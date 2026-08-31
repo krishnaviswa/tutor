@@ -1,0 +1,1187 @@
+<title>The Loop UI Kit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --ground:#F3F6F0;
+  --surface:#FBFCF9;
+  --sunk:#EBEFE6;
+  --bezel:#2A2F25;
+  --mock-screen:#F1F4EC;
+  --raised:#FFFFFF;
+  --ink:#182019;
+  --ink-soft:#4C574F;
+  --ink-faint:#7E8A81;
+  --line:#D6DCCF;
+  --line-soft:#E4E9DD;
+  --accent:#2E7D4F;
+  --accent-ink:#1E5738;
+  --accent-wash:#E4EFE5;
+  --amber:#AF6C22;
+  --amber-wash:#F5E9D8;
+  --crimson:#A4384A;
+  --crimson-wash:#F3E0E1;
+  --sky:#2C6C88;
+  --sky-wash:#DDEAEE;
+  --serif:"Spectral",Georgia,"Times New Roman",serif;
+  --sans:"Hanken Grotesk",system-ui,-apple-system,Segoe UI,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --shadow:0 1px 2px rgba(24,32,25,.04), 0 12px 34px -12px rgba(24,32,25,.18);
+  --shadow-lift:0 2px 6px rgba(24,32,25,.06), 0 26px 60px -22px rgba(24,32,25,.30);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0C110E;
+    --surface:#171E19;
+    --sunk:#10150F;
+    --bezel:#39423B;
+    --mock-screen:#11160F;
+    --raised:#1E251F;
+    --ink:#E6ECE3;
+    --ink-soft:#A4AEA4;
+    --ink-faint:#6C776E;
+    --line:#26302A;
+    --line-soft:#1D251F;
+    --accent:#5CB57C;
+    --accent-ink:#8CD3A5;
+    --accent-wash:#173224;
+    --amber:#D3944F;
+    --amber-wash:#332413;
+    --crimson:#D06E7A;
+    --crimson-wash:#331A1E;
+    --sky:#6BA7C2;
+    --sky-wash:#122831;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 40px -14px rgba(0,0,0,.6);
+    --shadow-lift:0 2px 8px rgba(0,0,0,.5), 0 30px 70px -24px rgba(0,0,0,.75);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0C110E;
+  --surface:#171E19;
+  --sunk:#10150F;
+  --bezel:#39423B;
+  --mock-screen:#11160F;
+  --raised:#1E251F;
+  --ink:#E6ECE3;
+  --ink-soft:#A4AEA4;
+  --ink-faint:#6C776E;
+  --line:#26302A;
+  --line-soft:#1D251F;
+  --accent:#5CB57C;
+  --accent-ink:#8CD3A5;
+  --accent-wash:#173224;
+  --amber:#D3944F;
+  --amber-wash:#332413;
+  --crimson:#D06E7A;
+  --crimson-wash:#331A1E;
+  --sky:#6BA7C2;
+  --sky-wash:#122831;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 40px -14px rgba(0,0,0,.6);
+  --shadow-lift:0 2px 8px rgba(0,0,0,.5), 0 30px 70px -24px rgba(0,0,0,.75);
+}
+
+/* ============ BASE ============ */
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:600;line-height:1.15;text-wrap:balance;margin:0;}
+p{margin:0;}
+a{color:var(--accent-ink);}
+::selection{background:var(--accent-wash);}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px;}
+
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px;}
+.eyebrow{
+  font-family:var(--mono);
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+}
+
+/* ============ TOP BAR ============ */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:color-mix(in srgb, var(--ground) 88%, transparent);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line-soft);
+}
+.topbar__in{display:flex;align-items:center;justify-content:space-between;height:56px;}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:-.01em;}
+.brand svg{width:22px;height:22px;flex:none;}
+.theme-btn{
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--surface);color:var(--ink-soft);
+  border:1px solid var(--line);border-radius:999px;
+  padding:7px 14px;cursor:pointer;
+}
+.theme-btn:hover{color:var(--ink);border-color:var(--ink-faint);}
+
+/* ============ HERO ============ */
+.hero{padding:76px 0 40px;border-bottom:1px solid var(--line-soft);}
+.hero h1{
+  font-size:clamp(2.4rem,6vw,4rem);
+  letter-spacing:-.02em;
+  margin:18px 0 20px;
+}
+.hero h1 em{font-style:italic;color:var(--accent-ink);}
+.hero__lede{font-size:1.15rem;color:var(--ink-soft);max-width:60ch;}
+.hero__meta{
+  margin-top:28px;display:flex;flex-wrap:wrap;gap:8px 10px;
+}
+.tag{
+  font-family:var(--mono);font-size:11px;letter-spacing:.04em;
+  padding:5px 10px;border-radius:999px;
+  border:1px solid var(--line);color:var(--ink-soft);background:var(--surface);
+}
+
+/* ============ LOOP DIAGRAM ============ */
+.loop{padding:44px 0 8px;}
+.loop h2{font-size:1.5rem;margin-bottom:6px;}
+.loop__sub{color:var(--ink-soft);max-width:64ch;margin-bottom:28px;}
+.loop__track{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:10px;
+}
+.node{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:16px 14px 14px;
+  position:relative;
+  min-width:0;
+}
+.node__n{
+  font-family:var(--serif);font-size:1.5rem;font-weight:600;
+  color:var(--accent-ink);line-height:1;
+}
+.node__t{font-weight:600;font-size:.92rem;margin:8px 0 4px;}
+.node__d{font-size:.8rem;color:var(--ink-faint);line-height:1.4;}
+.node__screens{
+  margin-top:10px;font-family:var(--mono);font-size:10px;letter-spacing:.05em;
+  color:var(--accent-ink);
+}
+.node:not(:last-child)::after{
+  content:"→";
+  position:absolute;right:-11px;top:50%;transform:translateY(-50%);
+  color:var(--ink-faint);font-size:13px;z-index:2;
+}
+.node--opt{border-style:dashed;opacity:.85;}
+
+/* ============ SECTIONS ============ */
+.surface-sec{padding:60px 0 8px;}
+.sec-head{
+  display:flex;align-items:baseline;gap:16px;
+  border-top:2px solid var(--ink);
+  padding-top:16px;margin-bottom:8px;
+}
+.sec-head__no{font-family:var(--mono);font-size:13px;color:var(--ink-faint);letter-spacing:.1em;}
+.sec-head h2{font-size:1.7rem;letter-spacing:-.01em;}
+.sec-intro{color:var(--ink-soft);max-width:66ch;margin:10px 0 36px;}
+
+/* ============ PLATE GRID ============ */
+.plates{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+  gap:32px 28px;
+  align-items:start;
+}
+.plate{
+  display:flex;flex-direction:column;gap:16px;
+}
+.plate--wide{grid-column:1/-1;}
+.plate--wide .plate__inner{
+  display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:32px;align-items:start;
+}
+.plate__inner{display:flex;flex-direction:column;gap:16px;}
+.plate__framewrap{display:flex;justify-content:center;}
+.plate__cap{}
+.plate__id{
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--accent-ink);
+  display:flex;align-items:center;gap:8px;
+}
+.plate__id .stage{
+  color:var(--amber);border:1px solid var(--amber);border-radius:999px;
+  padding:1px 7px;font-size:9.5px;letter-spacing:.06em;
+}
+.plate__title{font-size:1.15rem;margin:7px 0 8px;letter-spacing:-.005em;}
+.plate__note{font-size:.9rem;color:var(--ink-soft);line-height:1.55;}
+.plate__note b{color:var(--ink);font-weight:600;}
+.plate__donor{
+  margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);
+  font-family:var(--mono);font-size:11px;line-height:1.6;color:var(--ink-faint);
+}
+.plate__donor span{color:var(--accent-ink);}
+
+/* ============ PHONE FRAME ============ */
+.phone{
+  width:300px;flex:none;
+  background:var(--bezel);
+  border:1px solid var(--line);
+  border-radius:38px;
+  padding:9px;
+  box-shadow:var(--shadow-lift);
+}
+.phone__screen{
+  background:var(--mock-screen);
+  border:1px solid var(--line-soft);
+  border-radius:30px;
+  overflow:hidden;
+  height:604px;
+  display:flex;flex-direction:column;
+  position:relative;
+}
+.phone__status{
+  height:26px;flex:none;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+  font-family:var(--mono);font-size:10.5px;font-weight:500;color:var(--ink-soft);
+}
+.phone__status .dots{letter-spacing:1px;}
+.phone__body{
+  flex:1;overflow:hidden;
+  display:flex;flex-direction:column;
+  padding:6px 14px 12px;
+  gap:10px;
+}
+.phone__tab{
+  height:50px;flex:none;
+  border-top:1px solid var(--line-soft);
+  display:flex;align-items:center;justify-content:space-around;
+  font-family:var(--mono);font-size:9px;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--ink-faint);
+}
+.phone__tab .on{color:var(--accent-ink);}
+.phone__tab i{
+  display:block;width:16px;height:16px;margin:0 auto 3px;border-radius:5px;
+  border:1.5px solid currentColor;
+}
+
+/* ============ WINDOW FRAME ============ */
+.win{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:12px;
+  overflow:hidden;
+  background:var(--mock-screen);
+  box-shadow:var(--shadow);
+}
+.win__bar{
+  height:38px;background:var(--sunk);
+  border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:7px;padding:0 14px;
+}
+.win__bar .d{width:10px;height:10px;border-radius:50%;background:var(--line);}
+.win__bar .addr{
+  margin-left:10px;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);
+  background:var(--raised);border:1px solid var(--line);border-radius:6px;
+  padding:3px 10px;
+}
+.win__body{padding:18px 18px 20px;}
+
+/* ============ MOCK PRIMITIVES ============ */
+.m-appbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:2px 2px 8px;border-bottom:1px solid var(--line-soft);
+}
+.m-appbar h5{font-family:var(--serif);font-size:1rem;font-weight:600;margin:0;}
+.m-appbar .m-sub{font-size:10.5px;color:var(--ink-faint);font-family:var(--mono);}
+.m-scroll{flex:1;overflow:hidden;display:flex;flex-direction:column;gap:9px;}
+.m-card{
+  background:var(--raised);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:11px 12px;
+}
+.m-card--sunk{background:color-mix(in srgb, var(--ink) 5%, var(--mock-screen));border-color:var(--line);}
+.m-card--accent{background:var(--accent-wash);border-color:color-mix(in srgb,var(--accent) 40%,var(--line));}
+.m-card--amber{background:var(--amber-wash);border-color:color-mix(in srgb,var(--amber) 40%,var(--line));}
+.m-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint);}
+.m-h{font-weight:600;font-size:.92rem;margin:3px 0;line-height:1.3;}
+.m-p{font-size:.8rem;color:var(--ink-soft);line-height:1.45;}
+.m-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.m-row + .m-row{margin-top:7px;}
+.m-tiny{font-size:.72rem;color:var(--ink-faint);font-family:var(--mono);}
+.m-mono{font-family:var(--mono);}
+.m-pill{
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.04em;
+  padding:2px 7px;border-radius:999px;white-space:nowrap;
+  border:1px solid transparent;
+}
+.m-pill--p1{background:var(--accent-wash);color:var(--accent-ink);border-color:color-mix(in srgb,var(--accent) 35%,transparent);}
+.m-pill--live{background:var(--crimson-wash);color:var(--crimson);border-color:color-mix(in srgb,var(--crimson) 35%,transparent);}
+.m-pill--urgent{background:var(--amber-wash);color:var(--amber);border-color:color-mix(in srgb,var(--amber) 35%,transparent);}
+.m-pill--info{background:var(--sky-wash);color:var(--sky);border-color:color-mix(in srgb,var(--sky) 35%,transparent);}
+.m-pill--miss{background:var(--crimson-wash);color:var(--crimson);border-color:color-mix(in srgb,var(--crimson) 35%,transparent);}
+.m-pill--ok{background:var(--accent-wash);color:var(--accent-ink);border-color:color-mix(in srgb,var(--accent) 35%,transparent);}
+.m-pill--ghost{background:var(--sunk);color:var(--ink-faint);border-color:var(--line);}
+.m-lane{display:flex;gap:5px;}
+.m-lane div{
+  flex:1;text-align:center;font-family:var(--mono);font-size:8.5px;letter-spacing:.03em;
+  padding:5px 2px;border-radius:7px;background:var(--sunk);color:var(--ink-soft);
+  border:1px solid var(--line-soft);
+}
+.m-lane div b{display:block;font-size:12px;color:var(--ink);}
+.m-btn{
+  display:block;width:100%;text-align:center;
+  font-family:var(--sans);font-weight:600;font-size:.82rem;
+  padding:10px;border-radius:10px;border:1px solid var(--line);
+  background:var(--raised);color:var(--ink);cursor:default;
+}
+.m-btn--primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+:root[data-theme="dark"] .m-btn--primary,
+:root:not([data-theme="light"]) .m-btn--primary{color:#0C130E;}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .m-btn--primary{color:#fff;}}
+.m-opt{
+  display:flex;align-items:center;gap:8px;
+  border:1px solid var(--line);border-radius:9px;
+  padding:8px 10px;font-size:.8rem;
+}
+.m-opt .b{
+  width:16px;height:16px;border-radius:50%;border:1.5px solid var(--ink-faint);flex:none;
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;color:var(--ink-faint);
+}
+.m-opt--sel{border-color:var(--accent);background:var(--accent-wash);}
+.m-opt--sel .b{border-color:var(--accent);background:var(--accent);color:#fff;}
+.m-opt--wrong{border-color:var(--crimson);background:var(--crimson-wash);}
+.m-opt--right{border-color:var(--accent);background:var(--accent-wash);}
+.m-meter{height:6px;border-radius:999px;background:var(--sunk);overflow:hidden;}
+.m-meter i{display:block;height:100%;background:var(--accent);border-radius:999px;}
+.m-meter i.amber{background:var(--amber);}
+.m-video{
+  border-radius:10px;background:linear-gradient(135deg,#1c2b22,#0f1a14);
+  aspect-ratio:16/10;display:flex;align-items:flex-end;padding:9px;
+  position:relative;overflow:hidden;
+}
+.m-video::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 32% 38%, rgba(92,181,124,.35), transparent 55%);
+}
+.m-video .play{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.9);
+  display:flex;align-items:center;justify-content:center;color:#12201a;font-size:12px;
+}
+.m-video .cap{position:relative;font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.9);}
+.m-otp{display:flex;gap:6px;justify-content:center;margin:2px 0;}
+.m-otp span{
+  width:34px;height:42px;border-radius:9px;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:16px;font-weight:600;
+}
+.m-otp span.f{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-wash);}
+.m-field{
+  border:1px solid var(--line);border-radius:10px;padding:9px 11px;
+  font-family:var(--mono);font-size:.8rem;color:var(--ink-soft);
+  background:var(--raised);
+  display:flex;align-items:center;gap:7px;
+}
+.m-seg{
+  display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;
+  font-family:var(--mono);font-size:10px;
+}
+.m-seg div{flex:1;text-align:center;padding:8px 4px;color:var(--ink-faint);}
+.m-seg div.on{background:var(--accent);color:#fff;}
+:root[data-theme="dark"] .m-seg div.on,:root:not([data-theme="light"]) .m-seg div.on{color:#0C130E;}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .m-seg div.on{color:#fff;}}
+
+/* ---- desktop table ---- */
+.m-table{width:100%;border-collapse:collapse;font-size:.8rem;}
+.m-table th{
+  text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--ink-faint);font-weight:500;
+  padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap;
+}
+.m-table td{padding:9px 10px;border-bottom:1px solid var(--line-soft);vertical-align:top;}
+.m-table tr:last-child td{border-bottom:none;}
+.m-table td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--ink-soft);}
+.m-tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;}
+.m-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.m-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.m-side{
+  display:flex;flex-direction:column;gap:9px;
+}
+.m-stat{
+  border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:var(--raised);
+}
+.m-stat .v{font-family:var(--serif);font-size:1.5rem;font-weight:600;line-height:1;}
+.m-stat .l{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-top:5px;}
+.m-lock{
+  text-align:center;padding:14px 10px;border:1px dashed var(--line);border-radius:12px;
+  background:var(--sunk);
+}
+.m-lock .ic{font-size:18px;}
+
+/* ============ FILTER FOOTER ============ */
+.filter{padding:64px 0 30px;}
+.filter h2{font-size:1.6rem;margin-bottom:8px;}
+.filter__sub{color:var(--ink-soft);max-width:62ch;margin-bottom:28px;}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+.rule{background:var(--surface);padding:18px 16px;}
+.rule .n{font-family:var(--serif);font-size:1.3rem;color:var(--accent-ink);}
+.rule p{font-size:.86rem;color:var(--ink-soft);margin-top:6px;}
+.rule p b{color:var(--ink);}
+.credo{
+  margin-top:26px;font-family:var(--serif);font-style:italic;font-size:1.35rem;
+  text-align:center;color:var(--ink);letter-spacing:-.01em;
+}
+
+footer.page{
+  border-top:1px solid var(--line-soft);
+  padding:30px 0 60px;
+  font-family:var(--mono);font-size:11px;color:var(--ink-faint);line-height:1.7;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:820px){
+  .loop__track{grid-template-columns:1fr 1fr;}
+  .node:not(:last-child)::after{content:none;}
+  .plate--wide .plate__inner{grid-template-columns:1fr;}
+  .plate--wide .plate__cap{order:-1;}
+}
+@media (max-width:520px){
+  .wrap{padding:0 16px;}
+  .loop__track{grid-template-columns:1fr;}
+  .plates{grid-template-columns:1fr;}
+  .hero{padding:52px 0 32px;}
+}
+
+/* ============ MOTION ============ */
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease, transform .6s ease;}
+.reveal.in{opacity:1;transform:none;}
+@media (prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none;transition:none;}
+}
+</style>
+
+<header class="topbar">
+  <div class="wrap topbar__in">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 3c3.5 3 3.5 15 0 18M12 3c-3.5 3-3.5 15 0 18M3.2 9.5h17.6M3.2 14.5h17.6"/></svg>
+      The Loop
+    </div>
+    <button class="theme-btn" id="themeBtn" type="button">Theme</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">UI kit · solo NEET Biology faculty · one owner account</p>
+      <h1>One teacher owns the <em>whole loop</em> — so the screens do too.</h1>
+      <p class="hero__lede">Sixteen screens for a coaching brand run by a single Biology faculty: a mobile student app and a desktop owner console. Every screen is wired to the operating loop — visual module, live class, same-day DPP, same-week mock, optional backlog — and nothing on the refuse list is built.</p>
+      <div class="hero__meta">
+        <span class="tag">Student: mobile-first</span>
+        <span class="tag">Owner: desktop console</span>
+        <span class="tag">Phone OTP auth</span>
+        <span class="tag">No second teacher seat</span>
+        <span class="tag">NEET UG 2026 syllabus spine</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="loop wrap">
+    <h2>The loop every screen answers to</h2>
+    <p class="loop__sub">Numbered because it is a real sequence — assets fire in this order, on this calendar. The screen codes show where each mockup below lives.</p>
+    <div class="loop__track">
+      <div class="node reveal">
+        <div class="node__n">1</div>
+        <div class="node__t">Visual module</div>
+        <div class="node__d">Priority-1 PPT + long video, day of publish.</div>
+        <div class="node__screens">→ S2</div>
+      </div>
+      <div class="node reveal">
+        <div class="node__n">2</div>
+        <div class="node__t">Live / YouTube long</div>
+        <div class="node__d">Class or upload. WAVE-lite checks only if live.</div>
+        <div class="node__screens">→ S6</div>
+      </div>
+      <div class="node reveal">
+        <div class="node__n">3</div>
+        <div class="node__t">Same-day DPP</div>
+        <div class="node__d">10–15 items that must be solved before midnight.</div>
+        <div class="node__screens">→ S3 · S4</div>
+      </div>
+      <div class="node reveal">
+        <div class="node__n">4</div>
+        <div class="node__t">Same-week mock</div>
+        <div class="node__d">Chapter test or PYQ set + a live analysis.</div>
+        <div class="node__screens">→ S5</div>
+      </div>
+      <div class="node node--opt reveal">
+        <div class="node__n">5</div>
+        <div class="node__t">Backlog call</div>
+        <div class="node__d">8 min on skipped work. Paid cohort only.</div>
+        <div class="node__screens">→ S8</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ENTRY ============ -->
+  <section class="surface-sec wrap">
+    <div class="sec-head">
+      <span class="sec-head__no">E</span>
+      <h2>Entry</h2>
+    </div>
+    <p class="sec-intro">One login surface. School OS, coaching OS, practice OS and a visual library can share a login later — they cannot share one faculty role now — so the door asks a single question and routes.</p>
+
+    <div class="plates">
+
+      <!-- E1 -->
+      <div class="plate reveal">
+        <div class="plate__framewrap">
+          <div class="phone"><div class="phone__screen">
+            <div class="phone__status"><span>9:41</span><span class="dots">5G ▪ 84</span></div>
+            <div class="phone__body">
+              <div style="text-align:center;padding:22px 0 8px;">
+                <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="var(--accent)" stroke-width="1.4" style="margin-bottom:10px;"><circle cx="12" cy="12" r="9"/><path d="M12 3c3.5 3 3.5 15 0 18M12 3c-3.5 3-3.5 15 0 18M3.2 9.5h17.6M3.2 14.5h17.6"/></svg>
+                <h5 style="font-family:var(--serif);font-size:1.4rem;margin:0;">The Loop</h5>
+                <p class="m-p" style="margin-top:4px;">NEET Biology — concept, practice, analysis</p>
+              </div>
+              <div class="m-scroll" style="justify-content:center;gap:12px;">
+                <div class="m-card m-card--accent">
+                  <div class="m-k">I'm here to</div>
+                  <div class="m-h" style="margin-top:4px;">Learn</div>
+                  <div class="m-p">Classes, videos, daily practice, doubts.</div>
+                </div>
+                <div class="m-card">
+                  <div class="m-k">I'm here to</div>
+                  <div class="m-h" style="margin-top:4px;">Teach</div>
+                  <div class="m-p">Owner console — one account.</div>
+                </div>
+                <p class="m-tiny" style="text-align:center;">Free on YouTube? <span style="color:var(--accent-ink);">Start learning — no cohort needed.</span></p>
+              </div>
+            </div>
+            <div class="phone__tab"><span class="on"><i></i>Start</span></div>
+          </div></div>
+        </div>
+        <div class="plate__cap">
+          <div class="plate__id">E1</div>
+          <h3 class="plate__title">Role select</h3>
+          <p class="plate__note">Two roles, not four dashboards. The <b>Learn</b> path is identical for a free YouTube viewer and a paid-cohort student — what differs is what unlocks after, not the door.</p>
+          <div class="plate__donor"><span>encodes</span> · filter rule 1 — spines share a login, never a role</div>
+        </div>
+      </div>
+
+      <!-- E2 -->
+      <div class="plate reveal">
+        <div class="plate__framewrap">
+          <div class="phone"><div class="phone__screen">
+            <div class="phone__status"><span>9:41</span><span class="dots">5G ▪ 84</span></div>
+            <div class="phone__body">
+              <div class="m-appbar"><h5>Sign in to learn</h5></div>
+              <div class="m-scroll" style="gap:14px;padding-top:6px;">
+                <div>
+                  <div class="m-k" style="margin-bottom:6px;">Mobile number</div>
+                  <div class="m-field"><span class="m-mono">+91</span><span style="color:var(--ink);">98•• ••• 210</span></div>
+                </div>
+                <div>
+                  <div class="m-k" style="margin-bottom:6px;">Enter the 6-digit code</div>
+                  <div class="m-otp"><span>4</span><span>1</span><span>8</span><span class="f">0</span><span></span><span></span></div>
+                  <p class="m-tiny" style="text-align:center;margin-top:6px;">Resend in 0:24</p>
+                </div>
+                <button class="m-btn m-btn--primary">Verify &amp; continue</button>
+                <div class="m-card m-card--sunk">
+                  <div class="m-p">No password to forget. Your number is your identity across classes, DPPs and doubts.</div>
+                </div>
+              </div>
+            </div>
+            <div class="phone__tab"><span class="on"><i></i>Sign in</span></div>
+          </div></div>
+        </div>
+        <div class="plate__cap">
+          <div class="plate__id">E2</div>
+          <h3 class="plate__title">Student sign-in — phone OTP</h3>
+          <p class="plate__note">The Indian exam-prep default: number in, one-time code, done. One identity threads the whole loop, so a missed DPP or a logged doubt always attaches to a real student.</p>
+          <div class="plate__donor"><span>encodes</span> · PW funnel — YouTube viewer and batch student enter the same way</div>
+        </div>
+      </div>
+
+      <!-- E3 -->
+      <div class="plate reveal">
+        <div class="plate__framewrap">
+          <div class="phone"><div class="phone__screen">
+            <div class="phone__status"><span>9:41</span><span class="dots">Wi-Fi ▪ 96</span></div>
+            <div class="phone__body">
+              <div class="m-appbar"><h5>Owner console</h5><span class="m-sub">1 seat</span></div>
+              <div class="m-scroll" style="gap:12px;padding-top:6px;">
+                <div class="m-field"><span>✉</span><span style="color:var(--ink);">faculty@theloop.in</span></div>
+                <div class="m-field"><span>🔒</span><span>••••••••••••</span></div>
+                <div class="m-field"><span class="m-mono">2FA</span><span style="color:var(--ink);">• • •&nbsp;&nbsp;— authenticator</span></div>
+                <button class="m-btn m-btn--primary">Open console</button>
+                <div class="m-card">
+                  <div class="m-k">This account owns</div>
+                  <div class="m-p" style="margin-top:5px;">The roadmap · content packages · the DPP bank · the doubt log · cohort tiers. There is no second teacher seat until you sell into schools.</div>
+                </div>
+              </div>
+            </div>
+            <div class="phone__tab"><span class="on"><i></i>Console</span></div>
+          </div></div>
+        </div>
+        <div class="plate__cap">
+          <div class="plate__id">E3</div>
+          <h3 class="plate__title">Owner sign-in — the faculty account</h3>
+          <p class="plate__note">One Biology teacher, one privileged account with real 2FA. It is deliberately a single seat: <b>star faculty is not the homework policeman</b>, and there is no TA swarm to provision.</p>
+          <div class="plate__donor"><span>refuses</span> · Unacademy go-live org · PW Pathshala doubt counters</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ STUDENT APP ============ -->
+  <section class="surface-sec wrap">
+    <div class="sec-head">
+      <span class="sec-head__no">S</span>
+      <h2>Student app</h2>
+    </div>
+    <p class="sec-intro">The student day that is in scope: an evening class or a YouTube long, a same-night DPP, a weekly mock and its analysis. No school period, no tablet lesson pack, no eight-hour doubt counter — those are a different spine.</p>
+
+    <div class="plates">
+
+      <!-- S1 HOME -->
+      <div class="plate reveal">
+        <div class="plate__framewrap">
+          <div class="phone"><div class="phone__screen">
+            <div class="phone__status"><span>18:47</span><span class="dots">4G ▪ 61</span></div>
+            <div class="phone__body">
+              <div class="m-appbar"><h5>Today</h5><span class="m-sub">Mon · 1 Sep</span></div>
+              <div class="m-scroll">
+                <div class="m-card m-card--accent">
+                  <div class="m-row"><span class="m-k">Live · 19:00</span><span class="m-pill m-pill--live">● LIVE SOON</span></div>
+                  <div class="m-h">ETS &amp; Oxidative Phosphorylation</div>
+                  <div class="m-p">Respiration · Priority&nbsp;1 · chemiosmosis + ATP yield</div>
+                </div>
+                <div class="m-card m-card--amber">
+                  <div class="m-row"><span class="m-k">Today's DPP</span><span class="m-pill m-pill--urgent">MUST SOLVE · 5:13 LEFT</span></div>
+                  <div class="m-h">12 items — TCA / Krebs</div>
+                  <div class="m-meter" style="margin-top:7px;"><i class="amber" style="width:0%"></i></div>
+                  <div class="m-tiny" style="margin-top:5px;">Closes at midnight. 0 / 12 done.</div>
+                </div>
+                <div class="m-card">
+                  <div class="m-row"><span class="m-k">This week</span><span class="m-pill m-pill--ghost">SUN 10:00</span></div>
+                  <div class="m-h" style="font-size:.86rem;">Respiration — chapter test + analysis class</div>
+                </div>
+                <div class="m-card m-card--sunk">
+                  <div class="m-k">Continue</div>
+                  <div class="m-row" style="margin-top:4px;"><span style="font-size:.82rem;">TCA Cycle in 5 Minutes</span><span class="m-tiny">2:10 left</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="phone__tab">
+              <span class="on"><i></i>Today</span><span><i></i>Topics</span><span><i></i>DPP</span><span><i></i>Doubts</span>
+            </div>
+          </div></div>
+        </div>
+        <div class="plate__cap">
+          <div class="plate__id">S1 <span class="stage">loop 1–4</span></div>
+          <h3 class="plate__title">Student home</h3>
+          <p class="plate__note">One screen, four things: tonight's class, tonight's DPP with a live countdown, this week's mock, and the video to resume. The amber DPP card is the loudest element on purpose.</p>
+          <div class="plate__donor"><span>encodes</span> · rule 3 — live without a same-day artefact is webinar theatre</div>
+        </div>
+      </div>
+
+      <!-- S2 CONTENT PACKAGE -->
+      <div class="plate reveal">
+        <div class="plate__framewrap">
+          <div class="phone"><div class="phone__screen">
+            <div class="phone__status"><span>20:02</span><span class="dots">Wi-Fi ▪ 58</span></div>
+            <div class="phone__body">
+              <div class="m-appbar"><h5>TCA / Krebs Cycle</h5><span class="m-sub">Respiration</span></div>
+              <div class="m-scroll">
+                <div class="m-row"><span class="m-pill m-pill--p1">PRIORITY 1</span><span class="m-pill m-pill--ok">PACKAGE · 8 ASSETS</span></div>
+                <div class="m-video"><span class="play">▶</span><span class="cap">Long video · 38:41 · watched</span></div>
+                <div class="m-card">
+                  <div class="m-k">Watch</div>
+                  <div class="m-row" style="margin-top:5px;"><span class="m-p">3 Shorts — amphibolic? · NADH count · CO₂ site</span></div>
+                  <div class="m-row"><span class="m-p">PYQ video — 5 NEET questions</span></div>
+                  <div class="m-row"><span class="m-p">Revision — TCA in 5 minutes</span></div>
+                </div>
+                <div class="m-card m-card--sunk">
+                  <div class="m-k">Read</div>
+                  <div class="m-row" style="margin-top:4px;"><span class="m-p">Class notes — aligned to the lecture (PDF)</span></div>
+                </div>
+                <div class="m-card m-card--accent">
+                  <div class="m-k">Worksheet — three lanes</div>
+                  <div class="m-lane" style="margin-top:7px;">
+                    <div>Warm-up<b>4</b></div><div>Sprint<b>8</b></div><div>Race<b>4</b></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="phone__tab"><span><i></i>Today</span><span class="on"><i></i>Topics</span><span><i></i>DPP</span><span><i></i>Doubts</span></div>
+          </div></div>
+        </div>
+        <div class="plate__cap">
+          <div class="plate__id">S2 <span class="stage">loop 1</span></div>
+          <h3 class="plate__title">Topic content package</h3>
+          <p class="plate__note">A Priority-1 topic opens as <b>8–10 assets</b>, never one PPT: long video, three Shorts, a PYQ video, a 5-minute revision, lecture-aligned notes, and a worksheet split Warm-up 4 / Sprint 8 / Race 4.</p>
+          <div class="plate__donor"><span>encodes</span> · BYJU's TLA — designed story + three difficulty lanes, no studio</div>
+        </div>
+      </div>
+
+      <!-- S3 DPP PLAYER -->
+      <div class="plate reveal">
+        <div class="plate__framewrap">
+          <div class="phone"><div class="phone__screen">
+            <div class="phone__status"><span>21:18</span><span class="dots">4G ▪ 52</span></div>
+            <div class="phone__body">
+              <div class="m-appbar"><h5>Same-day DPP</h5><span class="m-sub">Q7 / 12</span></div>
+              <div class="m-card m-card--amber" style="padding:8px 11px;">
+                <div class="m-row"><span class="m-k">Must be solved today</span><span class="m-mono" style="font-size:.8rem;color:var(--amber);font-weight:600;">2:41:07</span></div>
+              </div>
+              <div class="m-scroll" style="gap:8px;">
+                <div class="m-meter"><i class="amber" style="width:50%"></i></div>
+                <p class="m-p" style="font-weight:500;color:var(--ink);">In the TCA cycle, which step is a substrate-level phosphorylation?</p>
+                <div class="m-opt"><span class="b">A</span>Citrate → isocitrate</div>
+                <div class="m-opt m-opt--sel"><span class="b">B</span>Succinyl-CoA → succinate</div>
+                <div class="m-opt"><span class="b">C</span>Fumarate → malate</div>
+                <div class="m-opt"><span class="b">D</span>Malate → oxaloacetate</div>
+                <div style="flex:1;"></div>
+                <button class="m-btn m-btn--primary">Save &amp; next</button>
+                <p class="m-tiny" style="text-align:center;">Q7 taking a while — flagged for the key.</p>
+              </div>
+            </div>
+            <div class="phone__tab"><span><i></i>Today</span><span><i></i>Topics</span><span class="on"><i></i>DPP</span><span><i></i>Doubts</span></div>
+          </div></div>
+        </div>
+        <div class="plate__cap">
+          <div class="plate__id">S3 <span class="stage">loop 3</span></div>
+          <h3 class="plate__title">Same-day DPP player</h3>
+          <p class="plate__note">PW's DPP as a must-solve artefact, not a PDF dump. One question at a time, a real countdown to midnight, and time-on-question quietly logged so the key can tell a time-sink from a misconception.</p>
+          <div class="plate__donor"><span>encodes</span> · PW DPP · Toppr — flag slow-but-correct vs concept-wrong</div>
+        </div>
+      </div>
+
+      <!-- S4 DPP RESULT -->
+      <div class="plate reveal">
+        <div class="plate__framewrap">
+          <div class="phone"><div class="phone__screen">
+            <div class="phone__status"><span>21:44</span><span class="dots">4G ▪ 50</span></div>
+            <div class="phone__body">
+              <div class="m-appbar"><h5>DPP key</h5><span class="m-sub">TCA · tonight</span></div>
+              <div class="m-scroll">
+                <div class="m-card m-card--accent">
+                  <div class="m-row"><div><div class="m-k">Score</div><div style="font-family:var(--serif);font-size:1.7rem;font-weight:600;">8 / 12</div></div>
+                  <div style="text-align:right;"><div class="m-tiny">Median 7</div><div class="m-tiny">18:20 taken</div></div></div>
+                </div>
+                <div class="m-k">Every miss becomes an action</div>
+                <div class="m-card">
+                  <div class="m-row"><span class="m-mono" style="font-size:.78rem;">Q3</span><span class="m-pill m-pill--info">TIME-SINK · 3:40, correct</span></div>
+                  <div class="m-p" style="margin-top:5px;">Right answer, slow. → Watch the 90-second solve</div>
+                </div>
+                <div class="m-card">
+                  <div class="m-row"><span class="m-mono" style="font-size:.78rem;">Q5</span><span class="m-pill m-pill--miss">MISCONCEPTION</span></div>
+                  <div class="m-p" style="margin-top:5px;">Glycolysis vs link reaction mixed up. → 90-sec solve + revisit notes §2</div>
+                </div>
+                <div class="m-card">
+                  <div class="m-row"><span class="m-mono" style="font-size:.78rem;">Q9</span><span class="m-pill m-pill--miss">MISCONCEPTION</span></div>
+                  <div class="m-p" style="margin-top:5px;">FADH₂ yield. → added to Sunday analysis shortlist</div>
+                </div>
+              </div>
+            </div>
+            <div class="phone__tab"><span><i></i>Today</span><span><i></i>Topics</span><span class="on"><i></i>DPP</span><span><i></i>Doubts</span></div>
+          </div></div>
+        </div>
+        <div class="plate__cap">
+          <div class="plate__id">S4 <span class="stage">loop 3</span></div>
+          <h3 class="plate__title">DPP result &amp; tagged key</h3>
+          <p class="plate__note">A score alone is a PDF nobody uses. Each miss is tagged — time-sink or misconception — and each tag carries a next step: a 90-second solve clip, a note to revisit, or a seat on the weekly analysis shortlist.</p>
+          <div class="plate__donor"><span>encodes</span> · rule 4 — a miss must become a tagged item, a clip, or a backlog</div>
+        </div>
+      </div>
+
+      <!-- S5 WEEKLY MOCK -->
+      <div class="plate reveal">
+        <div class="plate__framewrap">
+          <div class="phone"><div class="phone__screen">
+            <div class="phone__status"><span>10:02</span><span class="dots">Wi-Fi ▪ 77</span></div>
+            <div class="phone__body">
+              <div class="m-appbar"><h5>This week's mock</h5><span class="m-sub">Sun</span></div>
+              <div class="m-scroll">
+                <div class="m-card">
+                  <div class="m-row"><span class="m-k">10:00 · today</span><span class="m-pill m-pill--urgent">OPENS IN 0:58</span></div>
+                  <div class="m-h">Respiration — chapter test</div>
+                  <div class="m-p">45 questions · 45 min · Glycolysis → ETS</div>
+                </div>
+                <div class="m-card m-card--sunk">
+                  <div class="m-row"><span class="m-k">20:00 · today</span><span class="m-pill m-pill--live">LIVE</span></div>
+                  <div class="m-h" style="font-size:.9rem;">Analysis class</div>
+                  <div class="m-p">Live walkthrough of the 6 most-missed — not a silent rank drop.</div>
+                </div>
+                <div class="m-card m-card--accent">
+                  <div class="m-k">On the shortlist from your week</div>
+                  <div class="m-p" style="margin-top:5px;">Q9 FADH₂ yield · link-reaction location · RQ of fats</div>
+                </div>
+                <p class="m-tiny" style="text-align:center;">Paper and analysis ship the same week as the topic — not months later.</p>
+              </div>
+            </div>
+            <div class="phone__tab"><span><i></i>Today</span><span class="on"><i></i>Topics</span><span><i></i>DPP</span><span><i></i>Doubts</span></div>
+          </div></div>
+        </div>
+        <div class="plate__cap">
+          <div class="plate__id">S5 <span class="stage">loop 4</span></div>
+          <h3 class="plate__title">Weekly mock + analysis</h3>
+          <p class="plate__note">Adda247's Sunday ritual at tutor scale: a chapter test <b>and</b> a live analysis class in the same week as the topic. The student even sees which of their own misses made the walkthrough shortlist.</p>
+          <div class="plate__donor"><span>encodes</span> · Adda247 weekend analysis · PW AITS cadence</div>
+        </div>
+      </div>
+
+      <!-- S6 LIVE CLASS -->
+      <div class="plate reveal">
+        <div class="plate__framewrap">
+          <div class="phone"><div class="phone__screen">
+            <div class="phone__status"><span>19:24</span><span class="dots">4G ▪ 44</span></div>
+            <div class="phone__body" style="padding:6px 12px 12px;">
+              <div class="m-video" style="aspect-ratio:16/11;">
+                <span class="cap">ETS — Complex I → IV · whiteboard</span>
+              </div>
+              <div class="m-card m-card--amber" style="margin-top:9px;">
+                <div class="m-row"><span class="m-k">Quick check · 20s</span><span class="m-pill m-pill--urgent">340 answering</span></div>
+                <div class="m-p" style="margin:5px 0 7px;font-weight:500;color:var(--ink);">Which complex does NOT pump protons?</div>
+                <div class="m-grid2" style="gap:6px;">
+                  <div class="m-opt" style="padding:6px 8px;"><span class="b">I</span></div>
+                  <div class="m-opt m-opt--sel" style="padding:6px 8px;"><span class="b">II</span></div>
+                  <div class="m-opt" style="padding:6px 8px;"><span class="b">III</span></div>
+                  <div class="m-opt" style="padding:6px 8px;"><span class="b">IV</span></div>
+                </div>
+              </div>
+              <div class="m-field" style="margin-top:9px;"><span>✎</span><span>Ask a doubt — logged, answered after class</span></div>
+              <p class="m-tiny" style="margin-top:6px;text-align:center;">WhatsApp group is overflow, never the record.</p>
+            </div>
+            <div class="phone__tab"><span class="on"><i></i>Live</span><span><i></i>Chat</span><span><i></i>Doubt</span><span><i></i>Notes</span></div>
+          </div></div>
+        </div>
+        <div class="plate__cap">
+          <div class="plate__id">S6 <span class="stage">loop 2</span></div>
+          <h3 class="plate__title">Live class — WAVE-lite</h3>
+          <p class="plate__note">Something every few minutes — a poll or a board step — <b>only when the class is live</b>. One faculty on the whiteboard, no parallel TA swarm. Doubts land in a logged place; the group chat is overflow.</p>
+          <div class="plate__donor"><span>encodes</span> · Vedantu WAVE (lite) · rule 5 — chat is overflow</div>
+        </div>
+      </div>
+
+      <!-- S7 DOUBTS -->
+      <div class="plate reveal">
+        <div class="plate__framewrap">
+          <div class="phone"><div class="phone__screen">
+            <div class="phone__status"><span>23:41</span><span class="dots">4G ▪ 39</span></div>
+            <div class="phone__body">
+              <div class="m-appbar"><h5>Doubts</h5><span class="m-sub">logged</span></div>
+              <div class="m-scroll">
+                <div class="m-card m-card--sunk">
+                  <div class="m-k">New doubt</div>
+                  <div class="m-field" style="margin-top:6px;background:var(--surface);"><span>📎</span><span>IMG_ETS_graph.jpg</span></div>
+                  <div class="m-field" style="margin-top:6px;background:var(--surface);"><span>✎</span><span>Why does the graph plateau after Complex IV?</span></div>
+                  <button class="m-btn m-btn--primary" style="margin-top:8px;">Submit — topic: Respiration</button>
+                </div>
+                <div class="m-k">Your thread</div>
+                <div class="m-card">
+                  <div class="m-row"><span class="m-p" style="font-weight:500;color:var(--ink);">Chemiosmosis vs substrate-level?</span><span class="m-pill m-pill--ok">ANSWERED</span></div>
+                  <div class="m-tiny" style="margin-top:4px;">Asked 21:12 · answered 23:38 (overnight)</div>
+                </div>
+                <div class="m-card">
+                  <div class="m-row"><span class="m-p" style="font-weight:500;color:var(--ink);">P/O ratio numbers</span><span class="m-pill m-pill--ghost">IN QUEUE · 4 AHEAD</span></div>
+                  <div class="m-tiny" style="margin-top:4px;">Asked 22:05 · answered after class + overnight</div>
+                </div>
+              </div>
+            </div>
+            <div class="phone__tab"><span><i></i>Today</span><span><i></i>Topics</span><span><i></i>DPP</span><span class="on"><i></i>Doubts</span></div>
+          </div></div>
+        </div>
+        <div class="plate__cap">
+          <div class="plate__id">S7</div>
+          <h3 class="plate__title">Doubts — logged, not lost</h3>
+          <p class="plate__note">Doubts-on-Chat as a job: a photo or a line of text goes in, tagged to a topic, and it is <b>logged</b> — answered after class and overnight. Honest queue position, no fake instant SLA.</p>
+          <div class="plate__donor"><span>encodes</span> · Toppr DOC (the job, not the ML engine)</div>
+        </div>
+      </div>
+
+      <!-- S8 BACKLOG -->
+      <div class="plate reveal">
+        <div class="plate__framewrap">
+          <div class="phone"><div class="phone__screen">
+            <div class="phone__status"><span>17:30</span><span class="dots">Wi-Fi ▪ 90</span></div>
+            <div class="phone__body">
+              <div class="m-appbar"><h5>Backlog call</h5><span class="m-sub">cohort</span></div>
+              <div class="m-scroll">
+                <div class="m-card m-card--accent">
+                  <div class="m-row"><span class="m-k">Booked · Fri 18:00</span><span class="m-pill m-pill--ok">8 MIN</span></div>
+                  <div class="m-h" style="font-size:.92rem;">Skipped work only — not a re-teach</div>
+                  <div class="m-p" style="margin-top:5px;">2 DPPs unsolved · 1 chapter test missed</div>
+                </div>
+                <div class="m-card">
+                  <div class="m-k">Agenda the mentor will hold to</div>
+                  <div class="m-p" style="margin-top:5px;">1 · Why the Thu DPP was skipped<br>2 · Plan to clear it before Sunday<br>3 · One commitment for next week</div>
+                </div>
+                <div class="m-lock">
+                  <div class="ic">🔒</div>
+                  <div class="m-p" style="margin-top:6px;">YouTube-only members get the classes, videos and DPPs. The mentor slot unlocks with a named cohort.</div>
+                </div>
+              </div>
+            </div>
+            <div class="phone__tab"><span><i></i>Today</span><span><i></i>Topics</span><span><i></i>DPP</span><span class="on"><i></i>More</span></div>
+          </div></div>
+        </div>
+        <div class="plate__cap">
+          <div class="plate__id">S8 <span class="stage">loop 5</span></div>
+          <h3 class="plate__title">Mentor backlog call — paid cohort</h3>
+          <p class="plate__note">An 8–10 minute slot booked on <b>skipped DPPs and tests</b>, never re-teaching content. It appears only once a named paid cohort exists; free viewers see the locked state and why.</p>
+          <div class="plate__donor"><span>encodes</span> · Unacademy Iconic / upGrad Jeet (lite) · rule 2</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ OWNER CONSOLE ============ -->
+  <section class="surface-sec wrap">
+    <div class="sec-head">
+      <span class="sec-head__no">C</span>
+      <h2>Owner console</h2>
+    </div>
+    <p class="sec-intro">Desktop, one operator. The console adds <b>when</b> assets fire — it never rewrites the topic order or priority, which stay in the NEET plan. It also refuses to let you ship a live class without a same-day practice artefact.</p>
+
+    <div class="plates">
+
+      <!-- C1 DASHBOARD -->
+      <div class="plate plate--wide reveal">
+        <div class="plate__inner">
+          <div class="win">
+            <div class="win__bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="addr">console.theloop.in / this-week</span></div>
+            <div class="win__body">
+              <div class="m-appbar" style="border:none;padding-bottom:12px;">
+                <div><span class="m-k">Current phase</span><h5 style="margin-top:2px;">Plant Physiology — Respiration</h5></div>
+                <span class="m-pill m-pill--p1">IN PROGRESS · #3 ETS / OXIDATIVE PHOSPHORYLATION</span>
+              </div>
+              <div class="m-grid3" style="margin-bottom:14px;">
+                <div class="m-stat"><div class="v">Mon</div><div class="l">Visual module + worksheet published</div></div>
+                <div class="m-stat"><div class="v">Mon 21:00</div><div class="l">Same-day DPP goes live · 12 items</div></div>
+                <div class="m-stat"><div class="v">Sun</div><div class="l">Chapter test + analysis class</div></div>
+              </div>
+              <span class="m-k">Package pipeline</span>
+              <div class="m-tablewrap" style="margin-top:8px;">
+                <table class="m-table">
+                  <thead><tr><th>Topic</th><th>Priority</th><th>Assets</th><th>Status</th><th>Fires</th></tr></thead>
+                  <tbody>
+                    <tr><td>TCA / Krebs Cycle</td><td>1</td><td class="num">8 / 8</td><td><span class="m-pill m-pill--ok">SHIPPED</span></td><td class="num">last week</td></tr>
+                    <tr><td>ETS / Oxidative Phosphorylation</td><td>1</td><td class="num">5 / 9</td><td><span class="m-pill m-pill--urgent">BUILDING</span></td><td class="num">this week</td></tr>
+                    <tr><td>Photosynthesis — Light Reaction</td><td>1</td><td class="num">0 / 9</td><td><span class="m-pill m-pill--ghost">QUEUED</span></td><td class="num">wk of 15 Sep</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="plate__cap">
+          <div class="plate__id">C1</div>
+          <h3 class="plate__title">Owner dashboard — this week</h3>
+          <p class="plate__note">The home screen is the loop on a calendar: what publishes Monday, when the DPP opens, when Sunday's test and analysis fire. The pipeline table tracks one Priority-1 package at a time against its asset count.</p>
+          <div class="plate__donor"><span>encodes</span> · loop adds timing, not strategy · immediate-preparation rule — current phase only</div>
+        </div>
+      </div>
+
+      <!-- C2 ROADMAP -->
+      <div class="plate plate--wide reveal">
+        <div class="plate__inner">
+          <div class="win">
+            <div class="win__bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="addr">console.theloop.in / roadmap</span></div>
+            <div class="win__body">
+              <div class="m-appbar" style="border:none;padding-bottom:10px;">
+                <h5>Master roadmap — prepare first, launch later</h5>
+                <div class="m-seg" style="max-width:230px;"><div class="on">All</div><div>P1</div><div>P2</div><div>P3</div></div>
+              </div>
+              <div class="m-tablewrap">
+                <table class="m-table">
+                  <thead><tr><th>Topic</th><th>Pri</th><th>NEET weight</th><th>PPT time</th><th>Personal study</th><th>Detailed PPT?</th><th>Teach order</th><th>Start teaching</th><th>YouTube</th></tr></thead>
+                  <tbody>
+                    <tr><td>Respiration — TCA</td><td>1</td><td>High</td><td class="num">3 d</td><td>Master fully</td><td>Yes</td><td class="num">2</td><td class="num">done</td><td class="num">5 / 5</td></tr>
+                    <tr><td>Respiration — ETS</td><td>1</td><td>High</td><td class="num">3 d</td><td>Master fully</td><td>Yes</td><td class="num">3</td><td class="num">this week</td><td class="num">5 / 5</td></tr>
+                    <tr><td>Photosynthesis — Light Reaction</td><td>1</td><td>High</td><td class="num">3 d</td><td>Master fully</td><td>Yes</td><td class="num">4</td><td class="num">15 Sep</td><td class="num">5 / 5</td></tr>
+                    <tr><td>Animal Kingdom</td><td>2</td><td>High*</td><td class="num">2 d</td><td>NCERT line-by-line</td><td>Yes</td><td class="num">18</td><td class="num">Nov</td><td class="num">5 / 5</td></tr>
+                    <tr><td>Taxonomic Aids</td><td>3</td><td>Low</td><td class="num">0.5 d</td><td>NCERT only</td><td>Combine</td><td class="num">31</td><td class="num">bundle</td><td class="num">2 / 5</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="m-tiny" style="margin-top:8px;">* Animal Kingdom outranks its YouTube pull — memory-heavy, high NEET question yield.</p>
+            </div>
+          </div>
+        </div>
+        <div class="plate__cap">
+          <div class="plate__id">C2</div>
+          <h3 class="plate__title">Roadmap &amp; priority tracker</h3>
+          <p class="plate__note">The whole Class 11 + 12 list as one table: priority, NEET weight, PPT budget, what to <b>master</b> vs what needs a <b>detailed PPT</b>, teaching order and start date. Priority 3 rows are marked "combine", not "skip".</p>
+          <div class="plate__donor"><span>encodes</span> · core strategy 1 &amp; 5 — roadmap first; master ≠ produce</div>
+        </div>
+      </div>
+
+      <!-- C3 PACKAGE BUILDER -->
+      <div class="plate plate--wide reveal">
+        <div class="plate__inner">
+          <div class="win">
+            <div class="win__bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="addr">console.theloop.in / packages / ets</span></div>
+            <div class="win__body">
+              <div class="m-appbar" style="border:none;padding-bottom:12px;">
+                <div><span class="m-k">Content package</span><h5 style="margin-top:2px;">ETS / Oxidative Phosphorylation</h5></div>
+                <div class="m-seg" style="max-width:180px;"><div class="on">P1</div><div>P2</div><div>P3</div></div>
+              </div>
+              <div class="m-grid2">
+                <div class="m-card">
+                  <div class="m-k">Required assets · P1</div>
+                  <div class="m-row" style="margin-top:6px;"><span class="m-p">Long YouTube video</span><span class="m-pill m-pill--ok">DONE</span></div>
+                  <div class="m-row"><span class="m-p">Class PPT</span><span class="m-pill m-pill--ok">DONE</span></div>
+                  <div class="m-row"><span class="m-p">Student worksheet · 4 / 8 / 4</span><span class="m-pill m-pill--ok">DONE</span></div>
+                  <div class="m-row"><span class="m-p">3 Shorts</span><span class="m-pill m-pill--urgent">2 / 3</span></div>
+                  <div class="m-row"><span class="m-p">PYQ video — 5 NEET Qs</span><span class="m-pill m-pill--ghost">TODO</span></div>
+                  <div class="m-row"><span class="m-p">Revision — 5 min</span><span class="m-pill m-pill--ghost">TODO</span></div>
+                  <div class="m-row"><span class="m-p">Chapter test bank</span><span class="m-pill m-pill--ghost">TODO</span></div>
+                </div>
+                <div class="m-side">
+                  <div class="m-stat"><div class="v">5 / 9</div><div class="l">Assets complete</div></div>
+                  <div class="m-card m-card--amber">
+                    <div class="m-k">Publish gate</div>
+                    <div class="m-p" style="margin-top:5px;">A P1 package cannot publish until the worksheet <b>and</b> a same-day DPP exist. 2 assets still block release.</div>
+                  </div>
+                  <button class="m-btn">Publish package — blocked</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="plate__cap">
+          <div class="plate__id">C3 <span class="stage">loop 1</span></div>
+          <h3 class="plate__title">Content package builder</h3>
+          <p class="plate__note">One 3-day topic equals a package, not a lone PPT. The checklist is set by the priority level, and a Priority-1 topic physically cannot publish without a worksheet and a same-day DPP attached.</p>
+          <div class="plate__donor"><span>encodes</span> · strategy 12 — one topic = a content package · rule 3</div>
+        </div>
+      </div>
+
+      <!-- C4 SCHEDULER -->
+      <div class="plate plate--wide reveal">
+        <div class="plate__inner">
+          <div class="win">
+            <div class="win__bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="addr">console.theloop.in / schedule</span></div>
+            <div class="win__body">
+              <div class="m-appbar" style="border:none;padding-bottom:12px;"><h5>Week of 1 Sep — ETS</h5><span class="m-pill m-pill--p1">RESPIRATION</span></div>
+              <div class="m-tablewrap">
+                <table class="m-table">
+                  <thead><tr><th>Day</th><th>Asset fires</th><th>Loop stage</th><th>Timing rule</th></tr></thead>
+                  <tbody>
+                    <tr><td>Mon</td><td>Visual module + worksheet (4 / 8 / 4)</td><td class="num">1</td><td>Day of publish</td></tr>
+                    <tr><td>Mon 19:00</td><td>Live class + WAVE-lite checks</td><td class="num">2</td><td>Live only</td></tr>
+                    <tr><td>Mon 21:00</td><td>Same-day DPP · 12 items · must solve</td><td class="num">3</td><td><b>Same calendar day</b></td></tr>
+                    <tr><td>Wed</td><td>15–20 min DPP-solve clip</td><td class="num">3</td><td>Same evening if possible</td></tr>
+                    <tr><td>Sun 10:00</td><td>Chapter test / PYQ set</td><td class="num">4</td><td><b>Same week</b> as topic</td></tr>
+                    <tr><td>Sun 20:00</td><td>Analysis class — 6 most-missed</td><td class="num">4</td><td>Same week</td></tr>
+                    <tr><td>Fri 18:00</td><td>Backlog calls — cohort only</td><td class="num">5</td><td>Fortnightly · paid</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="m-card m-card--amber" style="margin-top:12px;">
+                <div class="m-k">Blocked</div>
+                <div class="m-p" style="margin-top:4px;">A live class was dragged to Thu with no DPP the same day. <b>Live without a same-day practice artefact is webinar theatre</b> — add a DPP or move the class.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="plate__cap">
+          <div class="plate__id">C4 <span class="stage">loop 1–5</span></div>
+          <h3 class="plate__title">Publish scheduler</h3>
+          <p class="plate__note">Every asset placed against its timing rule — DPP the same calendar day, mock and analysis the same week. The scheduler blocks a live class that has no same-day DPP rather than letting it ship as theatre.</p>
+          <div class="plate__donor"><span>encodes</span> · map-to-content-package table · rules 3 &amp; 4</div>
+        </div>
+      </div>
+
+      <!-- C5 ANALYTICS -->
+      <div class="plate plate--wide reveal">
+        <div class="plate__inner">
+          <div class="win">
+            <div class="win__bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="addr">console.theloop.in / analysis / respiration-test</span></div>
+            <div class="win__body">
+              <div class="m-appbar" style="border:none;padding-bottom:12px;"><h5>Chapter test — most missed</h5><span class="m-sub">61 attempts · median 31 / 45</span></div>
+              <div class="m-tablewrap">
+                <table class="m-table">
+                  <thead><tr><th>Item</th><th>Missed by</th><th>Dominant tag</th><th>Required remedial action</th></tr></thead>
+                  <tbody>
+                    <tr><td>Q12 — FADH₂ vs NADH ATP yield</td><td class="num">70%</td><td><span class="m-pill m-pill--miss">MISCONCEPTION</span></td><td>▸ Cut a 90-sec solve clip · ▸ Add to Sun analysis</td></tr>
+                    <tr><td>Q27 — RQ of fats</td><td class="num">54%</td><td><span class="m-pill m-pill--miss">MISCONCEPTION</span></td><td>▸ Add to Sun analysis</td></tr>
+                    <tr><td>Q19 — Link reaction location</td><td class="num">48%</td><td><span class="m-pill m-pill--info">TIME-SINK</span></td><td>▸ Tag on next DPP key · ▸ 90-sec clip</td></tr>
+                    <tr><td>Q33 — Chemiosmosis direction</td><td class="num">41%</td><td><span class="m-pill m-pill--miss">MISCONCEPTION</span></td><td>▸ Mentor backlog (cohort) · ▸ Sun analysis</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="m-tiny" style="margin-top:8px;">No row can be saved with an empty action. A number that produces nothing is not allowed to close.</p>
+            </div>
+          </div>
+        </div>
+        <div class="plate__cap">
+          <div class="plate__id">C5</div>
+          <h3 class="plate__title">Analysis → remedial</h3>
+          <p class="plate__note">The most-missed items, each forced to carry an action: a solve clip, a seat on Sunday's analysis, a tag on the next DPP key, or a cohort backlog item. You cannot save a row whose only output is a percentage.</p>
+          <div class="plate__donor"><span>encodes</span> · rule 4 — analytics without a remedial action is a PDF nobody uses</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ FILTER FOOTER ============ -->
+  <section class="filter wrap">
+    <h2>The filter every screen was held to</h2>
+    <p class="filter__sub">Copied from the operating loop. A screen only ships if it survives all five — and if it does not appear on the refuse list.</p>
+    <div class="rules">
+      <div class="rule"><div class="n">1</div><p><b>Layer four spines.</b> School, coaching, practice and visual library can share a login later — not one faculty role now.</p></div>
+      <div class="rule"><div class="n">2</div><p><b>Star faculty is not the homework policeman.</b> A mentor backlog slot chases skipped work. The lecture never does.</p></div>
+      <div class="rule"><div class="n">3</div><p><b>Live without a same-day artefact is webinar theatre.</b> A DPP on the same calendar day, or the class does not ship.</p></div>
+      <div class="rule"><div class="n">4</div><p><b>Analytics without a remedial action is a PDF nobody uses.</b> Every miss becomes a tag, a clip, or a backlog item.</p></div>
+      <div class="rule"><div class="n">5</div><p><b>WhatsApp / Telegram is overflow</b> — never the system of record for notes, tests, or doubts.</p></div>
+    </div>
+    <p class="credo">Copy the behaviour, not the org.</p>
+    <p class="filter__sub" style="margin-top:22px;">Refused for now, and not designed: a school timetable / attendance OS · a scan-grade paper factory · a full go-live incentive-and-penalty dashboard · 8-hour subject-wise doubt counters · a parent attendance OS · offline tablet lesson packs · a two-teacher studio hall.</p>
+  </section>
+
+  <footer class="page wrap">
+    The Loop — UI kit for a solo NEET Biology faculty. Screens are design mockups, not a shipped product.<br>
+    Grounded in tutor-operating-loop.md, NEET-preparation-strategies.md and indian-edtech-platform-comparison.md. Pair-compare scores in those files are expert ordinals — verify any single feature against the live SKU before citing it publicly.
+  </footer>
+</main>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  var btn=document.getElementById('themeBtn');
+  var order=['system','light','dark'];
+  var i=0;
+  function apply(){
+    var m=order[i];
+    if(m==='system'){root.removeAttribute('data-theme');btn.textContent='Theme · Auto';}
+    else{root.setAttribute('data-theme',m);btn.textContent='Theme · '+m.charAt(0).toUpperCase()+m.slice(1);}
+  }
+  btn.addEventListener('click',function(){i=(i+1)%order.length;apply();});
+  apply();
+
+  if(!window.matchMedia||!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);} });
+    },{rootMargin:'0px 0px -8% 0px'});
+    document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+  }else{
+    document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('in');});
+  }
+})();
+</script>
+</invoke>
