@@ -1,0 +1,1104 @@
+<meta charset="utf-8">
+<title>TutorOS — 26-Screen Prototype</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --ground:#F3F6F0; --surface:#FBFCF9; --sunk:#EBEFE6; --raised:#FFFFFF;
+  --ink:#182019; --ink-soft:#4C574F; --ink-faint:#7E8A81;
+  --line:#D6DCCF; --line-soft:#E4E9DD;
+  --accent:#2E7D4F; --accent-ink:#1E5738; --accent-wash:#E4EFE5;
+  --amber:#AF6C22; --amber-wash:#F5E9D8;
+  --crimson:#A4384A; --crimson-wash:#F3E0E1;
+  --sky:#2C6C88; --sky-wash:#DDEAEE;
+  --violet:#6A4C93; --violet-wash:#E9E2F1;
+  --serif:"Spectral",Georgia,"Times New Roman",serif;
+  --sans:"Hanken Grotesk",system-ui,-apple-system,Segoe UI,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --shadow:0 1px 2px rgba(24,32,25,.04), 0 12px 34px -12px rgba(24,32,25,.18);
+  --tint:var(--accent); --tint-wash:var(--accent-wash);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0C110E; --surface:#171E19; --sunk:#10150F; --raised:#1E251F;
+    --ink:#E6ECE3; --ink-soft:#A4AEA4; --ink-faint:#6C776E;
+    --line:#26302A; --line-soft:#1D251F;
+    --accent:#5CB57C; --accent-ink:#8CD3A5; --accent-wash:#173224;
+    --amber:#D3944F; --amber-wash:#332413;
+    --crimson:#D06E7A; --crimson-wash:#331A1E;
+    --sky:#6BA7C2; --sky-wash:#122831;
+    --violet:#A98FD6; --violet-wash:#241C33;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 40px -14px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0C110E; --surface:#171E19; --sunk:#10150F; --raised:#1E251F;
+  --ink:#E6ECE3; --ink-soft:#A4AEA4; --ink-faint:#6C776E;
+  --line:#26302A; --line-soft:#1D251F;
+  --accent:#5CB57C; --accent-ink:#8CD3A5; --accent-wash:#173224;
+  --amber:#D3944F; --amber-wash:#332413;
+  --crimson:#D06E7A; --crimson-wash:#331A1E;
+  --sky:#6BA7C2; --sky-wash:#122831;
+  --violet:#A98FD6; --violet-wash:#241C33;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 40px -14px rgba(0,0,0,.6);
+}
+
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:600;line-height:1.15;margin:0;text-wrap:balance;}
+p{margin:0;}
+button{font-family:inherit;}
+::selection{background:var(--accent-wash);}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px;}
+.k{font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);}
+
+/* ---------- top bar ---------- */
+#top{position:sticky;top:0;z-index:40;height:56px;display:flex;align-items:center;gap:10px;padding:0 14px;background:color-mix(in srgb,var(--ground) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft);}
+#top .brand{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-weight:600;font-size:15px;cursor:pointer;}
+#top .brand svg{width:19px;height:19px;}
+#top .brand i{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:2px 6px;font-style:normal;}
+.burger{border:1px solid var(--line);background:var(--surface);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);flex:none;}
+.tnav{display:flex;align-items:center;gap:8px;margin:0 auto;font-family:var(--mono);font-size:11px;color:var(--ink-soft);}
+.tnav button{border:1px solid var(--line);background:var(--surface);border-radius:8px;width:26px;height:26px;cursor:pointer;color:var(--ink-soft);}
+.tnav button:disabled{opacity:.35;cursor:default;}
+.tnav .lbl{min-width:150px;text-align:center;}
+.right{display:flex;align-items:center;gap:7px;flex:none;}
+.iconbtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;height:31px;padding:0 10px;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);display:inline-flex;align-items:center;gap:6px;}
+.iconbtn:hover{border-color:var(--ink-faint);color:var(--ink);}
+.iconbtn.on{background:var(--accent-wash);color:var(--accent-ink);border-color:transparent;}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:none;}
+.seg button{border:0;background:var(--surface);padding:0 10px;height:31px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-faint);cursor:pointer;}
+.seg button.on{background:var(--ink);color:var(--ground);}
+@media(max-width:820px){.tnav .lbl{display:none;}.iconbtn .lbl{display:none;}.iconbtn{padding:0 8px;}}
+
+/* ---------- drawer ---------- */
+#drawer{position:fixed;top:0;left:0;bottom:0;width:312px;max-width:86vw;background:var(--surface);border-right:1px solid var(--line);z-index:60;transform:translateX(-103%);transition:transform .22s ease;overflow-y:auto;padding:16px 14px 40px;}
+#drawer.open{transform:none;}
+#drawer .dh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+#drawer .dh b{font-family:var(--serif);font-size:1rem;}
+#scrim{position:fixed;inset:0;background:rgba(10,14,11,.36);z-index:55;opacity:0;pointer-events:none;transition:opacity .2s;}
+#scrim.open{opacity:1;pointer-events:auto;}
+.draw__grp{margin-bottom:13px;}
+.draw__grp h4{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 5px;display:flex;gap:7px;align-items:center;}
+.draw__grp h4 i{width:17px;height:17px;border-radius:5px;background:var(--tint-wash);color:var(--tint);display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-size:9px;font-weight:700;}
+.draw a{display:block;padding:7px 9px;border-radius:8px;font-size:.85rem;color:var(--ink-soft);cursor:pointer;}
+.draw a:hover{background:var(--sunk);}
+.draw a.on{background:var(--tint-wash);color:var(--tint);font-weight:600;}
+.draw a small{display:block;font-size:.7rem;color:var(--ink-faint);font-weight:400;}
+
+/* ---------- stage + device ---------- */
+#stage{padding:26px 20px 64px;max-width:1240px;margin:0 auto;}
+@media(max-width:560px){#stage{padding:14px 9px 48px;}}
+.dev{margin:0 auto;background:var(--raised);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;max-width:100%;}
+.dev--web{max-width:1180px;}
+.dev--phone{max-width:406px;border-radius:42px;padding:10px;background:#0d120f;border-color:#0d120f;}
+.dev__bar{height:38px;display:flex;align-items:center;gap:8px;padding:0 14px;background:var(--surface);border-bottom:1px solid var(--line-soft);}
+.dev__dots{display:flex;gap:6px;}
+.dev__dots i{width:9px;height:9px;border-radius:50%;background:var(--line);display:block;}
+.dev__url{flex:1;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);background:var(--ground);border:1px solid var(--line-soft);border-radius:999px;padding:3px 12px;text-align:center;max-width:380px;margin:0 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dev__scr{background:var(--ground);height:min(660px,82vh);overflow-y:auto;overflow-x:hidden;position:relative;}
+.dev--phone .dev__scr{height:min(620px,80vh);}
+@media(max-width:560px){.dev__scr{height:min(600px,78vh);}}
+.phonewrap{min-height:100%;display:flex;flex-direction:column;}
+.phonewrap>.appwrap{flex:1 0 auto;}
+.pstat{display:flex;align-items:center;justify-content:space-between;padding:9px 22px 8px;font-family:var(--mono);font-size:10px;color:var(--ink-soft);background:var(--surface);}
+.dev--phone .pstat{border-radius:30px 30px 0 0;}
+.dev--phone .flowbar{border-radius:0 0 30px 30px;}
+
+/* tint hooks */
+.tint-amber{--tint:var(--amber);--tint-wash:var(--amber-wash);}
+.tint-accent{--tint:var(--accent);--tint-wash:var(--accent-wash);}
+.tint-sky{--tint:var(--sky);--tint-wash:var(--sky-wash);}
+.tint-violet{--tint:var(--violet);--tint-wash:var(--violet-wash);}
+
+/* ---------- app chrome (phone) ---------- */
+.appbar{display:flex;align-items:center;gap:10px;padding:15px 16px 12px;background:var(--tint-wash);}
+.appbar h2{font-size:1.1rem;flex:1;}
+.appwrap{padding:14px 16px 6px;}
+.appnav{display:flex;background:var(--surface);border-top:1px solid var(--line);}
+.appnav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;font-family:var(--mono);font-size:7.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-faint);cursor:pointer;}
+.appnav a.on{color:var(--tint);}
+.appnav svg{width:17px;height:17px;}
+
+/* ---------- console chrome (web) ---------- */
+.cons{display:grid;grid-template-columns:198px 1fr;min-height:520px;}
+.cons__side{background:var(--surface);border-right:1px solid var(--line-soft);padding:14px 10px;display:flex;flex-direction:column;gap:2px;}
+.cons__side a{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;font-size:.83rem;color:var(--ink-soft);cursor:pointer;}
+.cons__side a:hover{background:var(--sunk);}
+.cons__side a.on{background:var(--tint-wash);color:var(--tint);font-weight:600;}
+.cons__side svg{width:15px;height:15px;flex:none;}
+.cons__main{padding:20px 22px;min-width:0;}
+.cons__main>h2{font-size:1.3rem;margin-bottom:3px;}
+.cons__main>.k{margin-bottom:16px;display:block;}
+.dev--phone .cons{grid-template-columns:1fr;}
+.dev--phone .cons__side{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line-soft);padding:8px;}
+.dev--phone .cons__side a span{display:none;}
+.dev--phone .cons__main{padding:14px;}
+
+/* ---------- setup chrome ---------- */
+.suphead{padding:16px 22px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--surface);}
+.wm{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-weight:600;}
+.wm i{font-family:var(--mono);font-size:7.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:2px 6px;font-style:normal;}
+.steps{font-family:var(--mono);font-size:10px;color:var(--ink-faint);display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.steps .on{color:var(--tint);font-weight:600;}
+.steps .done{color:var(--ink-soft);}
+.supbody{padding:22px;}
+@media(max-width:560px){.supbody{padding:14px;}}
+
+/* ---------- building blocks ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:15px;margin-bottom:12px;}
+.card--wash{background:var(--tint-wash);border-color:transparent;}
+.card h3{font-size:1rem;margin-bottom:9px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.sb{display:flex;justify-content:space-between;gap:10px;align-items:center;}
+.grid{display:grid;gap:10px;}
+.g2{grid-template-columns:repeat(auto-fit,minmax(210px,1fr));}
+.g3{grid-template-columns:repeat(auto-fit,minmax(146px,1fr));}
+.g4{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));}
+.muted{color:var(--ink-faint);font-size:.8rem;}
+.hr{height:1px;background:var(--line-soft);margin:12px 0;}
+
+.stat{background:var(--raised);border:1px solid var(--line-soft);border-radius:11px;padding:12px;}
+.stat__v{font-family:var(--serif);font-size:1.45rem;font-weight:600;line-height:1;}
+.stat__l{font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-faint);margin-top:6px;}
+.stat__d{margin-top:5px;}
+
+.pill{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;letter-spacing:.03em;padding:3px 8px;border-radius:999px;background:var(--sunk);color:var(--ink-soft);border:1px solid var(--line-soft);white-space:nowrap;}
+.is-good{color:var(--accent-ink);background:var(--accent-wash);border-color:transparent;}
+.is-warn{color:var(--amber);background:var(--amber-wash);border-color:transparent;}
+.is-bad{color:var(--crimson);background:var(--crimson-wash);border-color:transparent;}
+.is-info{color:var(--sky);background:var(--sky-wash);border-color:transparent;}
+.is-mute{color:var(--ink-faint);}
+
+.av{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;color:#fff;font-family:var(--mono);font-size:.7rem;font-weight:600;flex:none;}
+.av--sm{width:23px;height:23px;font-size:.58rem;}
+.av--lg{width:44px;height:44px;font-size:.88rem;}
+.avrow{display:flex;}
+.avrow .av{margin-left:-8px;border:2px solid var(--surface);}
+.avrow .av:first-child{margin-left:0;}
+
+.bars{display:flex;gap:7px;align-items:flex-end;height:92px;}
+.bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;height:100%;}
+.bar b{width:100%;max-width:30px;background:var(--tint);border-radius:5px 5px 0 0;min-height:4px;display:block;opacity:.85;}
+.bar em{font-family:var(--mono);font-size:8px;color:var(--ink-faint);font-style:normal;}
+
+.ring{width:96px;height:96px;}
+.ring__bg{fill:none;stroke:var(--line);stroke-width:7;}
+.ring__fg{fill:none;stroke:var(--tint);stroke-width:7;stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;}
+.ring__t{text-anchor:middle;dominant-baseline:central;font-family:var(--serif);font-weight:600;font-size:15px;fill:var(--ink);}
+
+.field{display:block;margin-bottom:12px;}
+.field>span{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:5px;}
+.field__in{background:var(--raised);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:.9rem;color:var(--ink);}
+.field em{font-style:normal;font-size:.72rem;color:var(--ink-faint);display:block;margin-top:4px;}
+
+.tl{position:relative;padding-left:20px;}
+.tl::before{content:"";position:absolute;left:5px;top:4px;bottom:4px;width:2px;background:var(--line);}
+.tl__i{position:relative;padding:0 0 15px;}
+.tl__i:last-child{padding-bottom:0;}
+.tl__i::before{content:"";position:absolute;left:-18px;top:3px;width:10px;height:10px;border-radius:50%;background:var(--tint);border:2px solid var(--surface);}
+.tl__t{font-family:var(--mono);font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-faint);}
+.tl__b{font-size:.87rem;margin-top:2px;}
+
+.chips{display:flex;gap:6px;flex-wrap:wrap;}
+.chip{font-family:var(--mono);font-size:9.5px;padding:4px 9px;border-radius:999px;background:var(--sunk);color:var(--ink-soft);border:1px solid var(--line-soft);}
+.chip.on{background:var(--tint);color:#fff;border-color:var(--tint);}
+
+.list__i{display:flex;gap:11px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-soft);}
+.list__i:last-child{border-bottom:0;}
+.list__i .gr{flex:1;min-width:0;}
+.list__i .t{font-size:.88rem;font-weight:500;}
+.list__i .s{font-size:.75rem;color:var(--ink-faint);}
+
+.tbl{width:100%;border-collapse:collapse;font-size:.83rem;}
+.tbl th{text-align:left;font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;padding:8px 9px;border-bottom:1px solid var(--line);}
+.tbl td{padding:10px 9px;border-bottom:1px solid var(--line-soft);}
+.tblwrap{overflow-x:auto;}
+
+.qopt{display:flex;gap:10px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:11px;margin-bottom:8px;font-size:.9rem;background:var(--raised);}
+.qopt.sel{border-color:var(--tint);background:var(--tint-wash);}
+.qopt i{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--ink-faint);display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.68rem;font-style:normal;flex:none;}
+.qopt.sel i{background:var(--tint);border-color:var(--tint);color:#fff;}
+
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-width:270px;}
+.palette b{aspect-ratio:1;border-radius:7px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.7rem;color:var(--ink-faint);font-weight:400;}
+.palette b.a{background:var(--tint);color:#fff;border-color:var(--tint);}
+.palette b.m{border-color:var(--amber);color:var(--amber);}
+.palette b.c{outline:2px solid var(--tint);outline-offset:1px;}
+
+.studio{background:#11171a;color:#e8edeb;padding:14px;min-height:100%;}
+.studio h2,.studio h3{color:#f2f6f4;}
+.studio .vmain{aspect-ratio:16/9;background:linear-gradient(135deg,#1b2a24,#16212b);border-radius:12px;display:flex;align-items:flex-end;padding:12px;font-size:.8rem;color:#cdd6d3;}
+.studio .vgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:8px;margin-top:8px;}
+.studio .vtile{aspect-ratio:5/4;background:#1c2427;border:1px solid #2b3538;border-radius:10px;display:flex;align-items:flex-end;padding:6px;font-size:.66rem;color:#c0c9c6;}
+.studio .dock{background:#161d20;border:1px solid #26302f;border-radius:12px;padding:12px;margin-top:10px;}
+.studio .ctrls{display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap;}
+.studio .cbtn{width:38px;height:38px;border-radius:50%;background:#232c2f;border:1px solid #313b3d;display:flex;align-items:center;justify-content:center;color:#dfe6e3;font-size:.8rem;}
+.sbar{background:#232c2f;border-radius:6px;height:8px;overflow:hidden;margin:5px 0;}
+.sbar b{display:block;height:100%;background:#5CB57C;}
+
+/* ---------- hotspots (the only real interaction) ---------- */
+.hot{cursor:pointer;text-decoration:none;color:inherit;}
+.hot--row{display:block;border:1.5px solid color-mix(in srgb,var(--tint) 42%,transparent);border-radius:12px;padding:13px 14px;margin-bottom:9px;background:var(--surface);transition:transform .13s,border-color .13s,background .13s;}
+.hot--row:hover{border-color:var(--tint);background:var(--tint-wash);transform:translateY(-1px);}
+.hot--card{position:relative;display:block;border:1.5px solid color-mix(in srgb,var(--tint) 42%,transparent);border-radius:13px;padding:15px 40px 15px 15px;margin-bottom:10px;background:var(--surface);transition:transform .13s,border-color .13s,background .13s;}
+.hot--card:hover{border-color:var(--tint);background:var(--tint-wash);transform:translateY(-1px);}
+.hot--card::after{content:"→";position:absolute;right:15px;top:50%;transform:translateY(-50%);color:var(--tint);font-weight:700;}
+.hot--btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;background:var(--tint);color:#fff;border:none;font-family:var(--sans);font-weight:600;font-size:.88rem;cursor:pointer;transition:filter .13s;}
+.hot--btn:hover{filter:brightness(1.07);}
+.hot--btn::after{content:"→";}
+.hot--btn.ghost{background:transparent;color:var(--tint);border:1.5px solid color-mix(in srgb,var(--tint) 45%,transparent);}
+:root[data-theme="dark"] .hot--btn:not(.ghost),:root:not([data-theme="light"]) .hot--btn:not(.ghost){color:#0c130e;}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .hot--btn:not(.ghost){color:#fff;}}
+.hot--link{border-bottom:2px solid var(--tint);color:var(--tint);cursor:pointer;font-weight:600;}
+body.showhot .hot--row,body.showhot .hot--card{box-shadow:0 0 0 3px var(--tint-wash);}
+body.showhot .hot--btn{box-shadow:0 0 0 4px var(--tint-wash);}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);font-size:.8rem;font-family:var(--sans);cursor:default;}
+.btn--dark{background:var(--ink);color:var(--ground);border-color:var(--ink);}
+.btn--sm{padding:6px 10px;font-size:.74rem;}
+
+.flowbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:var(--sunk);border-top:2px dashed var(--line);}
+.flowbar>div{min-width:0;display:flex;align-items:center;}
+.flowbar>div:first-child{flex:1;}
+.flowbar>div:last-child{flex:none;}
+.flowbar .fb__l{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);text-align:center;flex:none;padding:0 6px;}
+.flowbar .prev{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.flowbar .prev:hover{color:var(--ink);}
+.flowbar .hot--btn{white-space:nowrap;padding:9px 14px;font-size:.82rem;}
+@media(max-width:440px){.flowbar .fb__l{display:none;}}
+
+/* ---------- map ---------- */
+.mapwrap{max-width:1180px;margin:0 auto;}
+.maphero{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:26px;margin-bottom:20px;box-shadow:var(--shadow);}
+.maphero h1{font-size:clamp(1.5rem,3vw,2.15rem);letter-spacing:-.02em;margin:10px 0 12px;}
+.maphero h1 em{font-style:italic;color:var(--accent-ink);}
+.maphero p{color:var(--ink-soft);max-width:64ch;}
+.maphero .row{margin-top:18px;}
+.mapmeta{margin-top:14px;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);}
+.mapgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:14px;}
+.mapcol{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;}
+.mapcol__h{display:flex;align-items:center;gap:8px;font-weight:600;font-size:.9rem;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid var(--line-soft);}
+.mapcol__h i{width:20px;height:20px;border-radius:6px;background:var(--tint-wash);color:var(--tint);display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.68rem;font-weight:700;font-style:normal;flex:none;}
+.mapchip{display:block;padding:9px 10px;border-radius:9px;border:1px solid var(--line-soft);margin-bottom:6px;cursor:pointer;transition:border-color .13s,background .13s;}
+.mapchip:last-child{margin-bottom:0;}
+.mapchip:hover{border-color:var(--tint);background:var(--tint-wash);}
+.mapchip b{display:block;font-size:.83rem;}
+.mapchip span{display:block;font-size:.71rem;color:var(--ink-faint);margin-top:1px;}
+
+/* ---------- modal + toast ---------- */
+.modal{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(10,14,11,.42);}
+.modal.open{display:flex;}
+.modal__c{background:var(--surface);border:1px solid var(--line);border-radius:14px;max-width:580px;width:100%;padding:24px;max-height:84vh;overflow-y:auto;box-shadow:var(--shadow);}
+.modal__c h3{font-size:1.2rem;margin-bottom:12px;}
+.modal__c p,.modal__c li{font-size:.86rem;color:var(--ink-soft);line-height:1.55;}
+.modal__c ul{padding-left:18px;margin:8px 0;}
+.modal__c .x{float:right;cursor:pointer;color:var(--ink-faint);font-family:var(--mono);font-size:.8rem;}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(18px);background:var(--ink);color:var(--ground);padding:11px 16px;border-radius:10px;font-size:.8rem;z-index:65;opacity:0;transition:opacity .3s,transform .3s;max-width:92vw;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%);}
+
+@media(max-width:560px){
+  .cons{grid-template-columns:1fr;}
+  .cons__side{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line-soft);}
+  .cons__side a span{display:none;}
+  .cons__main{padding:14px;}
+}
+</style>
+
+<header id="top">
+  <button class="burger" id="burger" aria-label="All screens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <div class="brand" id="brandHome">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 3c3.5 3 3.5 15 0 18M12 3c-3.5 3-3.5 15 0 18M3.2 9.5h17.6M3.2 14.5h17.6"/></svg>
+    TutorOS <i>prototype</i>
+  </div>
+  <nav class="tnav">
+    <button id="pv" aria-label="Previous screen">‹</button>
+    <span class="lbl" id="tlbl">26-screen walkthrough</span>
+    <button id="nx" aria-label="Next screen">›</button>
+  </nav>
+  <div class="right">
+    <button class="iconbtn on" id="hotBtn" title="Highlight the clickable areas"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg><span class="lbl">Hotspots</span></button>
+    <div class="seg" id="vpSeg">
+      <button data-vp="auto" class="on">Auto</button>
+      <button data-vp="phone">Phone</button>
+      <button data-vp="web">Web</button>
+    </div>
+    <button class="iconbtn" id="themeBtn">Theme</button>
+  </div>
+</header>
+
+<div id="scrim"></div>
+<aside id="drawer">
+  <div class="dh"><b>All 26 screens</b><span class="prev" id="aboutLink" style="cursor:pointer;color:var(--accent-ink);font-family:var(--mono);font-size:11px;">About ⓘ</span></div>
+  <div id="drawerBody"></div>
+</aside>
+
+<main id="stage"></main>
+
+<div class="modal" id="modal"><div class="modal__c" id="modalC"></div></div>
+<div class="toast" id="toast"></div>
+
+<noscript><p style="padding:24px;font-family:sans-serif">This prototype needs JavaScript to run the screen-to-screen flow.</p></noscript>
+
+<script>
+(function(){
+/* ================= theme ================= */
+var root=document.documentElement, tb=document.getElementById('themeBtn');
+var torder=['system','light','dark'], ti=0;
+try{var sv=localStorage.getItem('tos_theme');if(sv)ti=Math.max(0,torder.indexOf(sv));}catch(e){}
+function applyTheme(){var m=torder[ti];if(m==='system'){root.removeAttribute('data-theme');tb.textContent='Theme · Auto';}else{root.setAttribute('data-theme',m);tb.textContent='Theme · '+m[0].toUpperCase()+m.slice(1);}try{localStorage.setItem('tos_theme',m);}catch(e){}}
+tb.addEventListener('click',function(){ti=(ti+1)%torder.length;applyTheme();});
+applyTheme();
+
+/* ================= icons ================= */
+var ICONS={
+ home:'<path d="M3 10.5 12 3l9 7.5V21H4a1 1 0 0 1-1-1z"/><path d="M9 21v-6h6v6"/>',
+ cal:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',
+ users:'<circle cx="9" cy="8" r="3.4"/><path d="M2.5 20c0-3.3 2.9-6 6.5-6s6.5 2.7 6.5 6"/><path d="M16.5 5.4a3.4 3.4 0 0 1 0 6.8M21.5 20c0-2.6-1.7-4.9-4-5.6"/>',
+ spark:'<path d="M3 17l5-6 4 4 6-9"/><path d="M3 21h18"/>',
+ chat:'<path d="M4 5h16v11H9l-5 4z"/>',
+ book:'<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 0-3 3z"/><path d="M19 20H8"/>',
+ doc:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>',
+ play:'<circle cx="12" cy="12" r="9"/><path d="M10 8.5l6 3.5-6 3.5z"/>',
+ gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
+ cash:'<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>',
+ flag:'<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+};
+function ic(n){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">'+(ICONS[n]||ICONS.doc)+'</svg>';}
+
+/* ================= helpers ================= */
+function av(n,cls){n=(n||'').trim();var p=n.split(/\s+/);var i=((p[0]||' ')[0]+(p[1]?p[1][0]:'')).toUpperCase();
+ var pal=['#2E7D4F','#2C6C88','#6A4C93','#AF6C22','#A4384A','#3f7d63','#4b6b8a'];var h=0;for(var k=0;k<n.length;k++)h=(h*31+n.charCodeAt(k))>>>0;
+ return '<span class="av '+(cls||'')+'" style="background:'+pal[h%pal.length]+'">'+i+'</span>';}
+function pill(t,tone){return '<span class="pill '+(tone?'is-'+tone:'')+'">'+t+'</span>';}
+function stat(v,l,d,tone){return '<div class="stat"><div class="stat__v">'+v+'</div><div class="stat__l">'+l+'</div>'+(d?'<div class="stat__d">'+pill(d,tone)+'</div>':'')+'</div>';}
+function field(l,v,hint){return '<label class="field"><span>'+l+'</span><div class="field__in">'+v+'</div>'+(hint?'<em>'+hint+'</em>':'')+'</label>';}
+function bars(data){return '<div class="bars">'+data.map(function(d){return '<span class="bar"><b style="height:'+d[1]+'%"></b><em>'+d[0]+'</em></span>';}).join('')+'</div>';}
+function ring(pct){var r=40,c=2*Math.PI*r,off=c*(1-pct/100);return '<svg class="ring" viewBox="0 0 100 100"><circle class="ring__bg" cx="50" cy="50" r="'+r+'"/><circle class="ring__fg" cx="50" cy="50" r="'+r+'" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"/><text class="ring__t" x="50" y="50">'+pct+'%</text></svg>';}
+function hotBtn(label,goto,ghost){return '<button class="hot hot--btn'+(ghost?' ghost':'')+'" data-goto="'+goto+'">'+label+'</button>';}
+function next(goto,label){return '<button class="hot hot--btn" data-goto="'+goto+'">'+label+'</button>';}
+
+/* ================= data model ================= */
+var FLOWS=[
+ {id:'f1',name:'Set up the workspace',tint:'amber',screens:['signup','template','branding','roster']},
+ {id:'f2',name:'Everyone signs in',tint:'accent',screens:['router','student-login','staff-login']},
+ {id:'f3',name:'Run a live class',tint:'sky',screens:['schedule','session-pre','live-teacher','record']},
+ {id:'f4',name:'Student joins & learns',tint:'accent',screens:['student-dash','join','live-student','library','lesson']},
+ {id:'f5',name:'The practice loop',tint:'sky',screens:['practice-build','practice-play','practice-result','analysis','test']},
+ {id:'f6',name:'Doubts, records & oversight',tint:'violet',screens:['doubt-student','doubt-teacher','timeline','teacher-dash','owner']}
+];
+var TOUR=[];FLOWS.forEach(function(f){f.screens.forEach(function(s){TOUR.push(s);});});
+function flowOf(id){for(var i=0;i<FLOWS.length;i++)if(FLOWS[i].screens.indexOf(id)>=0)return FLOWS[i];return FLOWS[0];}
+
+var S={
+ 'signup':{t:'Workspace setup',sub:'Name it, pick a URL, set the timezone',who:'Owner',frame:'web',tint:'amber'},
+ 'template':{t:'Pick a template',sub:'One choice sets ~26 modules for you',who:'Owner',frame:'web',tint:'amber'},
+ 'branding':{t:'Branding & domain',sub:'Logo, colour, custom domain, sender',who:'Owner',frame:'web',tint:'amber'},
+ 'roster':{t:'Roster & cohorts',sub:'Import students, group them into batches',who:'Owner',frame:'web',tint:'amber'},
+ 'router':{t:'Role router',sub:'One door — here to learn, or to teach',who:'Student',frame:'phone',tint:'accent'},
+ 'student-login':{t:'Student sign-in',sub:'Phone OTP — one identity for the record',who:'Student',frame:'phone',tint:'accent'},
+ 'staff-login':{t:'Staff sign-in',sub:'Email + 2FA for privileged accounts',who:'Teacher',frame:'web',tint:'sky'},
+ 'schedule':{t:'Schedule / calendar',sub:'Recurring and one-off sessions',who:'Teacher',frame:'web',tint:'sky'},
+ 'session-pre':{t:'Session detail (pre-class)',sub:'Everything about one class before it starts',who:'Teacher',frame:'web',tint:'sky'},
+ 'live-teacher':{t:'Live session — teacher',sub:'Video, roster, chat, polls, doubts',who:'Teacher',frame:'web',tint:'sky'},
+ 'record':{t:'Session record & event transcript',sub:'The after-class bundle — an event log',who:'Teacher',frame:'web',tint:'sky'},
+ 'student-dash':{t:'Student dashboard',sub:'Next class, open practice, this week',who:'Student',frame:'phone',tint:'accent'},
+ 'join':{t:'Join page / waiting room',sub:'The link they click to get into class',who:'Student',frame:'phone',tint:'accent'},
+ 'live-student':{t:'Live session — student',sub:'The call plus quick-checks and doubts',who:'Student',frame:'phone',tint:'accent'},
+ 'library':{t:'Content library',sub:'Lessons, videos, PDFs, playlists',who:'Student',frame:'phone',tint:'accent'},
+ 'lesson':{t:'Lesson viewer',sub:'One lesson — video, notes, checks',who:'Student',frame:'phone',tint:'accent'},
+ 'practice-build':{t:'Practice set builder',sub:'Assemble a same-day practice artefact',who:'Teacher',frame:'web',tint:'sky'},
+ 'practice-play':{t:'Practice player',sub:'One question at a time, a real deadline',who:'Student',frame:'phone',tint:'accent'},
+ 'practice-result':{t:'Result & tagged key',sub:'Every miss tagged, every tag an action',who:'Student',frame:'phone',tint:'accent'},
+ 'analysis':{t:'Analysis → remediation',sub:'Most-missed items forced to carry an action',who:'Teacher',frame:'web',tint:'sky'},
+ 'test':{t:'Test runner',sub:'Timed paper, palette, sections, resume',who:'Student',frame:'phone',tint:'accent'},
+ 'doubt-student':{t:'Doubts queue — student',sub:'Photo or text in, an honest queue position',who:'Student',frame:'phone',tint:'accent'},
+ 'doubt-teacher':{t:'Doubts triage — teacher',sub:'Tag, answer, attach a clip, resolve',who:'Teacher',frame:'web',tint:'sky'},
+ 'timeline':{t:'Student timeline / record log',sub:'One stream — the full record',who:'Student',frame:'phone',tint:'accent'},
+ 'teacher-dash':{t:'Teacher dashboard',sub:'Cohort health — who is behind',who:'Teacher',frame:'web',tint:'sky'},
+ 'owner':{t:'Owner console',sub:'Operation-wide — delivery, SLA, revenue',who:'Owner',frame:'web',tint:'violet'}
+};
+
+/* ================= shared chrome ================= */
+function setupHead(step){
+ var st=['Workspace','Template','Branding','Students'];
+ return '<div class="suphead"><div class="wm">'+
+   '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 3c3.5 3 3.5 15 0 18M3.2 9.5h17.6M3.2 14.5h17.6"/></svg>'+
+   ' Meridian Biology <i>setup</i></div><div class="steps">'+
+   st.map(function(s,i){var c=i+1===step?'on':i+1<step?'done':'';return '<span class="'+c+'">'+(i+1)+' '+s+'</span>';}).join('<b style="color:var(--line)">·</b>')+
+   '</div></div>';
+}
+function tnav(kind,active){
+ var t=[['Dashboard','teacher-dash','spark'],['Schedule','schedule','cal'],['Students','roster','users'],['Practice','practice-build','doc'],['Doubts','doubt-teacher','chat'],['Records','timeline','flag'],['Content','library','book']];
+ var o=[['Owner console','owner','spark'],['Cohorts','roster','users'],['Schedule','schedule','cal'],['Doubts','doubt-teacher','chat'],['Records','timeline','flag'],['Branding','branding','gear']];
+ var items=kind==='owner'?o:t;
+ return '<aside class="cons__side">'+items.map(function(it){
+   return '<a data-goto="'+it[1]+'" class="'+(it[0]===active?'on':'')+'">'+ic(it[2])+'<span>'+it[0]+'</span></a>';
+ }).join('')+'</aside>';
+}
+function cons(kind,active,main){return '<div class="cons">'+tnav(kind,active)+'<div class="cons__main">'+main+'</div></div>';}
+function appnav(active){
+ var items=[['Home','student-dash','home'],['Classes','library','play'],['Practice','practice-play','spark'],['Doubts','doubt-student','chat'],['You','timeline','flag']];
+ return '<nav class="appnav">'+items.map(function(it){return '<a data-goto="'+it[1]+'" class="'+(it[0]===active?'on':'')+'">'+ic(it[2])+'<span>'+it[0]+'</span></a>';}).join('')+'</nav>';
+}
+function appbar(title,right){return '<div class="appbar"><h2>'+title+'</h2>'+(right||'')+'</div>';}
+
+/* ================= screens ================= */
+var R={};
+
+R['signup']=function(){
+ return setupHead(1)+'<div class="supbody"><div class="grid g2" style="align-items:start">'+
+  '<div>'+
+   '<h2 style="font-size:1.4rem;margin-bottom:4px">Create your workspace</h2>'+
+   '<p class="muted" style="margin-bottom:16px">Two minutes. No card. Everything here is editable later.</p>'+
+   field('Program name','Meridian Biology')+
+   field('Workspace URL','<b>meridian-bio</b>.tutoros.app','a custom domain comes next')+
+   field('Your role','Owner &amp; teacher &nbsp;·&nbsp; <span class="muted">solo for now, add staff later</span>')+
+   field('Time zone','India Standard Time (UTC +5:30)')+
+   field('Roughly how many students?','25 – 75')+
+   '<div style="margin-top:6px">'+hotBtn('Continue — choose a template','template')+'</div>'+
+  '</div>'+
+  '<div class="card card--wash"><div class="k" style="margin-bottom:8px">What you get on day one</div>'+
+   ['Student &amp; staff logins','One live class with an auto-generated Meet link','A same-day practice set with a real deadline','A record log for every student','A dashboard that reads from that log']
+     .map(function(x){return '<div class="list__i"><span style="color:var(--tint)">✓</span><div class="gr"><div class="t">'+x+'</div></div></div>';}).join('')+
+   '<p class="muted" style="margin-top:10px">14-day trial · Starter plan · billed to you, not your students.</p>'+
+  '</div>'+
+ '</div></div>';
+};
+
+R['template']=function(){
+ var opts=[
+  ['Exam-prep loop','Concept → same-day practice → tagged analysis → mock. NEET / JEE / board.',1],
+  ['1-on-1 subject tutor','Sessions, homework, a shared record, simple billing.',0],
+  ['K-12 homework help','Short sessions, doubts, light practice, parent visibility.',0],
+  ['Skills / cohort course','Cohorts, projects, assignments, certificates.',0],
+  ['Music / arts','Recurring 1-on-1s, practice logs, recital scheduling.',0],
+  ['Start blank','Turn modules on yourself.',0]
+ ];
+ return setupHead(2)+'<div class="supbody">'+
+  '<h2 style="font-size:1.4rem;margin-bottom:4px">What kind of tutoring do you run?</h2>'+
+  '<p class="muted" style="margin-bottom:16px">This is where the opinion lives — a template sets the modules, the taxonomy and a few automation rules. You can switch or fine-tune any time.</p>'+
+  '<div class="grid g2">'+opts.map(function(o){
+    return '<div class="'+(o[2]?'card card--wash':'card')+'" style="'+(o[2]?'border:1.5px solid var(--tint)':'')+'">'+
+      '<div class="sb"><h3 style="margin:0">'+o[0]+'</h3>'+(o[2]?pill('selected','info'):'<span class="muted">choose</span>')+'</div>'+
+      '<p class="muted" style="margin-top:6px">'+o[1]+'</p>'+
+      (o[2]?'<div class="hr"></div><div class="k" style="margin-bottom:6px">Turns on 26 of 35 modules</div><div class="chips">'+
+        ['Sessions + Meet link','Session record','Question bank','Same-day practice','Auto-grading','Tagged analysis','Doubts queue','Announcements','Student / teacher / owner dashboards','Mentor backlog']
+        .map(function(c){return '<span class="chip">'+c+'</span>';}).join('')+'</div>':'')+
+    '</div>';
+  }).join('')+'</div>'+
+  '<div style="margin-top:6px">'+hotBtn('Apply “Exam-prep loop” → branding','branding')+'</div>'+
+ '</div>';
+};
+
+R['branding']=function(){
+ return setupHead(3)+'<div class="supbody"><div class="grid g2" style="align-items:start">'+
+  '<div>'+
+   '<h2 style="font-size:1.4rem;margin-bottom:14px">Make it yours</h2>'+
+   '<div class="field"><span>Logo</span><div class="row"><span class="av av--lg" style="background:var(--accent);border-radius:12px">M</span><span class="btn btn--sm">Replace</span></div></div>'+
+   '<div class="field"><span>Accent colour</span><div class="palette" style="grid-template-columns:repeat(6,32px)"><b class="a c">✓</b><b style="background:#2C6C88"></b><b style="background:#6A4C93"></b><b style="background:#A4384A"></b><b style="background:#AF6C22"></b><b style="background:#1f6f5c"></b></div></div>'+
+   field('Login-page headline','Your NEET Biology prep, on the record.')+
+   field('Custom domain','learn.meridianbio.in &nbsp; '+pill('DNS verified','good'))+
+   field('Email sender','anitha@meridianbio.in &nbsp; '+pill('SPF pending','warn'))+
+   '<div style="margin-top:6px">'+hotBtn('Save → add your students','roster')+'</div>'+
+  '</div>'+
+  '<div class="card"><div class="k" style="margin-bottom:10px">Live preview — student login</div>'+
+   '<div style="background:var(--accent-wash);border-radius:14px;padding:22px;text-align:center">'+
+     '<span class="av av--lg" style="background:var(--accent);border-radius:12px;margin:0 auto">M</span>'+
+     '<div style="font-family:var(--serif);font-size:1.05rem;margin:12px 0 4px">Meridian Biology</div>'+
+     '<div class="muted" style="margin-bottom:14px">Your NEET Biology prep, on the record.</div>'+
+     '<div style="background:var(--raised);border:1px solid var(--line);border-radius:9px;padding:9px;font-family:var(--mono);font-size:.8rem;color:var(--ink-faint)">+91 ·  ·  ·  ·  ·</div>'+
+     '<div style="background:var(--accent);color:#fff;border-radius:9px;padding:9px;margin-top:8px;font-weight:600;font-size:.85rem">Send code</div>'+
+   '</div></div>'+
+ '</div></div>';
+};
+
+R['roster']=function(){
+ var students=[
+  ['Aditya Menon','98•••• ••210','Evening','12 Jun','active'],
+  ['Sneha Iyer','99•••• ••441','Evening','12 Jun','active'],
+  ['Farhan Qureshi','70•••• ••883','Evening','19 Jun','at risk'],
+  ['Divya Suresh','88•••• ••120','Weekend','2 Jul','active'],
+  ['Kabir Anand','63•••• ••507','Evening','19 Jun','active'],
+  ['Meera Joshi','94•••• ••318','Weekend','2 Jul','at risk'],
+  ['Rohan Pillai','90•••• ••776','Evening','1 Aug','trial'],
+  ['Ananya Rao','80•••• ••654','Weekend','1 Aug','active']
+ ];
+ var main='<h2>Students</h2><span class="k">42 enrolled · 2 pending invite · 3 cohorts</span>'+
+  '<div class="row" style="margin-bottom:12px"><span class="btn btn--dark btn--sm">+ Add student</span><span class="btn btn--sm">Import CSV</span><span class="btn btn--sm">Invite link</span></div>'+
+  '<div class="tblwrap"><table class="tbl"><thead><tr><th>Student</th><th>Phone</th><th>Cohort</th><th>Joined</th><th>Status</th></tr></thead><tbody>'+
+   students.map(function(s){var tone=s[4]==='at risk'?'bad':s[4]==='trial'?'warn':'good';
+    return '<tr><td><div class="row" style="gap:8px;flex-wrap:nowrap">'+av(s[0],'av--sm')+'<span>'+s[0]+'</span></div></td><td class="muted">'+s[1]+'</td><td>'+pill(s[2])+'</td><td class="muted">'+s[3]+'</td><td>'+pill(s[4],tone)+'</td></tr>';
+   }).join('')+
+  '</tbody></table></div>'+
+  '<div class="card" style="margin-top:16px"><h3>Cohorts</h3>'+
+   [['NEET 2026 — Evening','28 students · Mon/Wed/Fri 6:30 PM'],['NEET 2026 — Weekend','14 students · Sat/Sun 9:00 AM'],['Crash — Class 12','draft · opens Oct']]
+   .map(function(c){return '<div class="list__i"><div class="gr"><div class="t">'+c[0]+'</div><div class="s">'+c[1]+'</div></div><span class="btn btn--sm">Open</span></div>';}).join('')+
+  '</div>'+
+  '<div style="margin-top:6px">'+hotBtn('Done → see how people sign in','router')+'</div>';
+ return cons('teacher','Students',main);
+};
+
+R['router']=function(){
+ return '<div style="min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:34px 24px;text-align:center;background:var(--accent-wash)">'+
+  '<span class="av av--lg" style="background:var(--accent);border-radius:14px;width:52px;height:52px;font-size:1rem">M</span>'+
+  '<h2 style="font-size:1.3rem;margin:16px 0 4px">Meridian Biology</h2>'+
+  '<p class="muted" style="margin-bottom:26px">NEET 2026 · Biology</p>'+
+  '<div style="width:100%;max-width:280px">'+
+   '<div class="hot hot--card" data-goto="student-login" style="text-align:left"><div style="font-weight:600">I’m here to learn</div><div class="muted">Student sign-in</div></div>'+
+   '<div class="hot hot--card" data-goto="staff-login" style="text-align:left"><div style="font-weight:600">I’m a teacher / staff</div><div class="muted">Staff sign-in with 2FA</div></div>'+
+  '</div>'+
+  '<p class="muted" style="margin-top:28px;font-family:var(--mono);font-size:.68rem">Powered by TutorOS · placeholder name</p>'+
+ '</div>';
+};
+
+R['student-login']=function(){
+ return '<div style="padding:30px 24px;min-height:100%;display:flex;flex-direction:column;justify-content:center">'+
+  '<span class="av av--lg" style="background:var(--accent);border-radius:12px">M</span>'+
+  '<h2 style="font-size:1.25rem;margin:16px 0 6px">Enter the 6-digit code</h2>'+
+  '<p class="muted" style="margin-bottom:18px">Sent to +91 98•••• ••210. &nbsp;<span style="color:var(--tint)">Change number</span></p>'+
+  '<div class="row" style="gap:8px;flex-wrap:nowrap;margin-bottom:14px">'+
+   ['4','1','9','2','',''].map(function(d){return '<div style="flex:1;aspect-ratio:1;max-width:46px;border:1.5px solid '+(d?'var(--tint)':'var(--line)')+';border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:1.2rem">'+d+'</div>';}).join('')+
+  '</div>'+
+  '<p class="muted" style="margin-bottom:18px;font-family:var(--mono);font-size:.72rem">Resend code in 0:24</p>'+
+  hotBtn('Verify → my dashboard','student-dash')+
+  '<div class="card card--wash" style="margin-top:22px"><div class="k" style="margin-bottom:4px">One identity</div><p class="muted">Your sessions, practice, doubts, reports and fees all thread to this number. Log in on any device and the whole record is there.</p></div>'+
+ '</div>';
+};
+
+R['staff-login']=function(){
+ return '<div class="supbody" style="max-width:440px;margin:0 auto;padding:40px 24px">'+
+  '<div class="wm" style="margin-bottom:22px"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 3c3.5 3 3.5 15 0 18M3.2 9.5h17.6M3.2 14.5h17.6"/></svg> Meridian Biology <i>staff</i></div>'+
+  '<h2 style="font-size:1.35rem;margin-bottom:16px">Staff sign-in</h2>'+
+  field('Work email','anitha@meridianbio.in')+
+  field('Password','••••••••••••')+
+  field('2FA code','<span style="font-family:var(--mono);letter-spacing:.3em">830 4·· </span>','from your authenticator app')+
+  '<div style="margin-top:6px">'+hotBtn('Sign in → dashboard','teacher-dash')+'</div>'+
+  '<div class="card" style="margin-top:20px"><div class="k" style="margin-bottom:4px">Why the extra step</div><p class="muted">Privileged accounts require 2FA. Every staff action — a grade change, a fee edit, a data export — is written to the audit log.</p></div>'+
+ '</div>';
+};
+
+R['schedule']=function(){
+ var days=[['Mon 1',[]],['Tue 2',[['6:30','Neural Control','live','session-pre'],['8:00','DPP-14 solve','live',null]]],['Wed 3',[]],['Thu 4',[['6:30','Chemical Coordination','live',null]]],['Fri 5',[['6:30','Revision + doubts','live',null]]],['Sat 6',[['9:00','Mock 6','test',null],['11:00','Mock 6 analysis','live',null]]]];
+ var main='<h2>This week</h2><span class="k">NEET 2026 — Evening batch ▾ &nbsp;·&nbsp; Asia/Kolkata</span>'+
+  '<div class="row" style="margin-bottom:14px"><span class="btn btn--dark btn--sm">+ New session</span><span class="btn btn--sm">‹ prev week</span><span class="btn btn--sm">next week ›</span></div>'+
+  '<div class="tblwrap"><div style="display:grid;grid-template-columns:repeat(6,minmax(116px,1fr));gap:8px;min-width:560px">'+
+   days.map(function(d){
+    return '<div style="background:var(--surface);border:1px solid var(--line-soft);border-radius:10px;padding:8px;min-height:150px">'+
+     '<div class="k" style="margin-bottom:8px">'+d[0]+'</div>'+
+     (d[1].length?d[1].map(function(b){
+       var inner='<div style="font-family:var(--mono);font-size:9px;color:var(--ink-faint)">'+b[0]+'</div><div style="font-size:.78rem;font-weight:500;line-height:1.2;margin-top:2px">'+b[1]+'</div>';
+       if(b[3])return '<div class="hot hot--row" data-goto="'+b[3]+'" style="padding:8px;margin-bottom:6px">'+inner+'</div>';
+       return '<div style="background:var(--sunk);border-radius:8px;padding:8px;margin-bottom:6px">'+inner+'</div>';
+     }).join(''):'<div class="muted" style="font-size:.72rem">—</div>')+
+    '</div>';
+   }).join('')+
+  '</div></div>'+
+  '<p class="muted" style="margin-top:12px">Tonight’s <b>Neural Control</b> block is the live one — open it.</p>'+
+  '<div style="margin-top:8px">'+hotBtn('Open tonight’s session','session-pre')+'</div>';
+ return cons('teacher','Schedule',main);
+};
+
+R['session-pre']=function(){
+ var main='<h2>Neural Control of Movement</h2><span class="k">Live · NEET 2026 Evening · Tue 2 Sep · 6:30 – 8:00 PM IST</span>'+
+  '<div class="grid g2" style="align-items:start">'+
+   '<div>'+
+    '<div class="card"><div class="sb"><h3 style="margin:0">Video link</h3>'+pill('auto-created','info')+'</div>'+
+     '<div class="field__in" style="font-family:var(--mono);font-size:.82rem;margin:8px 0">meet.google.com/qvz-abcd-hij</div>'+
+     '<p class="muted">Generated from anitha@meridianbio.in — no cost, joins straight from the student app.</p>'+
+     '<div class="row" style="margin-top:8px"><span class="btn btn--sm">Copy link</span><span class="btn btn--sm">Regenerate</span></div>'+
+    '</div>'+
+    '<div class="card"><h3>Agenda</h3>'+
+     ['Recap: reflex arc &amp; synapse types','Saltatory conduction — the misconception to break','Neuromuscular junction','Live poll → DPP-14 released on end']
+     .map(function(a){return '<div class="list__i"><span style="color:var(--tint)">▢</span><div class="gr"><div class="t" style="font-weight:400">'+a+'</div></div></div>';}).join('')+
+    '</div>'+
+   '</div>'+
+   '<div>'+
+    '<div class="card card--wash"><div class="k" style="margin-bottom:8px">Auto-releases when class ends</div>'+
+     '<div class="list__i"><div class="gr"><div class="t">Lesson · Neural Control of Movement</div><div class="s">to 28 students</div></div></div>'+
+     '<div class="list__i"><div class="gr"><div class="t">DPP 14 · 16 questions</div><div class="s">due 11:00 PM tonight</div></div></div>'+
+    '</div>'+
+    '<div class="card"><div class="sb"><h3 style="margin:0">Roster</h3><span class="muted">24 of 28 confirmed</span></div>'+
+     '<div class="avrow" style="margin-top:10px">'+['Aditya Menon','Sneha Iyer','Kabir Anand','Rohan Pillai','Ananya Rao'].map(function(n){return av(n,'av--sm');}).join('')+'<span class="av av--sm" style="background:var(--ink-faint)">+19</span></div>'+
+    '</div>'+
+   '</div>'+
+  '</div>'+
+  '<div style="margin-top:6px">'+hotBtn('Start class','live-teacher')+'</div>';
+ return cons('teacher','Schedule',main);
+};
+
+R['live-teacher']=function(){
+ return '<div class="studio">'+
+  '<div class="sb"><h2 style="font-size:1.1rem">Neural Control · live</h2><span class="pill is-bad">REC 42:18</span></div>'+
+  '<div class="vmain" style="margin-top:10px">Anitha Rao — sharing slide 12 / 20</div>'+
+  '<div class="vgrid">'+['Aditya M','Sneha I','Kabir A','Rohan P','Ananya R','Divya S'].map(function(n){return '<div class="vtile">'+n+'</div>';}).join('')+'</div>'+
+  '<div class="dock">'+
+   '<div class="row" style="gap:6px;margin-bottom:10px">'+['Roster 24','Chat','Polls','Doubts 2'].map(function(t,i){return '<span class="pill '+(i===2?'is-info':'')+'">'+t+'</span>';}).join('')+'</div>'+
+   '<div style="font-size:.82rem;color:#e8edeb;margin-bottom:6px">Poll · Where is the interneuron?</div>'+
+   [['Grey matter of the spinal cord',71],['Dorsal root ganglion',18],['White matter',11]].map(function(p){
+     return '<div style="font-size:.72rem;color:#aeb8b5">'+p[0]+' — '+p[1]+'%</div><div class="sbar"><b style="width:'+p[1]+'%"></b></div>';
+   }).join('')+
+   '<div style="font-size:.74rem;color:#9fb0aa;margin-top:6px">18 / 24 correct · 2 raised hands — Sneha, Kabir</div>'+
+   '<div class="row" style="gap:6px;margin-top:8px"><span class="pill">Push explanation</span><span class="pill">Open doubt</span></div>'+
+  '</div>'+
+  '<div class="ctrls"><span class="cbtn">🎙</span><span class="cbtn">📷</span><span class="cbtn">🖥</span><span class="cbtn">✋</span>'+
+   '<button class="hot hot--btn" data-goto="record" style="background:#A4384A;color:#fff">End class</button></div>'+
+ '</div>';
+};
+
+R['record']=function(){
+ var main='<h2>Session record — Neural Control of Movement</h2><span class="k">Tue 2 Sep · 89 min &nbsp;·&nbsp; '+pill('event log — not a transcription','info')+'</span>'+
+  '<div class="grid g2" style="align-items:start">'+
+   '<div class="card"><h3>Event transcript</h3><div class="tl" style="margin-top:6px">'+
+    [['6:31 PM','Class started · Meet link opened'],['6:34 PM','24 of 28 joined'],['6:52 PM','Poll fired — “Where is the interneuron?” · 18/24 correct'],['7:11 PM','Doubt raised — Sneha Iyer · “Reflex arc direction”'],['7:39 PM','Board photo uploaded — neuromuscular junction'],['8:00 PM','DPP 14 released to 28 students · due 11 PM'],['8:04 PM','Class ended · record generated']]
+    .map(function(e){return '<div class="tl__i"><div class="tl__t">'+e[0]+'</div><div class="tl__b">'+e[1]+'</div></div>';}).join('')+
+   '</div></div>'+
+   '<div>'+
+    '<div class="card"><div class="sb"><h3 style="margin:0">Attendance</h3><span class="muted">24 present · 4 absent</span></div>'+
+     '<div class="row" style="margin-top:8px;gap:6px">'+['Farhan Qureshi','Meera Joshi','Vikram S','Nisha T'].map(function(n){return '<span class="pill">'+av(n,'av--sm')+' '+n.split(' ')[0]+'</span>';}).join('')+'</div>'+
+     '<div class="row" style="margin-top:10px"><span class="btn btn--sm">Notify guardians</span></div>'+
+    '</div>'+
+    '<div class="card"><h3>Teacher note</h3><p class="muted">60% missed the saltatory-conduction poll — open next class with the “myelin doesn’t speed ion flow” correction. Assign the 3-min clip to the 15 who missed.</p><div class="row" style="margin-top:8px"><span class="btn btn--sm">+ Add note</span></div></div>'+
+    '<div class="card card--wash"><p class="muted">This record fans out to <b>24 student timelines</b> and links back to the DPP it generated.</p></div>'+
+   '</div>'+
+  '</div>'+
+  '<div style="margin-top:6px">'+hotBtn('Open cohort dashboard','teacher-dash')+'</div>';
+ return cons('teacher','Schedule',main);
+};
+
+R['student-dash']=function(){
+ return appbar('Hi, Aditya','<span class="pill is-warn">🔥 9</span>')+'<div class="appwrap">'+
+  '<div class="hot hot--card" data-goto="join"><div class="k" style="color:var(--tint)">Tonight · 6:30 PM</div><div style="font-weight:600;margin:3px 0">Neural Control of Movement</div><div class="muted">Live · join opens 6:15</div></div>'+
+  '<div class="hot hot--card" data-goto="practice-play"><div class="k" style="color:var(--crimson)">Practice due · 11:00 PM</div><div style="font-weight:600;margin:3px 0">DPP 14 · 16 questions</div><div class="muted">0 / 16 answered</div></div>'+
+  '<div class="card"><div class="k">This week</div><div class="list__i" style="border:0;padding:8px 0"><div class="gr"><div class="t">Mock 6 · Biology</div><div class="s">Sat 9:00 AM · 180 marks</div></div><span class="pill">test</span></div></div>'+
+  '<div class="hot hot--card" data-goto="doubt-student"><div class="k" style="color:var(--tint)">Your doubt was answered</div><div style="font-weight:600;margin:3px 0">“Reflex arc direction”</div><div class="muted">2-min clip attached · tap to view</div></div>'+
+  '<div class="card"><div class="k" style="margin-bottom:8px">Weak tags to drill</div><div class="chips">'+['Photosynthesis','Excretion','Nernst equation'].map(function(c){return '<span class="chip">'+c+'</span>';}).join('')+'</div>'+
+   '<div style="margin-top:10px">'+hotBtn('Practice these','practice-play','ghost')+'</div></div>'+
+ '</div>'+appnav('Home');
+};
+
+R['join']=function(){
+ return '<div style="padding:24px 20px;min-height:100%;display:flex;flex-direction:column">'+
+  '<h2 style="font-size:1.15rem">Neural Control of Movement</h2>'+
+  '<p class="muted" style="margin-bottom:14px">Starts in 4 minutes · 23 already joined</p>'+
+  '<div style="background:#11171a;border-radius:16px;aspect-ratio:3/4;display:flex;align-items:flex-end;justify-content:center;padding:14px;color:#cdd6d3;font-size:.8rem">Camera preview</div>'+
+  '<div class="row" style="justify-content:center;gap:10px;margin:14px 0">'+['🎙 On','📷 On'].map(function(t){return '<span class="pill">'+t+'</span>';}).join('')+'</div>'+
+  '<div class="avrow" style="justify-content:center;margin-bottom:16px">'+['Sneha Iyer','Kabir Anand','Rohan Pillai','Ananya Rao'].map(function(n){return av(n,'av--sm');}).join('')+'<span class="av av--sm" style="background:var(--ink-faint)">+19</span></div>'+
+  hotBtn('Join now','live-student')+
+  '<p class="muted" style="margin-top:12px;text-align:center;font-size:.74rem">Anitha can admit you if you’re early.</p>'+
+ '</div>';
+};
+
+R['live-student']=function(){
+ return '<div class="studio" style="display:flex;flex-direction:column;min-height:100%">'+
+  '<div class="vmain" style="aspect-ratio:3/4;flex:1">Anitha Rao · presenting</div>'+
+  '<div class="dock" style="border-color:#2f5140;background:#15241d">'+
+   '<div style="font-size:.7rem;color:#8fd3ab;letter-spacing:.08em;text-transform:uppercase">Quick check · 20s left</div>'+
+   '<div style="font-size:.86rem;color:#eef4f1;margin:6px 0 10px">Where is the interneuron located?</div>'+
+   ['Grey matter of the spinal cord','Dorsal root ganglion','White matter'].map(function(o,i){return '<div style="border:1px solid #34423c;border-radius:9px;padding:9px 11px;margin-bottom:6px;font-size:.8rem;color:#dfe8e4'+(i===0?';border-color:#5CB57C;background:#1c3327':'')+'">'+o+'</div>';}).join('')+
+  '</div>'+
+  '<div style="background:#161d20;border:1px solid #26302f;border-radius:10px;padding:9px 11px;margin-top:8px;font-size:.76rem;color:#9fb0aa">Ask a doubt…  <span style="float:right">➤</span></div>'+
+  '<div class="ctrls"><span class="cbtn">🎙</span><span class="cbtn">📷</span><span class="cbtn">✋</span>'+
+   '<button class="hot hot--btn" data-goto="student-dash" style="background:#A4384A;color:#fff">Leave</button></div>'+
+ '</div>';
+};
+
+R['library']=function(){
+ var items=[
+  ['Neural Control of Movement','Video · 38 min','play',70],
+  ['TCA / Krebs Cycle','Video · 42 min','play',100],
+  ['Photosynthesis','Playlist · 6 videos','book',33],
+  ['Respiration — NCERT notes','PDF · 14 pages','doc',0]
+ ];
+ return appbar('Content','')+'<div class="appwrap">'+
+  '<div class="field__in muted" style="margin-bottom:10px">🔍  Search lessons, tags…</div>'+
+  '<div class="chips" style="margin-bottom:12px">'+['All','Class 11','Class 12','Priority 1'].map(function(c,i){return '<span class="chip'+(i===0?' on':'')+'">'+c+'</span>';}).join('')+'</div>'+
+  items.map(function(it){
+   return '<div class="hot hot--row" data-goto="lesson"><div class="row" style="flex-wrap:nowrap;gap:11px"><span class="av av--sm" style="background:var(--tint);border-radius:8px">'+ic(it[2])+'</span>'+
+    '<div class="gr"><div class="t">'+it[0]+'</div><div class="s">'+it[1]+'</div>'+
+     (it[3]>0?'<div style="height:4px;background:var(--sunk);border-radius:2px;margin-top:6px"><b style="display:block;height:100%;width:'+it[3]+'%;background:var(--tint);border-radius:2px"></b></div>':'')+
+    '</div>'+(it[3]===100?pill('done','good'):'')+'</div></div>';
+  }).join('')+
+ '</div>'+appnav('Classes');
+};
+
+R['lesson']=function(){
+ return appbar('Lesson','')+'<div class="appwrap">'+
+  '<div style="background:#11171a;border-radius:12px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;color:#cdd6d3">▶</div>'+
+  '<h2 style="font-size:1.1rem;margin:12px 0 4px">Neural Control of Movement</h2>'+
+  '<div class="muted" style="margin-bottom:12px">Class 11 · Priority 1 · 38 min</div>'+
+  '<div class="chips" style="margin-bottom:12px">'+['Notes','3 checks','Doubts'].map(function(c,i){return '<span class="chip'+(i===0?' on':'')+'">'+c+'</span>';}).join('')+'</div>'+
+  '<div class="card"><ul class="muted" style="margin:0;padding-left:18px;line-height:1.7">'+
+   ['Resting potential is set by the Na⁺/K⁺ pump — 3 Na⁺ out, 2 K⁺ in.','Reflex arc: receptor → sensory → interneuron (grey matter) → motor → effector.','Saltatory conduction: myelin forces the impulse to jump node to node — it does not speed ion flow itself.','Neuromuscular junction uses acetylcholine.']
+   .map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>'+
+  '<div class="hot hot--card" data-goto="practice-play"><div class="k" style="color:var(--tint)">Next</div><div style="font-weight:600;margin-top:3px">DPP 14 · 16 questions · due 11 PM</div></div>'+
+  '<div class="row"><span class="btn btn--sm">Mark complete</span></div>'+
+ '</div>'+appnav('Classes');
+};
+
+R['practice-build']=function(){
+ var items=[['Q1','Resting membrane potential','Warm-up'],['Q4','Reflex arc sequence','Warm-up'],['Q7','Nernst potential for K⁺','Sprint'],['Q11','Saltatory conduction','Race'],['Q14','Neuromuscular junction','Sprint']];
+ var main='<h2>New practice set</h2><span class="k">Same-day artefact · Evening batch</span>'+
+  '<div class="grid g2" style="align-items:start"><div>'+
+   field('Name','DPP 14 — Neural Control')+
+   field('Source','Auto-assemble from tags ▾')+
+   '<div class="field"><span>Tags</span><div class="chips"><span class="chip on">Neural Control</span><span class="chip on">Reflex arc</span><span class="chip on">Synapse</span><span class="chip">+ add</span></div></div>'+
+   '<div class="field"><span>Difficulty mix</span><div class="row">'+['Warm-up 4','Sprint 8','Race 4'].map(function(x){return pill(x);}).join('')+'</div></div>'+
+   field('Deadline','Today · 11:00 PM')+
+   field('Release','When tonight’s class ends')+
+  '</div><div>'+
+   '<div class="card"><div class="sb"><h3 style="margin:0">Preview · 16 items</h3><span class="muted">showing 5</span></div>'+
+    items.map(function(it){return '<div class="list__i"><div class="gr"><div class="t" style="font-weight:400">'+it[0]+'. '+it[1]+'</div></div>'+pill(it[2],it[2]==='Race'?'bad':it[2]==='Sprint'?'warn':'good')+'</div>';}).join('')+
+   '</div>'+
+   '<div class="card card--wash"><p class="muted">Students see it the moment class ends — no PDF, a real deadline, time-on-question logged.</p></div>'+
+  '</div></div>'+
+  '<div style="margin-top:6px">'+hotBtn('Assign to Evening batch · 28 students','practice-play')+'</div>';
+ return cons('teacher','Practice',main);
+};
+
+R['practice-play']=function(){
+ return '<div style="padding:16px 18px;min-height:100%;display:flex;flex-direction:column">'+
+  '<div class="sb" style="margin-bottom:10px"><span class="pill is-info">DPP 14 · Q7 / 16</span><span class="pill is-warn">due 11:00 PM</span></div>'+
+  '<div class="row" style="gap:4px;margin-bottom:14px">'+Array.apply(null,{length:16}).map(function(_,i){return '<span style="width:14px;height:6px;border-radius:3px;background:'+(i<6?'var(--tint)':i===6?'var(--ink)':'var(--line)')+'"></span>';}).join('')+'</div>'+
+  '<div style="font-size:1rem;font-weight:500;line-height:1.45;margin-bottom:16px">Q7. The Nernst equilibrium potential for K⁺ in a typical neuron is closest to:</div>'+
+  ['−90 mV','−70 mV','+40 mV','0 mV'].map(function(o,i){return '<div class="qopt'+(i===0?' sel':'')+'"><i>'+'ABCD'[i]+'</i>'+o+'</div>';}).join('')+
+  '<div class="sb" style="margin:12px 0"><span class="muted" style="font-family:var(--mono);font-size:.72rem">⏱ 0:41 on this question</span><span class="btn btn--sm">⚑ Flag</span></div>'+
+  '<div style="margin-top:auto">'+
+   '<p class="muted" style="font-size:.74rem;margin-bottom:8px">15 answered · 1 flagged</p>'+
+   hotBtn('Review & submit','practice-result')+
+  '</div>'+
+ '</div>';
+};
+
+R['practice-result']=function(){
+ var miss=[
+  ['Q11 · Saltatory conduction','misconception','bad','Myelin doesn’t speed ion flow — it forces the impulse to jump.','Watch: Saltatory conduction · 3 min','lesson'],
+  ['Q7 · Nernst potential','time-sink','warn','Right answer — but 2:10 taken.','Drill 5 timed','practice-play'],
+  ['Q3 · Synapse types','misconception','bad','Electrical vs chemical synapse mixed up.','Re-read the notes','lesson'],
+  ['Q14 · Reflex arc order','time-sink','warn','Correct on the second attempt.','Drill 5 timed','practice-play']
+ ];
+ return appbar('DPP 14','<span class="pill">8:04 PM</span>')+'<div class="appwrap">'+
+  '<div class="card" style="text-align:center">'+ring(75)+'<div style="font-family:var(--serif);font-size:1.15rem;margin-top:4px">12 / 16</div><div class="muted">beat the batch average of 10.4</div></div>'+
+  '<div class="card"><div class="k" style="margin-bottom:8px">By section</div>'+
+   [['Warm-up','4 / 4',100],['Sprint','6 / 8',75],['Race','2 / 4',50]].map(function(s){return '<div style="margin-bottom:8px"><div class="sb" style="font-size:.8rem"><span>'+s[0]+'</span><span class="muted">'+s[1]+'</span></div><div style="height:6px;background:var(--sunk);border-radius:3px;margin-top:3px"><b style="display:block;height:100%;width:'+s[2]+'%;background:var(--tint);border-radius:3px"></b></div></div>';}).join('')+
+  '</div>'+
+  '<div class="k" style="margin:14px 0 8px">Your misses — each has a next step</div>'+
+  miss.map(function(m){return '<div class="hot hot--row" data-goto="'+m[5]+'"><div class="sb"><span style="font-weight:600;font-size:.85rem">'+m[0]+'</span>'+pill(m[1],m[2])+'</div><p class="muted" style="margin:4px 0 6px">'+m[3]+'</p><span class="hot--link">'+m[4]+'</span></div>';}).join('')+
+  '<div style="margin-top:8px">'+hotBtn('Back to home','student-dash','ghost')+'</div>'+
+ '</div>'+appnav('Practice');
+};
+
+R['analysis']=function(){
+ var rows=[
+  ['Q11','Saltatory conduction','62%','misconception','bad','3-min clip queued to 15 students','queued','good'],
+  ['Q7','Nernst equation','48%','time-sink','warn','Added to Saturday warm-up','set','good'],
+  ['Q3','Synapse types','33%','misconception','bad','— attach an action','open','bad'],
+  ['Q14','Reflex arc order','29%','time-sink','warn','Pinned for next class','set','good']
+ ];
+ var main='<h2>DPP 14 — Evening batch analysis</h2><span class="k">24 attempts · '+pill('Cohort view','info')+' &nbsp; <span class="muted">By student</span></span>'+
+  '<div class="tblwrap"><table class="tbl"><thead><tr><th>Item</th><th>Missed</th><th>Tag</th><th>Required action</th><th></th></tr></thead><tbody>'+
+   rows.map(function(r){return '<tr><td><b>'+r[0]+'</b> '+r[1]+'</td><td>'+r[2]+'</td><td>'+pill(r[3],r[4])+'</td><td>'+(r[6]==='open'?'<span class="hot--link" style="color:var(--amber);border-color:var(--amber)">'+r[5]+'</span>':r[5])+'</td><td>'+pill(r[6],r[7])+'</td></tr>';}).join('')+
+  '</tbody></table></div>'+
+  '<div class="card card--wash" style="margin-top:14px"><p class="muted">A row can’t close on a percentage. <b>Q3 still needs an action</b> before this analysis is done.</p></div>'+
+  '<div class="row" style="margin-top:8px"><span class="btn btn--sm">Queue all clips</span><span class="btn btn--sm">Book mentor backlog · 4 students</span></div>'+
+  '<div style="margin-top:12px">'+hotBtn('Operation overview','owner')+'</div>';
+ return cons('teacher','Practice',main);
+};
+
+R['test']=function(){
+ return '<div style="padding:14px 16px;min-height:100%;display:flex;flex-direction:column;background:var(--surface)">'+
+  '<div class="sb" style="margin-bottom:10px"><span class="pill">Mock 6 · Zoology</span><span class="pill is-warn">⏱ 1:42:30</span></div>'+
+  '<div class="chips" style="margin-bottom:12px">'+['Botany','Zoology'].map(function(c,i){return '<span class="chip'+(i===1?' on':'')+'">'+c+'</span>';}).join('')+'</div>'+
+  '<div style="font-size:.95rem;font-weight:500;line-height:1.45;margin-bottom:14px">Q23. Which of the following cranial nerves is purely sensory?</div>'+
+  ['Olfactory (I)','Trochlear (IV)','Trigeminal (V)','Vagus (X)'].map(function(o,i){return '<div class="qopt'+(i===0?' sel':'')+'"><i>'+'ABCD'[i]+'</i>'+o+'</div>';}).join('')+
+  '<div class="k" style="margin:14px 0 6px">Question palette</div>'+
+  '<div class="palette" style="grid-template-columns:repeat(8,1fr);max-width:none">'+
+   Array.apply(null,{length:24}).map(function(_,i){var c=i<14?'a':i===14?'c':(i===17||i===21)?'m':'';return '<b class="'+c+'">'+(i+1)+'</b>';}).join('')+
+  '</div>'+
+  '<div class="sb" style="margin-top:14px"><span class="btn btn--sm">Save &amp; next</span>'+hotBtn('Submit test','student-dash')+'</div>'+
+  '<p class="muted" style="margin-top:8px;font-size:.72rem">14 answered · 2 marked for review · 8 blank · results in 30 min</p>'+
+ '</div>';
+};
+
+R['doubt-student']=function(){
+ return appbar('Ask a doubt','')+'<div class="appwrap">'+
+  '<div class="card"><div class="k" style="margin-bottom:8px">Snap the question</div>'+
+   '<div style="border:1.5px dashed var(--line);border-radius:10px;padding:18px;text-align:center;color:var(--ink-faint)">📷  Tap to add a photo</div>'+
+   '<div class="row" style="margin-top:8px"><span class="pill">📎 IMG_4821.jpg</span></div>'+
+  '</div>'+
+  field('Add detail','Why does the impulse jump at the nodes of Ranvier?')+
+  '<div class="field"><span>Topic</span><div class="chips"><span class="chip on">Neural Control</span><span class="chip">Reflex arc</span><span class="chip">Synapse</span></div></div>'+
+  '<div class="card card--wash"><p class="muted">You’ll be <b>#3 in the queue</b> · doubts on this topic are usually answered within 4 hours. No fake “instant”.</p></div>'+
+  hotBtn('Submit doubt','doubt-teacher')+
+  '<div class="k" style="margin:16px 0 8px">Earlier doubts</div>'+
+  '<div class="hot hot--row" data-goto="lesson"><div class="sb"><span class="t">Reflex arc direction</span>'+pill('answered','good')+'</div><div class="s">2-min clip attached · yesterday</div></div>'+
+  '<div class="list__i"><div class="gr"><div class="t">Difference: axon vs dendrite</div><div class="s">answered · 28 Aug</div></div></div>'+
+ '</div>'+appnav('Doubts');
+};
+
+R['doubt-teacher']=function(){
+ var q=[['Farhan Qureshi','Excretion','5h 12m','overdue','bad'],['Sneha Iyer','Reflex arc','2h 03m','SLA 4h','warn'],['Aditya Menon','Neural Control','22m','fresh','good']];
+ var main='<h2>Doubts</h2><span class="k">3 open · 1 breaching SLA · routed to you</span>'+
+  '<div class="grid g2" style="align-items:start"><div>'+
+   q.map(function(d,i){return '<div class="'+(i===1?'hot hot--row':'card')+'"'+(i===1?'':'')+'><div class="sb"><div class="row" style="gap:8px;flex-wrap:nowrap">'+av(d[0],'av--sm')+'<div><div class="t" style="font-size:.85rem;font-weight:600">'+d[0]+'</div><div class="s">'+d[1]+' · '+d[2]+'</div></div></div>'+pill(d[3],d[4])+'</div></div>';}).join('')+
+  '</div><div>'+
+   '<div class="card"><div class="sb"><h3 style="margin:0">Sneha Iyer</h3>'+pill('Reflex arc · 2h','warn')+'</div>'+
+    '<div class="row" style="margin:10px 0"><span class="pill">📎 photo</span></div>'+
+    '<p class="muted" style="margin-bottom:10px">“Why does the impulse jump at the nodes of Ranvier?”</p>'+
+    '<div class="field__in muted">Type a reply…</div>'+
+    '<div class="row" style="margin-top:8px">'+['Attach clip','Insert: Saltatory conduction','Route to Ravi'].map(function(x){return '<span class="btn btn--sm">'+x+'</span>';}).join('')+'</div>'+
+    '<div style="margin-top:10px">'+hotBtn('Answer &amp; resolve','timeline')+'</div>'+
+   '</div>'+
+   '<div class="card card--wash"><p class="muted">A resolved doubt attaches to the student’s timeline <b>and</b> the session it came from.</p></div>'+
+  '</div></div>';
+ return cons('teacher','Doubts',main);
+};
+
+R['timeline']=function(){
+ var ev=[
+  ['Today · 8:04 PM','DPP 14 submitted — 12 / 16 · 2 misconception, 2 time-sink','practice-result'],
+  ['Today · 6:30 PM','Attended “Neural Control” — 89 min · poll 3/3','record'],
+  ['Yesterday','Doubt answered — “Reflex arc direction” · clip attached','lesson'],
+  ['31 Aug','Mock 5 — 512 / 720 · percentile 88',null],
+  ['28 Aug','Fee paid — September · ₹4,500',null],
+  ['27 Aug','Term report sent to guardian (Mr. Menon)',null]
+ ];
+ return appbar('Aditya Menon','<span class="pill">record</span>')+'<div class="appwrap">'+
+  '<div class="chips" style="margin-bottom:14px">'+['All','Sessions','Practice','Doubts','Money'].map(function(c,i){return '<span class="chip'+(i===0?' on':'')+'">'+c+'</span>';}).join('')+'</div>'+
+  '<div class="tl">'+ev.map(function(e){
+    var inner='<div class="tl__t">'+e[0]+'</div><div class="tl__b">'+e[1]+'</div>';
+    return e[2]?'<div class="tl__i"><div class="hot hot--row" data-goto="'+e[2]+'" style="margin:0">'+inner+'</div></div>':'<div class="tl__i">'+inner+'</div>';
+  }).join('')+'</div>'+
+  '<div class="card card--wash" style="margin-top:14px"><p class="muted">Full log · exportable as PDF / CSV · retention 24 months · the guardian and teacher see read-only views of this same stream.</p></div>'+
+  hotBtn('Operation overview','owner','ghost')+
+ '</div>'+appnav('You');
+};
+
+R['teacher-dash']=function(){
+ var chase=[
+  ['Farhan Qureshi','2 DPPs missed · last seen 3 days ago','bad'],
+  ['Divya Suresh','Mock 5 −18% vs cohort average','bad'],
+  ['Kabir Anand','3 doubts opened, none read','warn'],
+  ['Meera Joshi','Attendance 60% this fortnight','warn']
+ ];
+ var main='<h2>NEET 2026 — Evening batch</h2><span class="k">Week of 1 Sep · 28 students</span>'+
+  '<div class="grid g4" style="margin-bottom:14px">'+
+   stat('86%','Attendance','+4 pts','good')+
+   stat('71%','Practice done','−5 pts','bad')+
+   stat('3','Doubt backlog','SLA 6h','warn')+
+   stat('4','At risk','needs a nudge','bad')+
+  '</div>'+
+  '<div class="grid g2" style="align-items:start">'+
+   '<div class="card"><h3>Students to chase</h3>'+
+    chase.map(function(c){return '<div class="hot hot--row" data-goto="timeline"><div class="sb"><div class="row" style="gap:8px;flex-wrap:nowrap">'+av(c[0],'av--sm')+'<div class="gr"><div class="t" style="font-size:.85rem;font-weight:600">'+c[0]+'</div><div class="s">'+c[1]+'</div></div></div>'+pill('open record','info')+'</div></div>';}).join('')+
+    '<div class="row" style="margin-top:6px"><span class="btn btn--sm">Book mentor backlog · 4</span><span class="btn btn--sm">Message guardians</span></div>'+
+   '</div>'+
+   '<div class="card"><h3>Attendance this week</h3>'+
+    bars([['Mon',88],['Tue',86],['Wed',82],['Thu',90],['Fri',79],['Sat',93]])+
+    '<div class="hr"></div><div class="k" style="margin-bottom:8px">Practice completion by DPP</div>'+
+    bars([['11',77],['12',74],['13',68],['14',71]])+
+   '</div>'+
+  '</div>'+
+  '<div class="card card--wash"><p class="muted">Same numbers the owner sees, scoped to your cohort — attendance from Meet join events, completion from practice attempts, backlog from the doubts queue.</p></div>'+
+  '<div style="margin-top:6px">'+hotBtn('This month across the operation','owner')+'</div>';
+ return cons('teacher','Dashboard',main);
+};
+
+R['owner']=function(){
+ var main='<h2>Meridian Biology</h2><span class="k">September · operating scorecard</span>'+
+  '<div class="grid g3" style="margin-bottom:14px">'+
+   stat('38<span style="font-size:.9rem;color:var(--ink-faint)">/40</span>','Sessions delivered','on plan','good')+
+   stat('42','Active students','+3 this month','good')+
+   stat('74%','Practice completion','target 80%','warn')+
+   stat('91%','Doubt SLA met','+6 pts','good')+
+   stat('₹1.86L','Revenue booked','collected 88%','good')+
+   stat('3','Churn risk','2+ weeks quiet','bad')+
+  '</div>'+
+  '<div class="grid g2" style="align-items:start">'+
+   '<div class="card"><h3>Teachers</h3>'+
+    [['Anitha Rao','24 sessions · 4.8 ★ · doubt SLA 94%'],['Ravi Kulkarni','14 sessions · 4.6 ★ · doubt SLA 86%']]
+    .map(function(t){return '<div class="list__i"><div class="row" style="gap:8px;flex-wrap:nowrap">'+av(t[0],'av--sm')+'<div class="gr"><div class="t">'+t[0]+'</div><div class="s">'+t[1]+'</div></div></div></div>';}).join('')+
+   '</div>'+
+   '<div class="card"><h3>Cohort P&amp;L</h3><div class="tblwrap"><table class="tbl"><thead><tr><th>Cohort</th><th>In</th><th>Margin</th></tr></thead><tbody>'+
+    [['Evening · 28','₹1,26,000','70%'],['Weekend · 14','₹60,400','64%'],['Crash · draft','—','—']].map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>';}).join('')+
+   '</tbody></table></div></div>'+
+  '</div>'+
+  '<div class="card" style="border-color:color-mix(in srgb,var(--amber) 40%,var(--line))"><div class="sb"><h3 style="margin:0">⚠ Weekend batch attendance −12%</h3>'+pill('2 weeks','warn')+'</div><p class="muted" style="margin-top:6px">3 students flagged. Drill into the cohort dashboard.</p><div style="margin-top:8px">'+hotBtn('Open Weekend dashboard','teacher-dash','ghost')+'</div></div>'+
+  '<div class="card card--wash"><p class="muted">Every number here is derived from the same event log — sessions, attempts, doubts, payments. Nothing is entered twice.</p></div>'+
+  '<div style="margin-top:6px">'+hotBtn('Back to the flow map','map')+'</div>';
+ return cons('owner','Owner console',main);
+};
+
+/* ================= map ================= */
+function mapView(){
+ var cols=FLOWS.map(function(f,i){
+  var chips=f.screens.map(function(s){return '<div class="mapchip" data-goto="'+s+'"><b>'+S[s].t+'</b><span>'+S[s].sub+'</span></div>';}).join('');
+  return '<div class="mapcol tint-'+f.tint+'"><div class="mapcol__h"><i>'+(i+1)+'</i>'+f.name+' · '+f.screens.length+'</div>'+chips+'</div>';
+ }).join('');
+ return '<div class="mapwrap">'+
+  '<div class="maphero">'+
+   '<p class="k">TutorOS · interactive prototype · '+TOUR.length+' screens</p>'+
+   '<h1>Click straight through the product — <em>login, class, practice, doubts, records</em>.</h1>'+
+   '<p>Every screen is a mock, wired to the next. Move with the outlined buttons, the arrows up top, or this map. Nothing else is interactive — this is for deciding the look and the flow before Figma and the backend.</p>'+
+   '<div class="row"><button class="hot hot--btn" data-goto="signup">Start the walkthrough</button>'+
+     '<button class="hot hot--btn ghost" data-goto="student-dash">Jump to the student app</button>'+
+     '<button class="hot hot--btn ghost" data-goto="owner">Jump to the owner console</button>'+
+     '<span class="btn" id="aboutBtn2" style="cursor:pointer">About this prototype ⓘ</span></div>'+
+   '<div class="mapmeta">Compatible with the web app and the mobile app — use the Phone / Web toggle up top on any screen.</div>'+
+  '</div>'+
+  '<div class="mapgrid">'+cols+'</div>'+
+ '</div>';
+}
+
+/* ================= about ================= */
+function aboutHTML(){
+ return '<span class="x" data-close>close ✕</span><h3>About this prototype</h3>'+
+  '<p><b>What it is.</b> A clickable mock of TutorOS — '+TOUR.length+' screens across 6 flows, each wired to the next. It is not functional: buttons navigate, nothing saves. Use it to lock the look and the screen-to-screen flow.</p>'+
+  '<p style="margin-top:10px"><b>Where it comes from.</b> The <code>Exam-prep loop</code> template in <code>tutor-platform-explorer.html</code> (26 of 35 modules on). Full rationale in <code>tutor-platform-blueprint.md</code>.</p>'+
+  '<p style="margin-top:10px"><b>Folded in to keep the walkthrough to 26.</b> Staff &amp; roles settings, question-bank editor, test setup, assignments, announcements, notification preferences, template gallery, mentor-slot booking, and the platform-subscription screen each exist in the blueprint — ask and they get their own screens.</p>'+
+  '<p style="margin-top:10px"><b>How to use it.</b></p><ul>'+
+   '<li>Click the <span style="color:var(--accent-ink)">colour-outlined</span> buttons and cards to move between screens.</li>'+
+   '<li><b>Hotspots</b> (top right) outlines every clickable area — toggle it off for clean screenshots.</li>'+
+   '<li><b>Phone / Web</b> forces either form factor on any screen.</li>'+
+   '<li>The <b>‹ ›</b> arrows and the dashed bar at each screen’s foot step through the story in order.</li>'+
+   '<li>The <b>☰</b> menu lists all 26, grouped by flow.</li>'+
+  '</ul>'+
+  '<p style="margin-top:10px"><b>Next step.</b> Freeze the layout in Figma as the constant, then build the backend and wire it to the flow state.</p>';
+}
+
+/* ================= router + render ================= */
+var state={vp:'auto',cur:'map'};
+try{var v=localStorage.getItem('tos_vp');if(v)state.vp=v;}catch(e){}
+document.querySelectorAll('#vpSeg button').forEach(function(b){b.classList.toggle('on',b.dataset.vp===state.vp);});
+
+function urlFor(id){
+ if(['signup','template','branding'].indexOf(id)>=0)return 'meridian-bio.tutoros.app/setup';
+ if(id==='staff-login')return 'meridian-bio.tutoros.app/staff';
+ if(S[id].tint==='violet')return 'meridian-bio.tutoros.app/owner';
+ return 'meridian-bio.tutoros.app/app';
+}
+function flowbar(id){
+ var i=TOUR.indexOf(id);
+ var pv=i>0?TOUR[i-1]:null, nx=i<TOUR.length-1?TOUR[i+1]:null;
+ return '<div class="flowbar">'+
+  '<div>'+(pv?'<span class="prev" data-goto="'+pv+'">‹ '+S[pv].t+'</span>':'<span class="fb__l">start</span>')+'</div>'+
+  '<div class="fb__l">prototype flow · '+(i+1)+' / '+TOUR.length+'</div>'+
+  '<div>'+(nx?next(nx,S[nx].t):next('map','Flow map'))+'</div>'+
+ '</div>';
+}
+function frame(id){
+ var m=S[id], body=R[id]();
+ var vp=state.vp==='auto'?m.frame:state.vp;
+ var tint='tint-'+m.tint;
+ if(vp==='phone'){
+  return '<div class="dev dev--phone '+tint+'">'+
+    '<div class="pstat"><span>9:41</span><span>5G ▪▪▪ 82%</span></div>'+
+    '<div class="dev__scr"><div class="phonewrap">'+body+'</div></div>'+
+    flowbar(id)+
+  '</div>';
+ }
+ return '<div class="dev dev--web '+tint+'">'+
+   '<div class="dev__bar"><span class="dev__dots"><i></i><i></i><i></i></span><span class="dev__url">'+urlFor(id)+'</span></div>'+
+   '<div class="dev__scr">'+body+'</div>'+
+   flowbar(id)+
+ '</div>';
+}
+function buildDrawer(){
+ var h='<div class="draw"><a id="mapItem" data-goto="map">↦ Flow map / overview</a><div class="hr"></div>';
+ FLOWS.forEach(function(f,i){
+  h+='<div class="draw__grp tint-'+f.tint+'"><h4><i>'+(i+1)+'</i>'+f.name+'</h4>';
+  f.screens.forEach(function(s){h+='<a data-goto="'+s+'">'+S[s].t+'<small>'+S[s].who+'</small></a>';});
+  h+='</div>';
+ });
+ h+='</div>';
+ document.getElementById('drawerBody').innerHTML=h;
+}
+function syncChrome(){
+ var id=state.cur;
+ var pv=document.getElementById('pv'), nx=document.getElementById('nx'), lbl=document.getElementById('tlbl');
+ if(id==='map'){pv.disabled=true;nx.disabled=false;lbl.textContent=TOUR.length+'-screen walkthrough';}
+ else{
+  var i=TOUR.indexOf(id);var f=flowOf(id);
+  pv.disabled=false;nx.disabled=false;
+  lbl.textContent=f.name+' · '+(i+1)+'/'+TOUR.length;
+ }
+ document.querySelectorAll('#drawer a[data-goto]').forEach(function(a){a.classList.toggle('on',a.dataset.goto===id);});
+ document.querySelectorAll('#vpSeg button').forEach(function(b){b.classList.toggle('on',b.dataset.vp===state.vp);});
+}
+function render(){
+ var id=(location.hash.replace('#/','')||'map');
+ if(id!=='map'&&!S[id])id='map';
+ state.cur=id;
+ var stage=document.getElementById('stage');
+ stage.innerHTML=(id==='map')?mapView():frame(id);
+ window.scrollTo(0,0);
+ var sc=stage.querySelector('.dev__scr');if(sc)sc.scrollTop=0;
+ syncChrome();
+}
+function go(id){location.hash='#/'+id;}
+window.addEventListener('hashchange',render);
+
+/* nav helpers */
+document.getElementById('pv').addEventListener('click',function(){
+ if(state.cur==='map')return;
+ var i=TOUR.indexOf(state.cur);go(i>0?TOUR[i-1]:'map');
+});
+document.getElementById('nx').addEventListener('click',function(){
+ if(state.cur==='map'){go(TOUR[0]);return;}
+ var i=TOUR.indexOf(state.cur);go(i<TOUR.length-1?TOUR[i+1]:'map');
+});
+document.getElementById('brandHome').addEventListener('click',function(){go('map');});
+
+/* delegated clicks for [data-goto] */
+document.addEventListener('click',function(e){
+ var g=e.target.closest('[data-goto]');
+ if(g){e.preventDefault();closeDrawer();go(g.getAttribute('data-goto'));return;}
+ if(e.target.closest('[data-close]')||e.target.id==='modal'){document.getElementById('modal').classList.remove('open');return;}
+ if(e.target.id==='aboutBtn2'||e.target.id==='aboutLink'){openAbout();return;}
+});
+
+/* drawer */
+var drawer=document.getElementById('drawer'), scrim=document.getElementById('scrim');
+function openDrawer(){drawer.classList.add('open');scrim.classList.add('open');}
+function closeDrawer(){drawer.classList.remove('open');scrim.classList.remove('open');}
+document.getElementById('burger').addEventListener('click',openDrawer);
+scrim.addEventListener('click',closeDrawer);
+
+/* hotspots toggle */
+var hotBtnEl=document.getElementById('hotBtn');
+var showhot=true;
+try{if(localStorage.getItem('tos_hot')==='0')showhot=false;}catch(e){}
+function applyHot(){document.body.classList.toggle('showhot',showhot);hotBtnEl.classList.toggle('on',showhot);try{localStorage.setItem('tos_hot',showhot?'1':'0');}catch(e){}}
+hotBtnEl.addEventListener('click',function(){showhot=!showhot;applyHot();});
+applyHot();
+
+/* viewport */
+document.getElementById('vpSeg').addEventListener('click',function(e){
+ var b=e.target.closest('button');if(!b)return;
+ state.vp=b.dataset.vp;try{localStorage.setItem('tos_vp',state.vp);}catch(e){}
+ render();
+});
+
+/* modal */
+function openAbout(){document.getElementById('modalC').innerHTML=aboutHTML();document.getElementById('modal').classList.add('open');}
+
+/* first-visit toast */
+try{
+ if(!localStorage.getItem('tos_seen')){
+  var t=document.getElementById('toast');
+  t.textContent='Tip — click the outlined buttons to move between screens. ☰ for all 26.';
+  setTimeout(function(){t.classList.add('show');},700);
+  setTimeout(function(){t.classList.remove('show');},7000);
+  localStorage.setItem('tos_seen','1');
+ }
+}catch(e){}
+
+buildDrawer();
+render();
+})();
+</script>

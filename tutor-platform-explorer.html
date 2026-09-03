@@ -1,0 +1,879 @@
+<title>TutorOS Feature Explorer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --ground:#F3F6F0; --surface:#FBFCF9; --sunk:#EBEFE6; --raised:#FFFFFF;
+  --ink:#182019; --ink-soft:#4C574F; --ink-faint:#7E8A81;
+  --line:#D6DCCF; --line-soft:#E4E9DD;
+  --accent:#2E7D4F; --accent-ink:#1E5738; --accent-wash:#E4EFE5;
+  --amber:#AF6C22; --amber-wash:#F5E9D8;
+  --crimson:#A4384A; --crimson-wash:#F3E0E1;
+  --sky:#2C6C88; --sky-wash:#DDEAEE;
+  --violet:#6A4C93; --violet-wash:#E9E2F1;
+  --serif:"Spectral",Georgia,"Times New Roman",serif;
+  --sans:"Hanken Grotesk",system-ui,-apple-system,Segoe UI,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --shadow:0 1px 2px rgba(24,32,25,.04), 0 12px 34px -12px rgba(24,32,25,.18);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0C110E; --surface:#171E19; --sunk:#10150F; --raised:#1E251F;
+    --ink:#E6ECE3; --ink-soft:#A4AEA4; --ink-faint:#6C776E;
+    --line:#26302A; --line-soft:#1D251F;
+    --accent:#5CB57C; --accent-ink:#8CD3A5; --accent-wash:#173224;
+    --amber:#D3944F; --amber-wash:#332413;
+    --crimson:#D06E7A; --crimson-wash:#331A1E;
+    --sky:#6BA7C2; --sky-wash:#122831;
+    --violet:#A98FD6; --violet-wash:#241C33;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 40px -14px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0C110E; --surface:#171E19; --sunk:#10150F; --raised:#1E251F;
+  --ink:#E6ECE3; --ink-soft:#A4AEA4; --ink-faint:#6C776E;
+  --line:#26302A; --line-soft:#1D251F;
+  --accent:#5CB57C; --accent-ink:#8CD3A5; --accent-wash:#173224;
+  --amber:#D3944F; --amber-wash:#332413;
+  --crimson:#D06E7A; --crimson-wash:#331A1E;
+  --sky:#6BA7C2; --sky-wash:#122831;
+  --violet:#A98FD6; --violet-wash:#241C33;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 40px -14px rgba(0,0,0,.6);
+}
+
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--sans); font-size:15px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:600;line-height:1.15;margin:0;text-wrap:balance;}
+p{margin:0;}
+button{font-family:inherit;}
+::selection{background:var(--accent-wash);}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px;}
+
+.eyebrow{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);}
+
+/* top bar */
+.topbar{
+  position:sticky;top:0;z-index:60;
+  background:color-mix(in srgb, var(--ground) 90%, transparent);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line-soft);
+}
+.topbar__in{
+  max-width:1400px;margin:0 auto;padding:0 22px;height:54px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--serif);font-weight:600;font-size:16px;letter-spacing:-.01em;}
+.brand svg{width:21px;height:21px;flex:none;}
+.brand .ph{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:2px 7px;}
+.theme-btn{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+  background:var(--surface);color:var(--ink-soft);border:1px solid var(--line);border-radius:999px;
+  padding:6px 12px;cursor:pointer;
+}
+.theme-btn:hover{color:var(--ink);border-color:var(--ink-faint);}
+
+/* hero */
+.hero{max-width:1400px;margin:0 auto;padding:34px 22px 8px;}
+.hero h1{font-size:clamp(1.7rem,3.4vw,2.5rem);letter-spacing:-.02em;margin:10px 0 12px;}
+.hero h1 em{font-style:italic;color:var(--accent-ink);}
+.hero p{color:var(--ink-soft);max-width:70ch;font-size:1.02rem;}
+.hero .files{margin-top:14px;font-family:var(--mono);font-size:11px;color:var(--ink-faint);}
+.hero .files a{color:var(--accent-ink);}
+
+/* layout */
+.shell{max-width:1400px;margin:0 auto;padding:22px;display:grid;grid-template-columns:340px minmax(0,1fr);gap:26px;align-items:start;}
+
+/* rail */
+.rail{position:sticky;top:66px;max-height:calc(100vh - 84px);overflow-y:auto;display:flex;flex-direction:column;gap:16px;padding-right:4px;}
+.rail__box{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;}
+.rail__box h3{font-size:.82rem;font-family:var(--mono);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:10px;}
+.presets{display:flex;flex-wrap:wrap;gap:6px;}
+.preset{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.02em;
+  background:var(--raised);color:var(--ink-soft);border:1px solid var(--line);border-radius:999px;
+  padding:6px 10px;cursor:pointer;
+}
+.preset:hover{border-color:var(--accent);color:var(--accent-ink);}
+.preset--ghost{border-style:dashed;}
+
+.domgroup{margin-bottom:12px;}
+.domgroup:last-child{margin-bottom:0;}
+.domgroup__h{display:flex;align-items:baseline;gap:8px;margin:2px 0 7px;}
+.domgroup__h .l{font-family:var(--mono);font-size:10px;color:var(--ink-faint);}
+.domgroup__h .n{font-weight:600;font-size:.86rem;}
+.mod{
+  display:flex;align-items:flex-start;gap:9px;padding:6px 7px;border-radius:9px;cursor:pointer;
+  border:1px solid transparent;
+}
+.mod:hover{background:var(--sunk);}
+.mod.on{background:var(--accent-wash);border-color:color-mix(in srgb,var(--accent) 26%,transparent);}
+.mod.auto{background:var(--sky-wash);border-color:color-mix(in srgb,var(--sky) 26%,transparent);}
+.mod.core{background:var(--sunk);border-color:var(--line-soft);cursor:not-allowed;}
+.mod__cb{
+  width:16px;height:16px;border-radius:5px;border:1.5px solid var(--ink-faint);flex:none;margin-top:1px;
+  display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;
+}
+.mod.on .mod__cb{background:var(--accent);border-color:var(--accent);}
+.mod.auto .mod__cb{background:var(--sky);border-color:var(--sky);}
+.mod.core .mod__cb{background:var(--ink-faint);border-color:var(--ink-faint);}
+.mod__main{min-width:0;flex:1;}
+.mod__name{font-size:.83rem;font-weight:500;line-height:1.3;}
+.mod__meta{font-family:var(--mono);font-size:9px;letter-spacing:.03em;color:var(--ink-faint);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap;}
+.mod__meta .req{color:var(--sky);}
+.mod__meta .cr{color:var(--ink-faint);}
+.dots{letter-spacing:1px;}
+
+/* panel */
+.panel{display:flex;flex-direction:column;gap:18px;min-width:0;}
+
+.summary{
+  background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px;
+  display:grid;grid-template-columns:repeat(5,1fr);gap:4px;
+}
+.sumcell{padding:12px 12px;border-radius:11px;background:var(--raised);border:1px solid var(--line-soft);}
+.sumcell .v{font-family:var(--serif);font-size:1.35rem;font-weight:600;line-height:1;}
+.sumcell .v small{font-size:.72rem;font-family:var(--sans);color:var(--ink-soft);font-weight:500;}
+.sumcell .l{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-top:6px;}
+.sumcell--tier .v{color:var(--accent-ink);}
+
+.notice{
+  background:var(--sky-wash);border:1px solid color-mix(in srgb,var(--sky) 30%,var(--line));
+  border-radius:12px;padding:11px 13px;font-size:.82rem;color:var(--ink-soft);
+}
+.notice b{color:var(--ink);}
+.notice ul{margin:6px 0 0;padding-left:18px;}
+.notice li{margin:2px 0;}
+.notice code{font-family:var(--mono);font-size:.78rem;color:var(--sky);}
+
+.tabs{display:flex;gap:2px;background:var(--line);border:1px solid var(--line);border-radius:11px;overflow:hidden;}
+.tab{
+  flex:1;text-align:center;padding:9px 6px;background:var(--surface);color:var(--ink-faint);
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;border:none;
+}
+.tab.on{background:var(--accent);color:#fff;}
+:root[data-theme="dark"] .tab.on,:root:not([data-theme="light"]) .tab.on{color:#0C130E;}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .tab.on{color:#fff;}}
+
+.viewhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:2px;}
+.viewhead h2{font-size:1.25rem;letter-spacing:-.01em;}
+.viewhead .hint{font-size:.8rem;color:var(--ink-faint);}
+.miniact{font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 10px;cursor:pointer;}
+.miniact:hover{color:var(--ink);border-color:var(--ink-faint);}
+
+/* screens grid */
+.screens{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;}
+.scard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:9px;}
+.scard__wire{
+  background:var(--sunk);border:1px solid var(--line-soft);border-radius:9px;height:74px;
+  display:flex;align-items:center;justify-content:center;color:var(--ink-faint);
+}
+.scard__wire svg{width:70%;height:64%;}
+.scard__name{font-weight:600;font-size:.9rem;line-height:1.25;}
+.scard__purpose{font-size:.78rem;color:var(--ink-soft);line-height:1.45;}
+.scard__mods{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto;}
+.chip{font-family:var(--mono);font-size:8.5px;letter-spacing:.03em;padding:2px 6px;border-radius:999px;background:var(--sunk);color:var(--ink-faint);border:1px solid var(--line-soft);}
+.chip--a{background:var(--accent-wash);color:var(--accent-ink);border-color:transparent;}
+
+/* concepts */
+.domfilter{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;}
+.domfilter button{font-family:var(--mono);font-size:10px;letter-spacing:.03em;padding:5px 9px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink-soft);cursor:pointer;}
+.domfilter button.on{background:var(--ink);color:var(--ground);border-color:var(--ink);}
+.concept{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0;overflow:hidden;}
+.concept__head{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;}
+.concept__id{font-family:var(--mono);font-size:11px;color:var(--accent-ink);font-weight:600;flex:none;}
+.concept__name{font-weight:600;font-size:.98rem;flex:1;min-width:0;}
+.concept__tags{display:flex;gap:6px;align-items:center;flex:none;}
+.etag{font-family:var(--mono);font-size:9px;letter-spacing:.03em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--ink-faint);}
+.etag--risk-low{color:var(--accent-ink);border-color:color-mix(in srgb,var(--accent) 35%,transparent);}
+.etag--risk-med{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 35%,transparent);}
+.etag--risk-high{color:var(--crimson);border-color:color-mix(in srgb,var(--crimson) 35%,transparent);}
+.effdots{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:1px;}
+.concept__body{padding:0 14px 14px;display:none;}
+.concept.open .concept__body{display:block;}
+.concept.open .concept__head{border-bottom:1px solid var(--line-soft);}
+.concept__what{font-size:.86rem;color:var(--ink-soft);margin:12px 0 12px;line-height:1.5;}
+.ladder{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.rung{background:var(--sunk);border:1px solid var(--line-soft);border-radius:9px;padding:9px 10px;}
+.rung .v{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);}
+.rung .t{font-size:.78rem;color:var(--ink-soft);margin-top:4px;line-height:1.4;}
+.kv{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.78rem;color:var(--ink-faint);}
+.kv .k{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;margin-right:6px;}
+.kv .v{color:var(--ink-soft);}
+.kv b{color:var(--ink-soft);font-weight:600;}
+
+/* sequence */
+.phase{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-bottom:10px;}
+.phase__h{display:flex;align-items:baseline;gap:10px;margin-bottom:8px;}
+.phase__n{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);}
+.phase__t{font-weight:600;font-size:.98rem;}
+.phase__mvp{font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--amber);border:1px solid var(--amber);border-radius:999px;padding:1px 7px;}
+.phase__list{display:flex;flex-wrap:wrap;gap:6px;}
+.pmod{font-family:var(--mono);font-size:10px;padding:4px 8px;border-radius:8px;background:var(--accent-wash);color:var(--accent-ink);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);}
+.phase__empty{font-size:.8rem;color:var(--ink-faint);font-style:italic;}
+.phase__note{font-size:.78rem;color:var(--ink-faint);margin-top:8px;}
+
+/* packaging */
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.tier{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;}
+.tier.on{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-wash);}
+.tier__name{font-size:1.05rem;font-weight:600;}
+.tier__price{font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--accent-ink);margin:4px 0 8px;}
+.tier__for{font-size:.8rem;color:var(--ink-soft);margin-bottom:10px;min-height:2.4em;}
+.tier__row{display:flex;justify-content:space-between;gap:8px;font-size:.78rem;padding:4px 0;border-top:1px solid var(--line-soft);}
+.tier__row .k{color:var(--ink-faint);font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;}
+.tier__badge{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--accent);border-radius:999px;padding:2px 8px;margin-bottom:8px;}
+:root[data-theme="dark"] .tier__badge,:root:not([data-theme="light"]) .tier__badge{color:#0C130E;}
+.costtable{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:6px;}
+.costtable th{text-align:left;font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;padding:7px 8px;border-bottom:1px solid var(--line);}
+.costtable td{padding:8px;border-bottom:1px solid var(--line-soft);}
+.costtable td.num{font-family:var(--mono);text-align:right;color:var(--ink-soft);}
+.costtable tr:last-child td{border-bottom:none;font-weight:600;}
+.disc{font-size:.76rem;color:var(--ink-faint);margin-top:10px;line-height:1.5;}
+
+.emptyview{padding:40px 20px;text-align:center;color:var(--ink-faint);font-size:.9rem;}
+
+footer.page{
+  max-width:1400px;margin:0 auto;padding:26px 22px 56px;
+  border-top:1px solid var(--line-soft);
+  font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);line-height:1.7;
+}
+
+@media (max-width:1000px){
+  .shell{grid-template-columns:1fr;}
+  .rail{position:static;max-height:none;overflow:visible;}
+  .summary{grid-template-columns:repeat(2,1fr);}
+  .ladder{grid-template-columns:1fr;}
+  .tiers{grid-template-columns:1fr;}
+}
+@media (max-width:560px){
+  .shell{padding:14px;}
+  .hero{padding:24px 14px 4px;}
+  .screens{grid-template-columns:1fr;}
+  .concept__tags .etag{display:none;}
+}
+</style>
+
+<header class="topbar">
+  <div class="topbar__in">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 3c3.5 3 3.5 15 0 18M12 3c-3.5 3-3.5 15 0 18M3.2 9.5h17.6M3.2 14.5h17.6"/></svg>
+      TutorOS <span class="ph">placeholder name</span>
+    </div>
+    <button class="theme-btn" id="themeBtn" type="button">Theme</button>
+  </div>
+</header>
+
+<section class="hero">
+  <p class="eyebrow">Feature explorer · multi-tenant tutoring platform</p>
+  <h1>Tick the modules. Get the <em>screens, build concepts, tier and build order</em>.</h1>
+  <p>Every tutoring business runs the same seven jobs — let people in, deliver a session, give practice, answer doubts, keep a record, show progress, take money. This picks which of ~35 modules a given tenant needs, then shows what it takes to build and what it should cost.</p>
+  <p class="files">Written companion: <a href="tutor-platform-blueprint.md">tutor-platform-blueprint.md</a> &nbsp;·&nbsp; worked example: <a href="tutor-loop-ui-kit.html">tutor-loop-ui-kit.html</a></p>
+</section>
+
+<div class="shell">
+  <aside class="rail">
+    <div class="rail__box">
+      <h3>Start from a template</h3>
+      <div class="presets" id="presets"></div>
+      <div style="margin-top:10px;">
+        <button class="preset preset--ghost" data-preset="__core">Reset to core only</button>
+      </div>
+    </div>
+    <div class="rail__box">
+      <h3>Modules</h3>
+      <div id="modlist"></div>
+    </div>
+  </aside>
+
+  <main class="panel">
+    <div class="summary" id="summary"></div>
+    <div id="notices"></div>
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-view="screens">Screens</button>
+      <button class="tab" data-view="concepts">Build concepts</button>
+      <button class="tab" data-view="sequence">Build sequence</button>
+      <button class="tab" data-view="packaging">Packaging</button>
+    </div>
+    <div id="view"></div>
+  </main>
+</div>
+
+<footer class="page">
+  TutorOS Feature Explorer — a scoping and pricing tool, not a shipped product. Module list, effort
+  ratings, tiers and cost bands are planning estimates; verify against real build and real vendor
+  pricing before committing. Grounded in tutor-platform-blueprint.md.
+</footer>
+
+<script>
+(function(){
+/* ---------------- theme ---------------- */
+var root=document.documentElement, tb=document.getElementById('themeBtn');
+var order=['system','light','dark'], ti=0;
+function applyTheme(){var m=order[ti];if(m==='system'){root.removeAttribute('data-theme');tb.textContent='Theme · Auto';}else{root.setAttribute('data-theme',m);tb.textContent='Theme · '+m[0].toUpperCase()+m.slice(1);}}
+tb.addEventListener('click',function(){ti=(ti+1)%order.length;applyTheme();});
+applyTheme();
+
+/* ---------------- data ---------------- */
+var DOMAINS={A:'Identity & Access',B:'Teaching & Sessions',C:'Practice & Assessment',D:'Doubts & Communication',E:'Progress & Analytics',F:'Business & Operations',G:'Configuration & Templates'};
+var CORE=['A1','A2','A3','D4','F2','G1','G2'];
+var TIERRANK={core:1,platform:1,starter:1,cohort:2,institute:3};
+
+var M=[
+ {id:'A1',dom:'A',name:'Workspace & branding',deps:[],effort:2,risk:'low',tier:'starter',phase:0,
+  what:'Tenant setup — name, subdomain, timezone, logo, colours. The container every other module lives inside.',
+  screens:['Workspace setup wizard','Branding & domain settings'],
+  ladder:['Logo, subdomain, timezone','Custom domain + branded email sender','Full white-label: theme tokens, login-page control'],
+  entities:['Workspace','Domain','BrandTheme'],integ:['DNS','Email (Postmark/SES)']},
+ {id:'A2',dom:'A',name:'Student accounts',deps:['A1'],effort:3,risk:'low',tier:'starter',phase:0,
+  what:'Phone-OTP by default, email magic-link as an option. One identity threads the whole timeline.',
+  screens:['Role router','Student sign-in'],
+  ladder:['One method per workspace','Multi-method + account recovery','SSO for institutes, household accounts'],
+  entities:['User','Identity','AuthToken'],integ:['SMS (Twilio/MSG91)','Email']},
+ {id:'A3',dom:'A',name:'Staff accounts & roles',deps:['A1'],effort:3,risk:'low',tier:'starter',phase:0,
+  what:'Owner / Teacher / Assistant with a permission matrix. Privileged accounts get real 2FA.',
+  screens:['Staff sign-in','Staff & roles settings'],
+  ladder:['Fixed roles','Per-module permission toggles','Custom roles, granular scopes'],
+  entities:['StaffMember','Role','Permission'],integ:['Authenticator (TOTP)']},
+ {id:'A4',dom:'A',name:'Parent / guardian accounts',deps:['A2'],effort:2,risk:'low',tier:'cohort',phase:3,
+  what:'Linked to one or more students, read-mostly: attendance, reports, fees.',
+  screens:['Parent link / home'],
+  ladder:['One guardian per student','Multiple guardians + fee visibility','Guardian messaging, consent management'],
+  entities:['Guardian','GuardianLink'],integ:[]},
+ {id:'A5',dom:'A',name:'Enrollment & cohorts',deps:['A2','A3'],effort:3,risk:'med',tier:'starter',phase:1,
+  what:'Batches, groups, 1-on-1 pairings with join and leave dates.',
+  screens:['Roster','Cohort builder'],
+  ladder:['Manual add + CSV import','Invite links, waitlists','Self-serve enrollment with approval, cohort templates'],
+  entities:['Cohort','Enrollment'],integ:['CSV import']},
+
+ {id:'B1',dom:'B',name:'Scheduling & calendar',deps:['A5'],effort:3,risk:'med',tier:'starter',phase:1,
+  what:'Recurring and one-off sessions, timezones, per-cohort or 1-on-1, reschedule.',
+  screens:['Schedule / calendar','Session detail (pre-class)'],
+  ladder:['Manual calendar + recurrence','Student-booked slots, conflict detection','Two-way Google/Outlook sync, booking pages'],
+  entities:['ScheduledSession','RecurrenceRule'],integ:['Google Calendar','Outlook']},
+ {id:'B2',dom:'B',name:'Live session + video link',deps:['B1'],effort:4,risk:'med',tier:'starter',phase:1,
+  what:'Generates the Meet link via the tenant Google account, a join page, and a teacher console shell.',
+  screens:['Join page / waiting room','Live session console (teacher)','Live session view (student)'],
+  ladder:['Generated Meet link + join page','Attendance from Meet events, in-app chat','Hosted rooms add-on, screen-record, co-host handoff'],
+  entities:['LiveSession','MeetLink','JoinEvent'],integ:['Google Meet/Calendar','LiveKit/Daily (later)']},
+ {id:'B3',dom:'B',name:'Session record & event transcript',deps:['B2'],effort:4,risk:'med',tier:'starter',phase:1,
+  what:'The structured after-class bundle — attendance, chat, polls, doubts, notes — attached to the session and fanned out to each attendee timeline. Event log, not speech-to-text.',
+  screens:['Session record & event transcript'],
+  ladder:['Attendance + notes + link','Chat/poll/doubt capture, board-photo upload','STT segments, searchable across sessions, auto-summary'],
+  entities:['SessionRecord','TranscriptEvent','SessionNote'],integ:['Object storage']},
+ {id:'B4',dom:'B',name:'In-session engagement',deps:['B2'],effort:3,risk:'med',tier:'cohort',phase:3,
+  what:'Polls, quick MCQ checks and board steps fired live during a class.',
+  screens:['Live session console (teacher)','Live session view (student)'],
+  ladder:['Single poll, live tally','MCQ bank pull, per-student response log','Auto-check every N minutes with a nudge, confusion signals'],
+  entities:['Poll','PollResponse'],integ:[]},
+ {id:'B5',dom:'B',name:'Content library',deps:['A1'],effort:3,risk:'low',tier:'starter',phase:2,
+  what:'Lessons, videos, PDFs, playlists and modules with per-cohort visibility.',
+  screens:['Content library','Lesson / module viewer'],
+  ladder:['Upload + folders + links','Playlists, scheduled release, view tracking','Versioning, per-cohort variants, embedded checks'],
+  entities:['ContentItem','Playlist','ViewLog'],integ:['Object storage (S3/R2)','YouTube']},
+ {id:'B6',dom:'B',name:'Assignments & homework',deps:['A5'],effort:3,risk:'low',tier:'starter',phase:2,
+  what:'Issue a task, students submit file or text, teacher grades and returns.',
+  screens:['Assignment issue','Assignment submit & grade'],
+  ladder:['Issue + due date + file submit','Rubrics, resubmission, late tracking','Peer review, plagiarism-check hook'],
+  entities:['Assignment','Submission','Grade'],integ:['Object storage']},
+
+ {id:'C1',dom:'C',name:'Question bank',deps:['A1'],effort:3,risk:'low',tier:'cohort',phase:2,
+  what:'Items (MCQ, numeric, short, multi-select), tags, difficulty, media, solutions.',
+  screens:['Question bank'],
+  ladder:['CRUD + tags + import','Difficulty lanes, usage stats, dedupe','Shared/community banks, auto-tagging'],
+  entities:['Question','Tag','Solution'],integ:['Bulk import (CSV/Word)']},
+ {id:'C2',dom:'C',name:'Practice sets / daily practice',deps:['C1'],effort:3,risk:'med',tier:'cohort',phase:2,
+  what:'A same-day practice artefact — auto-assembled from tags or hand-picked — with a real deadline.',
+  screens:['Practice set builder','Practice player'],
+  ladder:['Manual set + deadline','Auto-assemble by tag/difficulty, time-on-question logging','Per-student sets generated from weak tags'],
+  entities:['PracticeSet','Attempt','ItemResponse'],integ:[]},
+ {id:'C3',dom:'C',name:'Tests & mocks',deps:['C1'],effort:4,risk:'med',tier:'cohort',phase:3,
+  what:'Timed, scheduled, sectioned papers with windows and instructions.',
+  screens:['Test / mock setup','Test runner'],
+  ladder:['Fixed paper, timer, schedule','Sections, negative marking, palette, resume','Proctoring hooks, randomisation, test series calendar'],
+  entities:['Test','TestSection','TestAttempt'],integ:['Proctoring (later)']},
+ {id:'C4',dom:'C',name:'Auto-grading & scoring',deps:['C2'],effort:3,risk:'med',tier:'cohort',phase:2,
+  what:'Objective auto-grade, a manual queue for subjective work, and the score model behind both.',
+  screens:['Practice result & tagged key'],
+  ladder:['MCQ/numeric auto + manual override','Partial credit, rubric grading queue','Short-text auto-grade with confidence flags'],
+  entities:['Score','GradingTask'],integ:[]},
+ {id:'C5',dom:'C',name:'Analysis & remediation',deps:['C4'],effort:4,risk:'med',tier:'cohort',phase:2,
+  what:'Most-missed items, each tagged time-sink vs misconception, each tag carrying a required action. A row cannot close on a percentage alone.',
+  screens:['Analysis → remediation board','Practice result & tagged key'],
+  ladder:['Most-missed + tags','Forced-action rule, cohort vs student view, links to clips','Trend across topics, predicted weak areas'],
+  entities:['MissTag','RemedialAction'],integ:[]},
+ {id:'C6',dom:'C',name:'Adaptive practice',deps:['C5'],effort:5,risk:'high',tier:'institute',phase:4,
+  what:'Attempt history drives the next item. Needs attempt volume before it is worth building.',
+  screens:['Practice set builder'],
+  ladder:['Rule-based next (weak-tag bias)','Difficulty targeting to a success band','Item-response-theory model'],
+  entities:['AbilityEstimate','ItemStats'],integ:[]},
+
+ {id:'D1',dom:'D',name:'Doubts / questions queue',deps:['A2'],effort:3,risk:'med',tier:'starter',phase:3,
+  what:'Photo or text in, topic tag, honest queue position, an SLA target — not a fake instant promise.',
+  screens:['Doubts queue (student)','Doubts triage (teacher)'],
+  ladder:['Submit + tag + status','Queue position, SLA timer, canned answers, attach a clip','Routing by topic to the right teacher, similar-doubt suggestions'],
+  entities:['Doubt','DoubtReply'],integ:['Object storage']},
+ {id:'D2',dom:'D',name:'Message threads',deps:['A2','A3'],effort:3,risk:'low',tier:'starter',phase:3,
+  what:'Teacher-to-student and teacher-to-parent conversations, in-platform so they are on the record.',
+  screens:['Message threads'],
+  ladder:['1:1 threads','Attachments, read state, templates','Group threads, moderation, quiet hours'],
+  entities:['Thread','Message'],integ:['Push','Email']},
+ {id:'D3',dom:'D',name:'Announcements / broadcasts',deps:['A5'],effort:2,risk:'low',tier:'starter',phase:3,
+  what:'One-to-cohort posts, pinned or scheduled.',
+  screens:['Announcements'],
+  ladder:['Post to cohort','Schedule + channels (push/email)','Segments, acknowledgements'],
+  entities:['Announcement'],integ:['Push','Email']},
+ {id:'D4',dom:'D',name:'Student timeline / record log',deps:['A2'],effort:4,risk:'med',tier:'starter',phase:0,
+  what:'One per-student event stream — sessions, practice, doubts, reports, payments. Other modules write to it; this owns the read model and the views.',
+  screens:['Student timeline / record log'],
+  ladder:['Append-only event list','Filters, export, dispute annotations','Cross-student search, retention-policy enforcement'],
+  entities:['TimelineEvent'],integ:[]},
+ {id:'D5',dom:'D',name:'Notifications',deps:['A2'],effort:3,risk:'med',tier:'starter',phase:1,
+  what:'Push, email, and SMS/WhatsApp as overflow — never the system of record.',
+  screens:['Notification preferences'],
+  ladder:['Email + web push','SMS/WhatsApp, per-event preferences','Digest logic, delivery analytics, quiet hours'],
+  entities:['NotificationPref','DeliveryLog'],integ:['Web Push/FCM','Email','SMS/WhatsApp (MSG91/Gupshup)']},
+
+ {id:'E1',dom:'E',name:'Student dashboard',deps:['D4'],effort:3,risk:'low',tier:'starter',phase:1,
+  what:'The learner home — next session, open practice with a deadline, this week test, doubt status, streak.',
+  screens:['Student dashboard'],
+  ladder:['Today + this week','Trends, weak-tag summary','Goals, projected readiness'],
+  entities:['DashboardWidget'],integ:[]},
+ {id:'E2',dom:'E',name:'Teacher dashboard',deps:['E1'],effort:3,risk:'med',tier:'cohort',phase:2,
+  what:'Cohort health — attendance, practice completion, doubt backlog, who is behind.',
+  screens:['Teacher dashboard'],
+  ladder:['Per-cohort completion + attendance','Per-student drill-down, at-risk list','Cohort comparisons, intervention tracking'],
+  entities:['CohortMetric'],integ:[]},
+ {id:'E3',dom:'E',name:'Owner console',deps:['E2'],effort:4,risk:'med',tier:'cohort',phase:3,
+  what:'Operation-wide — sessions delivered vs planned, completion, doubt SLA, revenue, churn signals.',
+  screens:['Owner console'],
+  ladder:['The operating scorecard','Staff performance, cohort P&L','Forecasting, blended financial + learning metrics'],
+  entities:['OpsMetric'],integ:[]},
+ {id:'E4',dom:'E',name:'Reports & exports',deps:['E1'],effort:3,risk:'low',tier:'cohort',phase:3,
+  what:'Parent and term reports as PDF, CSV exports, scheduled sends.',
+  screens:['Reports & exports'],
+  ladder:['Per-student PDF, CSV export','Templates, scheduled guardian sends','Branded report designer, bulk generation'],
+  entities:['ReportTemplate','ReportRun'],integ:['PDF render']},
+ {id:'E5',dom:'E',name:'Mentor / backlog workflow',deps:['C5','A5'],effort:3,risk:'med',tier:'institute',phase:3,
+  what:'A booked short slot on skipped work — not re-teaching. Appears only where a paid cohort exists.',
+  screens:['Mentor / backlog workflow'],
+  ladder:['Flag skipped items + book a slot','Agenda auto-built from misses, commitment tracking','Mentor assignment, outcome loop back to analysis'],
+  entities:['BacklogItem','MentorSlot'],integ:['Calendar']},
+
+ {id:'F1',dom:'F',name:'Student billing & plans',deps:['A5'],effort:4,risk:'med',tier:'cohort',phase:4,
+  what:'Fee plans (monthly, term, per-session), invoices, dunning, pause and resume.',
+  screens:['Student billing & plans'],
+  ladder:['Plans + mark-paid + invoice PDF','Auto-invoice, reminders, proration','Families, scholarships, revenue recognition'],
+  entities:['FeePlan','Invoice','Subscription'],integ:['PDF render']},
+ {id:'F2',dom:'F',name:'Platform subscription & metering',deps:['A1'],effort:3,risk:'med',tier:'platform',phase:0,
+  what:'The tenant own bill to you. Meters seats, active students, storage, sends, hosted-room minutes — drives the tier.',
+  screens:['Platform subscription & usage'],
+  ladder:['Tier + seat count + monthly charge','Usage meters + overage','Annual plans, in-app upgrade, usage alerts'],
+  entities:['PlatformPlan','UsageMeter'],integ:['Stripe Billing']},
+ {id:'F3',dom:'F',name:'Payments integration',deps:['F1'],effort:3,risk:'med',tier:'cohort',phase:4,
+  what:'Collect student fees through a gateway.',
+  screens:['Payments & invoices'],
+  ladder:['One gateway, checkout link','Saved methods, auto-charge, refunds','Multi-gateway, split settlements'],
+  entities:['Payment','PaymentMethod'],integ:['Razorpay','Stripe','PayU']},
+ {id:'F4',dom:'F',name:'Trials, coupons, referrals',deps:['F1'],effort:2,risk:'low',tier:'institute',phase:4,
+  what:'Free trials, discount codes, referral credit.',
+  screens:['Student billing & plans'],
+  ladder:['Trial windows + codes','Referral credit + tracking','Campaign analytics, tiered rewards'],
+  entities:['Coupon','Referral'],integ:[]},
+ {id:'F5',dom:'F',name:'Multi-teacher payouts',deps:['F1','A3'],effort:3,risk:'med',tier:'institute',phase:4,
+  what:'Revenue share or per-session pay, with payout statements.',
+  screens:['Payouts / revenue share'],
+  ladder:['Manual payout calc + statement','Rules per teacher, automated runs','Gateway payouts, tax handling'],
+  entities:['PayoutRule','PayoutRun'],integ:['Payout rails (RazorpayX/Stripe Connect)']},
+ {id:'F6',dom:'F',name:'Compliance & data',deps:['A1'],effort:3,risk:'high',tier:'cohort',phase:4,
+  what:'Retention windows, data export, consent capture, audit log — configurable per workspace because law varies by geography.',
+  screens:['Audit log & data export'],
+  ladder:['Export + audit log + basic consent','Retention windows, right-to-erasure flow','Region packs (DPDP/GDPR), DPA tooling'],
+  entities:['ConsentRecord','AuditEntry','RetentionRule'],integ:[]},
+
+ {id:'G1',dom:'G',name:'Module toggle engine',deps:['A1'],effort:4,risk:'med',tier:'core',phase:0,
+  what:'What makes "fully configurable" real — per-workspace flags, dependency resolution, safe disable that hides rather than deletes.',
+  screens:[],
+  ladder:['Flags + dependency graph','Preview mode, staged rollout','Per-cohort overrides'],
+  entities:['FeatureFlag','FlagDependency'],integ:[]},
+ {id:'G2',dom:'G',name:'Templates / presets',deps:['G1'],effort:2,risk:'low',tier:'core',phase:0,
+  what:'Named toggle sets plus default automation rules and starter taxonomy. Opinion lives here, not in the engine.',
+  screens:['"What kind of tutoring?" onboarding','Template gallery'],
+  ladder:['Apply a preset at signup','Editable presets, switch later','Publish custom presets, per-vertical packs'],
+  entities:['Template','TemplateApplication'],integ:[]},
+ {id:'G3',dom:'G',name:'Custom fields & taxonomy',deps:['G1'],effort:3,risk:'med',tier:'cohort',phase:4,
+  what:'Rename cohort to batch/class/group; define subjects, grades, levels; add custom student fields.',
+  screens:['Custom fields & taxonomy'],
+  ladder:['Rename core objects, subject list','Custom fields on students/sessions','Typed field schema, validation, per-form layout'],
+  entities:['CustomField','TaxonomyTerm'],integ:[]},
+ {id:'G4',dom:'G',name:'Automation rules',deps:['G1'],effort:4,risk:'med',tier:'institute',phase:4,
+  what:'Opt-in when-then rules — e.g. warn on a live session with no same-day practice; create a backlog item after 2 missed practices; escalate a doubt open past 24h. Your refuse-list opinions live here as choices.',
+  screens:['Automation rules'],
+  ladder:['Fixed rule library, on/off','Parameterised rules, per-cohort','Custom rule builder, webhooks as actions'],
+  entities:['Rule','RuleRun'],integ:['Webhooks']},
+ {id:'G5',dom:'G',name:'Integrations',deps:['A1'],effort:3,risk:'med',tier:'cohort',phase:4,
+  what:'Google (Calendar/Meet/Drive), payment gateways, SMS/WhatsApp, YouTube, Zapier/webhooks.',
+  screens:['Integrations'],
+  ladder:['Google + one payment gateway','Messaging + storage + calendar providers','Public API, webhook subscriptions, marketplace'],
+  entities:['Integration','OAuthGrant'],integ:['Google','Zapier','Webhooks']}
+];
+
+var MODMAP={};M.forEach(function(m){MODMAP[m.id]=m;});
+
+var SCREENS={
+ 'Workspace setup wizard':{p:'First run — name the workspace, set subdomain and timezone.',w:'wizard'},
+ 'Branding & domain settings':{p:'Logo, colours, custom domain, email sender.',w:'settings'},
+ 'Role router':{p:'One door — "here to learn / teach" — routes to the right sign-in.',w:'form'},
+ 'Student sign-in':{p:'Phone OTP or email magic-link. One identity for the whole timeline.',w:'form'},
+ 'Staff sign-in':{p:'Email, password and 2FA for privileged accounts.',w:'form'},
+ 'Staff & roles settings':{p:'Invite staff, assign roles and per-module permissions.',w:'settings'},
+ '"What kind of tutoring?" onboarding':{p:'Pick a template; ~15 toggles get set for you.',w:'wizard'},
+ 'Template gallery':{p:'Browse and switch templates; see what each one turns on.',w:'list'},
+ 'Roster':{p:'All students — status, cohort, join date. CSV import.',w:'table'},
+ 'Cohort builder':{p:'Group students into batches or 1-on-1 pairings.',w:'table'},
+ 'Parent link / home':{p:'Guardian view of a linked student — attendance, reports, fees.',w:'dashboard'},
+ 'Schedule / calendar':{p:'Recurring and one-off sessions across cohorts.',w:'calendar'},
+ 'Session detail (pre-class)':{p:'Everything about one upcoming session before it starts.',w:'dashboard'},
+ 'Join page / waiting room':{p:'The link students click — identity check, then into the call.',w:'video'},
+ 'Live session console (teacher)':{p:'Video, roster, chat, fire a poll, see doubts.',w:'video'},
+ 'Live session view (student)':{p:'The call plus quick-checks and an ask-a-doubt box.',w:'video'},
+ 'Session record & event transcript':{p:'After class — attendance, chat, polls, doubts, notes in one bundle.',w:'timeline'},
+ 'Content library':{p:'Lessons, videos, PDFs, playlists; per-cohort visibility.',w:'list'},
+ 'Lesson / module viewer':{p:'A single lesson — video, notes, attached checks.',w:'player'},
+ 'Assignment issue':{p:'Set a task, attach files, pick a due date and cohort.',w:'form'},
+ 'Assignment submit & grade':{p:'Student submits; teacher grades and returns.',w:'list'},
+ 'Question bank':{p:'All items — type, tags, difficulty, solution.',w:'table'},
+ 'Practice set builder':{p:'Assemble a set by tag/difficulty or by hand; set a deadline.',w:'form'},
+ 'Practice player':{p:'One question at a time, a real deadline, time-on-question logged.',w:'player'},
+ 'Practice result & tagged key':{p:'Score, plus every miss tagged and carrying a next step.',w:'report'},
+ 'Test / mock setup':{p:'Timed paper — sections, marking, window, instructions.',w:'form'},
+ 'Test runner':{p:'Full-screen test with a palette, timer and resume.',w:'player'},
+ 'Analysis → remediation board':{p:'Most-missed items; each forced to carry an action.',w:'table'},
+ 'Doubts queue (student)':{p:'Photo or text in, topic tag, honest queue position.',w:'chat'},
+ 'Doubts triage (teacher)':{p:'Incoming doubts — tag, answer, attach a clip, close.',w:'list'},
+ 'Message threads':{p:'On-record 1:1 conversations with students and guardians.',w:'chat'},
+ 'Announcements':{p:'One-to-cohort posts, pinned or scheduled.',w:'list'},
+ 'Student timeline / record log':{p:'One stream — sessions, practice, doubts, reports, payments.',w:'timeline'},
+ 'Notification preferences':{p:'Per-event channels — push, email, SMS/WhatsApp.',w:'settings'},
+ 'Student dashboard':{p:'Next session, open practice with a deadline, this week test.',w:'dashboard'},
+ 'Teacher dashboard':{p:'Cohort health — attendance, completion, doubt backlog, who is behind.',w:'dashboard'},
+ 'Owner console':{p:'Operation-wide — delivery, completion, doubt SLA, revenue.',w:'dashboard'},
+ 'Reports & exports':{p:'Per-student and term reports; CSV exports; scheduled sends.',w:'report'},
+ 'Mentor / backlog workflow':{p:'Book a short slot on skipped work; agenda built from misses.',w:'list'},
+ 'Student billing & plans':{p:'Fee plans, invoices, dunning, pause/resume.',w:'table'},
+ 'Payments & invoices':{p:'Collect fees; saved methods; refunds.',w:'table'},
+ 'Platform subscription & usage':{p:'The tenant own bill — tier, seats, storage, sends.',w:'report'},
+ 'Payouts / revenue share':{p:'Per-teacher pay and payout statements.',w:'table'},
+ 'Automation rules':{p:'Opt-in when-then rules; each names the modules it needs.',w:'settings'},
+ 'Integrations':{p:'Google, payment gateways, SMS/WhatsApp, webhooks.',w:'settings'},
+ 'Audit log & data export':{p:'Retention windows, consent, full export, change history.',w:'table'}
+};
+
+var PHASES=[
+ {n:'Phase 0',t:'Tenant spine',note:'A workspace exists, people log in, features flip. Nothing teaching-facing ships yet.'},
+ {n:'Phase 1',t:'Deliver and log a session',mvp:true,note:'The smallest thing a tutor will pay for — run a class, students join through the platform, attendance and notes land on the timeline.'},
+ {n:'Phase 2',t:'Close the practice loop',note:'Concept to practice to tagged analysis. The exam-prep template becomes fully usable.'},
+ {n:'Phase 3',t:'Accountability & communication',note:'The full loop plus the surfaces that keep students and guardians in the loop.'},
+ {n:'Phase 4',t:'Business & scale',note:'A tenant can run their whole business inside the platform; you can serve institutes.'}
+];
+
+var TIERS=[
+ {id:'starter',name:'Starter',price:'$15–29 / mo',forr:'Solo tutor, 1-on-1 or one small batch',rows:[['Students','≤ 30'],['Staff seats','1'],['Storage','5 GB'],['SMS / WhatsApp','none bundled'],['Gate','core + sessions + doubts + basic dashboard']]},
+ {id:'cohort',name:'Cohort',price:'$59–99 / mo',forr:'Small team running a structured practice loop',rows:[['Students','≤ 250'],['Staff seats','up to 5'],['Storage','50 GB'],['SMS / WhatsApp','500 / mo'],['Gate','+ question bank, practice, tests, analysis, billing']]},
+ {id:'institute',name:'Institute',price:'$199–349 / mo + usage',forr:'Multi-teacher program with billing, branding, payouts',rows:[['Students','250+'],['Staff seats','unlimited'],['Storage','250 GB'],['SMS / WhatsApp','2,000 / mo'],['Gate','+ parents, adaptive, payouts, automation, white-label']]}
+];
+
+var PRESETS={
+ 'exam-prep':{name:'Exam-prep loop',ids:['A1','A2','A3','A5','B1','B2','B3','B4','B5','B6','C1','C2','C3','C4','C5','D1','D3','D4','D5','E1','E2','E3','E5','G1','G2','F2']},
+ 'tutor-1on1':{name:'1-on-1 subject tutor',ids:['A1','A2','A3','A5','B1','B2','B3','B6','D2','D4','D5','E1','E4','F1','F3','G1','G2','F2']},
+ 'k12':{name:'K-12 homework help',ids:['A1','A2','A3','A4','A5','B1','B2','B3','B6','C2','D1','D2','D4','D5','E1','E2','E4','G1','G2','F2']},
+ 'skills':{name:'Skills / cohort course',ids:['A1','A2','A3','A5','B2','B3','B5','B6','C1','C3','C4','D2','D3','D4','D5','E1','E2','F1','F3','G1','G2','F2']},
+ 'music':{name:'Music / arts',ids:['A1','A2','A3','A4','A5','B1','B2','B3','D2','D4','D5','E4','F1','F3','G1','G2','F2']},
+ 'everything':{name:'Everything',ids:M.map(function(m){return m.id;})}
+};
+
+/* ---------------- wireframe glyphs ---------------- */
+function wire(t){
+ var s='<svg viewBox="0 0 48 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">';
+ var g={
+  form:'<rect x="8" y="5" width="32" height="5" rx="1.5"/><rect x="8" y="14" width="32" height="5" rx="1.5"/><rect x="8" y="23" width="15" height="5" rx="1.5" fill="currentColor"/>',
+  settings:'<circle cx="12" cy="9" r="3"/><line x1="19" y1="9" x2="40" y2="9"/><circle cx="30" cy="20" r="3"/><line x1="8" y1="20" x2="24" y2="20"/><line x1="35" y1="20" x2="40" y2="20"/>',
+  list:'<line x1="8" y1="7" x2="40" y2="7"/><line x1="8" y1="14" x2="40" y2="14"/><line x1="8" y1="21" x2="40" y2="21"/><line x1="8" y1="28" x2="30" y2="28"/>',
+  table:'<rect x="7" y="5" width="34" height="22" rx="1.5"/><line x1="7" y1="12" x2="41" y2="12"/><line x1="18" y1="5" x2="18" y2="27"/><line x1="29" y1="5" x2="29" y2="27"/>',
+  dashboard:'<rect x="7" y="5" width="34" height="4" rx="1"/><rect x="7" y="13" width="9" height="14" rx="1.5"/><rect x="19" y="13" width="9" height="14" rx="1.5"/><rect x="31" y="13" width="10" height="14" rx="1.5"/>',
+  calendar:'<rect x="7" y="6" width="34" height="21" rx="1.5"/><line x1="7" y1="12" x2="41" y2="12"/><line x1="18" y1="12" x2="18" y2="27"/><line x1="30" y1="12" x2="30" y2="27"/><line x1="7" y1="19.5" x2="41" y2="19.5"/>',
+  player:'<rect x="7" y="5" width="34" height="18" rx="2"/><path d="M21 9l7 5-7 5z" fill="currentColor" stroke="none"/><line x1="7" y1="28" x2="34" y2="28"/>',
+  video:'<rect x="7" y="6" width="24" height="16" rx="2"/><circle cx="19" cy="14" r="3.4"/><rect x="34" y="7" width="7" height="6" rx="1"/><rect x="34" y="16" width="7" height="6" rx="1"/>',
+  chat:'<path d="M8 7h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H16l-5 4v-4H8a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z" transform="translate(2 0)"/>',
+  report:'<rect x="10" y="4" width="24" height="26" rx="1.5"/><line x1="15" y1="11" x2="29" y2="11"/><line x1="15" y1="16" x2="29" y2="16"/><rect x="15" y="21" width="4" height="5" fill="currentColor" stroke="none"/><rect x="21" y="19" width="4" height="7" fill="currentColor" stroke="none"/>',
+  wizard:'<circle cx="12" cy="8" r="2" fill="currentColor" stroke="none"/><circle cx="24" cy="8" r="2"/><circle cx="36" cy="8" r="2"/><line x1="14" y1="8" x2="22" y2="8"/><line x1="26" y1="8" x2="34" y2="8"/><rect x="10" y="15" width="28" height="13" rx="1.5"/>',
+  timeline:'<line x1="12" y1="4" x2="12" y2="30"/><circle cx="12" cy="9" r="2.4" fill="currentColor" stroke="none"/><circle cx="12" cy="18" r="2.4"/><circle cx="12" cy="27" r="2.4"/><line x1="18" y1="9" x2="38" y2="9"/><line x1="18" y1="18" x2="38" y2="18"/><line x1="18" y1="27" x2="32" y2="27"/>'
+ };
+ return s+(g[t]||g.list)+'</svg>';
+}
+
+/* ---------------- state + resolve ---------------- */
+var state={user:new Set(PRESETS['exam-prep'].ids),view:'screens',dom:'all',openC:new Set()};
+CORE.forEach(function(id){state.user.add(id);});
+
+function resolve(){
+ var active=new Set();
+ CORE.forEach(function(id){active.add(id);});
+ state.user.forEach(function(id){active.add(id);});
+ var changed=true;
+ while(changed){
+  changed=false;
+  active.forEach(function(id){
+   (MODMAP[id].deps||[]).forEach(function(d){ if(!active.has(d)){active.add(d);changed=true;} });
+  });
+ }
+ var auto=new Set();
+ active.forEach(function(id){ if(!state.user.has(id) && CORE.indexOf(id)<0) auto.add(id); });
+ return {active:active,auto:auto};
+}
+function requiredBy(id,active){
+ var out=[];
+ active.forEach(function(a){ if((MODMAP[a].deps||[]).indexOf(id)>=0 && (state.user.has(a)||CORE.indexOf(a)>=0)) out.push(a); });
+ return out;
+}
+function tierOf(active){
+ var r=1;
+ active.forEach(function(id){ r=Math.max(r,TIERRANK[MODMAP[id].tier]||1); });
+ return r===3?'institute':r===2?'cohort':'starter';
+}
+function runCost(active){
+ var rows=[];
+ rows.push(['Video','Google Meet via tenant account','$0']);
+ var storage = active.has('B3')||active.has('B5')||active.has('B6') ? '$1–5' : '$0–1';
+ rows.push(['Storage','~1 GB per recorded hour · object storage','~'+storage]);
+ var notif = active.has('D5') ? '$0–8' : '$0';
+ rows.push(['Notifications','email ~$0 · SMS ~$0.01 · WhatsApp ~$0.005','~'+notif]);
+ rows.push(['Compute + managed DB','shared, amortised per workspace','$2–6']);
+ if(active.has('C6')) rows.push(['Adaptive compute','model scoring jobs','$1–4']);
+ rows.push(['Estimated total','at rest, one active workspace','$3–20 / mo']);
+ return rows;
+}
+
+/* ---------------- render ---------------- */
+var elPresets=document.getElementById('presets');
+Object.keys(PRESETS).forEach(function(k){
+ var b=document.createElement('button');
+ b.className='preset';b.dataset.preset=k;b.textContent=PRESETS[k].name;
+ elPresets.appendChild(b);
+});
+document.querySelectorAll('[data-preset]').forEach(function(b){
+ b.addEventListener('click',function(){
+  var k=b.dataset.preset;
+  state.user=new Set(k==='__core'?[]:PRESETS[k].ids);
+  CORE.forEach(function(id){state.user.add(id);});
+  render();
+ });
+});
+document.getElementById('tabs').addEventListener('click',function(e){
+ var t=e.target.closest('.tab'); if(!t)return;
+ state.view=t.dataset.view; renderTabs(); renderView();
+});
+
+function renderTabs(){
+ document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('on',t.dataset.view===state.view); });
+}
+
+function renderRail(r){
+ var host=document.getElementById('modlist'); host.innerHTML='';
+ Object.keys(DOMAINS).forEach(function(dk){
+  var grp=document.createElement('div'); grp.className='domgroup';
+  grp.innerHTML='<div class="domgroup__h"><span class="l">'+dk+'</span><span class="n">'+DOMAINS[dk]+'</span></div>';
+  M.filter(function(m){return m.dom===dk;}).forEach(function(m){
+   var isCore=CORE.indexOf(m.id)>=0;
+   var isUser=state.user.has(m.id)&&!isCore;
+   var isAuto=r.auto.has(m.id);
+   var row=document.createElement('div');
+   row.className='mod'+(isCore?' core':isAuto?' auto':isUser?' on':'');
+   var reqs=isAuto?requiredBy(m.id,r.active):[];
+   row.innerHTML=
+    '<div class="mod__cb">'+(isCore||isUser||isAuto?'✓':'')+'</div>'+
+    '<div class="mod__main"><div class="mod__name">'+m.id+' · '+m.name+'</div>'+
+    '<div class="mod__meta">'+
+      '<span class="cr">effort '+m.effort+'/5</span>'+
+      '<span class="cr">'+m.tier+'</span>'+
+      (isCore?'<span class="req">always on</span>':'')+
+      (reqs.length?'<span class="req">needs → '+reqs.join(', ')+'</span>':'')+
+    '</div></div>';
+   if(!isCore){
+    row.addEventListener('click',function(){
+     if(state.user.has(m.id)) state.user.delete(m.id); else state.user.add(m.id);
+     render();
+    });
+   }
+   grp.appendChild(row);
+  });
+  host.appendChild(grp);
+ });
+}
+
+function renderSummary(r){
+ var active=r.active;
+ var nonCore=0; active.forEach(function(id){ if(CORE.indexOf(id)<0) nonCore++; });
+ var scr=screenSet(active).length;
+ var tier=tierOf(active);
+ var tObj=TIERS.filter(function(t){return t.id===tier;})[0];
+ var totalEffort=0; active.forEach(function(id){ totalEffort+=MODMAP[id].effort; });
+ var host=document.getElementById('summary');
+ host.innerHTML=
+  cell(active.size+' <small>/ '+M.length+'</small>','modules on')+
+  cell(nonCore+'','beyond core')+
+  cell(scr+'','screens needed')+
+  cell(tObj.name,'tier','tier')+
+  cell(tObj.price.replace(/ \/ mo.*/,'').replace('$',''),'$ / mo band');
+ function cell(v,l,mod){ return '<div class="sumcell'+(mod?' sumcell--'+mod:'')+'"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>'; }
+}
+
+function renderNotices(r){
+ var host=document.getElementById('notices'); host.innerHTML='';
+ if(!r.auto.size) return;
+ var items=[];
+ r.auto.forEach(function(id){
+  items.push('<li><code>'+id+'</code> '+MODMAP[id].name+' — pulled in by '+requiredBy(id,r.active).join(', ')+'</li>');
+ });
+ host.innerHTML='<div class="notice"><b>Dependencies added automatically.</b> These are on because a module you picked needs them:<ul>'+items.join('')+'</ul></div>';
+}
+
+function screenSet(active){
+ var set={};
+ active.forEach(function(id){ (MODMAP[id].screens||[]).forEach(function(s){ (set[s]=set[s]||[]).push(id); }); });
+ return Object.keys(set).sort().map(function(s){ return {name:s,mods:set[s]}; });
+}
+
+function renderView(){
+ var r=resolve(); var host=document.getElementById('view');
+ if(state.view==='screens') host.innerHTML=viewScreens(r);
+ else if(state.view==='concepts'){ host.innerHTML=viewConcepts(r); bindConcepts(); }
+ else if(state.view==='sequence') host.innerHTML=viewSequence(r);
+ else host.innerHTML=viewPackaging(r);
+}
+
+function viewScreens(r){
+ var scr=screenSet(r.active);
+ var cards=scr.map(function(o){
+  var meta=SCREENS[o.name]||{p:'',w:'list'};
+  var chips=o.mods.map(function(id){return '<span class="chip chip--a">'+id+'</span>';}).join('');
+  return '<div class="scard"><div class="scard__wire">'+wire(meta.w)+'</div>'+
+   '<div class="scard__name">'+o.name+'</div>'+
+   '<div class="scard__purpose">'+meta.p+'</div>'+
+   '<div class="scard__mods">'+chips+'</div></div>';
+ }).join('');
+ return '<div class="viewhead"><h2>'+scr.length+' screens to design &amp; build</h2>'+
+  '<span class="hint">each lights up when a selected module needs it</span></div>'+
+  '<div class="screens">'+cards+'</div>';
+}
+
+function viewConcepts(r){
+ var mods=M.filter(function(m){return r.active.has(m.id)&&CORE.indexOf(m.id)<0;});
+ var doms=['all'].concat(Object.keys(DOMAINS).filter(function(d){return mods.some(function(m){return m.dom===d;});}));
+ var filt='<div class="domfilter">'+doms.map(function(d){
+   return '<button data-dom="'+d+'" class="'+(state.dom===d?'on':'')+'">'+(d==='all'?'All domains':d+' · '+DOMAINS[d])+'</button>';
+ }).join('')+'</div>';
+ var shown=mods.filter(function(m){return state.dom==='all'||m.dom===state.dom;});
+ if(!shown.length) return '<div class="viewhead"><h2>Build concepts</h2></div>'+filt+'<div class="emptyview">No modules beyond the always-on core. Pick some on the left.</div>';
+ var blocks=shown.map(function(m){
+  var open=state.openC.has(m.id);
+  var deps=(m.deps.length?m.deps.map(function(d){return '<span class="chip">'+d+'</span>';}).join(' '):'<span class="v">core only</span>');
+  return '<div class="concept'+(open?' open':'')+'" data-id="'+m.id+'">'+
+   '<div class="concept__head"><span class="concept__id">'+m.id+'</span>'+
+     '<span class="concept__name">'+m.name+'</span>'+
+     '<span class="concept__tags"><span class="effdots" title="build effort">'+dot(m.effort)+'</span>'+
+       '<span class="etag etag--risk-'+m.risk+'">'+m.risk+' risk</span></span></div>'+
+   '<div class="concept__body">'+
+     '<p class="concept__what">'+m.what+'</p>'+
+     '<div class="ladder">'+
+       rung('v1 — ship first',m.ladder[0])+rung('v2 — then',m.ladder[1])+rung('v3 — mature',m.ladder[2])+
+     '</div>'+
+     '<div class="kv"><div><span class="k">Depends on</span>'+deps+'</div></div>'+
+     '<div class="kv" style="margin-top:8px;"><div><span class="k">Data</span><b>'+m.entities.join(', ')+'</b></div></div>'+
+     '<div class="kv" style="margin-top:6px;"><div><span class="k">Integrations</span><b>'+(m.integ.length?m.integ.join(', '):'none')+'</b></div></div>'+
+     '<div class="kv" style="margin-top:6px;"><div><span class="k">Phase</span><b>'+PHASES[m.phase].n+' — '+PHASES[m.phase].t+'</b></div></div>'+
+   '</div></div>';
+ }).join('');
+ return '<div class="viewhead"><h2>'+shown.length+' modules to build</h2>'+
+   '<span class="miniact" id="toggleAll">'+(shown.every(function(m){return state.openC.has(m.id);})?'Collapse all':'Expand all')+'</span></div>'+
+   filt+blocks;
+ function rung(v,t){return '<div class="rung"><div class="v">'+v+'</div><div class="t">'+t+'</div></div>';}
+ function dot(n){var s='';for(var i=0;i<5;i++)s+=(i<n?'●':'○');return s;}
+}
+function bindConcepts(){
+ document.querySelectorAll('.concept__head').forEach(function(h){
+  h.addEventListener('click',function(){
+   var id=h.parentNode.dataset.id;
+   if(state.openC.has(id)) state.openC.delete(id); else state.openC.add(id);
+   renderView();
+  });
+ });
+ document.querySelectorAll('.domfilter button').forEach(function(b){
+  b.addEventListener('click',function(){ state.dom=b.dataset.dom; renderView(); });
+ });
+ var ta=document.getElementById('toggleAll');
+ if(ta) ta.addEventListener('click',function(){
+  var r=resolve();
+  var mods=M.filter(function(m){return r.active.has(m.id)&&CORE.indexOf(m.id)<0&&(state.dom==='all'||m.dom===state.dom);});
+  var allOpen=mods.every(function(m){return state.openC.has(m.id);});
+  mods.forEach(function(m){ if(allOpen) state.openC.delete(m.id); else state.openC.add(m.id); });
+  renderView();
+ });
+}
+
+function viewSequence(r){
+ var out=PHASES.map(function(p,pi){
+  var mods=M.filter(function(m){return r.active.has(m.id)&&m.phase===pi;});
+  mods.sort(function(a,b){return a.deps.length-b.deps.length || a.id.localeCompare(b.id);});
+  var list=mods.length
+    ? '<div class="phase__list">'+mods.map(function(m){return '<span class="pmod">'+m.id+' '+m.name+'</span>';}).join('')+'</div>'
+    : '<div class="phase__empty">nothing selected in this phase</div>';
+  return '<div class="phase"><div class="phase__h"><span class="phase__n">'+p.n+'</span>'+
+    '<span class="phase__t">'+p.t+'</span>'+(p.mvp?'<span class="phase__mvp">sellable MVP</span>':'')+'</div>'+
+    list+'<div class="phase__note">'+p.note+'</div></div>';
+ }).join('');
+ var total=0; r.active.forEach(function(id){total+=MODMAP[id].effort;});
+ return '<div class="viewhead"><h2>Build in this order</h2>'+
+   '<span class="hint">~'+total+' effort points · dependency-first within each phase</span></div>'+out+
+   '<div class="notice" style="margin-top:4px;">A module ships only after every module in its <b>Depends on</b> list is live in production — not just merged.</div>';
+}
+
+function viewPackaging(r){
+ var tier=tierOf(r.active);
+ var tcards=TIERS.map(function(t){
+  return '<div class="tier'+(t.id===tier?' on':'')+'">'+(t.id===tier?'<span class="tier__badge">your selection</span>':'')+
+   '<div class="tier__name">'+t.name+'</div><div class="tier__price">'+t.price+'</div>'+
+   '<div class="tier__for">'+t.forr+'</div>'+
+   t.rows.map(function(rw){return '<div class="tier__row"><span class="k">'+rw[0]+'</span><span>'+rw[1]+'</span></div>';}).join('')+
+   '</div>';
+ }).join('');
+ var cost=runCost(r.active).map(function(rw){return '<tr><td>'+rw[0]+'</td><td>'+rw[1]+'</td><td class="num">'+rw[2]+'</td></tr>';}).join('');
+ var instMods=[]; r.active.forEach(function(id){ if(MODMAP[id].tier==='institute') instMods.push(id+' '+MODMAP[id].name); });
+ var cohMods=[]; r.active.forEach(function(id){ if(MODMAP[id].tier==='cohort') cohMods.push(id+' '+MODMAP[id].name); });
+ var why = tier==='institute'
+   ? 'Institute because you selected: '+instMods.join(', ')+'.'
+   : tier==='cohort'
+   ? 'Cohort because you selected: '+cohMods.join(', ')+'. No Institute-only module is on.'
+   : 'Starter — no Cohort- or Institute-only module is on.';
+ return '<div class="viewhead"><h2>Packaging &amp; run cost</h2><span class="hint">bands are planning estimates — set real numbers</span></div>'+
+  '<div class="tiers">'+tcards+'</div>'+
+  '<div class="notice" style="margin-top:14px;">'+why+'</div>'+
+  '<h3 style="margin:18px 0 2px;font-size:1rem;">What one active workspace costs you to run</h3>'+
+  '<table class="costtable"><thead><tr><th>Line</th><th>Basis</th><th style="text-align:right;">Monthly</th></tr></thead><tbody>'+cost+'</tbody></table>'+
+  '<p class="disc">Margin is healthy because video defaults to the tenant Google Meet ($0 marginal). Hosted rooms and speech-to-text change the maths — keep them as opt-in metered add-ons, never bundled. Payment-gateway fees are pass-through and borne by the tenant or the student.</p>';
+}
+
+function render(){
+ var r=resolve();
+ renderRail(r); renderSummary(r); renderNotices(r); renderTabs(); renderView();
+}
+render();
+})();
+</script>
