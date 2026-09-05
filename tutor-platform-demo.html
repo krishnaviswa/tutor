@@ -60,7 +60,7 @@ button{font-family:inherit;}
 #top{position:sticky;top:0;z-index:40;height:56px;display:flex;align-items:center;gap:9px;padding:0 12px;background:color-mix(in srgb,var(--ground) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft);}
 #top .brand{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-weight:600;font-size:15px;cursor:pointer;flex:none;}
 #top .brand svg{width:19px;height:19px;}
-#top .brand i{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:2px 6px;font-style:normal;}
+#top .brand i{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:2px 6px;font-style:normal;cursor:pointer;}
 .burger{border:1px solid var(--line);background:var(--surface);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);flex:none;}
 .tplsel{border:1px solid var(--line);background:var(--surface);border-radius:8px;height:31px;font-family:var(--mono);font-size:10px;color:var(--ink-soft);padding:0 6px;max-width:160px;flex:none;}
 .tnav{display:flex;align-items:center;gap:8px;margin:0 auto;font-family:var(--mono);font-size:11px;color:var(--ink-soft);}
@@ -269,7 +269,7 @@ body.showhot .flownode{box-shadow:0 0 0 3px var(--tint-wash);}
 
 .flowbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:var(--sunk);border-top:2px dashed var(--line);}
 .flowbar>div{min-width:0;display:flex;align-items:center;}
-.flowbar>div:first-child{flex:1;}
+.flowbar>div:first-child{flex:1;gap:8px;flex-wrap:wrap;}
 .flowbar>div:last-child{flex:none;}
 .flowbar .fb__l{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);text-align:center;flex:none;padding:0 6px;}
 .flowbar .prev{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -282,6 +282,8 @@ body.showhot .flownode{box-shadow:0 0 0 3px var(--tint-wash);}
 .scrn__crumb{font-size:.8rem;color:var(--ink-soft);display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
 .scrn__crumb b{color:var(--ink);}
 .sc__k{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--tint);}
+.sc__link{cursor:pointer;border-bottom:1px solid color-mix(in srgb,var(--tint) 45%,transparent);}
+.sc__link:hover{color:var(--accent-ink);border-bottom-color:var(--accent-ink);}
 .sc__sep{color:var(--ink-faint);}
 .scrn__metar{display:flex;align-items:center;gap:8px;}
 .rolebadge{font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--tint);color:#fff;}
@@ -289,6 +291,15 @@ body.showhot .flownode{box-shadow:0 0 0 3px var(--tint-wash);}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .rolebadge{color:#fff;}}
 .modtag{font-family:var(--mono);font-size:9px;color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:3px 7px;}
 .sc__flow{font-family:var(--mono);font-size:10px;color:var(--tint);cursor:pointer;}
+
+.why{max-width:1180px;margin:0 auto 12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px 14px;box-shadow:var(--shadow);}
+.why>p.k{margin-bottom:8px;}
+.why__g{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:12px;}
+.why__g>div{min-width:0;}
+.why__g span{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-bottom:4px;}
+.why__g p{font-size:.82rem;color:var(--ink-soft);line-height:1.45;}
+.why--hero{margin:14px 0 0;box-shadow:none;background:var(--sunk);border-color:transparent;}
+@media(max-width:720px){.why__g{grid-template-columns:1fr;}}
 
 /* ---------- home ---------- */
 .mapwrap{max-width:1180px;margin:0 auto;}
@@ -338,16 +349,20 @@ body.showhot .flownode{box-shadow:0 0 0 3px var(--tint-wash);}
 
 /* ---------- compare ---------- */
 .cmptbl{width:100%;border-collapse:collapse;font-size:.8rem;}
-.cmptbl th{font-family:var(--mono);font-size:8.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-faint);padding:8px 6px;border-bottom:1px solid var(--line);text-align:center;}
-.cmptbl th:first-child{text-align:left;}
-.cmptbl td{padding:7px 6px;border-bottom:1px solid var(--line-soft);text-align:center;}
+.cmptbl th{font-family:var(--mono);font-size:8.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-faint);padding:8px 6px;border-bottom:1px solid var(--line);text-align:center;vertical-align:bottom;}
+.cmptbl th:first-child{text-align:left;min-width:280px;}
+.cmptbl td{padding:10px 6px;border-bottom:1px solid var(--line-soft);text-align:center;vertical-align:top;}
 .cmptbl td:first-child{text-align:left;}
 .cmptbl tr.grp td{background:var(--sunk);font-family:var(--mono);font-size:8.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);}
 .cmptbl tr.spine td:first-child{border-left:3px solid var(--accent);padding-left:7px;}
 .cmptbl .dot{width:11px;height:11px;border-radius:50%;display:inline-block;cursor:pointer;}
 .cmptbl .cmpx{color:var(--line);}
-.cmptbl .cmpname{cursor:pointer;}
+.cmptbl .cmpname{cursor:pointer;font-weight:600;color:var(--ink);}
 .cmptbl .cmpname:hover{color:var(--accent-ink);}
+.cmpmeta{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px 12px;margin-top:8px;}
+.cmpmeta>div{min-width:0;}
+.cmpmeta span{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-bottom:2px;font-weight:500;}
+.cmpmeta p{margin:0;font-size:.72rem;color:var(--ink-soft);line-height:1.4;font-weight:400;}
 
 /* ---------- modal + toast ---------- */
 .modal{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(10,14,11,.42);}
@@ -372,7 +387,7 @@ body.showhot .flownode{box-shadow:0 0 0 3px var(--tint-wash);}
   <button class="burger" id="burger" aria-label="All screens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <div class="brand" id="brandHome">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 3c3.5 3 3.5 15 0 18M12 3c-3.5 3-3.5 15 0 18M3.2 9.5h17.6M3.2 14.5h17.6"/></svg>
-    TutorOS <i>templates</i>
+    TutorOS <i id="brandTpl" title="Template home">templates</i>
   </div>
   <select id="tplSel" class="tplsel" aria-label="Jump to a template">
     <option value="home">Template home</option>
@@ -602,8 +617,13 @@ var TEMPLATES=[
   ]},
  {id:'t6',short:'Everything',name:'Everything',tint:'ink',tier:'Institute',
   shape:'Institute exploring the full surface',
-  blurb:'Every module on. The complete screen surface, in stage order — use this as the master gallery.',
+  blurb:'Every module on — the master gallery, not a recommended tenant. Each screen states who uses it, how they use it, and when it fires.',
   modules:'All modules on',
+  reason:{
+    who:'Product, design, and an institute owner reviewing the full surface. Not a starter tenant — focused templates (Exam-prep, 1-on-1, K-12, Skills, Music) turn modules off.',
+    how:'Walk the swimlane left to right. Open a card to read Who / How / When, then click through the mock. Numbered cards are human steps; dashed ⚙ cards are automatic writes (timeline fan-out).',
+    when:'Before Figma freeze and backend, or whenever you need a missing screen that a thinner template hid. Day-to-day tenants should pick a focused template, then add modules — not live on Everything forever.'
+  },
   roles:['student','faculty','admin','parent','system'],
   steps:[
    ['onboard-kind','admin','Onboard'],['template-gallery','admin','Onboard'],['wsetup','admin','Onboard'],['branding','admin','Onboard'],
@@ -626,6 +646,58 @@ TEMPLATES.forEach(function(t){
  t.steps.forEach(function(s){ if(!s[3] && !seen[s[0]]){ seen[s[0]]=1; t.tour.push(s[0]); } });
 });
 var ALL=TById('t6').tour.slice();
+
+/* ================= why this screen =================
+   own = accountable owner; who = who sits here; why = reason it exists; how = use; when = moment */
+var WHY={
+ 'router':{own:'Platform auth. Chrome is student until a role is chosen.',who:'Anyone opening the app URL without a remembered role.',why:'One URL serves three doors — student, staff, parent — without three bookmarks.',how:'Pick Student, Staff, or Parent. The app routes to the matching sign-in — one identity still threads the timeline.',when:'First visit, shared device, or after logout.'},
+ 'student-login':{own:'Student holds the identity. Owner chooses OTP vs magic-link.',who:'The learner.',why:'One identity for sessions, practice, doubts, and fees — no password in v1.',how:'Phone OTP by default; email magic-link optional. The same identity is used for the whole record.',when:'Every time they open the student app.'},
+ 'staff-login':{own:'Faculty or owner via staff membership.',who:'Teacher, assistant, or owner.',why:'Staff must not share the student app; membership decides the workspace.',how:'Same OTP / magic-link as students. Membership decides which console they enter.',when:'Opening the web teaching or owner console.'},
+ 'wsetup':{own:'Owner.',who:'Owner creating a workspace.',why:'The tenant spine must exist before branding, invites, or teaching.',how:'Name, timezone, subdomain. Always-on core stays on (identity, timeline, quotas). Feature flags for extra modules come next.',when:'Day 0 of a new tenant — before branding or invites.'},
+ 'branding':{own:'Owner.',who:'Owner.',why:'Learners must recognise the workspace as theirs, not a generic TutorOS shell.',how:'Logo, accent colour, subdomain. Custom domain is later.',when:'Immediately after workspace setup, before the first invite.'},
+ 'roster':{own:'Owner or assistant with roster rights.',who:'Owner or assistant.',why:'Who is enrolled is the source of seats, timelines, and billing — not a spreadsheet.',how:'Add students one by one or CSV import. Optional admin WhatsApp on new enrollment — not a second student list.',when:'Enrolment, then whenever someone joins or leaves.'},
+ 'cohort-builder':{own:'Faculty. Owner may set structure.',who:'Faculty or owner.',why:'Teaching is grouped; 1-on-1 is a pairing. Topics are tenant taxonomy, not a baked syllabus.',how:'Batches, groups, or 1-on-1 pairings. Topics are G3 — never exam-board tables in core.',when:'After roster, before the first scheduled class.'},
+ 'parent-link':{own:'Owner issues the invite; parent accepts.',who:'Guardian, invited by owner or teacher.',why:'A guardian needs access without a second student account.',how:'Open the invite token and confirm the student link. Read access only until billing asks them to pay.',when:'Enrolment for minors, or any tenant that wants a parent portal (K-12, music).'},
+ 'parent-home':{own:'Parent (read). Owner enables the parent module.',who:'A linked parent.',why:'The parent must see the record here — WhatsApp is a channel, not the ledger.',how:'Read-mostly: attendance, reports, fees for linked students.',when:'After class, a report, or an invoice — not during live teaching.'},
+ 'schedule':{own:'Faculty. Owner can view.',who:'Faculty (owner can view).',why:'Sessions must exist on a calendar before anyone can join.',how:'Create or move sessions. Reschedule notifies teacher, parent, and admin via D5 — students only if the owner enabled student WhatsApp.',when:'Weekly planning and same-day changes.'},
+ 'session-pre':{own:'Faculty.',who:'The teacher about to teach.',why:'Topic and video pointer must be set before the room opens. TutorOS does not host video.',how:'Confirm topic, cohort, Meet or Teams link, and the platform join URL.',when:'Before the session starts.'},
+ 'join':{own:'Student action; faculty owns the session.',who:'The student.',why:'Attendance is joining through the platform, not opening Meet in another tab.',how:'Waiting room. Stay here until class starts.',when:'Minutes before class.'},
+ 'live-teacher':{own:'Faculty.',who:'The teacher in session.',why:'Notes, polls, and attendance must stay in TutorOS, not trapped in Meet chat.',how:'Console around Meet/Teams. Teaching still happens in Google or Microsoft.',when:'During the live class.'},
+ 'live-student':{own:'Student in session; faculty hosts.',who:'The student in session.',why:'Join, leave, and later replay must attach to one identity.',how:'Live view / waiting overlay. Stay inside the product.',when:'During the live class.'},
+ 'session-video':{own:'Faculty. Student if the tenant shares replay.',who:'Teacher (student if the tenant shares replay).',why:'Replay lives at Google or Microsoft; we store the pointer, not the file.',how:'Open the Meet/Teams recording. Transcript panel stays empty until STT or an import — do not fake captions.',when:'After class, for replay or notes.'},
+ 'record':{own:'Faculty must write. System fans out to timelines.',who:'The teacher.',why:'This is the ledger write after class. Channels do not replace it.',how:'Write attendance, notes, board photos, and the link. That write fans out to each attendee timeline.',when:'Immediately after class. Do not skip this screen.'},
+ 'library':{own:'Faculty curates. Student consumes.',who:'Student consumes; teacher curates.',why:'Content between sessions needs a place that is not a WhatsApp file dump.',how:'Lessons, files, and links with visibility per cohort. Folders follow the tenant taxonomy.',when:'Between classes, or as drip content in a cohort course.'},
+ 'lesson':{own:'Faculty authors. Student completes.',who:'The student.',why:'Opening or finishing a module must be a timeline event, not a silent file view.',how:'Open one module. Progress writes to the record.',when:'When assigned, or self-paced between sessions.'},
+ 'assign-issue':{own:'Faculty.',who:'The teacher.',why:'Homework is a dated obligation on the record, not a chat reminder.',how:'Issue homework with a due date. WhatsApp may remind parent/teacher — it does not replace the assignment.',when:'After class, or as a standing weekly task.'},
+ 'assign-grade':{own:'Faculty grades. Student submits.',who:'Teacher grades; student submits first.',why:'Returned work must land on the timeline so a parent can see it without a second app.',how:'Submit, mark, return.',when:'After the due date, or as work comes in.'},
+ 'qbank':{own:'Faculty or content assistant.',who:'Teacher or content assistant.',why:'Reusable items tagged by tenant topics — never a hardcoded syllabus in core.',how:'Hand-pick or filter by tag into practice and tests.',when:'Before building a practice set or mock.'},
+ 'practice-build':{own:'Faculty.',who:'The teacher.',why:'Exam-prep needs a same-day practice loop; other templates may leave this off.',how:'Same-day or scheduled set from tags or hand-pick.',when:'After a concept class, or as a weekly drill window.'},
+ 'practice-play':{own:'Student.',who:'The student.',why:'The learner does the work. No fake instant tutor in the player.',how:'Answer on the phone. Honest timer and progress.',when:'Same day as class, or inside the assigned window.'},
+ 'practice-result':{own:'Student sees it. Faculty owns the next action.',who:'Student first; teacher uses Analysis next.',why:'A row cannot close on a percentage alone — tags drive what happens next.',how:'Score plus tagged misses.',when:'Immediately after the set.'},
+ 'test-setup':{own:'Faculty.',who:'The teacher.',why:'A timed paper is a scheduled event, not a casual practice set.',how:'Build the paper from the bank and set the window.',when:'Mock week, or end of a module in a cohort course.'},
+ 'test-runner':{own:'Student.',who:'The student.',why:'An attempt must write even if they leave early.',how:'Timed runner during the window only.',when:'During the scheduled window only.'},
+ 'analysis':{own:'Faculty.',who:'The teacher.',why:'Misses become the next class — this is the exam-prep spine after practise.',how:'Most-missed items, tags, required next action (re-teach, practice, backlog).',when:'After a practice set or mock, before the next class.'},
+ 'doubt-student':{own:'Student asks. Faculty answers.',who:'The student.',why:'Doubts must live in-product so they are not lost in WhatsApp. Honest queue — no fake instant.',how:'Photo or text into the queue.',when:'Stuck after class, practice, or homework.'},
+ 'doubt-teacher':{own:'Faculty. Assistant may triage.',who:'The teacher (assistant may triage).',why:'Unanswered doubts need an SLA. WhatsApp is a ping, not a second inbox.',how:'Triage the queue. Resolve here so the timeline has the answer.',when:'Daily backlog, especially after practice.'},
+ 'messages':{own:'Faculty owns the thread.',who:'Teacher starts; student (and parent if linked) reply.',why:'1:1 coaching must exist as a record, not only as a WhatsApp chat.',how:'In-platform threads. WhatsApp may notify teacher, parent, or admin.',when:'Anything that is not a one-to-cohort announcement.'},
+ 'announce':{own:'Faculty or owner.',who:'Teacher or owner.',why:'One message to a cohort — schedule, dates, policy — not 1:1 coaching.',how:'Broadcast. Parent WhatsApp if opted in. Students are not on WhatsApp unless the owner enabled it.',when:'Schedule changes, exam dates, policy.'},
+ 'timeline':{own:'Student is the subject. System writes. Faculty and parent read.',who:'Student owns the stream; teacher and parent read.',why:'This is the ledger. Channels deliver; they do not replace this screen.',how:'Append-only event log. Automatic writes from session record, practice, payments, doubts.',when:'After every session, assignment, payment, or doubt.'},
+ 'notif-prefs':{own:'Signed-in person. Owner gates student WhatsApp.',who:'The person signed in (student here; staff/parent have the same idea).',why:'Channels are optional; the ledger is not. Student WhatsApp stays off unless the owner enabled it.',how:'Channel + event checklist for teacher, parent, admin (and student if gated on).',when:'First login, and whenever they want quieter notifications.'},
+ 'student-dash':{own:'Student.',who:'The student.',why:'Opening the app should show the next action, not a hunt through menus.',how:'Next session, open practice, open doubts, this week. Few controls, clear next step.',when:'Opening the app, not during a live class.'},
+ 'teacher-dash':{own:'Faculty.',who:'The teacher.',why:'Cohort health in one place — who is behind — instead of a second spreadsheet.',how:'Attendance, practice completion, doubt backlog. Jump to the record.',when:'Morning briefing before class.'},
+ 'owner':{own:'Owner / admin.',who:'Owner / admin.',why:'Running the business (scorecard, quotas, kill switches) is not teaching a class.',how:'Quota bars warn at 80% and can block paid sends at 100%. Caps throttle cost, not always-on core.',when:'Operating the workspace, not during a live session.'},
+ 'reports':{own:'Faculty or owner produce. Parent receives a slice.',who:'Teacher or owner; parent gets a slice.',why:'A term view of the timeline — not a parallel gradebook.',how:'Term reports and CSV. Parent WhatsApp when a report is ready.',when:'Weekly check-in or term-end.'},
+ 'mentor':{own:'Faculty or assigned mentor.',who:'Teacher or assigned mentor.',why:'Catch skipped work in a short slot — not re-teach the whole class.',how:'Backlog items, often auto-created from missed practice.',when:'After a tagged fail or two missed practices.'},
+ 'billing':{own:'Owner or assistant with billing rights.',who:'Owner (or assistant with billing rights).',why:'The tenant collects from learners here. Separate from the platform subscription (F2).',how:'Fee plans and invoices.',when:'Enrolment and renewals.'},
+ 'payments':{own:'Payer (student or parent). Owner configures collection.',who:'Whoever pays — student or parent.',why:'Paying an invoice must write to the timeline; WhatsApp only notifies.',how:'Pay in-app. Admin and parent WhatsApp on captured or failed.',when:'When an invoice is due.'},
+ 'subscription':{own:'Owner.',who:'Owner.',why:'Platform cost (WhatsApp, storage, seats) must be visible and cap-able.',how:'Plan and meters. Warn at 80%. Caps throttle usage; they do not remove identity, timeline, or this screen.',when:'Monthly ops, and whenever a bar approaches the cap.'},
+ 'payouts':{own:'Institute owner.',who:'Institute owner.',why:'Institutes share revenue with teachers after collections. Starter 1-on-1 usually skips this.',how:'Revenue-share runs after a billing cycle.',when:'After collections, institute-scale only.'},
+ 'audit':{own:'Owner.',who:'Owner.',why:'Who changed what, plus export, for disputes and DPDP / GDPR.',how:'Audit log and workspace export. Guardian consent for minors is captured at enrolment.',when:'Staff change, a dispute, or a data request — not daily teaching.'},
+ 'onboard-kind':{own:'Owner.',who:'Owner at signup.',why:'The tutoring shape must be chosen before modules turn on. Everything is a gallery, not the default live tenant.',how:'Pick exam-prep, 1-on-1, K-12, skills, music, or explore Everything.',when:'First setup step, before template and branding.'},
+ 'template-gallery':{own:'Owner.',who:'Owner.',why:'See which modules each template turns on before going live.',how:'Stay on Everything only to explore; ship a focused template, then add modules.',when:'After kind, before branding.'},
+ 'automation':{own:'Owner.',who:'Owner.',why:'When → then rules without code. Opinions as choices, not law.',how:'e.g. session with no same-day practice → warn; two missed practices → backlog.',when:'After the teaching loop is live — not on day 0.'},
+ 'integrations':{own:'Owner.',who:'Owner.',why:'Vendor ports sit at the edge. Logic stays in services. Mock until keys exist.',how:'Meet/Teams, WhatsApp, email, payments.',when:'After branding, before going live with real students.'}
+};
 
 /* ================= shared chrome ================= */
 function setupHead(step){
@@ -1511,6 +1583,11 @@ function flowView(tid){
      '<p class="k"><span class="prev" data-goto="home">‹ all templates</span> &nbsp;·&nbsp; template '+T.id.slice(1)+' of 6</p>'+
      '<h1>'+T.name+'</h1><p>'+T.blurb+'</p>'+
      '<div class="mapmeta">'+T.shape+' &nbsp;·&nbsp; tier: '+T.tier+' &nbsp;·&nbsp; turns on: '+T.modules+'</div>'+
+     (T.reason?'<div class="why why--hero"><p class="k">Why this template</p><div class="why__g">'+
+       '<div><span>Who</span><p>'+T.reason.who+'</p></div>'+
+       '<div><span>How</span><p>'+T.reason.how+'</p></div>'+
+       '<div><span>When</span><p>'+T.reason.when+'</p></div>'+
+     '</div></div>':'')+
      '<div class="legend">'+order.map(function(r){return '<span class="tint-'+ROLE[r].tint+'"><i style="background:var(--tint)"></i>'+ROLE[r].label+'</span>';}).join('')+'</div>'+
      '<div class="row" style="margin-top:14px">'+
        '<button class="hot hot--btn" data-goto="'+tid+'/'+T.tour[0]+'">Walk this flow</button>'+
@@ -1544,6 +1621,12 @@ function drawWires(){
 window.addEventListener('resize',function(){if(state.view==='flow')drawWires();});
 
 /* ================= compare ================= */
+function whyFields(id){
+ var w=WHY[id]; if(!w)return '';
+ return [['Owner',w.own],['Who',w.who],['Why',w.why],['How',w.how],['When',w.when]].map(function(p){
+  return '<div><span>'+p[0]+'</span><p>'+p[1]+'</p></div>';
+ }).join('');
+}
 function compareView(){
  var inT={}; TEMPLATES.forEach(function(t){t.tour.forEach(function(s){(inT[s]=inT[s]||[]).push(t.id);});});
  var doms=[['A','Identity & access'],['B','Teaching & sessions'],['C','Practice & assessment'],['D','Doubts & communication'],['E','Progress & analytics'],['F','Business & operations'],['G','Configuration & templates']];
@@ -1553,7 +1636,7 @@ function compareView(){
   body+='<tr class="grp"><td colspan="7">'+dm[0]+' · '+dm[1]+'</td></tr>';
   ALL.filter(function(id){return S[id].dom===dm[0];}).forEach(function(id){
    var tids=inT[id]||[], spine=tids.length>=4;
-   body+='<tr class="'+(spine?'spine':'')+'"><td class="cmpname" data-goto="'+ctx+'/'+id+'">'+S[id].t+'</td>'+
+   body+='<tr class="'+(spine?'spine':'')+'"><td><span class="cmpname" data-goto="t6/'+id+'">'+S[id].t+'</span><div class="cmpmeta">'+whyFields(id)+'</div></td>'+
     TEMPLATES.map(function(t){
      var on=tids.indexOf(t.id)>=0;
      return '<td>'+(on?'<span class="dot tint-'+t.tint+'" style="background:var(--tint)" data-goto="'+t.id+'/'+id+'"></span>':'<span class="cmpx">·</span>')+'</td>';
@@ -1561,10 +1644,10 @@ function compareView(){
   });
  });
  return '<div class="mapwrap">'+
-  '<div class="maphero"><p class="k"><span class="prev" data-goto="home" style="cursor:pointer;color:var(--accent-ink)">‹ home</span> · compare</p>'+
+  '<div class="maphero"><p class="k"><span class="prev" data-goto="home" style="cursor:pointer;color:var(--accent-ink)">‹ Template home</span> · compare</p>'+
   '<h1>Which screens each template turns on</h1>'+
-  '<p>Rows with a green left edge are the <b>spine</b> — present in four or more templates (workspace, sign-in, schedule, session, record, timeline, dashboards, billing). Everything else is where templates diverge: the live practice loop belongs to Exam-prep; the parent portal to K-12 and Music; payouts, metering and audit to Everything.</p></div>'+
-  '<div class="tblwrap"><table class="cmptbl"><thead><tr><th>Screen</th>'+TEMPLATES.map(function(t){return '<th class="tint-'+t.tint+'" style="color:var(--tint)">'+t.short+'</th>';}).join('')+'</tr></thead><tbody>'+body+'</tbody></table></div>'+
+  '<p>Each row is a screen: <b>owner</b> (who is accountable), <b>who</b> sits there, <b>why</b> it exists, <b>how</b> to use it, and <b>when</b> it fires. Dots show which templates turn it on. Rows with a green left edge are the <b>spine</b> (four or more templates). The live practice loop belongs to Exam-prep; the parent portal to K-12 and Music; payouts, metering and audit to Everything. Click a screen name to open it in Everything (full Who / How / When strip).</p></div>'+
+  '<div class="tblwrap"><table class="cmptbl"><thead><tr><th>Screen · owner · who · why · how · when</th>'+TEMPLATES.map(function(t){return '<th class="tint-'+t.tint+'" style="color:var(--tint)">'+t.short+'</th>';}).join('')+'</tr></thead><tbody>'+body+'</tbody></table></div>'+
  '</div>';
 }
 
@@ -1573,6 +1656,7 @@ function aboutHTML(){
  return '<span class="x" data-close>close ✕</span><h3>About this prototype</h3>'+
   '<p><b>What it is.</b> A clickable mock of TutorOS — '+ALL.length+' screens, organised by the six shipped templates. Nothing saves; buttons and cards navigate. Use it to lock the look and the flow before Figma and the backend.</p>'+
   '<p style="margin-top:10px"><b>How it is organised.</b> Start on <b>Template home</b>. Each template opens a <b>horizontal swimlane</b> — Student · Faculty · Admin · Parent · System lanes, left-to-right stages. Click a numbered card to open that screen; the ‹ › bar then walks that template in order. <b>Compare</b> shows which screens each template shares.</p>'+
+  '<p style="margin-top:10px"><b>Everything template.</b> That flow is the master gallery. Open any screen there and you get <b>Owner / Who / Why / How / When</b>. <b>Compare all six</b> repeats the same notes on every row, plus which templates turn the screen on. Focused templates hide the strip on mocks so those screens stay the product UI.</p>'+
   '<p style="margin-top:10px"><b>Video is never hosted here.</b> The <b>Session video &amp; transcript</b> screen generates a Google Meet link by default, or takes a Microsoft Teams link. Those two providers only — Zoom and the rest are out of scope. Transcripts are pulled from Google or Microsoft afterwards — see <code>video-and-transcript-options.md</code>.</p>'+
   '<p style="margin-top:10px"><b>Source.</b> Templates, modules and the screen map come from <code>tutor-platform-blueprint.md</code>. The interactive module picker is <code>tutor-platform-explorer.html</code>.</p>'+
   '<p style="margin-top:10px"><b>Next step.</b> Freeze the layouts in Figma as the constant, then build the tenant spine and wire modules to the flow.</p>';
@@ -1605,22 +1689,35 @@ function hdrStrip(tid,id){
  var T=TById(tid),st=stepFor(tid,id),rt=ROLE[st.r];
  return '<div class="scrn__hdr tint-'+rt.tint+'">'+
    '<div class="scrn__crumb">'+
-     '<span class="sc__k">'+(T?T.name:'Screen')+'</span><span class="sc__sep">›</span>'+
+     '<span class="sc__k sc__link" data-goto="home">Template home</span><span class="sc__sep">›</span>'+
+     (T?'<span class="sc__k sc__link" data-goto="'+tid+'/flow">'+T.name+'</span><span class="sc__sep">›</span>':'')+
      '<span class="sc__k">'+st.st+'</span><span class="sc__sep">›</span>'+
      '<b>'+S[id].t+'</b>'+
    '</div>'+
    '<div class="scrn__metar">'+
      '<span class="rolebadge">'+rt.label+'</span>'+
      '<span class="modtag">module '+S[id].mod+'</span>'+
+     '<span class="sc__flow" data-goto="home">Home</span>'+
      (T?'<span class="sc__flow" data-goto="'+tid+'/flow">↩ flow</span>':'')+
    '</div>'+
- '</div>';
+ '</div>'+whyPanel(tid,id);
+}
+function whyPanel(tid,id){
+ if(tid!=='t6')return '';
+ var w=WHY[id]; if(!w)return '';
+ return '<div class="why tint-'+ROLE[stepFor(tid,id).r].tint+'">'+
+  '<p class="k">Why this screen · Everything</p>'+
+  '<div class="why__g">'+whyFields(id)+'</div></div>';
 }
 function flowbar(tid,id){
  var seq=seqFor(tid,id),i=seq.indexOf(id),T=TById(tid);
  var pv=i>0?seq[i-1]:null, nx=(i>=0&&i<seq.length-1)?seq[i+1]:null;
  return '<div class="flowbar">'+
-  '<div>'+(pv?'<span class="prev" data-goto="'+tid+'/'+pv+'">‹ '+S[pv].t+'</span>':'<span class="prev" data-goto="'+tid+'/flow">‹ '+T.name+' flow</span>')+'</div>'+
+  '<div>'+
+    '<span class="prev" data-goto="home">Template home</span>'+
+    '<span class="sc__sep">·</span>'+
+    (pv?'<span class="prev" data-goto="'+tid+'/'+pv+'">‹ '+S[pv].t+'</span>':'<span class="prev" data-goto="'+tid+'/flow">‹ '+T.name+' flow</span>')+
+  '</div>'+
   '<div class="fb__l">'+T.short+' · '+(i>=0?(i+1)+' / '+seq.length:'—')+'</div>'+
   '<div>'+(nx?'<button class="hot hot--btn" data-goto="'+tid+'/'+nx+'">'+S[nx].t+'</button>':'<button class="hot hot--btn" data-goto="'+tid+'/flow">Back to flow</button>')+'</div>'+
  '</div>';
@@ -1699,6 +1796,7 @@ document.getElementById('nx').addEventListener('click',function(){
  else if(state.view==='home')go('t1/flow');
 });
 document.getElementById('brandHome').addEventListener('click',function(){go('home');});
+document.getElementById('brandTpl').addEventListener('click',function(e){e.stopPropagation();go('home');});
 document.getElementById('tplSel').addEventListener('change',function(){var v=this.value;if(v==='home'||v==='compare')go(v);else go(v);});
 
 document.addEventListener('click',function(e){
