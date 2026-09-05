@@ -1,3 +1,3 @@
-# Backend tests (not built)
+# Backend tests
 
-Mock vendors. Mirror of `.cursor/rules/testing.mdc` (shared with frontend/CLAUDE.md).
+Mock vendors. Isolation, record→timeline, quotas, parent hub. Mirror of `.cursor/rules/testing.mdc`.

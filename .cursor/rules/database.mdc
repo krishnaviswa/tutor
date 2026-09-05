@@ -1,11 +1,11 @@
 ---
-description: PostgreSQL domain (stub)
+description: PostgreSQL domain
 globs: backend/app/models/**/*
 alwaysApply: false
 ---
 
-# Database (planned)
+# Database
 
-PostgreSQL only. `workspace_id` on every business table. `topics` / `taxonomies` — never syllabus tables.
+SQLAlchemy models written for PostgreSQL. Local sim default is SQLite file. `workspace_id` on every business table. `topics` / `taxonomies` — never syllabus tables.
 
 Spine listed in README §5 and `catalog/entities.json`.

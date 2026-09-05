@@ -1,15 +1,15 @@
 # TutorOS
 
-Subject-neutral remote tutoring workspace. Monorepo (app code not built yet).
+Subject-neutral remote tutoring workspace. Monorepo (`backend/` 002 sim; Next.js not built).
 
 > This file is the Claude Code equivalent of `.cursor/rules/project.mdc`.
 > Keep in sync — see **Cursor ↔ Claude Code parity** below.
 
-## Stack (planned)
+## Stack
 
 - UI: Next.js 15 App Router, TypeScript (`frontend/` later)
-- API: FastAPI, `/api/v1` (`backend/` later)
-- Data: PostgreSQL (`workspace_id` on every business table)
+- API: FastAPI, `/api/v1` (`backend/` 002-sim-spine)
+- Data: PostgreSQL-shaped SQLAlchemy; local sim SQLite file (`workspace_id` on every business table)
 - Auth: OTP + magic link + JWT; roles `owner` | `teacher` | `assistant` | `student` | `parent`
 
 ## Source of truth

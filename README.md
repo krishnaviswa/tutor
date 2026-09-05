@@ -8,7 +8,7 @@ Example pack (optional, not requirements): [docs/examples/neet-biology/](docs/ex
 
 This file is the single product map for humans and for any LLM (Cursor or Claude Code). In-flight features live under `specs/`. When a feature is Accepted, this README absorbs the delta.
 
-**No application code yet.** This pass is architecture, catalog, Spec Kit, and parity checkers.
+**Application code (002-sim-spine):** FastAPI in `backend/` with a durable SQLite sim file (Postgres-shaped models). Demo HTML remains UI gold; Next.js is not built.
 
 ---
 
@@ -17,7 +17,7 @@ This file is the single product map for humans and for any LLM (Cursor or Claude
 | You are a… | Read |
 |---|---|
 | **Anyone / LLM** | This disclaimer, [§1](#1-quick-start), [§2](#2-logical-design) |
-| **Product manager** | §2, [§10](#10-spec-kit--role-workflow), `specs/001-platform-architecture/spec.md` |
+| **Product manager** | §2, [§10](#10-spec-kit--role-workflow), `specs/002-sim-spine/spec.md` |
 | **Architect** | [§3](#3-architecture), [§5](#5-domain-model), [§8](#8-auth), [§9](#9-ports-whatsapp-quotas) |
 | **Builder** | Do not implement until spec status is Specified and you are asked. Then §3–§7. |
 | **Tester** | [§10](#10-spec-kit--role-workflow) after code exists |
@@ -93,11 +93,11 @@ UI later: Next.js 15. API later: FastAPI. This pass: catalog + HTML only. Screen
 
 ## 5. Domain model
 
-Spine: `workspaces`, `users`, `identities`, `sessions_auth`, `staff_memberships`, `students`, `parent_links`, `cohorts`, `enrollments`, `scheduled_sessions`, `attendance`, `session_records`, `transcript_events` (empty until STT), `timeline_events`, `feature_flags`, `audit_log`, **`taxonomies` / `topics`**.
+Spine: `workspaces`, `users`, `identities`, `sessions_auth`, `staff_memberships`, `students`, `parent_links`, `cohorts`, `enrollments`, `scheduled_sessions`, `attendance`, `session_records`, `transcript_events` (empty until STT), `timeline_events`, `feature_flags`, `audit_log`, **`taxonomies` / `topics`**, `usage_meters`, `quota_policies`.
 
 Never `biology_chapters` or exam-board tables. Content hangs off `topic_id`.
 
-Later: questions, attempts, doubts, messages, invoices, `usage_meters`, `quota_policies`.
+Later: questions, attempts, doubts, messages, invoices.
 
 Always-on (cannot flag off): A1, A2, A3, G1, G2, D4, F2. Caps throttle **usage**, not existence.
 
@@ -121,7 +121,7 @@ Catalog: [catalog/entities.json](catalog/entities.json), [catalog/modules.json](
 
 ## 7. API map
 
-All routes **planned**. Full list: [catalog/apis.json](catalog/apis.json). Mount later under `/api/v1`. Groups: `auth`, `workspaces`, `users`, `cohorts`, `sessions`, `content`, `practice`, `doubts`, `timeline`, `billing`, `modules`.
+All routes **planned** unless catalog `status` is `sim` (002 spine). Full list: [catalog/apis.json](catalog/apis.json). Mount under `/api/v1`. Groups: `auth`, `workspaces`, `users`, `cohorts`, `sessions`, `content`, `practice`, `doubts`, `timeline`, `billing`, `modules`.
 
 ---
 
@@ -159,7 +159,7 @@ PM  /speckit.specify + /speckit.clarify
  → Architect  /speckit.plan + checklist + /speckit.analyze
  → /speckit.tasks
  → human OK
- → Builder  /speckit.implement     (not this pass)
+ → Builder  /speckit.implement     (002-sim-spine in progress)
  → Tester  report + /speckit.converge
  → PM Accept  (same PR updates this README + catalog + architecture HTML)
 ```
@@ -172,8 +172,9 @@ Active feature: [specs/002-sim-spine/](specs/002-sim-spine/) (runnable spine sim
 
 ## 11. Known gaps
 
-- No `frontend/`, no `backend/`, no Docker, no Figma, no live OTP/Meet/Razorpay/WhatsApp.
-- All 47 screens `empty`. Demo mocks do not save input (do not write state into HTML).
+- Next.js UI, Docker, Figma, live OTP/Meet/Razorpay/WhatsApp are not in 002.
+- 002 FastAPI sim lives in `backend/` (SQLite file default, mock ports). Demo mocks still do not save into HTML.
+- All 47 screens remain `empty` in the demo. Do not invent ids.
 - Demo **incomplete** vs all six tracks: some spine screens still sit only on Everything. `staff-login` is on 1-on-1, K-12, Skills, Music, and Everything; Exam-prep omits it on purpose (faculty starts at cohort/schedule). Fill remaining gaps later — **same ids**, no new screens.
 - Inbound WhatsApp replies not in v1.
 - Speech-to-text is a slot on session record, not a port.
@@ -185,7 +186,7 @@ Active feature: [specs/002-sim-spine/](specs/002-sim-spine/) (runnable spine sim
 | ID | Title | Status |
 |---|---|---|
 | 001-platform-architecture | Swim-lane HTML, catalog, README hub, Spec Kit, parity | Specified (no `/speckit.implement`) |
-| 002-sim-spine | Local FastAPI + durable store + seed + auth stub + record→timeline + quotas | Specified — waiting human OK before implement |
+| 002-sim-spine | Local FastAPI + durable store + seed + auth stub + record→timeline + quotas | In Progress (human OK; implement) |
 
 ---
 

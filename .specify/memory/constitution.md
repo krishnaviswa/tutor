@@ -21,6 +21,6 @@ TutorOS is a **subject-neutral** remote tutoring workspace. Any subject a tutor 
 9. **Spec-driven.** PM `/speckit.specify` + `/speckit.clarify` → Architect `/speckit.plan` + checklist + `/speckit.analyze` → tasks → **human OK** → Builder `/speckit.implement` → Tester → PM Accept. No implement before Specified.
 10. **Cursor ↔ Claude Code parity.** A convention change updates both sides in the same commit (`scripts/check_agent_config_sync.py`).
 
-## Stack (planned, not built in this pass)
+## Stack (002 sim + planned production)
 
-Next.js 15 App Router (UI) · FastAPI `/api/v1` · PostgreSQL · layered monolith + ports.
+Next.js 15 App Router (UI, not in 002) · FastAPI `/api/v1` (002 scaffold) · PostgreSQL (models); local sim SQLite file · layered monolith + ports.

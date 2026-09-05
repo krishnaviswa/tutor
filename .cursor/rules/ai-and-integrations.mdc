@@ -1,10 +1,10 @@
 ---
-description: Ports and integrations (stub)
+description: Ports and integrations
 globs: backend/app/services/**/*
 alwaysApply: false
 ---
 
-# Ports (planned)
+# Ports
 
 Protocol + mock default: calendar_video, sms, email, storage, payments_student, payments_platform, push, whatsapp.
 

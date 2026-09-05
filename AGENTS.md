@@ -21,7 +21,7 @@ Commands: `/speckit.constitution`, `/speckit.specify`, `/speckit.clarify`, `/spe
 
 Sequence: PM specify+clarify → Architect plan+checklist+analyze → tasks → **human OK** → Builder implement → Tester → PM Accept.
 
-**Do not `/speckit.implement` for 001-platform-architecture** until the architecture HTML and plan are accepted.
+**Do not `/speckit.implement` for 001-platform-architecture** (architecture pack). Active implement: **002-sim-spine**.
 
 Active feature directory: `.specify/feature.json`. `git checkout` does not change it. Override: `SPECIFY_FEATURE_DIRECTORY`.
 
@@ -35,5 +35,6 @@ Every `.cursor/rules/*.mdc` has a Claude Code mirror. Change both in the same co
 - `specs/` — Spec Kit feature artifacts
 - `docs/examples/` — not requirements
 - `scripts/` — catalog build, role HTML mint, parity
+- `backend/` — 002 FastAPI sim (`/api/v1`, SQLite file, mock ports)
 - `tutor-platform-role-*.html` — generated from demo; do not edit
-- No `frontend/` or `backend/` app yet (stub CLAUDE.md files exist so pairing is valid)
+- No Next.js `frontend/` app yet (stub CLAUDE.md so pairing is valid)

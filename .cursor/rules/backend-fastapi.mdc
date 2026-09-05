@@ -1,11 +1,11 @@
 ---
-description: FastAPI conventions (stub until backend exists)
+description: FastAPI conventions
 globs: backend/**/*.py
 alwaysApply: false
 ---
 
-# FastAPI (planned)
+# FastAPI (002-sim-spine)
 
-No backend yet. When it exists: thin routers, logic in `services/`, REST under `/api/v1`, `require_roles()`, `QuotaGuard` after authz.
+Thin routers, logic in `services/`, REST under `/api/v1`, `require_roles()`, QuotaGuard after authz (paid channels). Mock ports default.
 
 See README §3 and `backend/CLAUDE.md`.

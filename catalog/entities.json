@@ -72,6 +72,14 @@
     "tier": "spine"
   },
   {
+    "id": "usage_meters",
+    "tier": "spine"
+  },
+  {
+    "id": "quota_policies",
+    "tier": "spine"
+  },
+  {
     "id": "questions",
     "tier": "later"
   },
@@ -89,14 +97,6 @@
   },
   {
     "id": "invoices",
-    "tier": "later"
-  },
-  {
-    "id": "usage_meters",
-    "tier": "later"
-  },
-  {
-    "id": "quota_policies",
     "tier": "later"
   },
   {

@@ -1,6 +1,6 @@
 # plan.md — 002-sim-spine
 
-Status: **Specified** (Architect). **`/speckit.implement` is blocked until tasks exist and a human OKs implement.** Do not skip the 8-step Spec Kit gate. This file is *how*; `spec.md` remains *what*.
+Status: **Specified**. Human OK received. Builder implements `tasks.md` on `cursor/002-sim-spine`.
 
 001-platform-architecture stays the architecture pack. 002 does not rewrite 001 artifacts. Demo HTML stays UI gold. Optional “live” pointer from architecture HTML or a thin OpenAPI page is **extra, not required**.
 
