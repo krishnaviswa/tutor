@@ -50,9 +50,10 @@ p{margin:0}
 button,a.btn{font-family:inherit;cursor:pointer}
 .k{font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
 #top{position:sticky;top:0;z-index:40;height:56px;display:flex;align-items:center;gap:9px;padding:0 12px;background:color-mix(in srgb,var(--ground) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft)}
-#top .brand{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-weight:600;font-size:15px;cursor:pointer}
-#top .brand i{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:2px 6px;font-style:normal}
-.iconbtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;height:31px;padding:0 10px;font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft)}
+#top .brand{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-weight:600;font-size:15px;cursor:pointer;border:0;background:transparent;color:inherit;padding:0}
+#top .brand i{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:2px 6px;font-style:normal;pointer-events:none}
+.iconbtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;height:31px;padding:0 10px;font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);flex:none}
+.iconbtn:disabled{opacity:.35;cursor:default}
 #stage{padding:22px 20px 64px;max-width:1100px;margin:0 auto}
 .lead{max-width:46rem;color:var(--ink-soft);margin:8px 0 22px}
 .grid{display:grid;gap:12px}
@@ -66,7 +67,11 @@ button,a.btn{font-family:inherit;cursor:pointer}
 .lane{display:flex;flex-direction:column;gap:10px;max-width:520px;margin:0 auto}
 .lane .card{text-align:center}
 .arrow{text-align:center;color:var(--ink-faint);font-size:18px}
-.crumb{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-bottom:10px}
+.crumb{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-bottom:10px;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.crumblink{background:none;border:none;padding:0;color:var(--accent-ink);cursor:pointer;font-family:var(--mono);font-size:11px;text-decoration:underline;text-underline-offset:2px}
+.crumb .here{color:var(--ink-faint);text-decoration:none;cursor:default}
+.crumb .sep{color:var(--line);pointer-events:none}
+button.hot:disabled{opacity:.35;cursor:default}
 .pill{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:999px;background:var(--sunk);margin-right:4px}
 .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 a.btn,button.hot{display:inline-flex;align-items:center;border:1px solid var(--line);background:var(--raised);border-radius:8px;padding:8px 12px;color:var(--ink);text-decoration:none;font-size:.85rem}
@@ -81,13 +86,15 @@ ul.plain{margin:8px 0 0;padding-left:1.1rem;color:var(--ink-soft)}
 :root[data-theme="light"]{color-scheme:light}
 </style>
 <header id="top">
-  <div class="brand" id="brandHome">
-    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 3c3.5 3 3.5 15 0 18M3.2 9.5h17.6M3.2 14.5h17.6"/></svg>
+  <button type="button" class="brand" id="brandHome" data-goto="start" title="Architecture home">
+    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3c3.5 3 3.5 15 0 18M3.2 9.5h17.6M3.2 14.5h17.6"/></svg>
     TutorOS <i>architecture</i>
-  </div>
+  </button>
   <span class="k" id="tlbl" style="margin:0 auto">system map</span>
-  <button class="iconbtn" id="backBtn">Back</button>
-  <button class="iconbtn" id="themeBtn">Theme</button>
+  <button type="button" class="iconbtn" id="homeBtn" data-goto="start">Home</button>
+  <button type="button" class="iconbtn" id="backBtn">Back</button>
+  <button type="button" class="iconbtn" id="fwdBtn">Forward</button>
+  <button type="button" class="iconbtn" id="themeBtn">Theme</button>
 </header>
 <main id="stage"></main>
 <script src="catalog/embed.js"></script>
@@ -149,14 +156,149 @@ function roleScreenHref(s, tpl){
   return 'tutor-platform-role-'+r+'.html#/'+tid+'/'+s.id;
 }
 
-function go(view,extra){
-  state.view=view;
-  if(extra){for(var k in extra)state[k]=extra[k];}
-  if(view==='start'){state.role=null;state.domain=null;state.screen=null;state.layer=null;state.flow=null;}
-  render();
+function resetState(){
+  state={view:'start',role:null,domain:null,screen:null,layer:null,flow:null};
 }
-function crumb(parts){
-  return '<div class="crumb">'+parts.join(' · ')+'</div>';
+function findFlow(id){var list=C.flows||[];for(var i=0;i<list.length;i++)if(list[i].id===id)return list[i];return null;}
+function tourIds(f){return (f&&f.tour&&f.tour.length)?f.tour:(f?f.steps.map(function(st){return st.screen;}):[]);}
+function encodeHash(){
+  if(state.view==='start')return '#/start';
+  if(state.view==='layers')return '#/layers';
+  if(state.view==='layer')return '#/layer/'+state.layer;
+  if(state.view==='flow')return '#/flow/'+state.flow;
+  if(state.view==='ui')return '#/ui'+(state.role?'/'+state.role:'');
+  if(state.view==='domain')return '#/ui'+(state.role?'/'+state.role:'')+'/'+state.domain;
+  if(state.view==='screen'||state.view==='follow'){
+    var tail=(state.view==='follow'?'/call':'');
+    if(state.flow)return '#/flow/'+state.flow+'/'+state.screen+tail;
+    return '#/ui'+(state.role?'/'+state.role:'')+'/'+(state.domain||'A')+'/'+state.screen+tail;
+  }
+  return '#/start';
+}
+function applyHash(){
+  var parts=location.hash.replace(/^#\/?/,'').split('/').filter(Boolean);
+  resetState();
+  if(!parts.length||parts[0]==='start')return;
+  if(parts[0]==='layers'){state.view='layers';return;}
+  if(parts[0]==='layer'){state.view='layer';state.layer=parts[1]||'entry';return;}
+  if(parts[0]==='flow'){
+    state.flow=parts[1]||null;
+    if(!parts[2]){state.view='flow';return;}
+    state.screen=parts[2];
+    var sc=findScreen(state.screen);if(sc)state.domain=sc.domain;
+    state.view=parts[3]==='call'?'follow':'screen';
+    return;
+  }
+  if(parts[0]==='ui'){
+    var i=1;
+    if(parts[i]&&ROLES.indexOf(parts[i])>=0){state.role=parts[i];i++;}
+    if(!parts[i]){state.view='ui';return;}
+    state.domain=parts[i];
+    if(!parts[i+1]){state.view='domain';return;}
+    state.screen=parts[i+1];
+    state.view=parts[i+2]==='call'?'follow':'screen';
+  }
+}
+function go(view,extra){
+  if(view==='start')resetState();
+  else{
+    state.view=view;
+    if(extra){for(var k in extra){if(Object.prototype.hasOwnProperty.call(extra,k))state[k]=extra[k];}}
+    if(view==='layers'){state.role=null;state.flow=null;state.screen=null;state.domain=null;state.layer=null;}
+    if(view==='layer'){state.flow=null;state.screen=null;state.domain=null;}
+    if(view==='ui'){state.flow=null;state.screen=null;state.domain=null;state.layer=null;}
+    if(view==='domain'){state.flow=null;state.screen=null;state.layer=null;}
+    if(view==='flow'){state.role=null;state.layer=null;state.screen=null;state.domain=null;}
+    if((view==='screen'||view==='follow')&&state.screen){
+      var s=findScreen(state.screen);if(s&&!state.domain)state.domain=s.domain;
+    }
+  }
+  var h=encodeHash();
+  if(location.hash===h){render();return;}
+  location.hash=h;
+}
+function parentGo(){
+  if(state.view==='follow'){go('screen');return;}
+  if(state.view==='screen'){go(state.flow?'flow':'domain');return;}
+  if(state.view==='flow'||state.view==='layers'||state.view==='ui'){go('start');return;}
+  if(state.view==='domain'){go('ui');return;}
+  if(state.view==='layer'){go('layers');return;}
+  go('start');
+}
+function crumb(items){
+  var h='<div class="crumb">';
+  items.forEach(function(it,i){
+    if(i)h+='<span class="sep">·</span>';
+    if(it.view){
+      var a=' type="button" class="crumblink" data-goto="'+it.view+'"';
+      if(it.role)a+=' data-role="'+it.role+'"';
+      if(it.domain)a+=' data-domain="'+it.domain+'"';
+      if(it.screen)a+=' data-screen-id="'+it.screen+'"';
+      if(it.layer)a+=' data-layer="'+it.layer+'"';
+      if(it.flow)a+=' data-flow="'+it.flow+'"';
+      if(it.clearFlow)a+=' data-clear-flow="1"';
+      h+='<button'+a+'>'+it.label+'</button>';
+    }else h+='<span class="here">'+it.label+'</span>';
+  });
+  return h+'</div>';
+}
+function neighborBtns(prev,next){
+  var h='<div class="row">';
+  h+='<button type="button" class="hot" data-goto="start">Home</button>';
+  if(prev){
+    var pa=' type="button" class="hot" data-goto="'+prev.view+'"';
+    if(prev.role)pa+=' data-role="'+prev.role+'"';
+    if(prev.domain)pa+=' data-domain="'+prev.domain+'"';
+    if(prev.screen)pa+=' data-screen-id="'+prev.screen+'"';
+    if(prev.layer)pa+=' data-layer="'+prev.layer+'"';
+    if(prev.flow)pa+=' data-flow="'+prev.flow+'"';
+    if(prev.clearFlow)pa+=' data-clear-flow="1"';
+    h+='<button'+pa+'>← '+prev.label+'</button>';
+  }else h+='<button type="button" class="hot" disabled>← Previous</button>';
+  if(next){
+    var na=' type="button" class="hot primary" data-goto="'+next.view+'"';
+    if(next.role)na+=' data-role="'+next.role+'"';
+    if(next.domain)na+=' data-domain="'+next.domain+'"';
+    if(next.screen)na+=' data-screen-id="'+next.screen+'"';
+    if(next.layer)na+=' data-layer="'+next.layer+'"';
+    if(next.flow)na+=' data-flow="'+next.flow+'"';
+    if(next.clearFlow)na+=' data-clear-flow="1"';
+    h+='<button'+na+'>'+next.label+' →</button>';
+  }else h+='<button type="button" class="hot" disabled>Next →</button>';
+  return h+'</div>';
+}
+function flowStepNav(sid){
+  var f=findFlow(state.flow);if(!f)return neighborBtns(null,null);
+  var ids=tourIds(f),i=ids.indexOf(sid);
+  var prev=i>0?{view:'screen',screen:ids[i-1],flow:f.id,label:ids[i-1]}:null;
+  var next=i>=0&&i<ids.length-1?{view:'screen',screen:ids[i+1],flow:f.id,label:ids[i+1]}:null;
+  return neighborBtns(prev,next);
+}
+function domainStepNav(){
+  var list=byDomain(state.domain),i=-1,j;
+  for(j=0;j<list.length;j++)if(list[j].id===state.screen)i=j;
+  var prev=i>0?{view:'screen',screen:list[i-1].id,domain:state.domain,clearFlow:true,label:list[i-1].title}:null;
+  var next=i>=0&&i<list.length-1?{view:'screen',screen:list[i+1].id,domain:state.domain,clearFlow:true,label:list[i+1].title}:null;
+  return neighborBtns(prev,next);
+}
+function layerStepNav(){
+  var i=-1,j;
+  for(j=0;j<LAYERS.length;j++)if(LAYERS[j].id===state.layer)i=j;
+  var prev=i>0?{view:'layer',layer:LAYERS[i-1].id,label:LAYERS[i-1].t}:null;
+  var next=i>=0&&i<LAYERS.length-1?{view:'layer',layer:LAYERS[i+1].id,label:LAYERS[i+1].t}:null;
+  return neighborBtns(prev,next);
+}
+function domainListNav(){
+  var ds=domains(),i=-1,j;
+  for(j=0;j<ds.length;j++)if(ds[j].id===state.domain)i=j;
+  var prev=i>0?{view:'domain',domain:ds[i-1].id,role:state.role||undefined,clearFlow:true,label:ds[i-1].id+' '+ds[i-1].name}:null;
+  var next=i>=0&&i<ds.length-1?{view:'domain',domain:ds[i+1].id,role:state.role||undefined,clearFlow:true,label:ds[i+1].id+' '+ds[i+1].name}:null;
+  return neighborBtns(prev,next);
+}
+function syncHeader(){
+  var home=document.getElementById('homeBtn'), back=document.getElementById('backBtn');
+  if(home)home.disabled=state.view==='start';
+  if(back)back.disabled=state.view==='start';
 }
 
 function startView(){
@@ -166,17 +308,17 @@ function startView(){
     '<div class="note"><b>Demo is UI gold and incomplete.</b> Screen ids, template steps, and Owner / Who / Why / How / When live in <code>tutor-platform-demo.html</code>. This map reads <code>catalog/embed.js</code> after <code>python scripts/build_catalog.py</code>. '+staffLoginNote()+' Parent hub (<code>parent-home</code>) is activity, marksheet, results, receipts, and teacher chat — own child only; same ids as the demo. Role HTML files are generated children (one lane, no extra features). If this map disagrees with the demo, the demo wins — rebuild catalog, then this page follows.</div>'+
     '<p class="k" style="margin-bottom:8px">Example workspaces (same engine)</p>'+
     '<div class="grid g3">'+TENANTS.map(function(t){
-      return '<div class="card" data-goto="layers"><span class="count">'+t.tpl+'</span><h3>'+t.name+'</h3><p>'+t.copy+'</p></div>';
+      return '<button type="button" class="card" data-goto="layers"><span class="count">'+t.tpl+'</span><h3>'+t.name+'</h3><p>'+t.copy+'</p></button>';
     }).join('')+'</div>'+
     '<p class="k" style="margin:22px 0 8px">Six template tracks (from demo)</p>'+
     '<div class="grid g2">'+flows.map(function(f){
-      return '<button class="card" data-goto="flow" data-flow="'+f.id+'"><span class="count">'+f.id+' · '+f.tour.length+' screens · '+f.tier+(tourHas(f,'staff-login')?' · staff sign-in':' · no staff sign-in')+(tourHas(f,'parent-home')?' · parent hub':'')+'</span><h3>'+f.name+'</h3><p>'+f.blurb+'</p></button>';
+      return '<button type="button" class="card" data-goto="flow" data-flow="'+f.id+'"><span class="count">'+f.id+' · '+f.tour.length+' screens · '+f.tier+(tourHas(f,'staff-login')?' · staff sign-in':' · no staff sign-in')+(tourHas(f,'parent-home')?' · parent hub':'')+'</span><h3>'+f.name+'</h3><p>'+f.blurb+'</p></button>';
     }).join('')+'</div>'+
     '<p class="k" style="margin:22px 0 8px">Enter as a swimlane role</p>'+
     '<div class="grid g2">'+ROLES.map(function(r){
-      return '<button class="card" data-goto="ui" data-role="'+r+'"><h3>'+r+'</h3><p>Screens this role sits on in demo steps (not chrome-only).</p></button>';
+      return '<button type="button" class="card" data-goto="ui" data-role="'+r+'"><h3>'+r+'</h3><p>Screens this role sits on in demo steps (not chrome-only).</p></button>';
     }).join('')+'</div>'+
-    '<div class="row"><button class="hot primary" data-goto="layers">All layers (architect view)</button>'+
+    '<div class="row"><button type="button" class="hot primary" data-goto="layers">All layers (architect view)</button>'+
     '<a class="btn" href="tutor-platform-demo.html">Open UI prototype</a></div>'+
     '<p class="muted" style="margin-top:16px">Role children (generated, not linked from the demo chrome): '+
     ['student','faculty','admin','parent','system'].map(function(r){return '<a class="btn" href="tutor-platform-role-'+r+'.html">'+r+'</a>';}).join(' ')+'</p>';
@@ -188,9 +330,13 @@ function flowTrackView(){
   var rows=f.steps.map(function(st,i){
     var s=findScreen(st.screen);
     var why=s&&s.why?s.why:(st.auto||'');
-    return '<button class="card" data-goto="screen" data-screen-id="'+st.screen+'"><span class="count">'+(st.auto?'auto':'step')+' · '+st.role+' · '+st.stage+'</span><h3>'+(s?s.title:st.screen)+'</h3><p>'+why+'</p></button>';
+    return '<button type="button" class="card" data-goto="screen" data-screen-id="'+st.screen+'" data-flow="'+f.id+'"><span class="count">'+(st.auto?'auto':'step')+' · '+st.role+' · '+st.stage+'</span><h3>'+(s?s.title:st.screen)+'</h3><p>'+why+'</p></button>';
   }).join('');
-  return crumb(['Start','Track '+f.id])+'<h1>'+f.name+'</h1>'+
+  var flows=C.flows||[],fi=-1,k;
+  for(k=0;k<flows.length;k++)if(flows[k].id===f.id)fi=k;
+  var prevF=fi>0?{view:'flow',flow:flows[fi-1].id,label:flows[fi-1].short||flows[fi-1].id}:null;
+  var nextF=fi>=0&&fi<flows.length-1?{view:'flow',flow:flows[fi+1].id,label:flows[fi+1].short||flows[fi+1].id}:null;
+  return crumb([{label:'Home',view:'start'},{label:f.name}])+neighborBtns(prevF,nextF)+'<h1>'+f.name+'</h1>'+
     '<p class="lead">'+f.blurb+' · '+f.shape+' · tier '+f.tier+'. Same ids as the demo swimlane. Staff sign-in: '+(tourHas(f,'staff-login')?'on this track':'omitted')+'. Parent hub: '+(tourHas(f,'parent-home')?'on this track':'off')+'.</p>'+
     '<div class="grid g2">'+rows+'</div>'+
     '<div class="row"><a class="btn primary" href="tutor-platform-demo.html#/'+f.id+'/flow">Open this flow in the demo</a>'+
@@ -201,9 +347,9 @@ function flowTrackView(){
 }
 
 function layersView(){
-  var h=crumb(['Start','Layers'])+'<h1>Request path</h1><p class="lead">Click a layer. From UI you drill into 47 screens. Back returns one step.</p><div class="lane">';
+  var h=crumb([{label:'Home',view:'start'},{label:'Layers'}])+'<h1>Request path</h1><p class="lead">Click a layer. From UI you drill into 47 screens. Home returns to Start. Back is one step up. Previous / Next walks a track, a domain, or these layers.</p><div class="lane">';
   LAYERS.forEach(function(L,i){
-    h+='<button class="card" data-goto="layer" data-layer="'+L.id+'"><span class="k">'+String(i+1).padStart(2,'0')+'</span><h3>'+L.t+'</h3><p>'+L.d+'</p></button>';
+    h+='<button type="button" class="card" data-goto="layer" data-layer="'+L.id+'"><span class="k">'+String(i+1).padStart(2,'0')+'</span><h3>'+L.t+'</h3><p>'+L.d+'</p></button>';
     if(i<LAYERS.length-1)h+='<div class="arrow">↓</div>';
   });
   return h+'</div>';
@@ -211,34 +357,35 @@ function layersView(){
 
 function layerView(){
   var L=LAYERS.filter(function(x){return x.id===state.layer;})[0];
+  if(!L)return '<p>Unknown layer</p>'+neighborBtns(null,null);
   var extra='';
-  if(state.layer==='ui') extra='<div class="row"><button class="hot primary" data-goto="ui">Open 47 screens by domain</button></div>';
+  if(state.layer==='ui') extra='<div class="row"><button type="button" class="hot primary" data-goto="ui">Open 47 screens by domain</button></div>';
   if(state.layer==='mw') extra='<ul class="plain">'+MW.map(function(m){return '<li>'+m+'</li>';}).join('')+'</ul>';
   if(state.layer==='ports') extra='<ul class="plain">'+C.ports.map(function(p){return '<li><code>'+p.id+'</code> · '+p.env+' default <code>'+p.default+'</code>'+(p.roles?' · WhatsApp roles: '+p.roles.join(', ')+'; student default '+p.studentDefault:'')+'</li>';}).join('')+'</ul>';
   if(state.layer==='db') extra='<ul class="plain">'+C.entities.filter(function(e){return e.tier==='spine';}).map(function(e){return '<li><code>'+e.id+'</code></li>';}).join('')+'</ul><p class="muted" style="margin-top:8px">Later: '+C.entities.filter(function(e){return e.tier==='later';}).map(function(e){return e.id;}).join(', ')+'</p>';
   if(state.layer==='api') extra='<p class="muted">'+C.apis.length+' planned routes. Open a screen card to see the ones it uses.</p>';
   if(state.layer==='svc') extra='<ul class="plain"><li>TimelinePort.append</li><li>ModuleFlags.ensure</li><li>SessionRecord.fanout</li><li>Notify.dispatch (teacher, parent, admin; student if enabled)</li><li>QuotaGuard.check</li></ul>';
-  if(state.layer==='entry') extra='<div class="row">'+ROLES.map(function(r){return '<button class="hot" data-goto="ui" data-role="'+r+'">'+r+'</button>';}).join('')+'</div>';
-  return crumb(['Start','Layers',L.t])+'<h1>'+L.t+'</h1><p class="lead">'+L.d+'</p>'+extra;
+  if(state.layer==='entry') extra='<div class="row">'+ROLES.map(function(r){return '<button type="button" class="hot" data-goto="ui" data-role="'+r+'">'+r+'</button>';}).join('')+'</div>';
+  return crumb([{label:'Home',view:'start'},{label:'Layers',view:'layers'},{label:L.t}])+layerStepNav()+'<h1>'+L.t+'</h1><p class="lead">'+L.d+'</p>'+extra;
 }
 
 function uiView(){
   var filter=state.role?' · role '+state.role:'';
-  return crumb(['Start','UI'+filter])+'<h1>UI · seven domains</h1>'+
+  return crumb([{label:'Home',view:'start'},{label:'UI'+filter}])+'<h1>UI · seven domains</h1>'+
     '<p class="lead">47 screens from demo <code>S</code>. Role filter uses swimlane steps (a screen can appear as student and as system). Chrome (appnav, sidebars) is not extra screens.</p>'+
     '<div class="grid g2">'+domains().map(function(d){
       var n=byDomain(d.id).length;
-      return '<button class="card" data-goto="domain" data-domain="'+d.id+'"><span class="count">'+d.id+' · '+n+' screens</span><h3>'+d.name+'</h3></button>';
+      return '<button type="button" class="card" data-goto="domain" data-domain="'+d.id+'"'+(state.role?' data-role="'+state.role+'"':'')+' data-clear-flow="1"><span class="count">'+d.id+' · '+n+' screens</span><h3>'+d.name+'</h3></button>';
     }).join('')+'</div>';
 }
 
 function domainView(){
   var list=byDomain(state.domain);
   var name=list[0]?list[0].domainName:state.domain;
-  return crumb(['Start','UI',name])+'<h1>'+state.domain+' · '+name+'</h1>'+
+  return crumb([{label:'Home',view:'start'},{label:'UI',view:'ui',role:state.role||undefined},{label:name}])+domainListNav()+'<h1>'+state.domain+' · '+name+'</h1>'+
     '<p class="lead">'+list.length+' screens'+(state.role?' for '+state.role:'')+'.</p>'+
     '<div class="grid g2">'+list.map(function(s){
-      return '<button class="card" data-screen="'+s.id+'" data-goto="screen" data-screen-id="'+s.id+'"><span class="count">'+s.module+' · '+s.role+' · '+s.frame+'</span><h3>'+s.title+'</h3><p>'+s.shows+'</p></button>';
+      return '<button type="button" class="card" data-screen="'+s.id+'" data-goto="screen" data-screen-id="'+s.id+'" data-clear-flow="1"'+(state.role?' data-role="'+state.role+'"':'')+' data-domain="'+state.domain+'"><span class="count">'+s.module+' · '+s.role+' · '+s.frame+'</span><h3>'+s.title+'</h3><p>'+s.shows+'</p></button>';
     }).join('')+'</div>';
 }
 
@@ -252,7 +399,11 @@ function whyBlock(s){
 function screenView(){
   var s=findScreen(state.screen);
   if(!s)return '<p>Unknown screen</p>';
-  return crumb(['Start','UI',s.domainName,s.title])+'<span class="pill" data-screen="'+s.id+'">'+s.id+'</span>'+
+  var trail=state.flow
+    ?[{label:'Home',view:'start'},{label:(findFlow(state.flow)||{}).name||state.flow,view:'flow',flow:state.flow},{label:s.title}]
+    :[{label:'Home',view:'start'},{label:'UI',view:'ui',role:state.role||undefined},{label:s.domainName,view:'domain',domain:s.domain,role:state.role||undefined,clearFlow:true},{label:s.title}];
+  var steps=state.flow?flowStepNav(s.id):domainStepNav();
+  return crumb(trail)+steps+'<span class="pill" data-screen="'+s.id+'">'+s.id+'</span>'+
     '<span class="pill">'+s.module+'</span><span class="pill">phase '+s.phase+'</span><span class="pill">'+s.status+'</span>'+
     '<span class="pill">lanes '+(s.roles||[s.role]).join(', ')+'</span>'+
     '<h1 style="margin-top:10px">'+s.title+'</h1>'+
@@ -264,14 +415,18 @@ function screenView(){
     '<div class="call"><b>Entities</b>'+(s.entities.length?s.entities.map(function(e){return '<code>'+e+'</code> ';}).join(''):'—')+'</div>'+
     '<div class="call"><b>Ports</b>'+(s.ports.length?s.ports.map(function(e){return '<code>'+e+'</code> ';}).join(''):'none')+'</div>'+
     '<div class="call"><b>Timeline events</b>'+(s.timelineEvents.length?s.timelineEvents.join(', '):'—')+'</div>'+
-    '<div class="row"><button class="hot primary" data-goto="follow">Follow the call</button>'+
+    '<div class="row"><button type="button" class="hot primary" data-goto="follow"'+(state.flow?' data-flow="'+state.flow+'"':'')+'>Follow the call</button>'+
     '<a class="btn" href="'+demoScreenHref(s.id)+'">Open in demo (Everything)</a>'+
     '<a class="btn" href="'+roleScreenHref(s)+'">Open role child</a></div>';
 }
 
 function followView(){
   var s=findScreen(state.screen);
-  return crumb(['Start','UI',s.title,'Call'])+'<h1>Follow the call</h1>'+
+  if(!s)return '<p>Unknown screen</p>';
+  var trail=state.flow
+    ?[{label:'Home',view:'start'},{label:(findFlow(state.flow)||{}).name||state.flow,view:'flow',flow:state.flow},{label:s.title,view:'screen',screen:s.id,flow:state.flow},{label:'Call'}]
+    :[{label:'Home',view:'start'},{label:'UI',view:'ui',role:state.role||undefined},{label:s.title,view:'screen',screen:s.id,clearFlow:true,domain:s.domain,role:state.role||undefined},{label:'Call'}];
+  return crumb(trail)+(state.flow?flowStepNav(s.id):domainStepNav())+'<h1>Follow the call</h1>'+
     '<p class="lead">Teaching writes the ledger first. Paid channels run through QuotaGuard. Why this screen exists is copied from the demo.</p>'+
     whyBlock(s)+
     '<div class="lane">'+
@@ -295,35 +450,43 @@ function render(){
   else if(state.view==='screen'){lbl.textContent=state.screen;html=screenView();}
   else if(state.view==='follow'){lbl.textContent='call';html=followView();}
   stage.innerHTML=html;
+  syncHeader();
   window.scrollTo(0,0);
 }
 
-function back(){
-  if(state.view==='follow'){go('screen');return;}
-  if(state.view==='screen'){go(state.flow?'flow':'domain');return;}
-  if(state.view==='flow'){go('start');return;}
-  if(state.view==='domain'){go('ui');return;}
-  if(state.view==='ui'){go(state.role?'start':'layers');return;}
-  if(state.view==='layer'){go('layers');return;}
-  if(state.view==='layers'){go('start');return;}
-  go('start');
-}
-
-document.getElementById('brandHome').addEventListener('click',function(){go('start');});
-document.getElementById('backBtn').addEventListener('click',back);
-document.addEventListener('click',function(e){
-  var g=e.target.closest('[data-goto]');
-  if(!g)return;
-  var v=g.getAttribute('data-goto');
+function extraFrom(g){
   var extra={};
   if(g.getAttribute('data-role'))extra.role=g.getAttribute('data-role');
   if(g.getAttribute('data-domain'))extra.domain=g.getAttribute('data-domain');
   if(g.getAttribute('data-screen-id'))extra.screen=g.getAttribute('data-screen-id');
   if(g.getAttribute('data-layer'))extra.layer=g.getAttribute('data-layer');
-  if(g.getAttribute('data-flow'))extra.flow=g.getAttribute('data-flow');
-  go(v,extra);
+  if(g.hasAttribute('data-flow'))extra.flow=g.getAttribute('data-flow');
+  else if(g.hasAttribute('data-clear-flow'))extra.flow=null;
+  else if(g.getAttribute('data-goto')==='screen'&&!g.hasAttribute('data-flow'))extra.flow=null;
+  return extra;
+}
+
+document.getElementById('backBtn').addEventListener('click',function(e){
+  e.preventDefault();
+  parentGo();
 });
-render();
+document.getElementById('fwdBtn').addEventListener('click',function(e){
+  e.preventDefault();
+  history.forward();
+});
+document.addEventListener('click',function(e){
+  var g=e.target.closest('[data-goto]');
+  if(!g||g.disabled)return;
+  e.preventDefault();
+  go(g.getAttribute('data-goto'),extraFrom(g));
+});
+window.addEventListener('hashchange',function(){
+  if(!location.hash||location.hash==='#'){location.replace('#/start');return;}
+  applyHash();
+  render();
+});
+if(!location.hash||location.hash==='#')location.replace('#/start');
+else{applyHash();render();}
 })();
 </script>
 <noscript><p style="padding:24px">This map needs JavaScript.</p></noscript>

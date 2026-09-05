@@ -106,6 +106,12 @@ def main() -> int:
         fail("architecture HTML must mention parent-home hub")
     if "tutor-platform-demo.html#/" not in html:
         fail("architecture HTML must deep-link demo with hash routes")
+    if 'id="homeBtn"' not in html or 'data-goto="start"' not in html:
+        fail("architecture HTML must expose Home → start")
+    if "encodeHash" not in html or "#/start" not in html:
+        fail("architecture HTML must hash-route views so back/forth works")
+    if "parentGo" not in html:
+        fail("architecture HTML must implement one-step Back")
     if "tutor-platform-role-faculty.html" not in html:
         fail("architecture HTML must link faculty role child")
     t1 = next((f for f in flows if f.get("id") == "t1"), None)
