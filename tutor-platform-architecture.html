@@ -1,0 +1,271 @@
+<meta charset="utf-8">
+<title>TutorOS — Architecture map</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#F3F6F0; --surface:#FBFCF9; --sunk:#EBEFE6; --raised:#FFFFFF;
+  --ink:#182019; --ink-soft:#4C574F; --ink-faint:#7E8A81;
+  --line:#D6DCCF; --line-soft:#E4E9DD;
+  --accent:#2E7D4F; --accent-ink:#1E5738; --accent-wash:#E4EFE5;
+  --amber:#AF6C22; --amber-wash:#F5E9D8;
+  --crimson:#A4384A; --crimson-wash:#F3E0E1;
+  --sky:#2C6C88; --sky-wash:#DDEAEE;
+  --violet:#6A4C93; --violet-wash:#E9E2F1;
+  --serif:"Spectral",Georgia,"Times New Roman",serif;
+  --sans:"Hanken Grotesk",system-ui,-apple-system,Segoe UI,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --shadow:0 1px 2px rgba(24,32,25,.04), 0 12px 34px -12px rgba(24,32,25,.18);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0C110E; --surface:#171E19; --sunk:#10150F; --raised:#1E251F;
+    --ink:#E6ECE3; --ink-soft:#A4AEA4; --ink-faint:#6C776E;
+    --line:#26302A; --line-soft:#1D251F;
+    --accent:#5CB57C; --accent-ink:#8CD3A5; --accent-wash:#173224;
+    --amber:#D3944F; --amber-wash:#332413;
+    --crimson:#D06E7A; --crimson-wash:#331A1E;
+    --sky:#6BA7C2; --sky-wash:#122831;
+    --violet:#A98FD6; --violet-wash:#241C33;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 40px -14px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0C110E; --surface:#171E19; --sunk:#10150F; --raised:#1E251F;
+  --ink:#E6ECE3; --ink-soft:#A4AEA4; --ink-faint:#6C776E;
+  --line:#26302A; --line-soft:#1D251F;
+  --accent:#5CB57C; --accent-ink:#8CD3A5; --accent-wash:#173224;
+  --amber:#D3944F; --amber-wash:#332413;
+  --crimson:#D06E7A; --crimson-wash:#331A1E;
+  --sky:#6BA7C2; --sky-wash:#122831;
+  --violet:#A98FD6; --violet-wash:#241C33;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.15;margin:0}
+p{margin:0}
+button,a.btn{font-family:inherit;cursor:pointer}
+.k{font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)}
+#top{position:sticky;top:0;z-index:40;height:56px;display:flex;align-items:center;gap:9px;padding:0 12px;background:color-mix(in srgb,var(--ground) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft)}
+#top .brand{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-weight:600;font-size:15px;cursor:pointer}
+#top .brand i{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:2px 6px;font-style:normal}
+.iconbtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;height:31px;padding:0 10px;font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft)}
+#stage{padding:22px 20px 64px;max-width:1100px;margin:0 auto}
+.lead{max-width:46rem;color:var(--ink-soft);margin:8px 0 22px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;box-shadow:var(--shadow);cursor:pointer;text-align:left;width:100%;color:inherit}
+.card:hover{border-color:var(--ink-faint)}
+.card h3{font-size:1.05rem;margin-bottom:4px}
+.card p,.muted{color:var(--ink-soft);font-size:.9rem}
+.count{font-family:var(--mono);font-size:11px;color:var(--accent-ink)}
+.lane{display:flex;flex-direction:column;gap:10px;max-width:520px;margin:0 auto}
+.lane .card{text-align:center}
+.arrow{text-align:center;color:var(--ink-faint);font-size:18px}
+.crumb{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-bottom:10px}
+.pill{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:999px;background:var(--sunk);margin-right:4px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+a.btn,button.hot{display:inline-flex;align-items:center;border:1px solid var(--line);background:var(--raised);border-radius:8px;padding:8px 12px;color:var(--ink);text-decoration:none;font-size:.85rem}
+button.hot.primary,a.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.call{border-left:3px solid var(--accent);padding:10px 14px;background:var(--surface);margin:10px 0}
+.call b{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-bottom:4px}
+.note{background:var(--amber-wash);border-radius:10px;padding:12px 14px;font-size:.88rem;margin:16px 0}
+ul.plain{margin:8px 0 0;padding-left:1.1rem;color:var(--ink-soft)}
+</style>
+<header id="top">
+  <div class="brand" id="brandHome">
+    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 3c3.5 3 3.5 15 0 18M3.2 9.5h17.6M3.2 14.5h17.6"/></svg>
+    TutorOS <i>architecture</i>
+  </div>
+  <span class="k" id="tlbl" style="margin:0 auto">system map</span>
+  <button class="iconbtn" id="backBtn">Back</button>
+  <button class="iconbtn" id="themeBtn">Theme</button>
+</header>
+<main id="stage"></main>
+<script src="catalog/embed.js"></script>
+<script>
+(function(){
+var root=document.documentElement, tb=document.getElementById('themeBtn');
+var torder=['system','light','dark'], ti=0;
+try{var sv=localStorage.getItem('tos_arch_theme');if(sv)ti=Math.max(0,torder.indexOf(sv));}catch(e){}
+function applyTheme(){var m=torder[ti];if(m==='system'){root.removeAttribute('data-theme');tb.textContent='Theme · Auto';}else{root.setAttribute('data-theme',m);tb.textContent='Theme · '+m[0].toUpperCase()+m.slice(1);}try{localStorage.setItem('tos_arch_theme',m);}catch(e){}}
+tb.addEventListener('click',function(){ti=(ti+1)%torder.length;applyTheme();});
+applyTheme();
+
+var C=window.TUTOROS_CATALOG;
+if(!C){document.getElementById('stage').innerHTML='<p class="lead">Missing catalog/embed.js. Run <code>python scripts/build_catalog.py</code>.</p>';return;}
+
+var LAYERS=[
+  {id:'entry',t:'Entry',d:'Role + workspace. Student, teacher, admin, parent, system.'},
+  {id:'ui',t:'UI',d:'47 screens in seven domains. Fluid, content-first, one primary action.'},
+  {id:'api',t:'API',d:'FastAPI /api/v1 routers by domain. Planned contracts, not live handlers.'},
+  {id:'mw',t:'Middleware',d:'CORS → request id → tenant → authn → authz + flags → QuotaGuard → idempotency → audit.'},
+  {id:'svc',t:'Services',d:'No HTTP. TimelinePort, ModuleFlags, SessionRecord.fanout, Notify.dispatch.'},
+  {id:'ports',t:'Ports',d:'Google Meet, Teams, SMS, email, storage, two payment ports, push, WhatsApp.'},
+  {id:'db',t:'PostgreSQL',d:'workspace_id on every business table. topics/taxonomies, not a syllabus.'}
+];
+var TENANTS=[
+  {id:'coaching',name:'Meridian Coaching',tpl:'Exam-prep',copy:'Sample content may mention a science topic. Biology here is fixture copy, not a module.'},
+  {id:'lang',name:'Northshore Languages',tpl:'1-on-1',copy:'Same engine: sessions, assignments, timeline, billing.'},
+  {id:'music',name:'Atelier Strings',tpl:'Music / arts',copy:'Same engine: recitals, guardian view, practice log.'}
+];
+var ROLES=['student','faculty','admin','parent','system'];
+var MW=['CORS allowlist','Request id','Tenant (workspace_id)','AuthN (OTP / magic link / JWT)','AuthZ (role + G1 flag → 404 if module off)','QuotaGuard (warn 80% / block paid send at 100%)','Idempotency on writes','Audit (staff mutations)'];
+
+var state={view:'start',role:null,domain:null,screen:null,layer:null};
+
+function screens(){return C.screens;}
+function byDomain(d){return screens().filter(function(s){return s.domain===d && (!state.role || state.role==='system' || s.role===state.role);});}
+function domains(){
+  var order=['A','B','C','D','E','F','G'], out=[];
+  order.forEach(function(d){
+    var list=screens().filter(function(s){return s.domain===d;});
+    out.push({id:d,name:list[0].domainName,n:list.length});
+  });
+  return out;
+}
+function findScreen(id){for(var i=0;i<C.screens.length;i++)if(C.screens[i].id===id)return C.screens[i];return null;}
+
+function go(view,extra){
+  state.view=view;
+  if(extra){for(var k in extra)state[k]=extra[k];}
+  if(view==='start'){state.role=null;state.domain=null;state.screen=null;state.layer=null;}
+  render();
+}
+function crumb(parts){
+  return '<div class="crumb">'+parts.join(' · ')+'</div>';
+}
+
+function startView(){
+  return '<p class="k">Start</p><h1>Someone opens TutorOS</h1>'+
+    '<p class="lead">Subject-neutral remote tutoring OS. Same engine for exam-prep, languages, music, skills. Biology / NEET files in this repo are one exam-prep <b>example tenant</b>, not the product.</p>'+
+    '<p class="k" style="margin-bottom:8px">Example workspaces (same engine)</p>'+
+    '<div class="grid g3">'+TENANTS.map(function(t){
+      return '<div class="card" data-goto="layers"><span class="count">'+t.tpl+'</span><h3>'+t.name+'</h3><p>'+t.copy+'</p></div>';
+    }).join('')+'</div>'+
+    '<p class="k" style="margin:22px 0 8px">Enter as a role</p>'+
+    '<div class="grid g2">'+ROLES.map(function(r){
+      return '<button class="card" data-goto="ui" data-role="'+r+'"><h3>'+r+'</h3><p>Open the UI layer filtered to this role.</p></button>';
+    }).join('')+'</div>'+
+    '<div class="row"><button class="hot primary" data-goto="layers">All layers (architect view)</button>'+
+    '<a class="btn" href="tutor-platform-demo.html">Open UI prototype</a></div>';
+}
+
+function layersView(){
+  var h=crumb(['Start','Layers'])+'<h1>Request path</h1><p class="lead">Click a layer. From UI you drill into 47 screens. Back returns one step.</p><div class="lane">';
+  LAYERS.forEach(function(L,i){
+    h+='<button class="card" data-goto="layer" data-layer="'+L.id+'"><span class="k">'+String(i+1).padStart(2,'0')+'</span><h3>'+L.t+'</h3><p>'+L.d+'</p></button>';
+    if(i<LAYERS.length-1)h+='<div class="arrow">↓</div>';
+  });
+  return h+'</div>';
+}
+
+function layerView(){
+  var L=LAYERS.filter(function(x){return x.id===state.layer;})[0];
+  var extra='';
+  if(state.layer==='ui') extra='<div class="row"><button class="hot primary" data-goto="ui">Open 47 screens by domain</button></div>';
+  if(state.layer==='mw') extra='<ul class="plain">'+MW.map(function(m){return '<li>'+m+'</li>';}).join('')+'</ul>';
+  if(state.layer==='ports') extra='<ul class="plain">'+C.ports.map(function(p){return '<li><code>'+p.id+'</code> · '+p.env+' default <code>'+p.default+'</code>'+(p.roles?' · WhatsApp roles: '+p.roles.join(', ')+'; student default '+p.studentDefault:'')+'</li>';}).join('')+'</ul>';
+  if(state.layer==='db') extra='<ul class="plain">'+C.entities.filter(function(e){return e.tier==='spine';}).map(function(e){return '<li><code>'+e.id+'</code></li>';}).join('')+'</ul><p class="muted" style="margin-top:8px">Later: '+C.entities.filter(function(e){return e.tier==='later';}).map(function(e){return e.id;}).join(', ')+'</p>';
+  if(state.layer==='api') extra='<p class="muted">'+C.apis.length+' planned routes. Open a screen card to see the ones it uses.</p>';
+  if(state.layer==='svc') extra='<ul class="plain"><li>TimelinePort.append</li><li>ModuleFlags.ensure</li><li>SessionRecord.fanout</li><li>Notify.dispatch (teacher, parent, admin; student if enabled)</li><li>QuotaGuard.check</li></ul>';
+  if(state.layer==='entry') extra='<div class="row">'+ROLES.map(function(r){return '<button class="hot" data-goto="ui" data-role="'+r+'">'+r+'</button>';}).join('')+'</div>';
+  return crumb(['Start','Layers',L.t])+'<h1>'+L.t+'</h1><p class="lead">'+L.d+'</p>'+extra;
+}
+
+function uiView(){
+  var filter=state.role?' · role '+state.role:'';
+  return crumb(['Start','UI'+filter])+'<h1>UI · seven domains</h1>'+
+    '<p class="lead">47 screens. Click a domain. Chrome (student appnav, faculty sidebar, owner sidebar, parent nav) wraps the screen — it is not extra screens.</p>'+
+    '<div class="grid g2">'+domains().map(function(d){
+      var n=byDomain(d.id).length;
+      return '<button class="card" data-goto="domain" data-domain="'+d.id+'"><span class="count">'+d.id+' · '+n+' screens</span><h3>'+d.name+'</h3></button>';
+    }).join('')+'</div>';
+}
+
+function domainView(){
+  var list=byDomain(state.domain);
+  var name=list[0]?list[0].domainName:state.domain;
+  return crumb(['Start','UI',name])+'<h1>'+state.domain+' · '+name+'</h1>'+
+    '<p class="lead">'+list.length+' screens'+(state.role?' for '+state.role:'')+'.</p>'+
+    '<div class="grid g2">'+list.map(function(s){
+      return '<button class="card" data-screen="'+s.id+'" data-goto="screen" data-screen-id="'+s.id+'"><span class="count">'+s.module+' · '+s.role+' · '+s.frame+'</span><h3>'+s.title+'</h3><p>'+s.shows+'</p></button>';
+    }).join('')+'</div>';
+}
+
+function screenView(){
+  var s=findScreen(state.screen);
+  if(!s)return '<p>Unknown screen</p>';
+  var demo='tutor-platform-demo.html?screen='+encodeURIComponent(s.id);
+  return crumb(['Start','UI',s.domainName,s.title])+'<span class="pill" data-screen="'+s.id+'">'+s.id+'</span>'+
+    '<span class="pill">'+s.module+'</span><span class="pill">phase '+s.phase+'</span><span class="pill">'+s.status+'</span>'+
+    '<h1 style="margin-top:10px">'+s.title+'</h1>'+
+    '<p class="lead">'+s.shows+'</p>'+
+    '<p class="muted">Route <code>'+s.route+'</code> · role '+s.role+' · frame '+s.frame+'</p>'+
+    '<div class="call"><b>Shows</b>'+s.shows+'</div>'+
+    '<div class="call"><b>APIs (planned)</b>'+(s.apis.length?s.apis.map(function(a){return '<div><code>'+a+'</code></div>';}).join(''):'None')+'</div>'+
+    '<div class="call"><b>Entities</b>'+(s.entities.length?s.entities.map(function(e){return '<code>'+e+'</code> ';}).join(''):'—')+'</div>'+
+    '<div class="call"><b>Ports</b>'+(s.ports.length?s.ports.map(function(e){return '<code>'+e+'</code> ';}).join(''):'none')+'</div>'+
+    '<div class="call"><b>Timeline events</b>'+(s.timelineEvents.length?s.timelineEvents.join(', '):'—')+'</div>'+
+    '<div class="row"><button class="hot primary" data-goto="follow">Follow the call</button>'+
+    '<a class="btn" href="'+demo+'">Open in demo</a></div>';
+}
+
+function followView(){
+  var s=findScreen(state.screen);
+  return crumb(['Start','UI',s.title,'Call'])+'<h1>Follow the call</h1>'+
+    '<p class="lead">Teaching writes the ledger first. Paid channels run through QuotaGuard.</p>'+
+    '<div class="lane">'+
+    '<div class="card"><span class="k">01 UI</span><h3>'+s.title+'</h3><p>'+s.route+'</p></div><div class="arrow">↓</div>'+
+    '<div class="card"><span class="k">02 API</span><h3>Routers</h3><p>'+(s.apis.join(' · ')||'—')+'</p></div><div class="arrow">↓</div>'+
+    '<div class="card"><span class="k">03 Middleware</span><h3>Tenant · Auth · Flags · QuotaGuard</h3><p>Missing module → 404. At 100% block, skip the paid send; timeline still writes.</p></div><div class="arrow">↓</div>'+
+    '<div class="card"><span class="k">04 Service</span><h3>No HTTP</h3><p>Notify.dispatch to teacher, parent, admin (student if owner-enabled). TimelinePort.append.</p></div><div class="arrow">↓</div>'+
+    '<div class="card"><span class="k">05 Ports / DB</span><h3>'+(s.ports.join(', ')||'PostgreSQL only')+'</h3><p>Entities: '+(s.entities.join(', ')||'—')+'</p></div>'+
+    '</div>';
+}
+
+function render(){
+  var stage=document.getElementById('stage'), lbl=document.getElementById('tlbl');
+  var html='';
+  if(state.view==='start'){lbl.textContent='entry';html=startView();}
+  else if(state.view==='layers'){lbl.textContent='layers';html=layersView();}
+  else if(state.view==='layer'){lbl.textContent=state.layer;html=layerView();}
+  else if(state.view==='ui'){lbl.textContent='ui';html=uiView();}
+  else if(state.view==='domain'){lbl.textContent='domain '+state.domain;html=domainView();}
+  else if(state.view==='screen'){lbl.textContent=state.screen;html=screenView();}
+  else if(state.view==='follow'){lbl.textContent='call';html=followView();}
+  stage.innerHTML=html;
+  window.scrollTo(0,0);
+}
+
+function back(){
+  if(state.view==='follow'){go('screen');return;}
+  if(state.view==='screen'){go('domain');return;}
+  if(state.view==='domain'){go('ui');return;}
+  if(state.view==='ui'){go(state.role?'start':'layers');return;}
+  if(state.view==='layer'){go('layers');return;}
+  if(state.view==='layers'){go('start');return;}
+  go('start');
+}
+
+document.getElementById('brandHome').addEventListener('click',function(){go('start');});
+document.getElementById('backBtn').addEventListener('click',back);
+document.addEventListener('click',function(e){
+  var g=e.target.closest('[data-goto]');
+  if(!g)return;
+  var v=g.getAttribute('data-goto');
+  var extra={};
+  if(g.getAttribute('data-role'))extra.role=g.getAttribute('data-role');
+  if(g.getAttribute('data-domain'))extra.domain=g.getAttribute('data-domain');
+  if(g.getAttribute('data-screen-id'))extra.screen=g.getAttribute('data-screen-id');
+  if(g.getAttribute('data-layer'))extra.layer=g.getAttribute('data-layer');
+  go(v,extra);
+});
+render();
+})();
+</script>
+<noscript><p style="padding:24px">This map needs JavaScript.</p></noscript>

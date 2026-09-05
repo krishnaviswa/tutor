@@ -1,0 +1,11 @@
+---
+description: Docs and API catalog
+globs: README.md,catalog/**,docs/**,specs/**
+alwaysApply: false
+---
+
+# Docs
+
+README.md is the product map. Catalog JSON is the contract. Specs are in-flight features. docs/examples is not requirements.
+
+If you add a screen, API, entity, or env var, update catalog + architecture HTML + README in the same change.

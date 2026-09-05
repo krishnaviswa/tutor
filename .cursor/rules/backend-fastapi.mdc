@@ -1,0 +1,11 @@
+---
+description: FastAPI conventions (stub until backend exists)
+globs: backend/**/*.py
+alwaysApply: false
+---
+
+# FastAPI (planned)
+
+No backend yet. When it exists: thin routers, logic in `services/`, REST under `/api/v1`, `require_roles()`, `QuotaGuard` after authz.
+
+See README §3 and `backend/CLAUDE.md`.

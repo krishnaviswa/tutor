@@ -1,0 +1,338 @@
+[
+  {
+    "id": "GET /api/v1/auth/me",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/auth/otp/start",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/auth/otp/verify",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/auth/magic-link",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/workspaces",
+    "status": "planned"
+  },
+  {
+    "id": "PATCH /api/v1/workspaces/current",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/workspaces/current",
+    "status": "planned"
+  },
+  {
+    "id": "PATCH /api/v1/workspaces/current/branding",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/students",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/students",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/students/import",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/cohorts",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/cohorts",
+    "status": "planned"
+  },
+  {
+    "id": "PATCH /api/v1/cohorts/{id}",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/parent-links",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/parent-links/{token}/accept",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/parent/home",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/sessions",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/sessions",
+    "status": "planned"
+  },
+  {
+    "id": "PATCH /api/v1/sessions/{id}",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/sessions/{id}",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/sessions/{id}/video-link",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/join/{token}",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/join/{token}/enter",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/sessions/{id}/live",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/sessions/{id}/engagement",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/sessions/{id}/video",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/sessions/{id}/record",
+    "status": "planned"
+  },
+  {
+    "id": "PATCH /api/v1/sessions/{id}/record",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/content",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/content",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/content/{id}",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/assignments",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/assignments",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/assignments/{id}/submissions",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/assignments/{id}/grade",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/questions",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/questions",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/practice-sets",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/practice-sets",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/practice-sets/{id}/play",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/practice-sets/{id}/attempt",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/attempts/{id}",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/tests",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/tests",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/tests/{id}/run",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/tests/{id}/submit",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/analysis/{cohortId}",
+    "status": "planned"
+  },
+  {
+    "id": "PATCH /api/v1/analysis/{id}/action",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/doubts",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/doubts",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/doubts/queue",
+    "status": "planned"
+  },
+  {
+    "id": "PATCH /api/v1/doubts/{id}",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/threads",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/threads/{id}/messages",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/announcements",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/announcements",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/students/{id}/timeline",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/notifications/prefs",
+    "status": "planned"
+  },
+  {
+    "id": "PUT /api/v1/notifications/prefs",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/me/dashboard",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/teacher/dashboard",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/owner/console",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/usage",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/reports",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/reports/export",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/backlog",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/backlog/{id}/book",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/plans",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/invoices",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/invoices/mine",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/payments/checkout",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/billing/subscription",
+    "status": "planned"
+  },
+  {
+    "id": "PATCH /api/v1/billing/quotas",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/billing/whatsapp-pause",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/payouts",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/audit",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/data-export",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/workspaces/current/template",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/templates",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/automation-rules",
+    "status": "planned"
+  },
+  {
+    "id": "PATCH /api/v1/automation-rules/{id}",
+    "status": "planned"
+  },
+  {
+    "id": "GET /api/v1/integrations",
+    "status": "planned"
+  },
+  {
+    "id": "POST /api/v1/integrations/{name}/connect",
+    "status": "planned"
+  }
+]

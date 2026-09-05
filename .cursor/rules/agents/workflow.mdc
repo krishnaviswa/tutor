@@ -1,0 +1,29 @@
+---
+description: Multi-agent build workflow — PM → Architect → Builder → Tester via Spec Kit
+alwaysApply: false
+---
+
+# Multi-agent workflow (TutorOS)
+
+Sequence (mandatory):
+
+```
+PM /speckit.specify + /speckit.clarify
+ → Architect /speckit.plan + /speckit.checklist + /speckit.analyze
+ → /speckit.tasks
+ → human OK
+ → Builder /speckit.implement
+ → Tester (report + /speckit.converge)
+ → PM Accept
+```
+
+Do not skip. Do not implement before Specified.
+
+Status: Draft → Specified → In Progress → Testing → Accepted.
+
+Artifacts: `specs/<nnn-name>/spec.md`, `plan.md`, `tasks.md`, `checklists/`, `analyze.md`.
+Active feature: `.specify/feature.json` (not the git branch).
+
+When Accepted, the same PR updates `README.md`, `catalog/`, and `tutor-platform-architecture.html` if screens, APIs, tables, or ports changed.
+
+No `/speckit.implement` on `001-platform-architecture` until architecture HTML + plan are accepted.

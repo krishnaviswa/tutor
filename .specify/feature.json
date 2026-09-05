@@ -1,0 +1,5 @@
+{
+  "featureDirectory": "specs/001-platform-architecture",
+  "featureName": "001-platform-architecture",
+  "note": "Active Spec Kit feature is this directory, not the git branch. Override with SPECIFY_FEATURE_DIRECTORY."
+}

@@ -1,0 +1,47 @@
+---
+description: TutorOS global conventions (subject-neutral)
+alwaysApply: true
+---
+
+# TutorOS
+
+Subject-neutral remote tutoring workspace. Monorepo (app code not built yet).
+
+## Stack (planned)
+- UI: Next.js 15 App Router, TypeScript (`frontend/` later)
+- API: FastAPI, `/api/v1` (`backend/` later)
+- Data: PostgreSQL (`workspace_id` on every business table)
+- Auth: OTP + magic link + JWT; roles `owner` | `teacher` | `assistant` | `student` | `parent`
+
+## Source of truth
+`README.md` is the single product document. Biology / NEET / NCERT is an **example tenant**, not the domain.
+
+Also: `tutor-platform-architecture.html`, `catalog/`, `.specify/memory/constitution.md`.
+
+## Non-negotiables
+1. Subject-neutral. Topics are G3 taxonomy. No syllabus tables.
+2. Timeline is the ledger. WhatsApp/email/push are channels.
+3. WhatsApp outbound for teacher, parent, admin; student off unless owner-enabled.
+4. QuotaGuard on metered resources. Caps throttle usage, not always-on core.
+5. Closed screen set (`catalog/screens.json`). Demo HTML is UI gold until `wired`.
+6. Ports at vendor edges; mock default. Logic in services, not routers.
+7. Never invent a screen id. Never commit secrets.
+8. Spec-driven: no `/speckit.implement` before Specified + human OK.
+
+## Claude Code parity
+
+| This Cursor rule | Mirrors |
+|---|---|
+| `project.mdc` (this file) | `CLAUDE.md` |
+| `backend-fastapi.mdc` | `backend/CLAUDE.md` |
+| `frontend-nextjs.mdc` | `frontend/CLAUDE.md` |
+| `ai-and-integrations.mdc` | `backend/app/services/CLAUDE.md` |
+| `database.mdc` | `backend/app/models/CLAUDE.md` |
+| `docs-and-api.mdc` | `docs/CLAUDE.md` |
+| `testing.mdc` | `backend/tests/CLAUDE.md`, `frontend/CLAUDE.md` |
+| `agents/workflow.mdc` | Multi-agent workflow section of `CLAUDE.md` |
+| `agents/role-product-manager.mdc` | `.claude/agents/product-manager.md` |
+| `agents/role-architect.mdc` | `.claude/agents/architect.md` |
+| `agents/role-tester.mdc` | `.claude/agents/tester.md` |
+
+**Sync rule:** same commit on both sides. `scripts/check_agent_config_sync.py`.

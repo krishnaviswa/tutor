@@ -1,0 +1,56 @@
+[
+  {
+    "id": "calendar_video",
+    "env": "VIDEO_PROVIDER",
+    "default": "mock",
+    "live": "google | microsoft"
+  },
+  {
+    "id": "sms",
+    "env": "SMS_PROVIDER",
+    "default": "mock",
+    "live": "msg91"
+  },
+  {
+    "id": "email",
+    "env": "EMAIL_PROVIDER",
+    "default": "mock",
+    "live": "ses | postmark"
+  },
+  {
+    "id": "storage",
+    "env": "STORAGE_PROVIDER",
+    "default": "local",
+    "live": "s3 | r2"
+  },
+  {
+    "id": "payments_student",
+    "env": "PAYMENTS_STUDENT_PROVIDER",
+    "default": "mock",
+    "live": "razorpay"
+  },
+  {
+    "id": "payments_platform",
+    "env": "PAYMENTS_PLATFORM_PROVIDER",
+    "default": "mock",
+    "live": "stripe"
+  },
+  {
+    "id": "push",
+    "env": "PUSH_PROVIDER",
+    "default": "mock",
+    "live": "fcm"
+  },
+  {
+    "id": "whatsapp",
+    "env": "WHATSAPP_PROVIDER",
+    "default": "mock",
+    "live": "meta_cloud",
+    "roles": [
+      "teacher",
+      "parent",
+      "admin"
+    ],
+    "studentDefault": "off"
+  }
+]
