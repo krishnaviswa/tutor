@@ -87,6 +87,27 @@ def main() -> int:
     if not (fd / "spec.md").exists():
         fail(f"missing {fd}/spec.md")
 
+    demo_text = (ROOT / "tutor-platform-demo.html").read_text(encoding="utf-8")
+    if "var ROLE_ONLY=null;" not in demo_text:
+        fail("demo.html must keep var ROLE_ONLY=null; (role children flip it)")
+    import importlib.util
+
+    _spec = importlib.util.spec_from_file_location(
+        "build_role_html", ROOT / "scripts" / "build_role_html.py"
+    )
+    _mod = importlib.util.module_from_spec(_spec)
+    assert _spec.loader is not None
+    _spec.loader.exec_module(_mod)
+    for role in _mod.ROLES:
+        path = ROOT / f"tutor-platform-role-{role}.html"
+        if not path.exists():
+            fail(f"missing {path.name} — run scripts/build_role_html.py")
+            continue
+        expected = _mod.render_role(demo_text, role)
+        actual = path.read_text(encoding="utf-8")
+        if actual.replace("\r\n", "\n") != expected.replace("\r\n", "\n"):
+            fail(f"{path.name} out of sync with demo — run scripts/build_role_html.py")
+
     if errors:
         print("architecture-parity: FAIL")
         for e in errors:
