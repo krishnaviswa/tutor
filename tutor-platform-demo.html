@@ -478,7 +478,7 @@ function stat(v,l,d,tone){return '<div class="stat"><div class="stat__v">'+v+'</
 function field(l,v,hint){return '<label class="field"><span>'+l+'</span><div class="field__in">'+v+'</div>'+(hint?'<em>'+hint+'</em>':'')+'</label>';}
 function bars(data){return '<div class="bars">'+data.map(function(d){return '<span class="bar"><b style="height:'+d[1]+'%"></b><em>'+d[0]+'</em></span>';}).join('')+'</div>';}
 function ring(pct){var r=40,c=2*Math.PI*r,off=c*(1-pct/100);return '<svg class="ring" viewBox="0 0 100 100"><circle class="ring__bg" cx="50" cy="50" r="'+r+'"/><circle class="ring__fg" cx="50" cy="50" r="'+r+'" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"/><text class="ring__t" x="50" y="50">'+pct+'%</text></svg>';}
-function hotBtn(label,goto,ghost){return '<button class="hot hot--btn'+(ghost?' ghost':'')+'" data-goto="'+goto+'">'+label+'</button>';}
+function hotBtn(label,goto,ghost,asRole){return '<button class="hot hot--btn'+(ghost?' ghost':'')+'" data-goto="'+goto+'"'+(asRole?' data-as="'+asRole+'"':'')+'>'+label+'</button>';}
 
 /* ================= data: stages + roles ================= */
 var STAGES=['Onboard','Enrol','Schedule','Teach','Practise','Assess','Support','Review','Operate','Bill','Configure'];
@@ -546,7 +546,7 @@ var S={
 var TEMPLATES=[
  {id:'t1',short:'Exam-prep',name:'Exam-prep loop',tint:'accent',tier:'Cohort',
   shape:'Cohort · high-frequency · practice-heavy',
-  blurb:'Concept → same-day practice → tagged analysis → mock. NEET / JEE / boards.',
+  blurb:'Concept → same-day practice → tagged analysis → mock. NEET / JEE / boards. Faculty starts at cohort/schedule — this track has no staff sign-in step.',
   modules:'Enrollment, cohorts, scheduling, session record, content, question bank, practice, tests, analysis, doubts, mentor backlog, dashboards',
   roles:['student','faculty','admin','parent','system'],
   steps:[
@@ -573,7 +573,7 @@ var TEMPLATES=[
   roles:['student','faculty','admin','system'],
   steps:[
    ['onboard-kind','admin','Onboard'],['branding','admin','Onboard'],
-   ['roster','admin','Enrol'],['student-login','student','Enrol'],
+   ['roster','admin','Enrol'],['student-login','student','Enrol'],['staff-login','faculty','Enrol'],
    ['schedule','faculty','Schedule'],['session-pre','faculty','Schedule'],
    ['join','student','Teach'],['live-teacher','faculty','Teach'],['session-video','faculty','Teach'],['record','faculty','Teach'],
    ['timeline','system','Teach','Session lands on the student timeline'],
@@ -589,7 +589,7 @@ var TEMPLATES=[
   roles:['student','faculty','admin','parent','system'],
   steps:[
    ['onboard-kind','admin','Onboard'],['branding','admin','Onboard'],
-   ['roster','admin','Enrol'],['parent-link','parent','Enrol'],['student-login','student','Enrol'],
+   ['roster','admin','Enrol'],['parent-link','parent','Enrol'],['student-login','student','Enrol'],['staff-login','faculty','Enrol'],
    ['schedule','faculty','Schedule'],
    ['join','student','Teach'],['live-teacher','faculty','Teach'],['record','faculty','Teach'],
    ['timeline','system','Teach','Attendance + notes → student timeline'],
@@ -606,7 +606,7 @@ var TEMPLATES=[
   roles:['student','faculty','admin','system'],
   steps:[
    ['onboard-kind','admin','Onboard'],['branding','admin','Onboard'],
-   ['cohort-builder','faculty','Enrol'],['student-login','student','Enrol'],
+   ['student-login','student','Enrol'],['staff-login','faculty','Enrol'],['cohort-builder','faculty','Enrol'],
    ['schedule','faculty','Schedule'],['session-pre','faculty','Schedule'],
    ['live-teacher','faculty','Teach'],['session-video','faculty','Teach'],['record','faculty','Teach'],
    ['library','student','Teach'],['lesson','student','Teach'],
@@ -623,7 +623,7 @@ var TEMPLATES=[
   roles:['student','faculty','admin','parent','system'],
   steps:[
    ['onboard-kind','admin','Onboard'],['branding','admin','Onboard'],
-   ['roster','admin','Enrol'],['parent-link','parent','Enrol'],
+   ['roster','admin','Enrol'],['parent-link','parent','Enrol'],['student-login','student','Enrol'],['staff-login','faculty','Enrol'],
    ['schedule','faculty','Schedule'],['session-pre','faculty','Schedule'],
    ['join','student','Teach'],['live-teacher','faculty','Teach'],['record','faculty','Teach'],
    ['timeline','system','Teach','Practice-log note added to the timeline'],
@@ -741,23 +741,64 @@ function setupHead(step){
    '</div></div>';
 }
 function tnav(kind,active){
- var t=[['Dashboard','teacher-dash','spark'],['Schedule','schedule','cal'],['Students','roster','users'],['Practice','practice-build','doc'],['Doubts','doubt-teacher','chat'],['Records','timeline','flag'],['Content','library','book']];
- var o=[['Owner console','owner','spark'],['Billing','billing','cash'],['Reports','reports','doc'],['Cohorts','roster','users'],['Schedule','schedule','cal'],['Records','timeline','flag'],['Integrations','integrations','gear']];
- var items=kind==='owner'?o:t;
+ var t=[['Dashboard',['teacher-dash','reports'],'spark','faculty'],['Schedule',['schedule'],'cal','faculty'],['Students',['roster','cohort-builder'],'users','faculty'],['Practice',['practice-build','assign-issue','qbank'],'doc','faculty'],['Doubts',['doubt-teacher','messages'],'chat','faculty'],['Records',['record','reports'],'flag','faculty'],['Content',['library'],'book','faculty']];
+ var o=[['Owner console',['owner'],'spark','admin'],['Billing',['billing'],'cash','admin'],['Reports',['reports'],'doc','admin'],['Cohorts',['roster','cohort-builder'],'users','admin'],['Schedule',['schedule'],'cal','admin'],['Records',['audit','reports'],'flag','admin'],['Integrations',['integrations'],'gear','admin']];
+ var rows=kind==='owner'?o:t;
+ var items=[];
+ rows.forEach(function(it){
+  var g=pickGoto(it[1], it[3]);
+  if(g) items.push([it[0],g,it[2],it[3]]);
+ });
  return '<aside class="cons__side">'+items.map(function(it){
-   return '<a data-goto="'+it[1]+'" class="'+(it[0]===active?'on':'')+'">'+ic(it[2])+'<span>'+it[0]+'</span></a>';
+   return '<a data-goto="'+it[1]+'" data-as="'+it[3]+'" class="'+(it[0]===active?'on':'')+'">'+ic(it[2])+'<span>'+it[0]+'</span></a>';
  }).join('')+'</aside>';
 }
 function cons(kind,active,main){return '<div class="cons">'+tnav(kind,active)+'<div class="cons__main">'+main+'</div></div>';}
 function appnav(active){
- var items=[['Home','student-dash','home'],['Classes','library','play'],['Practice','practice-play','spark'],['Doubts','doubt-student','chat'],['You','timeline','flag']];
- return '<nav class="appnav">'+items.map(function(it){return '<a data-goto="'+it[1]+'" class="'+(it[0]===active?'on':'')+'">'+ic(it[2])+'<span>'+it[0]+'</span></a>';}).join('')+'</nav>';
+ var rows=[['Home',['student-dash','join','timeline'],'home'],['Classes',['library','join','lesson'],'play'],['Practice',['practice-play'],'spark'],['Doubts',['doubt-student'],'chat'],['You',['timeline','student-dash'],'flag']];
+ var items=[];
+ rows.forEach(function(it){
+  var g=pickGoto(it[1], 'student');
+  if(g) items.push([it[0],g,it[2]]);
+ });
+ return '<nav class="appnav">'+items.map(function(it){return '<a data-goto="'+it[1]+'" data-as="student" class="'+(it[0]===active?'on':'')+'">'+ic(it[2])+'<span>'+it[0]+'</span></a>';}).join('')+'</nav>';
 }
 function pnav(active){
  var items=[['Home','parent-home','home'],['Activity','timeline','flag'],['Reports','reports','doc'],['Fees','payments','cash'],['Chat','messages','chat']];
  return '<nav class="appnav pnav">'+items.map(function(it){return '<a data-goto="'+it[1]+'" data-as="parent" class="'+(it[0]===active?'on':'')+'">'+ic(it[2])+'<span>'+it[0]+'</span></a>';}).join('')+'</nav>';
 }
 function parentView(){return ROLE_ONLY==='parent'||(state&&state.asRole==='parent');}
+function tourHas(id){
+ var T=TById(state&&state.tpl);
+ return !!(T && T.tour.indexOf(id)>=0);
+}
+function stepRoleOnTpl(id, role){
+ var T=TById(state&&state.tpl); if(!T) return S[id]&&S[id].role===role;
+ for(var i=0;i<T.steps.length;i++) if(T.steps[i][0]===id&&T.steps[i][1]===role) return true;
+ return false;
+}
+function pickGoto(cands, role){
+ var i,id;
+ for(i=0;i<cands.length;i++){
+  id=cands[i];
+  if(tourHas(id) && (!role || stepRoleOnTpl(id,role))) return id;
+ }
+ return null;
+}
+function landingAfter(loginId){
+ var staff=['teacher-dash','schedule','cohort-builder','reports'];
+ var stu=['student-dash','join','library','timeline'];
+ var pref=loginId==='staff-login'?staff:stu;
+ var role=loginId==='staff-login'?'faculty':'student';
+ var hit=pickGoto(pref, role);
+ if(hit) return hit;
+ var T=TById(state&&state.tpl);
+ if(T){
+  var idx=T.tour.indexOf(loginId);
+  for(var i=idx+1;i<T.tour.length;i++) if(stepRoleOnTpl(T.tour[i], role)) return T.tour[i];
+ }
+ return loginId;
+}
 function appbar(title,right){return '<div class="appbar"><h2>'+title+'</h2>'+(right||'')+'</div>';}
 
 /* ================= screens ================= */
@@ -881,20 +922,23 @@ R['cohort-builder']=function(){
 };
 
 R['router']=function(){
+ var doors=[];
+ if(roleHas('student-login')) doors.push(['student-login','student','I’m here to learn','Student sign-in']);
+ if(roleHas('staff-login')) doors.push(['staff-login','faculty','I’m a teacher / staff','Staff sign-in with 2FA']);
+ if(roleHas('parent-link')) doors.push(['parent-link','parent','I’m a parent','Follow my child']);
  return '<div style="min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:34px 24px;text-align:center;background:var(--accent-wash)">'+
   '<span class="av av--lg" style="background:var(--accent);border-radius:14px;width:52px;height:52px;font-size:1rem">M</span>'+
   '<h2 style="font-size:1.3rem;margin:16px 0 4px">Meridian Biology</h2>'+
   '<p class="muted" style="margin-bottom:26px">NEET 2026 · Biology</p>'+
   '<div style="width:100%;max-width:280px">'+
-   '<div class="hot hot--card" data-goto="student-login" style="text-align:left"><div style="font-weight:600">I’m here to learn</div><div class="muted">Student sign-in</div></div>'+
-   '<div class="hot hot--card" data-goto="staff-login" style="text-align:left"><div style="font-weight:600">I’m a teacher / staff</div><div class="muted">Staff sign-in with 2FA</div></div>'+
-   '<div class="hot hot--card" data-goto="parent-link" style="text-align:left"><div style="font-weight:600">I’m a parent</div><div class="muted">Follow my child</div></div>'+
+   doors.map(function(d){return '<div class="hot hot--card" data-goto="'+d[0]+'" data-as="'+d[1]+'" style="text-align:left"><div style="font-weight:600">'+d[2]+'</div><div class="muted">'+d[3]+'</div></div>';}).join('')+
   '</div>'+
   '<p class="muted" style="margin-top:24px;font-family:var(--mono);font-size:.68rem">Powered by TutorOS · placeholder name</p>'+
  '</div>';
 };
 
 R['student-login']=function(){
+ var dest=landingAfter('student-login');
  return '<div style="padding:30px 24px;min-height:100%;display:flex;flex-direction:column;justify-content:center">'+
   '<span class="av av--lg" style="background:var(--accent);border-radius:12px">M</span>'+
   '<h2 style="font-size:1.25rem;margin:16px 0 6px">Enter the 6-digit code</h2>'+
@@ -903,19 +947,20 @@ R['student-login']=function(){
    ['4','1','9','2','',''].map(function(d){return '<div style="flex:1;aspect-ratio:1;max-width:46px;border:1.5px solid '+(d?'var(--tint)':'var(--line)')+';border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:1.2rem">'+d+'</div>';}).join('')+
   '</div>'+
   '<p class="muted" style="margin-bottom:18px;font-family:var(--mono);font-size:.72rem">Resend code in 0:24</p>'+
-  hotBtn('Verify → my dashboard','student-dash')+
+  hotBtn('Verify → '+(S[dest]?S[dest].t:'continue'),dest,false,'student')+
   '<div class="card card--wash" style="margin-top:22px"><div class="k" style="margin-bottom:4px">One identity</div><p class="muted">Your sessions, practice, doubts, reports and fees all thread to this number. Log in on any device and the whole record is there.</p></div>'+
  '</div>';
 };
 
 R['staff-login']=function(){
+ var dest=landingAfter('staff-login');
  return '<div class="supbody" style="max-width:440px;margin:0 auto;padding:40px 24px">'+
   '<div class="wm" style="margin-bottom:22px"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 3c3.5 3 3.5 15 0 18M3.2 9.5h17.6M3.2 14.5h17.6"/></svg> Meridian Biology <i>staff</i></div>'+
   '<h2 style="font-size:1.35rem;margin-bottom:16px">Staff sign-in</h2>'+
   field('Work email','anitha@meridianbio.in')+
   field('Password','••••••••••••')+
   field('2FA code','<span style="font-family:var(--mono);letter-spacing:.3em">830 4·· </span>','from your authenticator app')+
-  '<div style="margin-top:6px">'+hotBtn('Sign in → dashboard','teacher-dash')+'</div>'+
+  '<div style="margin-top:6px">'+hotBtn('Sign in → '+(S[dest]?S[dest].t:'continue'),dest,false,'faculty')+'</div>'+
   '<div class="card" style="margin-top:20px"><div class="k" style="margin-bottom:4px">Why the extra step</div><p class="muted">Privileged accounts require 2FA. Every staff action — a grade change, a fee edit, a data export — is written to the audit log.</p></div>'+
  '</div>';
 };
@@ -1779,7 +1824,7 @@ function stepFor(tid,id){
  }
  return {r:S[id].role,st:'—'};
 }
-function seqFor(tid,id){var T=TById(tid);if(T&&T.tour.indexOf(id)>=0)return T.tour;return ALL;}
+function seqFor(tid,id){var T=TById(tid);if(T&&T.tour.length)return T.tour;return ALL;}
 function hdrStrip(tid,id){
  var T=TById(tid),st=stepFor(tid,id),rt=ROLE[st.r];
  return '<div class="scrn__hdr tint-'+rt.tint+'">'+
@@ -1902,7 +1947,12 @@ document.addEventListener('click',function(e){
   if(g.getAttribute('data-as')) state.asRole=g.getAttribute('data-as');
   else if(g.closest('.pnav')) state.asRole='parent';
   else if(g.getAttribute('data-fnode')!=null && STEPQ[g.getAttribute('data-fnode')]) state.asRole=STEPQ[g.getAttribute('data-fnode')][1];
-  else if(!(state.asRole==='parent' && g.closest('.phonewrap'))) state.asRole=null;
+  else {
+   var dest=g.getAttribute('data-goto')||'';
+   var sid=dest.indexOf('/')>=0?dest.split('/').pop():dest;
+   if(S[sid] && !(state.asRole==='parent' && g.closest('.phonewrap'))) state.asRole=stepFor(state.tpl||'t1', sid).r;
+   else if(!(state.asRole==='parent' && g.closest('.phonewrap'))) state.asRole=null;
+  }
   go(g.getAttribute('data-goto'));return;
  }
  if(e.target.closest('[data-close]')||e.target.id==='modal'){document.getElementById('modal').classList.remove('open');return;}

@@ -35,14 +35,14 @@ CONTRACTS: dict[str, dict] = {
         "entities": ["users", "identities", "sessions_auth"],
         "ports": ["sms", "email"],
         "timelineEvents": [],
-        "shows": "Student sign-in (phone OTP default, email magic link optional). No password in v1.",
+        "shows": "Student sign-in (phone OTP default, email magic link optional). Lands on a student screen on this template — not staff.",
     },
     "staff-login": {
         "apis": ["POST /api/v1/auth/otp/start", "POST /api/v1/auth/otp/verify", "POST /api/v1/auth/magic-link"],
         "entities": ["users", "identities", "staff_memberships", "sessions_auth"],
         "ports": ["sms", "email"],
         "timelineEvents": [],
-        "shows": "Staff sign-in for teacher, assistant, or owner.",
+        "shows": "Staff sign-in (OTP / magic-link + 2FA). Lands on a faculty screen on this template — not the student app.",
     },
     "wsetup": {
         "apis": ["POST /api/v1/workspaces", "PATCH /api/v1/workspaces/current"],
@@ -77,7 +77,7 @@ CONTRACTS: dict[str, dict] = {
         "entities": ["parent_links", "students"],
         "ports": ["whatsapp", "email", "sms"],
         "timelineEvents": ["parent.linked"],
-        "shows": "Invite token to link a guardian to a student.",
+        "shows": "Invite token to link a guardian to a student. After accept: activity, marksheet, results, receipts, teacher chat — own child only.",
     },
     "parent-home": {
         "apis": ["GET /api/v1/parent/home"],

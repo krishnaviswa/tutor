@@ -10,7 +10,7 @@ This feature delivers HTML + markdown + catalog + checkers only.
 
 ## Source of truth (demo wins)
 
-1. `tutor-platform-demo.html` — UI gold: `S` (47 ids), `TEMPLATES` (six tracks), `WHY` (owner / who / why / how / when). **Incomplete:** focused tracks do not yet include every spine screen (example: `staff-login` is on Everything / t6). Do not invent ids to fill the gap.
+1. `tutor-platform-demo.html` — UI gold: `S` (47 ids), `TEMPLATES` (six tracks), `WHY` (owner / who / why / how / when). **Incomplete:** focused tracks may omit some spine screens. `staff-login` is on t2–t6; Exam-prep (t1) omits it. Do not invent ids to fill remaining gaps.
 2. `python scripts/build_catalog.py` — screens, flows (steps + roles + tour), embed.js.
 3. `tutor-platform-architecture.html` — stack map. Reads `catalog/embed.js`. Role filter uses swimlane `roles[]`, not chrome-only `S.role`.
 4. `scripts/build_role_html.py` — five generated children. Same mocks; `ROLE_ONLY` filters lanes. No extra features. Not linked from demo chrome.

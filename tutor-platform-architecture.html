@@ -113,9 +113,10 @@ var LAYERS=[
   {id:'db',t:'PostgreSQL',d:'workspace_id on every business table. topics/taxonomies, not a syllabus.'}
 ];
 var TENANTS=[
-  {id:'coaching',name:'Meridian Coaching',tpl:'Exam-prep',copy:'Sample content may mention a science topic. Biology here is fixture copy, not a module.'},
-  {id:'lang',name:'Northshore Languages',tpl:'1-on-1',copy:'Same engine: sessions, assignments, timeline, billing.'},
-  {id:'music',name:'Atelier Strings',tpl:'Music / arts',copy:'Same engine: recitals, guardian view, practice log.'}
+  {id:'coaching',name:'Meridian Coaching',tpl:'Exam-prep',copy:'Sample content may mention a science topic. Biology here is fixture copy, not a module. Faculty starts at cohort/schedule — no staff sign-in on this track.'},
+  {id:'lang',name:'Northshore Languages',tpl:'1-on-1',copy:'Same engine: staff sign-in, sessions, assignments, timeline, billing.'},
+  {id:'k12',name:'After-school help',tpl:'K-12',copy:'Parent hub: activity, marksheet, results, receipts, teacher chat. Staff and student sign-in both on.'},
+  {id:'music',name:'Atelier Strings',tpl:'Music / arts',copy:'Same engine: recitals, guardian view, practice log, staff and student sign-in.'}
 ];
 var ROLES=['student','faculty','admin','parent','system'];
 var MW=['CORS allowlist','Request id','Tenant (workspace_id)','AuthN (OTP / magic link / JWT)','AuthZ (role + G1 flag → 404 if module off)','QuotaGuard (warn 80% / block paid send at 100%)','Idempotency on writes','Audit (staff mutations)'];
@@ -134,6 +135,19 @@ function domains(){
   return out;
 }
 function findScreen(id){for(var i=0;i<C.screens.length;i++)if(C.screens[i].id===id)return C.screens[i];return null;}
+function tourHas(f,id){return f && (f.tour||[]).indexOf(id)>=0;}
+function staffLoginNote(){
+  var on=[], off=[];
+  (C.flows||[]).forEach(function(f){ (tourHas(f,'staff-login')?on:off).push(f.short||f.id); });
+  return '<code>staff-login</code> is on '+on.join(', ')+(off.length?'; omitted on '+off.join(', ')+' (faculty starts at cohort/schedule)':'')+'. Sign-in CTAs stay on this template and this role — staff does not open the student app.';
+}
+function demoScreenHref(sid, tpl){return 'tutor-platform-demo.html#/'+(tpl||'t6')+'/'+sid;}
+function roleScreenHref(s, tpl){
+  var r=(s.roles&&s.roles[0])||s.role;
+  var tid=tpl;
+  if(!tid){var f=(C.flows||[]).filter(function(x){return tourHas(x,s.id);})[0]; tid=f?f.id:'t6';}
+  return 'tutor-platform-role-'+r+'.html#/'+tid+'/'+s.id;
+}
 
 function go(view,extra){
   state.view=view;
@@ -149,14 +163,14 @@ function startView(){
   var flows=C.flows||[];
   return '<p class="k">Start</p><h1>Someone opens TutorOS</h1>'+
     '<p class="lead">Subject-neutral remote tutoring OS. Same engine for exam-prep, languages, music, skills. Biology / NEET files in this repo are one exam-prep <b>example tenant</b>, not the product.</p>'+
-    '<div class="note"><b>Demo is UI gold and incomplete.</b> Screen ids, template steps, and Owner / Who / Why / How / When live in <code>tutor-platform-demo.html</code>. This map follows that catalog. Focused templates do not yet carry every spine screen (for example <code>staff-login</code> is on Everything). Role HTML files are generated children of the demo (one lane, no extra features). A later pass copies six-track UI and backend capability onto those role pages — still no new screen ids. If this map disagrees with the demo, the demo wins and this map is regenerated.</div>'+
+    '<div class="note"><b>Demo is UI gold and incomplete.</b> Screen ids, template steps, and Owner / Who / Why / How / When live in <code>tutor-platform-demo.html</code>. This map reads <code>catalog/embed.js</code> after <code>python scripts/build_catalog.py</code>. '+staffLoginNote()+' Parent hub (<code>parent-home</code>) is activity, marksheet, results, receipts, and teacher chat — own child only; same ids as the demo. Role HTML files are generated children (one lane, no extra features). If this map disagrees with the demo, the demo wins — rebuild catalog, then this page follows.</div>'+
     '<p class="k" style="margin-bottom:8px">Example workspaces (same engine)</p>'+
     '<div class="grid g3">'+TENANTS.map(function(t){
       return '<div class="card" data-goto="layers"><span class="count">'+t.tpl+'</span><h3>'+t.name+'</h3><p>'+t.copy+'</p></div>';
     }).join('')+'</div>'+
     '<p class="k" style="margin:22px 0 8px">Six template tracks (from demo)</p>'+
     '<div class="grid g2">'+flows.map(function(f){
-      return '<button class="card" data-goto="flow" data-flow="'+f.id+'"><span class="count">'+f.id+' · '+f.tour.length+' screens · '+f.tier+'</span><h3>'+f.name+'</h3><p>'+f.blurb+'</p></button>';
+      return '<button class="card" data-goto="flow" data-flow="'+f.id+'"><span class="count">'+f.id+' · '+f.tour.length+' screens · '+f.tier+(tourHas(f,'staff-login')?' · staff sign-in':' · no staff sign-in')+(tourHas(f,'parent-home')?' · parent hub':'')+'</span><h3>'+f.name+'</h3><p>'+f.blurb+'</p></button>';
     }).join('')+'</div>'+
     '<p class="k" style="margin:22px 0 8px">Enter as a swimlane role</p>'+
     '<div class="grid g2">'+ROLES.map(function(r){
@@ -173,12 +187,17 @@ function flowTrackView(){
   if(!f)return '<p>Unknown template</p>';
   var rows=f.steps.map(function(st,i){
     var s=findScreen(st.screen);
-    return '<button class="card" data-goto="screen" data-screen-id="'+st.screen+'"><span class="count">'+(st.auto?'auto':'step')+' · '+st.role+' · '+st.stage+'</span><h3>'+(s?s.title:st.screen)+'</h3><p>'+(st.auto||(s&&s.why)||'')+'</p></button>';
+    var why=s&&s.why?s.why:(st.auto||'');
+    return '<button class="card" data-goto="screen" data-screen-id="'+st.screen+'"><span class="count">'+(st.auto?'auto':'step')+' · '+st.role+' · '+st.stage+'</span><h3>'+(s?s.title:st.screen)+'</h3><p>'+why+'</p></button>';
   }).join('');
   return crumb(['Start','Track '+f.id])+'<h1>'+f.name+'</h1>'+
-    '<p class="lead">'+f.blurb+' · '+f.shape+' · tier '+f.tier+'. Same ids as the demo swimlane. Missing spine screens on this track are a demo gap, not extra architecture.</p>'+
+    '<p class="lead">'+f.blurb+' · '+f.shape+' · tier '+f.tier+'. Same ids as the demo swimlane. Staff sign-in: '+(tourHas(f,'staff-login')?'on this track':'omitted')+'. Parent hub: '+(tourHas(f,'parent-home')?'on this track':'off')+'.</p>'+
     '<div class="grid g2">'+rows+'</div>'+
-    '<div class="row"><a class="btn primary" href="tutor-platform-demo.html#/'+f.id+'/flow">Open this flow in the demo</a></div>';
+    '<div class="row"><a class="btn primary" href="tutor-platform-demo.html#/'+f.id+'/flow">Open this flow in the demo</a>'+
+    (tourHas(f,'staff-login')?'<a class="btn" href="tutor-platform-role-faculty.html#/'+f.id+'/staff-login">Faculty · staff sign-in</a>':'')+
+    (tourHas(f,'student-login')?'<a class="btn" href="tutor-platform-role-student.html#/'+f.id+'/student-login">Student · sign-in</a>':'')+
+    (tourHas(f,'parent-home')?'<a class="btn" href="tutor-platform-role-parent.html#/'+f.id+'/parent-home">Parent hub</a>':'')+
+    '</div>';
 }
 
 function layersView(){
@@ -233,7 +252,6 @@ function whyBlock(s){
 function screenView(){
   var s=findScreen(state.screen);
   if(!s)return '<p>Unknown screen</p>';
-  var demo='tutor-platform-demo.html?screen='+encodeURIComponent(s.id);
   return crumb(['Start','UI',s.domainName,s.title])+'<span class="pill" data-screen="'+s.id+'">'+s.id+'</span>'+
     '<span class="pill">'+s.module+'</span><span class="pill">phase '+s.phase+'</span><span class="pill">'+s.status+'</span>'+
     '<span class="pill">lanes '+(s.roles||[s.role]).join(', ')+'</span>'+
@@ -247,7 +265,8 @@ function screenView(){
     '<div class="call"><b>Ports</b>'+(s.ports.length?s.ports.map(function(e){return '<code>'+e+'</code> ';}).join(''):'none')+'</div>'+
     '<div class="call"><b>Timeline events</b>'+(s.timelineEvents.length?s.timelineEvents.join(', '):'—')+'</div>'+
     '<div class="row"><button class="hot primary" data-goto="follow">Follow the call</button>'+
-    '<a class="btn" href="'+demo+'">Open in demo (Everything)</a></div>';
+    '<a class="btn" href="'+demoScreenHref(s.id)+'">Open in demo (Everything)</a>'+
+    '<a class="btn" href="'+roleScreenHref(s)+'">Open role child</a></div>';
 }
 
 function followView(){

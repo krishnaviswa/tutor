@@ -59,7 +59,7 @@
       "email"
     ],
     "timelineEvents": [],
-    "shows": "Student sign-in (phone OTP default, email magic link optional). No password in v1.",
+    "shows": "Student sign-in (phone OTP default, email magic link optional). Lands on a student screen on this template \u2014 not staff.",
     "own": "Student holds the identity. Owner chooses OTP vs magic-link.",
     "who": "The learner.",
     "why": "One identity for sessions, practice, doubts, and fees \u2014 no password in v1.",
@@ -98,7 +98,7 @@
       "email"
     ],
     "timelineEvents": [],
-    "shows": "Staff sign-in for teacher, assistant, or owner.",
+    "shows": "Staff sign-in (OTP / magic-link + 2FA). Lands on a faculty screen on this template \u2014 not the student app.",
     "own": "Faculty or owner via staff membership.",
     "who": "Teacher, assistant, or owner.",
     "why": "Staff must not share the student app; membership decides the workspace.",
@@ -280,7 +280,7 @@
     "timelineEvents": [
       "parent.linked"
     ],
-    "shows": "Invite token to link a guardian to a student.",
+    "shows": "Invite token to link a guardian to a student. After accept: activity, marksheet, results, receipts, teacher chat \u2014 own child only.",
     "own": "Owner issues the invite; parent accepts.",
     "who": "Guardian, invited by owner or teacher.",
     "why": "A guardian needs access without a second student account.",

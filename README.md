@@ -107,7 +107,7 @@ Catalog: [catalog/entities.json](catalog/entities.json), [catalog/modules.json](
 
 ## 6. Screen map
 
-47 ids locked to `tutor-platform-demo.html` `S`. Source: [catalog/screens.json](catalog/screens.json). Each catalog row also carries Owner / Who / Why / How / When from demo `WHY`. Architecture Start lists the six demo tracks. Role HTML files are generated from the demo (`scripts/build_role_html.py`); they are not a second product.
+47 ids locked to `tutor-platform-demo.html` `S`. Source: [catalog/screens.json](catalog/screens.json). Each catalog row also carries Owner / Who / Why / How / When from demo `WHY`. The architecture HTML (`tutor-platform-architecture.html`) loads [catalog/embed.js](catalog/embed.js) — after demo edits run `python scripts/build_catalog.py` then `python scripts/build_role_html.py`. Architecture Start lists the six demo tracks from that catalog. Role HTML files are generated from the demo; they are not a second product. Parent hub is `parent-home` (activity, marksheet, results, receipts, teacher chat). `staff-login` is on 1-on-1, K-12, Skills, Music, Everything; Exam-prep omits it.
 
 - **A Identity (9):** `router`, `student-login`, `staff-login`, `wsetup`, `branding`, `roster`, `cohort-builder`, `parent-link`, `parent-home`
 - **B Teaching (11):** `schedule`, `session-pre`, `join`, `live-teacher`, `live-student`, `session-video`, `record`, `library`, `lesson`, `assign-issue`, `assign-grade`
@@ -174,7 +174,7 @@ Active feature: [specs/001-platform-architecture/](specs/001-platform-architectu
 
 - No `frontend/`, no `backend/`, no Docker, no Figma, no live OTP/Meet/Razorpay/WhatsApp.
 - All 47 screens `empty`. Demo mocks do not save input (do not write state into HTML).
-- Demo **incomplete** vs all six tracks: some spine screens (for example `staff-login`) appear on Everything before they appear on 1-on-1 / Skills. Fill later on those templates and on role pages — **same ids**, no new screens.
+- Demo **incomplete** vs all six tracks: some spine screens still sit only on Everything. `staff-login` is on 1-on-1, K-12, Skills, Music, and Everything; Exam-prep omits it on purpose (faculty starts at cohort/schedule). Fill remaining gaps later — **same ids**, no new screens.
 - Inbound WhatsApp replies not in v1.
 - Speech-to-text is a slot on session record, not a port.
 

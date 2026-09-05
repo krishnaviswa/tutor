@@ -13,7 +13,7 @@ Read-only check of spec / plan / tasks / catalog against the revised demo.
 | New screens invented | None |
 | Implement started | No |
 | MerchantHub product copy | None |
-| Demo completeness | **Gap (documented):** focused templates omit some spine screens (e.g. `staff-login`). Role pages are generated filters, not a second feature set. Fill later without new ids. |
+| Demo completeness | **Partial:** `staff-login` is on t2–t6; Exam-prep (t1) omits it by design. Other spine screens may still sit only on Everything. Role pages are generated filters, not a second feature set. Fill later without new ids. |
 | Demo vs architecture disagreement | Demo wins; rebuild catalog + architecture embed |
 
 Gaps that block implement: human walk of architecture HTML. Completeness of six tracks is a later feature, not a reason to invent screens.

@@ -47,7 +47,7 @@ Before any app code, TutorOS needs a shared map so Cursor and Claude Code cannot
 - WhatsApp is a channel, in scope for teacher/parent/admin.
 - Spec Kit maps onto PM/Architect/Builder/Tester; Tester is extra.
 - This pass stops before implement.
-- Demo is incomplete: focused templates omit some spine screens (e.g. staff-login). Architecture documents the gap; it does not invent screens.
+- Demo is incomplete: focused templates may omit some spine screens. `staff-login` is on 1-on-1, K-12, Skills, Music, and Everything; Exam-prep omits it. Architecture documents remaining gaps; it does not invent screens.
 
 ## DoD (PM)
 

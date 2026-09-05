@@ -6,7 +6,7 @@
     "tint": "accent",
     "tier": "Cohort",
     "shape": "Cohort \u00b7 high-frequency \u00b7 practice-heavy",
-    "blurb": "Concept \u2192 same-day practice \u2192 tagged analysis \u2192 mock. NEET / JEE / boards.",
+    "blurb": "Concept \u2192 same-day practice \u2192 tagged analysis \u2192 mock. NEET / JEE / boards. Faculty starts at cohort/schedule \u2014 this track has no staff sign-in step.",
     "roles": [
       "admin",
       "faculty",
@@ -306,6 +306,12 @@
         "auto": null
       },
       {
+        "screen": "staff-login",
+        "role": "faculty",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
         "screen": "schedule",
         "role": "faculty",
         "stage": "Schedule",
@@ -401,6 +407,7 @@
       "branding",
       "roster",
       "student-login",
+      "staff-login",
       "schedule",
       "session-pre",
       "join",
@@ -460,6 +467,12 @@
       {
         "screen": "student-login",
         "role": "student",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "staff-login",
+        "role": "faculty",
         "stage": "Enrol",
         "auto": null
       },
@@ -602,6 +615,7 @@
       "roster",
       "parent-link",
       "student-login",
+      "staff-login",
       "schedule",
       "join",
       "live-teacher",
@@ -632,8 +646,8 @@
     "blurb": "Cohorts, a content library that drips, projects and a final assessment. No live-practice loop.",
     "roles": [
       "admin",
-      "faculty",
-      "student"
+      "student",
+      "faculty"
     ],
     "steps": [
       {
@@ -649,14 +663,20 @@
         "auto": null
       },
       {
-        "screen": "cohort-builder",
+        "screen": "student-login",
+        "role": "student",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "staff-login",
         "role": "faculty",
         "stage": "Enrol",
         "auto": null
       },
       {
-        "screen": "student-login",
-        "role": "student",
+        "screen": "cohort-builder",
+        "role": "faculty",
         "stage": "Enrol",
         "auto": null
       },
@@ -766,8 +786,9 @@
     "tour": [
       "onboard-kind",
       "branding",
-      "cohort-builder",
       "student-login",
+      "staff-login",
+      "cohort-builder",
       "schedule",
       "session-pre",
       "live-teacher",
@@ -798,8 +819,8 @@
     "roles": [
       "admin",
       "parent",
-      "faculty",
       "student",
+      "faculty",
       "system"
     ],
     "steps": [
@@ -824,6 +845,18 @@
       {
         "screen": "parent-link",
         "role": "parent",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "student-login",
+        "role": "student",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "staff-login",
+        "role": "faculty",
         "stage": "Enrol",
         "auto": null
       },
@@ -941,6 +974,8 @@
       "branding",
       "roster",
       "parent-link",
+      "student-login",
+      "staff-login",
       "schedule",
       "session-pre",
       "join",

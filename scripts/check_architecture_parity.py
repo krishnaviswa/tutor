@@ -68,6 +68,24 @@ def main() -> int:
             fail(f"module {m['id']} has no screens (add a screen or ALLOW_NO_SCREEN)")
 
     flows = json.loads((ROOT / "catalog/flows.json").read_text(encoding="utf-8"))
+    import importlib.util
+
+    _cat_spec = importlib.util.spec_from_file_location(
+        "build_catalog", ROOT / "scripts" / "build_catalog.py"
+    )
+    _cat = importlib.util.module_from_spec(_cat_spec)
+    assert _cat_spec.loader is not None
+    _cat_spec.loader.exec_module(_cat)
+    live_flows = _cat.parse_flows()
+    if [f["id"] for f in live_flows] != [f["id"] for f in flows]:
+        fail("flows.json template ids stale — run scripts/build_catalog.py")
+    for live, stored in zip(live_flows, flows, strict=True):
+        live_steps = [(s["screen"], s["role"], s["stage"]) for s in live["steps"]]
+        stored_steps = [(s["screen"], s["role"], s["stage"]) for s in stored["steps"]]
+        if live_steps != stored_steps:
+            fail(f"flows.json {live['id']} steps != demo — run scripts/build_catalog.py")
+        if live["tour"] != stored["tour"]:
+            fail(f"flows.json {live['id']} tour != demo — run scripts/build_catalog.py")
     for f in flows:
         if "steps" not in f or "tour" not in f:
             fail(f"flow {f.get('id')} missing steps/tour (rebuild catalog from demo)")
@@ -84,8 +102,19 @@ def main() -> int:
         fail("architecture HTML must state the demo is incomplete")
     if "data-flow=" not in html:
         fail("architecture HTML must expose six demo tracks (data-flow)")
-    if "staff-login" not in html:
-        fail("architecture HTML must mention staff-login gap vs Everything")
+    if "parent-home" not in html:
+        fail("architecture HTML must mention parent-home hub")
+    if "tutor-platform-demo.html#/" not in html:
+        fail("architecture HTML must deep-link demo with hash routes")
+    if "tutor-platform-role-faculty.html" not in html:
+        fail("architecture HTML must link faculty role child")
+    t1 = next((f for f in flows if f.get("id") == "t1"), None)
+    if t1 and "staff-login" in t1.get("tour", []):
+        fail("exam-prep (t1) must omit staff-login")
+    for tid in ("t2", "t3", "t4", "t5", "t6"):
+        f = next((x for x in flows if x.get("id") == tid), None)
+        if f and "staff-login" not in f.get("tour", []):
+            fail(f"{tid} must include staff-login")
 
     spec = (ROOT / "specs/001-platform-architecture/spec.md").read_text(encoding="utf-8")
     plan = (ROOT / "specs/001-platform-architecture/plan.md").read_text(encoding="utf-8")
