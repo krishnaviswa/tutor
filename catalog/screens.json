@@ -284,8 +284,8 @@
     "own": "Owner issues the invite; parent accepts.",
     "who": "Guardian, invited by owner or teacher.",
     "why": "A guardian needs access without a second student account.",
-    "how": "Open the invite token and confirm the student link. Read access only until billing asks them to pay.",
-    "when": "Enrolment for minors, or any tenant that wants a parent portal (K-12, music).",
+    "how": "Open the invite token and confirm the student link. Then the parent hub: activity, marksheet, results, receipts, teacher chat \u2014 own child only.",
+    "when": "Enrolment for minors, or any tenant that wants a parent portal (K-12, music, exam-prep).",
     "roles": [
       "parent"
     ]
@@ -313,12 +313,12 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Read-mostly: attendance, reports, fees for linked students.",
+    "shows": "Guardian hub for linked children only: activity, progress/marksheet, test results, fee receipts, teacher chat.",
     "own": "Parent (read). Owner enables the parent module.",
     "who": "A linked parent.",
-    "why": "The parent must see the record here \u2014 WhatsApp is a channel, not the ledger.",
-    "how": "Read-mostly: attendance, reports, fees for linked students.",
-    "when": "After class, a report, or an invoice \u2014 not during live teaching.",
+    "why": "The parent hub for their own child \u2014 not a second gradebook and not the class roster.",
+    "how": "Open activity (timeline), progress/marksheet (reports), test results (practice-result), fees and receipts (payments), and a thread with the teacher (messages). Read-only except pay and chat.",
+    "when": "After class, a result, a report, or an invoice \u2014 not during live teaching.",
     "roles": [
       "parent"
     ]
@@ -859,7 +859,8 @@
     "how": "Score plus tagged misses.",
     "when": "Immediately after the set.",
     "roles": [
-      "student"
+      "student",
+      "parent"
     ]
   },
   {
@@ -1074,6 +1075,7 @@
     "how": "In-platform threads. WhatsApp may notify teacher, parent, or admin.",
     "when": "Anything that is not a one-to-cohort announcement.",
     "roles": [
+      "parent",
       "faculty"
     ]
   },
@@ -1145,7 +1147,8 @@
     "when": "After every session, assignment, payment, or doubt.",
     "roles": [
       "system",
-      "student"
+      "student",
+      "parent"
     ]
   },
   {
@@ -1182,6 +1185,7 @@
     "how": "Channel + event checklist for teacher, parent, admin (and student if gated on).",
     "when": "First login, and whenever they want quieter notifications.",
     "roles": [
+      "parent",
       "student"
     ]
   },
@@ -1321,7 +1325,8 @@
     "how": "Term reports and CSV. Parent WhatsApp when a report is ready.",
     "when": "Weekly check-in or term-end.",
     "roles": [
-      "faculty"
+      "faculty",
+      "parent"
     ]
   },
   {

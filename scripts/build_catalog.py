@@ -84,7 +84,7 @@ CONTRACTS: dict[str, dict] = {
         "entities": ["students", "attendance", "timeline_events"],
         "ports": [],
         "timelineEvents": [],
-        "shows": "Read-mostly: attendance, reports, fees for linked students.",
+        "shows": "Guardian hub for linked children only: activity, progress/marksheet, test results, fee receipts, teacher chat.",
     },
     "schedule": {
         "apis": ["GET /api/v1/sessions", "POST /api/v1/sessions", "PATCH /api/v1/sessions/{id}"],

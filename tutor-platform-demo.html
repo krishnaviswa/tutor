@@ -689,8 +689,8 @@ var WHY={
  'branding':{own:'Owner.',who:'Owner.',why:'Learners must recognise the workspace as theirs, not a generic TutorOS shell.',how:'Logo, accent colour, subdomain. Custom domain is later.',when:'Immediately after workspace setup, before the first invite.'},
  'roster':{own:'Owner or assistant with roster rights.',who:'Owner or assistant.',why:'Who is enrolled is the source of seats, timelines, and billing — not a spreadsheet.',how:'Add students one by one or CSV import. Optional admin WhatsApp on new enrollment — not a second student list.',when:'Enrolment, then whenever someone joins or leaves.'},
  'cohort-builder':{own:'Faculty. Owner may set structure.',who:'Faculty or owner.',why:'Teaching is grouped; 1-on-1 is a pairing. Topics are tenant taxonomy, not a baked syllabus.',how:'Batches, groups, or 1-on-1 pairings. Topics are G3 — never exam-board tables in core.',when:'After roster, before the first scheduled class.'},
- 'parent-link':{own:'Owner issues the invite; parent accepts.',who:'Guardian, invited by owner or teacher.',why:'A guardian needs access without a second student account.',how:'Open the invite token and confirm the student link. Read access only until billing asks them to pay.',when:'Enrolment for minors, or any tenant that wants a parent portal (K-12, music).'},
- 'parent-home':{own:'Parent (read). Owner enables the parent module.',who:'A linked parent.',why:'The parent must see the record here — WhatsApp is a channel, not the ledger.',how:'Read-mostly: attendance, reports, fees for linked students.',when:'After class, a report, or an invoice — not during live teaching.'},
+ 'parent-link':{own:'Owner issues the invite; parent accepts.',who:'Guardian, invited by owner or teacher.',why:'A guardian needs access without a second student account.',how:'Open the invite token and confirm the student link. Then the parent hub: activity, marksheet, results, receipts, teacher chat — own child only.',when:'Enrolment for minors, or any tenant that wants a parent portal (K-12, music, exam-prep).'},
+ 'parent-home':{own:'Parent (read). Owner enables the parent module.',who:'A linked parent.',why:'The parent hub for their own child — not a second gradebook and not the class roster.',how:'Open activity (timeline), progress/marksheet (reports), test results (practice-result), fees and receipts (payments), and a thread with the teacher (messages). Read-only except pay and chat.',when:'After class, a result, a report, or an invoice — not during live teaching.'},
  'schedule':{own:'Faculty. Owner can view.',who:'Faculty (owner can view).',why:'Sessions must exist on a calendar before anyone can join.',how:'Create or move sessions. Reschedule notifies teacher, parent, and admin via D5 — students only if the owner enabled student WhatsApp.',when:'Weekly planning and same-day changes.'},
  'session-pre':{own:'Faculty.',who:'The teacher about to teach.',why:'Topic and video pointer must be set before the room opens. TutorOS does not host video.',how:'Confirm topic, cohort, Meet or Teams link, and the platform join URL.',when:'Before the session starts.'},
  'join':{own:'Student action; faculty owns the session.',who:'The student.',why:'Attendance is joining through the platform, not opening Meet in another tab.',how:'Waiting room. Stay here until class starts.',when:'Minutes before class.'},
@@ -1454,17 +1454,32 @@ R['parent-link']=function(){
 };
 
 R['parent-home']=function(){
- return appbar('Aditya — this week','<span class="pill">guardian view</span>')+'<div class="appwrap">'+
-  '<div class="card"><div class="k">Attendance</div><div class="sb" style="margin-top:4px"><span style="font-family:var(--serif);font-size:1.3rem">5 / 6</span>'+pill('1 missed · Fri','warn')+'</div></div>'+
-  '<div class="hot hot--card" data-goto="reports"><div class="k" style="color:var(--tint)">New term report</div><div style="font-weight:600;margin:3px 0">August — Biology</div><div class="muted">512 / 720 · percentile 88 · tap to open</div></div>'+
-  '<div class="card"><div class="k">Next session</div><div style="font-weight:600;margin-top:3px">Neural Control — tonight 6:30 PM</div></div>'+
-  '<div class="hot hot--card" data-goto="payments"><div class="k" style="color:var(--crimson)">Fee due · 5 Sep</div><div style="font-weight:600;margin:3px 0">September · ₹4,500</div><div class="muted">tap to pay</div></div>'+
-  '<div class="hot hot--card" data-goto="messages"><div class="k" style="color:var(--tint)">Message the teacher</div><div class="muted" style="margin-top:3px">Usually replies within a day</div></div>'+
-  '<div class="card card--wash"><p class="muted">Read-only. Every item here is the same record the teacher and Aditya see — no separate parent data entry.</p></div>'+
+ return appbar('Family','<span class="pill">guardian</span>')+'<div class="appwrap">'+
+  '<div class="card"><div class="k">Your children</div>'+
+   '<div class="list__i" style="border:0;padding:8px 0 0"><div class="row" style="flex-wrap:nowrap;gap:10px">'+av('Aditya Menon')+'<div class="gr"><div class="t">Aditya Menon</div><div class="s">Evening cohort · active today</div></div></div>'+pill('linked','good')+'</div>'+
+   '<p class="muted" style="margin-top:8px;font-size:.74rem">Only students you are linked to. The roster of the rest of the class is hidden.</p>'+
+  '</div>'+
+  '<div class="grid g3" style="margin-bottom:10px">'+stat('5 / 6','Attendance','1 Fri miss','warn')+stat('12 / 16','Latest practice','DPP 14','info')+stat('512','Mock 5 / 720','pc 88','good')+'</div>'+
+  '<div class="hot hot--card" data-goto="timeline" data-as="parent"><div class="k" style="color:var(--tint)">Activity</div><div style="font-weight:600;margin:3px 0">Class attended · DPP submitted tonight</div><div class="muted">Same timeline the teacher writes — tap for the full log</div></div>'+
+  '<div class="hot hot--card" data-goto="reports" data-as="parent"><div class="k" style="color:var(--tint)">Progress &amp; marksheet</div><div style="font-weight:600;margin:3px 0">August term report</div><div class="muted">Attendance, practice, mock, teacher note</div></div>'+
+  '<div class="hot hot--card" data-goto="practice-result" data-as="parent"><div class="k" style="color:var(--tint)">Test result</div><div style="font-weight:600;margin:3px 0">DPP 14 · 12 / 16</div><div class="muted">Outcome only — student does the player</div></div>'+
+  '<div class="hot hot--card" data-goto="payments" data-as="parent"><div class="k" style="color:var(--crimson)">Fees &amp; receipts</div><div style="font-weight:600;margin:3px 0">Sep ₹4,500 due 5 Sep</div><div class="muted">Pay, then history + receipts</div></div>'+
+  '<div class="hot hot--card" data-goto="messages" data-as="parent"><div class="k" style="color:var(--tint)">Message the teacher</div><div class="muted" style="margin-top:3px">On the record · usually within a day</div></div>'+
+  '<div class="card card--wash"><p class="muted">Read-only except chat and pay. No second gradebook — every card opens an existing screen, not a parent-only id.</p></div>'+
  '</div>'+pnav('Home');
 };
 
 R['reports']=function(){
+ if(parentView()){
+  return appbar('Marksheet','<span class="pill">August</span>')+'<div class="appwrap">'+
+   '<div class="card"><div style="font-family:var(--serif);font-weight:600">Term report — Aditya Menon</div><div class="muted" style="margin-top:4px">Your child only · from the timeline</div>'+
+    '<div class="hr"></div>'+
+    [['Attendance','5 / 6 · 92%'],['Practice completion','78%'],['Latest test (DPP 14)','12 / 16'],['Mock 5','512 / 720 · pc 88'],['Teacher note','Steady term. Timed practice next.']].map(function(r){return '<div class="sb" style="font-size:.82rem;margin-bottom:6px;align-items:flex-start"><span class="muted">'+r[0]+'</span><span style="text-align:right;max-width:55%">'+r[1]+'</span></div>';}).join('')+
+   '</div>'+
+   '<div class="hot hot--card" data-goto="practice-result" data-as="parent"><div class="k">Open latest test result</div><div class="muted">Same practice-result screen, guardian view</div></div>'+
+   '<div class="card card--wash"><p class="muted">Not a second gradebook. Faculty generate the report; you read this slice.</p></div>'+
+  '</div>'+pnav('Reports');
+ }
  var main='<h2>Reports &amp; exports</h2><span class="k">Term reports · CSV · scheduled guardian sends</span>'+
  '<div class="grid g2" style="align-items:start"><div>'+
   field('Report type','Term progress — parent-facing')+
@@ -1516,15 +1531,15 @@ R['billing']=function(){
 };
 
 R['payments']=function(){
- return appbar('Fees','')+'<div class="appwrap">'+
+ return appbar('Fees &amp; receipts','')+'<div class="appwrap">'+
   '<div class="card" style="border-color:color-mix(in srgb,var(--crimson) 40%,var(--line))"><div class="k" style="color:var(--crimson)">Due 5 Sep</div>'+
    '<div class="sb" style="margin:6px 0"><span style="font-family:var(--serif);font-size:1.4rem">₹4,500</span>'+pill('September','warn')+'</div>'+
-   '<div class="muted">Meridian Biology · NEET 2026 Evening · invoice INV-2026-0914</div>'+
-   '<div style="margin-top:10px"><span class="hot hot--btn" data-goto="parent-home">Pay now · UPI / card</span></div>'+
-   '<p class="muted" style="margin-top:8px;font-size:.72rem">Processed by Razorpay. TutorOS never holds your money.</p>'+
+   '<div class="muted">Invoice INV-2026-0914 · linked child Aditya Menon</div>'+
+   '<div style="margin-top:10px"><span class="hot hot--btn" data-goto="parent-home" data-as="parent">Pay now · UPI / card</span></div>'+
+   '<p class="muted" style="margin-top:8px;font-size:.72rem">Processed by Razorpay. TutorOS never holds your money. Capture writes to the timeline.</p>'+
   '</div>'+
-  '<div class="card"><div class="k" style="margin-bottom:8px">History</div>'+
-   [['August','₹4,500','paid 28 Aug'],['July','₹4,500','paid 30 Jul'],['June','₹4,500','paid 2 Jul']].map(function(r){return '<div class="list__i"><div class="gr"><div class="t" style="font-weight:400">'+r[0]+'</div><div class="s">'+r[2]+'</div></div><span>'+r[1]+'</span></div>';}).join('')+
+  '<div class="card"><div class="k" style="margin-bottom:8px">Receipts &amp; history</div>'+
+   [['August','₹4,500','paid 28 Aug · RCT-0881'],['July','₹4,500','paid 30 Jul · RCT-0744'],['June','₹4,500','paid 2 Jul · RCT-0612']].map(function(r){return '<div class="list__i"><div class="gr"><div class="t" style="font-weight:400">'+r[0]+' · '+r[1]+'</div><div class="s">'+r[2]+'</div></div><span class="btn btn--sm">Receipt</span></div>';}).join('')+
   '</div>'+
  '</div>'+pnav('Fees');
 };

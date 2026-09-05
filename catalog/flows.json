@@ -11,8 +11,8 @@
       "admin",
       "faculty",
       "student",
-      "system",
-      "parent"
+      "parent",
+      "system"
     ],
     "steps": [
       {
@@ -42,6 +42,12 @@
       {
         "screen": "student-login",
         "role": "student",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "parent-link",
+        "role": "parent",
         "stage": "Enrol",
         "auto": null
       },
@@ -172,6 +178,36 @@
         "auto": null
       },
       {
+        "screen": "messages",
+        "role": "parent",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "notif-prefs",
+        "role": "parent",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "practice-result",
+        "role": "parent",
+        "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "reports",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
         "screen": "parent-home",
         "role": "parent",
         "stage": "Review",
@@ -202,6 +238,7 @@
       "roster",
       "cohort-builder",
       "student-login",
+      "parent-link",
       "schedule",
       "session-pre",
       "join",
@@ -221,6 +258,8 @@
       "timeline",
       "teacher-dash",
       "reports",
+      "messages",
+      "notif-prefs",
       "parent-home",
       "owner",
       "billing",
@@ -509,6 +548,36 @@
         "auto": null
       },
       {
+        "screen": "messages",
+        "role": "parent",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "notif-prefs",
+        "role": "parent",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "practice-result",
+        "role": "parent",
+        "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "reports",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
         "screen": "parent-home",
         "role": "parent",
         "stage": "Review",
@@ -546,6 +615,8 @@
       "timeline",
       "teacher-dash",
       "reports",
+      "notif-prefs",
+      "practice-result",
       "parent-home",
       "billing",
       "payments"
@@ -829,6 +900,30 @@
         "auto": null
       },
       {
+        "screen": "messages",
+        "role": "parent",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "notif-prefs",
+        "role": "parent",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "reports",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
         "screen": "billing",
         "role": "admin",
         "stage": "Bill",
@@ -857,6 +952,7 @@
       "timeline",
       "parent-home",
       "reports",
+      "notif-prefs",
       "billing",
       "payments"
     ]
@@ -1112,6 +1208,36 @@
         "auto": null
       },
       {
+        "screen": "messages",
+        "role": "parent",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "notif-prefs",
+        "role": "parent",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "practice-result",
+        "role": "parent",
+        "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "reports",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
         "screen": "parent-home",
         "role": "parent",
         "stage": "Review",
@@ -1143,7 +1269,7 @@
       },
       {
         "screen": "payments",
-        "role": "student",
+        "role": "parent",
         "stage": "Bill",
         "auto": null
       },
