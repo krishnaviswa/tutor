@@ -69,9 +69,23 @@ def main() -> int:
 
     flows = json.loads((ROOT / "catalog/flows.json").read_text(encoding="utf-8"))
     for f in flows:
+        if "steps" not in f or "tour" not in f:
+            fail(f"flow {f.get('id')} missing steps/tour (rebuild catalog from demo)")
         for sid in f["tour"]:
             if sid not in catalog_ids:
                 fail(f"flow {f['id']} unknown screen {sid}")
+
+    for s in screens:
+        for key in ("own", "who", "why", "how", "when", "roles"):
+            if not s.get(key):
+                fail(f"catalog screen {s['id']} missing {key} — run scripts/build_catalog.py")
+
+    if "incomplete" not in html.lower():
+        fail("architecture HTML must state the demo is incomplete")
+    if "data-flow=" not in html:
+        fail("architecture HTML must expose six demo tracks (data-flow)")
+    if "staff-login" not in html:
+        fail("architecture HTML must mention staff-login gap vs Everything")
 
     spec = (ROOT / "specs/001-platform-architecture/spec.md").read_text(encoding="utf-8")
     plan = (ROOT / "specs/001-platform-architecture/plan.md").read_text(encoding="utf-8")

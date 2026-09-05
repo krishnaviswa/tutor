@@ -398,13 +398,41 @@ def parse_screens() -> list[dict]:
                 "ports": extra.get("ports", []),
                 "timelineEvents": extra.get("timelineEvents", []),
                 "shows": extra.get("shows", title),
+                "own": "",
+                "who": "",
+                "why": "",
+                "how": "",
+                "when": "",
+                "roles": [role],
             }
         )
     missing = set(CONTRACTS) - {s["id"] for s in screens}
     extra_ids = {s["id"] for s in screens} - set(CONTRACTS)
     if missing or extra_ids:
         raise SystemExit(f"Contract mismatch missing={sorted(missing)} extra={sorted(extra_ids)}")
+    why = parse_why(text)
+    missing_why = {s["id"] for s in screens} - set(why)
+    extra_why = set(why) - {s["id"] for s in screens}
+    if missing_why or extra_why:
+        raise SystemExit(f"WHY mismatch missing={sorted(missing_why)} extra={sorted(extra_why)}")
+    by_id = {s["id"]: s for s in screens}
+    for sid, w in why.items():
+        by_id[sid].update(w)
     return screens
+
+
+def parse_why(text: str) -> dict[str, dict]:
+    block = re.search(r"var WHY=\{(.*?)\n\};", text, re.S)
+    if not block:
+        raise SystemExit("Could not find var WHY={...} in tutor-platform-demo.html")
+    rows = re.findall(
+        r"'([a-z0-9-]+)':\{own:'([^']*)',who:'([^']*)',why:'([^']*)',how:'([^']*)',when:'([^']*)'\}",
+        block.group(1),
+    )
+    return {
+        sid: {"own": own, "who": who, "why": why, "how": how, "when": when}
+        for sid, own, who, why, how, when in rows
+    }
 
 
 def modules() -> list[dict]:
@@ -452,7 +480,6 @@ def modules() -> list[dict]:
 
 def parse_flows() -> list[dict]:
     text = DEMO.read_text(encoding="utf-8")
-    # Unique tour ids from t6
     templates = []
     for tid, name in [
         ("t1", "Exam-prep loop"),
@@ -462,16 +489,57 @@ def parse_flows() -> list[dict]:
         ("t5", "Music / arts"),
         ("t6", "Everything"),
     ]:
+        head = re.search(
+            rf"id:'{tid}',short:'([^']+)',name:'([^']+)',tint:'([^']+)',tier:'([^']+)',\s*shape:'([^']*)',\s*blurb:'([^']*)'",
+            text,
+        )
+        if not head:
+            raise SystemExit(f"{tid} header not found")
         block = re.search(rf"id:'{tid}'.*?steps:\[(.*?)\]\s*\}}", text, re.S)
         if not block:
             raise SystemExit(f"{tid} steps not found")
-        steps = re.findall(r"\['([a-z0-9-]+)'", block.group(1))
+        raw = re.findall(
+            r"\['([a-z0-9-]+)','(\w+)','(\w+)'(?:,'([^']*)')?\]",
+            block.group(1),
+        )
+        steps = []
         tour = []
-        for s in steps:
-            if s not in tour:
-                tour.append(s)
-        templates.append({"id": tid, "name": name, "tour": tour})
+        roles: list[str] = []
+        for sid, role, stage, auto in raw:
+            steps.append({
+                "screen": sid,
+                "role": role,
+                "stage": stage,
+                "auto": auto or None,
+            })
+            if role not in roles:
+                roles.append(role)
+            if not auto and sid not in tour:
+                tour.append(sid)
+        templates.append({
+            "id": tid,
+            "short": head.group(1),
+            "name": head.group(2),
+            "tint": head.group(3),
+            "tier": head.group(4),
+            "shape": head.group(5),
+            "blurb": head.group(6),
+            "roles": roles,
+            "steps": steps,
+            "tour": tour,
+        })
     return templates
+
+
+def attach_swim_roles(screens: list[dict], flows: list[dict]) -> None:
+    acc: dict[str, list[str]] = {s["id"]: [] for s in screens}
+    for f in flows:
+        for st in f["steps"]:
+            sid, role = st["screen"], st["role"]
+            if sid in acc and role not in acc[sid]:
+                acc[sid].append(role)
+    for s in screens:
+        s["roles"] = acc[s["id"]] or [s["role"]]
 
 
 def entities() -> list[dict]:
@@ -533,21 +601,29 @@ def apis(screens: list[dict]) -> list[str]:
 def main() -> None:
     OUT.mkdir(exist_ok=True)
     screens = parse_screens()
+    flows = parse_flows()
+    attach_swim_roles(screens, flows)
+    mods = modules()
+    ents = entities()
+    prt = ports()
+    env = env_vars()
+    api_list = apis(screens)
     (OUT / "screens.json").write_text(json.dumps(screens, indent=2) + "\n", encoding="utf-8")
-    (OUT / "modules.json").write_text(json.dumps(modules(), indent=2) + "\n", encoding="utf-8")
-    (OUT / "flows.json").write_text(json.dumps(parse_flows(), indent=2) + "\n", encoding="utf-8")
-    (OUT / "entities.json").write_text(json.dumps(entities(), indent=2) + "\n", encoding="utf-8")
-    (OUT / "ports.json").write_text(json.dumps(ports(), indent=2) + "\n", encoding="utf-8")
-    (OUT / "env.json").write_text(json.dumps(env_vars(), indent=2) + "\n", encoding="utf-8")
-    (OUT / "apis.json").write_text(json.dumps(apis(screens), indent=2) + "\n", encoding="utf-8")
+    (OUT / "modules.json").write_text(json.dumps(mods, indent=2) + "\n", encoding="utf-8")
+    (OUT / "flows.json").write_text(json.dumps(flows, indent=2) + "\n", encoding="utf-8")
+    (OUT / "entities.json").write_text(json.dumps(ents, indent=2) + "\n", encoding="utf-8")
+    (OUT / "ports.json").write_text(json.dumps(prt, indent=2) + "\n", encoding="utf-8")
+    (OUT / "env.json").write_text(json.dumps(env, indent=2) + "\n", encoding="utf-8")
+    (OUT / "apis.json").write_text(json.dumps(api_list, indent=2) + "\n", encoding="utf-8")
     (OUT / "embed.js").write_text(
         "window.TUTOROS_CATALOG=" + json.dumps({
             "screens": screens,
-            "modules": modules(),
-            "flows": parse_flows(),
-            "entities": entities(),
-            "ports": ports(),
-            "apis": apis(screens),
+            "modules": mods,
+            "flows": flows,
+            "entities": ents,
+            "ports": prt,
+            "apis": api_list,
+            "note": "Demo is UI gold and incomplete. Catalog is generated from tutor-platform-demo.html. Role HTML files are generated children.",
         }) + ";\n",
         encoding="utf-8",
     )

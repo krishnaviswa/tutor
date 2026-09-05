@@ -48,7 +48,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
 h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.15;margin:0}
 p{margin:0}
 button,a.btn{font-family:inherit;cursor:pointer}
-.k{font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)}
+.k{font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
 #top{position:sticky;top:0;z-index:40;height:56px;display:flex;align-items:center;gap:9px;padding:0 12px;background:color-mix(in srgb,var(--ground) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft)}
 #top .brand{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-weight:600;font-size:15px;cursor:pointer}
 #top .brand i{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:2px 6px;font-style:normal}
@@ -70,11 +70,15 @@ button,a.btn{font-family:inherit;cursor:pointer}
 .pill{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:999px;background:var(--sunk);margin-right:4px}
 .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 a.btn,button.hot{display:inline-flex;align-items:center;border:1px solid var(--line);background:var(--raised);border-radius:8px;padding:8px 12px;color:var(--ink);text-decoration:none;font-size:.85rem}
-button.hot.primary,a.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.hot.primary,a.btn.primary{background:var(--accent);color:var(--ink);border-color:var(--accent)}
 .call{border-left:3px solid var(--accent);padding:10px 14px;background:var(--surface);margin:10px 0}
-.call b{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-bottom:4px}
+.call b{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);display:block;margin-bottom:4px}
 .note{background:var(--amber-wash);border-radius:10px;padding:12px 14px;font-size:.88rem;margin:16px 0}
 ul.plain{margin:8px 0 0;padding-left:1.1rem;color:var(--ink-soft)}
+.why{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:12px 0}
+.why span{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);display:block;margin-bottom:3px}
+.why p{font-size:.82rem;color:var(--ink-soft);line-height:1.4}
+:root[data-theme="light"]{color-scheme:light}
 </style>
 <header id="top">
   <div class="brand" id="brandHome">
@@ -100,8 +104,8 @@ var C=window.TUTOROS_CATALOG;
 if(!C){document.getElementById('stage').innerHTML='<p class="lead">Missing catalog/embed.js. Run <code>python scripts/build_catalog.py</code>.</p>';return;}
 
 var LAYERS=[
-  {id:'entry',t:'Entry',d:'Role + workspace. Student, teacher, admin, parent, system.'},
-  {id:'ui',t:'UI',d:'47 screens in seven domains. Fluid, content-first, one primary action.'},
+  {id:'entry',t:'Entry',d:'Role + workspace. Swimlane roles from the demo: student, faculty, admin, parent, system.'},
+  {id:'ui',t:'UI',d:'Closed set of 47 screens (demo S). Demo is UI gold and incomplete. Architecture does not invent ids.'},
   {id:'api',t:'API',d:'FastAPI /api/v1 routers by domain. Planned contracts, not live handlers.'},
   {id:'mw',t:'Middleware',d:'CORS → request id → tenant → authn → authz + flags → QuotaGuard → idempotency → audit.'},
   {id:'svc',t:'Services',d:'No HTTP. TimelinePort, ModuleFlags, SessionRecord.fanout, Notify.dispatch.'},
@@ -116,10 +120,11 @@ var TENANTS=[
 var ROLES=['student','faculty','admin','parent','system'];
 var MW=['CORS allowlist','Request id','Tenant (workspace_id)','AuthN (OTP / magic link / JWT)','AuthZ (role + G1 flag → 404 if module off)','QuotaGuard (warn 80% / block paid send at 100%)','Idempotency on writes','Audit (staff mutations)'];
 
-var state={view:'start',role:null,domain:null,screen:null,layer:null};
+var state={view:'start',role:null,domain:null,screen:null,layer:null,flow:null};
 
 function screens(){return C.screens;}
-function byDomain(d){return screens().filter(function(s){return s.domain===d && (!state.role || state.role==='system' || s.role===state.role);});}
+function roleOn(s,r){var rs=s.roles||[s.role];return rs.indexOf(r)>=0;}
+function byDomain(d){return screens().filter(function(s){return s.domain===d && (!state.role || roleOn(s,state.role));});}
 function domains(){
   var order=['A','B','C','D','E','F','G'], out=[];
   order.forEach(function(d){
@@ -133,7 +138,7 @@ function findScreen(id){for(var i=0;i<C.screens.length;i++)if(C.screens[i].id===
 function go(view,extra){
   state.view=view;
   if(extra){for(var k in extra)state[k]=extra[k];}
-  if(view==='start'){state.role=null;state.domain=null;state.screen=null;state.layer=null;}
+  if(view==='start'){state.role=null;state.domain=null;state.screen=null;state.layer=null;state.flow=null;}
   render();
 }
 function crumb(parts){
@@ -141,18 +146,39 @@ function crumb(parts){
 }
 
 function startView(){
+  var flows=C.flows||[];
   return '<p class="k">Start</p><h1>Someone opens TutorOS</h1>'+
     '<p class="lead">Subject-neutral remote tutoring OS. Same engine for exam-prep, languages, music, skills. Biology / NEET files in this repo are one exam-prep <b>example tenant</b>, not the product.</p>'+
+    '<div class="note"><b>Demo is UI gold and incomplete.</b> Screen ids, template steps, and Owner / Who / Why / How / When live in <code>tutor-platform-demo.html</code>. This map follows that catalog. Focused templates do not yet carry every spine screen (for example <code>staff-login</code> is on Everything). Role HTML files are generated children of the demo (one lane, no extra features). A later pass copies six-track UI and backend capability onto those role pages — still no new screen ids. If this map disagrees with the demo, the demo wins and this map is regenerated.</div>'+
     '<p class="k" style="margin-bottom:8px">Example workspaces (same engine)</p>'+
     '<div class="grid g3">'+TENANTS.map(function(t){
       return '<div class="card" data-goto="layers"><span class="count">'+t.tpl+'</span><h3>'+t.name+'</h3><p>'+t.copy+'</p></div>';
     }).join('')+'</div>'+
-    '<p class="k" style="margin:22px 0 8px">Enter as a role</p>'+
+    '<p class="k" style="margin:22px 0 8px">Six template tracks (from demo)</p>'+
+    '<div class="grid g2">'+flows.map(function(f){
+      return '<button class="card" data-goto="flow" data-flow="'+f.id+'"><span class="count">'+f.id+' · '+f.tour.length+' screens · '+f.tier+'</span><h3>'+f.name+'</h3><p>'+f.blurb+'</p></button>';
+    }).join('')+'</div>'+
+    '<p class="k" style="margin:22px 0 8px">Enter as a swimlane role</p>'+
     '<div class="grid g2">'+ROLES.map(function(r){
-      return '<button class="card" data-goto="ui" data-role="'+r+'"><h3>'+r+'</h3><p>Open the UI layer filtered to this role.</p></button>';
+      return '<button class="card" data-goto="ui" data-role="'+r+'"><h3>'+r+'</h3><p>Screens this role sits on in demo steps (not chrome-only).</p></button>';
     }).join('')+'</div>'+
     '<div class="row"><button class="hot primary" data-goto="layers">All layers (architect view)</button>'+
-    '<a class="btn" href="tutor-platform-demo.html">Open UI prototype</a></div>';
+    '<a class="btn" href="tutor-platform-demo.html">Open UI prototype</a></div>'+
+    '<p class="muted" style="margin-top:16px">Role children (generated, not linked from the demo chrome): '+
+    ['student','faculty','admin','parent','system'].map(function(r){return '<a class="btn" href="tutor-platform-role-'+r+'.html">'+r+'</a>';}).join(' ')+'</p>';
+}
+
+function flowTrackView(){
+  var f=(C.flows||[]).filter(function(x){return x.id===state.flow;})[0];
+  if(!f)return '<p>Unknown template</p>';
+  var rows=f.steps.map(function(st,i){
+    var s=findScreen(st.screen);
+    return '<button class="card" data-goto="screen" data-screen-id="'+st.screen+'"><span class="count">'+(st.auto?'auto':'step')+' · '+st.role+' · '+st.stage+'</span><h3>'+(s?s.title:st.screen)+'</h3><p>'+(st.auto||(s&&s.why)||'')+'</p></button>';
+  }).join('');
+  return crumb(['Start','Track '+f.id])+'<h1>'+f.name+'</h1>'+
+    '<p class="lead">'+f.blurb+' · '+f.shape+' · tier '+f.tier+'. Same ids as the demo swimlane. Missing spine screens on this track are a demo gap, not extra architecture.</p>'+
+    '<div class="grid g2">'+rows+'</div>'+
+    '<div class="row"><a class="btn primary" href="tutor-platform-demo.html#/'+f.id+'/flow">Open this flow in the demo</a></div>';
 }
 
 function layersView(){
@@ -180,7 +206,7 @@ function layerView(){
 function uiView(){
   var filter=state.role?' · role '+state.role:'';
   return crumb(['Start','UI'+filter])+'<h1>UI · seven domains</h1>'+
-    '<p class="lead">47 screens. Click a domain. Chrome (student appnav, faculty sidebar, owner sidebar, parent nav) wraps the screen — it is not extra screens.</p>'+
+    '<p class="lead">47 screens from demo <code>S</code>. Role filter uses swimlane steps (a screen can appear as student and as system). Chrome (appnav, sidebars) is not extra screens.</p>'+
     '<div class="grid g2">'+domains().map(function(d){
       var n=byDomain(d.id).length;
       return '<button class="card" data-goto="domain" data-domain="'+d.id+'"><span class="count">'+d.id+' · '+n+' screens</span><h3>'+d.name+'</h3></button>';
@@ -197,28 +223,38 @@ function domainView(){
     }).join('')+'</div>';
 }
 
+function whyBlock(s){
+  if(!s.who&&!s.why)return '';
+  return '<div class="why">'+
+    [['Owner',s.own],['Who',s.who],['Why',s.why],['How',s.how],['When',s.when]].map(function(p){
+      return '<div><span>'+p[0]+'</span><p>'+(p[1]||'—')+'</p></div>';
+    }).join('')+'</div>';
+}
 function screenView(){
   var s=findScreen(state.screen);
   if(!s)return '<p>Unknown screen</p>';
   var demo='tutor-platform-demo.html?screen='+encodeURIComponent(s.id);
   return crumb(['Start','UI',s.domainName,s.title])+'<span class="pill" data-screen="'+s.id+'">'+s.id+'</span>'+
     '<span class="pill">'+s.module+'</span><span class="pill">phase '+s.phase+'</span><span class="pill">'+s.status+'</span>'+
+    '<span class="pill">lanes '+(s.roles||[s.role]).join(', ')+'</span>'+
     '<h1 style="margin-top:10px">'+s.title+'</h1>'+
     '<p class="lead">'+s.shows+'</p>'+
-    '<p class="muted">Route <code>'+s.route+'</code> · role '+s.role+' · frame '+s.frame+'</p>'+
+    whyBlock(s)+
+    '<p class="muted">Route <code>'+s.route+'</code> · chrome role '+s.role+' · frame '+s.frame+'</p>'+
     '<div class="call"><b>Shows</b>'+s.shows+'</div>'+
     '<div class="call"><b>APIs (planned)</b>'+(s.apis.length?s.apis.map(function(a){return '<div><code>'+a+'</code></div>';}).join(''):'None')+'</div>'+
     '<div class="call"><b>Entities</b>'+(s.entities.length?s.entities.map(function(e){return '<code>'+e+'</code> ';}).join(''):'—')+'</div>'+
     '<div class="call"><b>Ports</b>'+(s.ports.length?s.ports.map(function(e){return '<code>'+e+'</code> ';}).join(''):'none')+'</div>'+
     '<div class="call"><b>Timeline events</b>'+(s.timelineEvents.length?s.timelineEvents.join(', '):'—')+'</div>'+
     '<div class="row"><button class="hot primary" data-goto="follow">Follow the call</button>'+
-    '<a class="btn" href="'+demo+'">Open in demo</a></div>';
+    '<a class="btn" href="'+demo+'">Open in demo (Everything)</a></div>';
 }
 
 function followView(){
   var s=findScreen(state.screen);
   return crumb(['Start','UI',s.title,'Call'])+'<h1>Follow the call</h1>'+
-    '<p class="lead">Teaching writes the ledger first. Paid channels run through QuotaGuard.</p>'+
+    '<p class="lead">Teaching writes the ledger first. Paid channels run through QuotaGuard. Why this screen exists is copied from the demo.</p>'+
+    whyBlock(s)+
     '<div class="lane">'+
     '<div class="card"><span class="k">01 UI</span><h3>'+s.title+'</h3><p>'+s.route+'</p></div><div class="arrow">↓</div>'+
     '<div class="card"><span class="k">02 API</span><h3>Routers</h3><p>'+(s.apis.join(' · ')||'—')+'</p></div><div class="arrow">↓</div>'+
@@ -232,6 +268,7 @@ function render(){
   var stage=document.getElementById('stage'), lbl=document.getElementById('tlbl');
   var html='';
   if(state.view==='start'){lbl.textContent='entry';html=startView();}
+  else if(state.view==='flow'){lbl.textContent=state.flow;html=flowTrackView();}
   else if(state.view==='layers'){lbl.textContent='layers';html=layersView();}
   else if(state.view==='layer'){lbl.textContent=state.layer;html=layerView();}
   else if(state.view==='ui'){lbl.textContent='ui';html=uiView();}
@@ -244,7 +281,8 @@ function render(){
 
 function back(){
   if(state.view==='follow'){go('screen');return;}
-  if(state.view==='screen'){go('domain');return;}
+  if(state.view==='screen'){go(state.flow?'flow':'domain');return;}
+  if(state.view==='flow'){go('start');return;}
   if(state.view==='domain'){go('ui');return;}
   if(state.view==='ui'){go(state.role?'start':'layers');return;}
   if(state.view==='layer'){go('layers');return;}
@@ -263,6 +301,7 @@ document.addEventListener('click',function(e){
   if(g.getAttribute('data-domain'))extra.domain=g.getAttribute('data-domain');
   if(g.getAttribute('data-screen-id'))extra.screen=g.getAttribute('data-screen-id');
   if(g.getAttribute('data-layer'))extra.layer=g.getAttribute('data-layer');
+  if(g.getAttribute('data-flow'))extra.flow=g.getAttribute('data-flow');
   go(v,extra);
 });
 render();

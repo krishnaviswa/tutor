@@ -26,7 +26,7 @@ See `[AGENTS.md](AGENTS.md)` for the repo map.
 2. Timeline is the ledger. WhatsApp/email/push are channels.
 3. WhatsApp outbound for teacher, parent, admin; student off unless owner-enabled.
 4. QuotaGuard on metered resources. Caps throttle usage, not always-on core.
-5. Closed screen set (`catalog/screens.json`). Demo HTML is UI gold until `wired`.
+5. Closed screen set (`catalog/screens.json`). Demo HTML is UI gold until `wired`, including while incomplete. Catalog/architecture follow the demo; never invent a screen id.
 6. Ports at vendor edges; mock default. Logic in services, not routers.
 7. Never invent a screen id. Never commit secrets.
 8. Spec-driven: no `/speckit.implement` before Specified + human OK.

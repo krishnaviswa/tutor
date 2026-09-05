@@ -551,7 +551,7 @@ var TEMPLATES=[
   roles:['student','faculty','admin','parent','system'],
   steps:[
    ['onboard-kind','admin','Onboard'],['branding','admin','Onboard'],
-   ['roster','admin','Enrol'],['cohort-builder','faculty','Enrol'],['student-login','student','Enrol'],
+   ['roster','admin','Enrol'],['cohort-builder','faculty','Enrol'],['student-login','student','Enrol'],['parent-link','parent','Enrol'],
    ['schedule','faculty','Schedule'],['session-pre','faculty','Schedule'],
    ['join','student','Teach'],['live-teacher','faculty','Teach'],['live-student','student','Teach'],
    ['session-video','faculty','Teach'],['record','faculty','Teach'],
@@ -561,7 +561,8 @@ var TEMPLATES=[
    ['mentor','system','Support','A missed practice auto-books a backlog slot'],
    ['doubt-student','student','Support'],['doubt-teacher','faculty','Support'],['mentor','faculty','Support'],
    ['test-setup','faculty','Assess'],['test-runner','student','Assess'],
-   ['timeline','student','Review'],['teacher-dash','faculty','Review'],['reports','faculty','Review'],['parent-home','parent','Review'],
+   ['timeline','student','Review'],['teacher-dash','faculty','Review'],['reports','faculty','Review'],
+   ['messages','parent','Support'],['notif-prefs','parent','Support'],['practice-result','parent','Assess'],['timeline','parent','Review'],['reports','parent','Review'],['parent-home','parent','Review'],
    ['owner','admin','Operate'],
    ['billing','admin','Bill'],['payments','parent','Bill']
   ]},
@@ -594,7 +595,8 @@ var TEMPLATES=[
    ['timeline','system','Teach','Attendance + notes → student timeline'],
    ['assign-issue','faculty','Practise'],['practice-play','student','Practise'],
    ['doubt-student','student','Support'],['doubt-teacher','faculty','Support'],['messages','faculty','Support'],['announce','faculty','Support'],
-   ['timeline','student','Review'],['teacher-dash','faculty','Review'],['reports','faculty','Review'],['parent-home','parent','Review'],
+   ['timeline','student','Review'],['teacher-dash','faculty','Review'],['reports','faculty','Review'],
+   ['messages','parent','Support'],['notif-prefs','parent','Support'],['practice-result','parent','Assess'],['timeline','parent','Review'],['reports','parent','Review'],['parent-home','parent','Review'],
    ['billing','admin','Bill'],['payments','parent','Bill']
   ]},
  {id:'t4',short:'Skills',name:'Skills / cohort course',tint:'violet',tier:'Cohort',
@@ -628,6 +630,7 @@ var TEMPLATES=[
    ['assign-issue','faculty','Practise'],
    ['messages','faculty','Support'],['announce','faculty','Support'],
    ['timeline','student','Review'],['parent-home','parent','Review'],['reports','faculty','Review'],
+   ['messages','parent','Support'],['notif-prefs','parent','Support'],['timeline','parent','Review'],['reports','parent','Review'],
    ['billing','admin','Bill'],['payments','parent','Bill']
   ]},
  {id:'t6',short:'Everything',name:'Everything',tint:'ink',tier:'Institute',
@@ -649,9 +652,10 @@ var TEMPLATES=[
    ['qbank','faculty','Practise'],['practice-build','faculty','Practise'],['practice-play','student','Practise'],['assign-issue','faculty','Practise'],
    ['test-setup','faculty','Assess'],['test-runner','student','Assess'],['practice-result','student','Assess'],['assign-grade','faculty','Assess'],['analysis','faculty','Assess'],
    ['doubt-student','student','Support'],['doubt-teacher','faculty','Support'],['messages','faculty','Support'],['announce','faculty','Support'],['mentor','faculty','Support'],['notif-prefs','student','Support'],
-   ['student-dash','student','Review'],['teacher-dash','faculty','Review'],['timeline','student','Review'],['reports','faculty','Review'],['parent-home','parent','Review'],
+   ['student-dash','student','Review'],['teacher-dash','faculty','Review'],['timeline','student','Review'],['reports','faculty','Review'],
+   ['messages','parent','Support'],['notif-prefs','parent','Support'],['practice-result','parent','Assess'],['timeline','parent','Review'],['reports','parent','Review'],['parent-home','parent','Review'],
    ['owner','admin','Operate'],['subscription','admin','Operate'],['payouts','admin','Operate'],
-   ['billing','admin','Bill'],['payments','student','Bill'],
+   ['billing','admin','Bill'],['payments','parent','Bill'],
    ['automation','admin','Configure'],['integrations','admin','Configure'],['audit','admin','Configure']
   ]}
 ];
@@ -750,9 +754,10 @@ function appnav(active){
  return '<nav class="appnav">'+items.map(function(it){return '<a data-goto="'+it[1]+'" class="'+(it[0]===active?'on':'')+'">'+ic(it[2])+'<span>'+it[0]+'</span></a>';}).join('')+'</nav>';
 }
 function pnav(active){
- var items=[['Home','parent-home','home'],['Reports','reports','doc'],['Fees','payments','cash'],['Messages','messages','chat']];
- return '<nav class="appnav">'+items.map(function(it){return '<a data-goto="'+it[1]+'" class="'+(it[0]===active?'on':'')+'">'+ic(it[2])+'<span>'+it[0]+'</span></a>';}).join('')+'</nav>';
+ var items=[['Home','parent-home','home'],['Activity','timeline','flag'],['Reports','reports','doc'],['Fees','payments','cash'],['Chat','messages','chat']];
+ return '<nav class="appnav pnav">'+items.map(function(it){return '<a data-goto="'+it[1]+'" data-as="parent" class="'+(it[0]===active?'on':'')+'">'+ic(it[2])+'<span>'+it[0]+'</span></a>';}).join('')+'</nav>';
 }
+function parentView(){return ROLE_ONLY==='parent'||(state&&state.asRole==='parent');}
 function appbar(title,right){return '<div class="appbar"><h2>'+title+'</h2>'+(right||'')+'</div>';}
 
 /* ================= screens ================= */
@@ -1161,8 +1166,19 @@ R['practice-result']=function(){
   ['Q3 · Synapse types','misconception','bad','Electrical vs chemical synapse mixed up.','Re-read the notes','lesson'],
   ['Q14 · Reflex arc order','time-sink','warn','Correct on the second attempt.','Drill 5 timed','practice-play']
  ];
+ var score='<div class="card" style="text-align:center">'+ring(75)+'<div style="font-family:var(--serif);font-size:1.15rem;margin-top:4px">12 / 16</div><div class="muted">DPP 14 · beat batch average 10.4</div></div>';
+ if(parentView()){
+  return appbar('Test result','<span class="pill">read-only</span>')+'<div class="appwrap">'+
+   score+
+   '<div class="card"><div class="k" style="margin-bottom:8px">Marksheet slice</div>'+
+    [['Correct','12'],['Missed','4'],['Time-sink tags','2'],['Next class','teacher will drill misses']].map(function(r){return '<div class="sb" style="font-size:.83rem;margin-bottom:4px"><span class="muted">'+r[0]+'</span><span>'+r[1]+'</span></div>';}).join('')+
+   '</div>'+
+   '<div class="card card--wash"><p class="muted">You see the outcome, not the live player. The student does the work; this is the same result row on their timeline.</p></div>'+
+   '<div style="margin-top:8px">'+hotBtn('Full term report','reports','ghost')+'</div>'+
+  '</div>'+pnav('Reports');
+ }
  return appbar('DPP 14','<span class="pill">8:04 PM</span>')+'<div class="appwrap">'+
-  '<div class="card" style="text-align:center">'+ring(75)+'<div style="font-family:var(--serif);font-size:1.15rem;margin-top:4px">12 / 16</div><div class="muted">beat the batch average of 10.4</div></div>'+
+  score+
   '<div class="card"><div class="k" style="margin-bottom:8px">By section</div>'+
    [['Warm-up','4 / 4',100],['Sprint','6 / 8',75],['Race','2 / 4',50]].map(function(s){return '<div style="margin-bottom:8px"><div class="sb" style="font-size:.8rem"><span>'+s[0]+'</span><span class="muted">'+s[1]+'</span></div><div style="height:6px;background:var(--sunk);border-radius:3px;margin-top:3px"><b style="display:block;height:100%;width:'+s[2]+'%;background:var(--tint);border-radius:3px"></b></div></div>';}).join('')+
   '</div>'+
@@ -1258,6 +1274,17 @@ R['doubt-teacher']=function(){
 };
 
 R['messages']=function(){
+ if(parentView()){
+  return appbar('Teacher','<span class="pill">Anitha</span>')+'<div class="appwrap">'+
+   '<p class="muted" style="margin-bottom:12px">Thread is on the record. WhatsApp may ping; this screen is the source.</p>'+
+   '<div style="background:var(--sunk);border-radius:12px;padding:10px;font-size:.85rem;margin-bottom:8px">Aditya missed Friday — everything ok?</div>'+
+   '<div style="background:var(--tint-wash);border-radius:12px;padding:10px;font-size:.85rem;margin:0 0 8px 28px">School exams. Back this week.</div>'+
+   '<div style="background:var(--sunk);border-radius:12px;padding:10px;font-size:.85rem;margin-bottom:12px">August report is on Parent home when you want the marksheet.</div>'+
+   '<div class="field__in muted">Message the teacher…</div>'+
+   '<div class="row" style="margin-top:8px"><span class="btn btn--sm">Send</span></div>'+
+   '<div class="card card--wash" style="margin-top:14px"><p class="muted">You only see threads for your linked child. Other students are not visible.</p></div>'+
+  '</div>'+pnav('Chat');
+ }
  var th=[['Mr. Menon (guardian)','Thanks, I’ll make sure he joins','2h'],['Sneha Iyer','Can I get the recording?','5h'],['Ravi Kulkarni (staff)','Covered your Friday slot','1d']];
  var main='<h2>Messages</h2><span class="k">On the record · in-platform · 3 threads</span>'+
  '<div class="grid g2" style="align-items:start"><div>'+
@@ -1302,18 +1329,33 @@ R['timeline']=function(){
   ['28 Aug','Fee paid — September · ₹4,500','payments'],
   ['27 Aug','Term report sent to guardian (Mr. Menon)','reports']
  ];
- return appbar('Aditya Menon','<span class="pill">record</span>')+'<div class="appwrap">'+
-  '<div class="chips" style="margin-bottom:14px">'+['All','Sessions','Practice','Doubts','Money'].map(function(c,i){return '<span class="chip'+(i===0?' on':'')+'">'+c+'</span>';}).join('')+'</div>'+
+ var log='<div class="chips" style="margin-bottom:14px">'+['All','Sessions','Practice','Doubts','Money'].map(function(c,i){return '<span class="chip'+(i===0?' on':'')+'">'+c+'</span>';}).join('')+'</div>'+
   '<div class="tl">'+ev.map(function(e){
     var inner='<div class="tl__t">'+e[0]+'</div><div class="tl__b">'+e[1]+'</div>';
-    return e[2]?'<div class="tl__i"><div class="hot hot--row" data-goto="'+e[2]+'" style="margin:0">'+inner+'</div></div>':'<div class="tl__i">'+inner+'</div>';
-  }).join('')+'</div>'+
+    var as=parentView()?' data-as="parent"':'';
+    return e[2]?'<div class="tl__i"><div class="hot hot--row" data-goto="'+e[2]+'"'+as+' style="margin:0">'+inner+'</div></div>':'<div class="tl__i">'+inner+'</div>';
+  }).join('')+'</div>';
+ if(parentView()){
+  return appbar('Aditya’s activity','<span class="pill">your child only</span>')+'<div class="appwrap">'+
+   log+
+   '<div class="card card--wash" style="margin-top:14px"><p class="muted">Same ledger the teacher writes. You cannot see other students. Channels (WhatsApp) are not this screen.</p></div>'+
+  '</div>'+pnav('Activity');
+ }
+ return appbar('Aditya Menon','<span class="pill">record</span>')+'<div class="appwrap">'+
+  log+
   '<div class="card card--wash" style="margin-top:14px"><p class="muted">Full log · exportable as PDF / CSV · retention 24 months · the guardian and teacher see read-only views of this same stream.</p></div>'+
   hotBtn('Operation overview','owner','ghost')+
  '</div>'+appnav('You');
 };
 
 R['notif-prefs']=function(){
+ if(parentView()){
+  var prow=[['Class reminder','WhatsApp + push'],['Practice / test result','WhatsApp + email'],['Term report ready','WhatsApp + email'],['Fee due / receipt','WhatsApp + SMS'],['Teacher message','Push']];
+  return appbar('Alerts','')+'<div class="appwrap">'+
+   prow.map(function(r){return '<div class="list__i"><div class="gr"><div class="t">'+r[0]+'</div><div class="s">'+r[1]+'</div></div><span class="pill is-good">on</span></div>';}).join('')+
+   '<div class="card card--wash" style="margin-top:12px"><p class="muted">Parent WhatsApp is on the product. Student WhatsApp stays off unless the owner enabled it. The timeline remains the ledger.</p></div>'+
+  '</div>'+pnav('Home');
+ }
  var rows=[['Session reminder','Push + SMS'],['Practice due','Push + Email'],['Doubt answered','Push'],['Test result ready','Push + Email'],['Report sent to guardian','Email'],['Fee due','Push + SMS']];
  return appbar('Notifications','')+'<div class="appwrap">'+
   rows.map(function(r){return '<div class="list__i"><div class="gr"><div class="t">'+r[0]+'</div><div class="s">'+r[1]+'</div></div><span class="pill is-good">on</span></div>';}).join('')+
@@ -1407,7 +1449,7 @@ R['parent-link']=function(){
   field('Your phone','+91 90•••• ••731')+
   field('Invite code','MB-AD-4417')+
   hotBtn('Link my account','parent-home')+
-  '<div class="card card--wash" style="margin-top:20px"><div class="k" style="margin-bottom:4px">What you’ll see</div><p class="muted">Attendance, test scores, fee status and term reports — read-only. You can message the teacher. You cannot see other students.</p></div>'+
+  '<div class="card card--wash" style="margin-top:20px"><div class="k" style="margin-bottom:4px">What you’ll see</div><p class="muted">Only <b>your</b> linked child: live activity, progress and marksheet, test results, fee receipts, and a thread with the teacher. You cannot see other students.</p></div>'+
  '</div>';
 };
 
@@ -1697,7 +1739,7 @@ function aboutHTML(){
 }
 
 /* ================= router + render ================= */
-var state={vp:'auto',view:'home',tpl:'t1',cur:null};
+var state={vp:'auto',view:'home',tpl:'t1',cur:null,asRole:null};
 try{var v=localStorage.getItem('tos_vp');if(v)state.vp=v;}catch(e){}
 try{var tp=localStorage.getItem('tos_tpl');if(tp&&TById(tp))state.tpl=tp;}catch(e){}
 document.querySelectorAll('#vpSeg button').forEach(function(b){b.classList.toggle('on',b.dataset.vp===state.vp);});
@@ -1712,9 +1754,13 @@ function urlFor(tid,id){
 }
 function stepFor(tid,id){
  var T=TById(tid);
+ var prefer=ROLE_ONLY||(state&&state.asRole)||null;
+ if(T && prefer){
+  for(var i=0;i<T.steps.length;i++){if(T.steps[i][0]===id&&T.steps[i][1]===prefer)return {r:T.steps[i][1],st:T.steps[i][2]};}
+ }
  if(T){
-  for(var i=0;i<T.steps.length;i++){if(T.steps[i][0]===id&&!T.steps[i][3])return {r:T.steps[i][1],st:T.steps[i][2]};}
-  for(var j=0;j<T.steps.length;j++){if(T.steps[j][0]===id)return {r:T.steps[j][1],st:T.steps[j][2]};}
+  for(var j=0;j<T.steps.length;j++){if(T.steps[j][0]===id&&!T.steps[j][3])return {r:T.steps[j][1],st:T.steps[j][2]};}
+  for(var k=0;k<T.steps.length;k++){if(T.steps[k][0]===id)return {r:T.steps[k][1],st:T.steps[k][2]};}
  }
  return {r:S[id].role,st:'—'};
 }
@@ -1759,7 +1805,8 @@ function flowbar(tid,id){
 function frame(tid,id){
  var m=S[id], body=R[id]?R[id]():'<div style="padding:40px 24px" class="muted">Screen stub — '+id+'</div>';
  var role=stepFor(tid,id).r;
- var vp=state.vp==='auto'?m.frame:state.vp;
+ var autoFrame=(role==='parent'&&(id==='reports'||id==='messages'||id==='notif-prefs'))?'phone':m.frame;
+ var vp=state.vp==='auto'?autoFrame:state.vp;
  var tint='tint-'+ROLE[role].tint;
  if(vp==='phone'){
   return '<div class="dev dev--phone '+tint+'"><div class="pstat"><span>9:41</span><span>5G ▪▪▪ 82%</span></div><div class="dev__scr"><div class="phonewrap">'+body+'</div></div>'+flowbar(tid,id)+'</div>';
@@ -1835,7 +1882,14 @@ document.getElementById('tplSel').addEventListener('change',function(){var v=thi
 
 document.addEventListener('click',function(e){
  var g=e.target.closest('[data-goto]');
- if(g){e.preventDefault();closeDrawer();go(g.getAttribute('data-goto'));return;}
+ if(g){
+  e.preventDefault();closeDrawer();
+  if(g.getAttribute('data-as')) state.asRole=g.getAttribute('data-as');
+  else if(g.closest('.pnav')) state.asRole='parent';
+  else if(g.getAttribute('data-fnode')!=null && STEPQ[g.getAttribute('data-fnode')]) state.asRole=STEPQ[g.getAttribute('data-fnode')][1];
+  else if(!(state.asRole==='parent' && g.closest('.phonewrap'))) state.asRole=null;
+  go(g.getAttribute('data-goto'));return;
+ }
  if(e.target.closest('[data-close]')||e.target.id==='modal'){document.getElementById('modal').classList.remove('open');return;}
  if(e.target.id==='aboutBtn2'||e.target.id==='aboutLink'){openAbout();return;}
 });

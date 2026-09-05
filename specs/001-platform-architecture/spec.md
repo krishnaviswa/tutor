@@ -23,12 +23,14 @@ Before any app code, TutorOS needs a shared map so Cursor and Claude Code cannot
 1. **Given** the repo README, **when** I read the first 40 lines, **then** it states subject-neutral and that Biology/NEET/NCERT is an example tenant.
 2. **Given** `tutor-platform-architecture.html`, **when** I click Start → a role → a domain → a screen → Follow the call, **then** I see APIs, middleware, ports/entities, and Back returns one step.
 3. **Given** the architecture Start view, **when** I look at example workspaces, **then** I see at least coaching, languages, and music — not Biology as the product.
-4. **Given** `catalog/screens.json`, **when** compared to demo `S`, **then** the 47 ids match.
+4. **Given** `catalog/screens.json`, **when** compared to demo `S`, **then** the 47 ids match, and each screen has Owner / Who / Why / How / When copied from demo `WHY`.
 5. **Given** WhatsApp in the plan, **when** I read role lists, **then** teacher, parent, and admin are wired; student is owner-gated default off.
 6. **Given** admin cost controls, **when** I open Follow the call on `subscription` / owner notes, **then** QuotaGuard warn/block is described on existing screens (no 48th screen).
 7. **Given** Cursor and Claude Code config, **when** `check_agent_config_sync.py` runs on this branch vs main, **then** it passes (pairs created together).
 8. **Given** `check_architecture_parity.py`, **when** run, **then** it exits 0.
 9. **Given** this feature, **when** someone runs `/speckit.implement`, **then** it is refused until a human accepts this pack.
+10. **Given** a disagreement between demo HTML and architecture HTML, **when** catalog is rebuilt, **then** architecture follows the demo (demo is UI gold and incomplete; no new screen ids).
+11. **Given** role files, **when** `scripts/build_role_html.py` runs, **then** five children exist (`student` `faculty` `admin` `parent` `system`) as 1:1 copies with `ROLE_ONLY` set — not mutually exclusive features.
 
 ## Out of scope
 
@@ -36,6 +38,8 @@ Before any app code, TutorOS needs a shared map so Cursor and Claude Code cannot
 - Inbound WhatsApp replies
 - Implementing any of the 47 screens as React
 - Copying MerchantHub product features
+- Copying six-track completeness onto role pages (later; still no new ids)
+- Persisting typed demo input into HTML files
 
 ## Clarify (closed)
 
@@ -43,6 +47,7 @@ Before any app code, TutorOS needs a shared map so Cursor and Claude Code cannot
 - WhatsApp is a channel, in scope for teacher/parent/admin.
 - Spec Kit maps onto PM/Architect/Builder/Tester; Tester is extra.
 - This pass stops before implement.
+- Demo is incomplete: focused templates omit some spine screens (e.g. staff-login). Architecture documents the gap; it does not invent screens.
 
 ## DoD (PM)
 

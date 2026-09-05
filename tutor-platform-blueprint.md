@@ -421,7 +421,7 @@ Ship a **rule library**; tenants enable what fits. Each rule names the modules i
 
 ## 6. UI screen map
 
-~40 screens. Each screen lights up when any module that needs it is on. Continuity with the
+47 screens (locked to `tutor-platform-demo.html` `S`). Each screen lights up when any module that needs it is on. Continuity with the
 16-screen kit is noted.
 
 | Screen | Needed by | Kit origin |

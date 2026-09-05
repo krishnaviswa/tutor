@@ -14,7 +14,7 @@ TutorOS is a **subject-neutral** remote tutoring workspace. Any subject a tutor 
 2. **Timeline is the ledger.** Modules write `timeline_events`. WhatsApp, email, SMS, and push are **delivery channels**, never the database.
 3. **WhatsApp is in scope** for teacher, parent, and admin (owner). Student WhatsApp is owner-gated (default off) because that cohort is the cost spike. v1 is outbound only.
 4. **Metered resources have admin caps.** WhatsApp/SMS/email sends, storage, seats, hosted minutes, later STT. Warn at 80%, block paid sends at 100% when policy is `block`. Caps throttle usage, not existence of always-on core (A1, A2, A3, G1, G2, D4, F2).
-5. **Closed screen set.** Screen ids live in `catalog/screens.json` and `tutor-platform-demo.html` `S`. Never invent a screen id. Demo HTML is UI gold until a screen is `wired`.
+5. **Closed screen set.** Screen ids live in `catalog/screens.json` and `tutor-platform-demo.html` `S`. Never invent a screen id. Demo HTML is UI gold until a screen is `wired`, including while the demo is still incomplete. Catalog and architecture HTML must match the demo; if they disagree, update catalog/architecture (regenerate), do not add screens.
 6. **No subject in the schema.** Topics hang off tenant `taxonomies` / `topics` (G3). Never `biology_chapters` or exam-board tables.
 7. **Fluid UI, simple UX.** Screens grow with content. One primary action per view. WhatsApp is a per-role channel toggle, not a second inbox. Quotas live on `owner` / `subscription`.
 8. **Ports at vendor edges.** Mock default in CI. Routers never call Google, Meta, or disk. Services never know HTTP.

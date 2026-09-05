@@ -8,6 +8,8 @@
 |---|---|
 | Product + architecture | README.md |
 | System map (clickable) | tutor-platform-architecture.html |
+| UI gold (incomplete) | tutor-platform-demo.html |
+| Role children (generated) | tutor-platform-role-*.html |
 | Screen / API / entity contracts | catalog/*.json |
 | Governing rules | .specify/memory/constitution.md |
 | In-flight feature | path in `.specify/feature.json` — not the git branch |
@@ -29,8 +31,9 @@ Every `.cursor/rules/*.mdc` has a Claude Code mirror. Change both in the same co
 
 ## Layout (this pass)
 
-- `catalog/` — screens, modules, APIs, entities, ports
+- `catalog/` — screens (incl. Why fields), modules, APIs, entities, ports, flows (steps)
 - `specs/` — Spec Kit feature artifacts
 - `docs/examples/` — not requirements
-- `scripts/` — catalog build + parity
+- `scripts/` — catalog build, role HTML mint, parity
+- `tutor-platform-role-*.html` — generated from demo; do not edit
 - No `frontend/` or `backend/` app yet (stub CLAUDE.md files exist so pairing is valid)

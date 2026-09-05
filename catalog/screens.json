@@ -21,7 +21,15 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Pick a role: student, staff, or parent. Routes to the matching sign-in."
+    "shows": "Pick a role: student, staff, or parent. Routes to the matching sign-in.",
+    "own": "Platform auth. Chrome is student until a role is chosen.",
+    "who": "Anyone opening the app URL without a remembered role.",
+    "why": "One URL serves three doors \u2014 student, staff, parent \u2014 without three bookmarks.",
+    "how": "Pick Student, Staff, or Parent. The app routes to the matching sign-in \u2014 one identity still threads the timeline.",
+    "when": "First visit, shared device, or after logout.",
+    "roles": [
+      "student"
+    ]
   },
   {
     "id": "student-login",
@@ -51,7 +59,15 @@
       "email"
     ],
     "timelineEvents": [],
-    "shows": "Student sign-in (phone OTP default, email magic link optional). No password in v1."
+    "shows": "Student sign-in (phone OTP default, email magic link optional). No password in v1.",
+    "own": "Student holds the identity. Owner chooses OTP vs magic-link.",
+    "who": "The learner.",
+    "why": "One identity for sessions, practice, doubts, and fees \u2014 no password in v1.",
+    "how": "Phone OTP by default; email magic-link optional. The same identity is used for the whole record.",
+    "when": "Every time they open the student app.",
+    "roles": [
+      "student"
+    ]
   },
   {
     "id": "staff-login",
@@ -82,7 +98,15 @@
       "email"
     ],
     "timelineEvents": [],
-    "shows": "Staff sign-in for teacher, assistant, or owner."
+    "shows": "Staff sign-in for teacher, assistant, or owner.",
+    "own": "Faculty or owner via staff membership.",
+    "who": "Teacher, assistant, or owner.",
+    "why": "Staff must not share the student app; membership decides the workspace.",
+    "how": "Same OTP / magic-link as students. Membership decides which console they enter.",
+    "when": "Opening the web teaching or owner console.",
+    "roles": [
+      "faculty"
+    ]
   },
   {
     "id": "wsetup",
@@ -109,7 +133,15 @@
       "email"
     ],
     "timelineEvents": [],
-    "shows": "Create workspace: name, timezone, subdomain. Always-on core flags on."
+    "shows": "Create workspace: name, timezone, subdomain. Always-on core flags on.",
+    "own": "Owner.",
+    "who": "Owner creating a workspace.",
+    "why": "The tenant spine must exist before branding, invites, or teaching.",
+    "how": "Name, timezone, subdomain. Always-on core stays on (identity, timeline, quotas). Feature flags for extra modules come next.",
+    "when": "Day 0 of a new tenant \u2014 before branding or invites.",
+    "roles": [
+      "admin"
+    ]
   },
   {
     "id": "branding",
@@ -135,7 +167,15 @@
       "storage"
     ],
     "timelineEvents": [],
-    "shows": "Logo, colours, subdomain. Custom domain later."
+    "shows": "Logo, colours, subdomain. Custom domain later.",
+    "own": "Owner.",
+    "who": "Owner.",
+    "why": "Learners must recognise the workspace as theirs, not a generic TutorOS shell.",
+    "how": "Logo, accent colour, subdomain. Custom domain is later.",
+    "when": "Immediately after workspace setup, before the first invite.",
+    "roles": [
+      "admin"
+    ]
   },
   {
     "id": "roster",
@@ -166,7 +206,15 @@
     "timelineEvents": [
       "student.enrolled"
     ],
-    "shows": "Student list, add, CSV import. Admin WhatsApp on new enrollment if opted in."
+    "shows": "Student list, add, CSV import. Admin WhatsApp on new enrollment if opted in.",
+    "own": "Owner or assistant with roster rights.",
+    "who": "Owner or assistant.",
+    "why": "Who is enrolled is the source of seats, timelines, and billing \u2014 not a spreadsheet.",
+    "how": "Add students one by one or CSV import. Optional admin WhatsApp on new enrollment \u2014 not a second student list.",
+    "when": "Enrolment, then whenever someone joins or leaves.",
+    "roles": [
+      "admin"
+    ]
   },
   {
     "id": "cohort-builder",
@@ -193,7 +241,15 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Batches / groups / 1-on-1 pairings. Topic taxonomy is tenant-defined."
+    "shows": "Batches / groups / 1-on-1 pairings. Topic taxonomy is tenant-defined.",
+    "own": "Faculty. Owner may set structure.",
+    "who": "Faculty or owner.",
+    "why": "Teaching is grouped; 1-on-1 is a pairing. Topics are tenant taxonomy, not a baked syllabus.",
+    "how": "Batches, groups, or 1-on-1 pairings. Topics are G3 \u2014 never exam-board tables in core.",
+    "when": "After roster, before the first scheduled class.",
+    "roles": [
+      "faculty"
+    ]
   },
   {
     "id": "parent-link",
@@ -224,7 +280,15 @@
     "timelineEvents": [
       "parent.linked"
     ],
-    "shows": "Invite token to link a guardian to a student."
+    "shows": "Invite token to link a guardian to a student.",
+    "own": "Owner issues the invite; parent accepts.",
+    "who": "Guardian, invited by owner or teacher.",
+    "why": "A guardian needs access without a second student account.",
+    "how": "Open the invite token and confirm the student link. Read access only until billing asks them to pay.",
+    "when": "Enrolment for minors, or any tenant that wants a parent portal (K-12, music).",
+    "roles": [
+      "parent"
+    ]
   },
   {
     "id": "parent-home",
@@ -249,7 +313,15 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Read-mostly: attendance, reports, fees for linked students."
+    "shows": "Read-mostly: attendance, reports, fees for linked students.",
+    "own": "Parent (read). Owner enables the parent module.",
+    "who": "A linked parent.",
+    "why": "The parent must see the record here \u2014 WhatsApp is a channel, not the ledger.",
+    "how": "Read-mostly: attendance, reports, fees for linked students.",
+    "when": "After class, a report, or an invoice \u2014 not during live teaching.",
+    "roles": [
+      "parent"
+    ]
   },
   {
     "id": "schedule",
@@ -282,7 +354,15 @@
       "session.rescheduled",
       "session.cancelled"
     ],
-    "shows": "Calendar of sessions. Create/reschedule notifies teacher, parent, admin via D5."
+    "shows": "Calendar of sessions. Create/reschedule notifies teacher, parent, admin via D5.",
+    "own": "Faculty. Owner can view.",
+    "who": "Faculty (owner can view).",
+    "why": "Sessions must exist on a calendar before anyone can join.",
+    "how": "Create or move sessions. Reschedule notifies teacher, parent, and admin via D5 \u2014 students only if the owner enabled student WhatsApp.",
+    "when": "Weekly planning and same-day changes.",
+    "roles": [
+      "faculty"
+    ]
   },
   {
     "id": "session-pre",
@@ -309,7 +389,15 @@
       "calendar_video"
     ],
     "timelineEvents": [],
-    "shows": "Pre-class detail: topic, cohort, Meet or Teams link, join URL."
+    "shows": "Pre-class detail: topic, cohort, Meet or Teams link, join URL.",
+    "own": "Faculty.",
+    "who": "The teacher about to teach.",
+    "why": "Topic and video pointer must be set before the room opens. TutorOS does not host video.",
+    "how": "Confirm topic, cohort, Meet or Teams link, and the platform join URL.",
+    "when": "Before the session starts.",
+    "roles": [
+      "faculty"
+    ]
   },
   {
     "id": "join",
@@ -338,7 +426,15 @@
     "timelineEvents": [
       "session.joined"
     ],
-    "shows": "Waiting room. Students join through the platform; Meet URL is not the attendance source."
+    "shows": "Waiting room. Students join through the platform; Meet URL is not the attendance source.",
+    "own": "Student action; faculty owns the session.",
+    "who": "The student.",
+    "why": "Attendance is joining through the platform, not opening Meet in another tab.",
+    "how": "Waiting room. Stay here until class starts.",
+    "when": "Minutes before class.",
+    "roles": [
+      "student"
+    ]
   },
   {
     "id": "live-teacher",
@@ -365,7 +461,15 @@
       "calendar_video"
     ],
     "timelineEvents": [],
-    "shows": "Teacher console shell around the video session."
+    "shows": "Teacher console shell around the video session.",
+    "own": "Faculty.",
+    "who": "The teacher in session.",
+    "why": "Notes, polls, and attendance must stay in TutorOS, not trapped in Meet chat.",
+    "how": "Console around Meet/Teams. Teaching still happens in Google or Microsoft.",
+    "when": "During the live class.",
+    "roles": [
+      "faculty"
+    ]
   },
   {
     "id": "live-student",
@@ -391,7 +495,15 @@
       "calendar_video"
     ],
     "timelineEvents": [],
-    "shows": "Student live view / waiting overlay."
+    "shows": "Student live view / waiting overlay.",
+    "own": "Student in session; faculty hosts.",
+    "who": "The student in session.",
+    "why": "Join, leave, and later replay must attach to one identity.",
+    "how": "Live view / waiting overlay. Stay inside the product.",
+    "when": "During the live class.",
+    "roles": [
+      "student"
+    ]
   },
   {
     "id": "session-video",
@@ -417,7 +529,15 @@
       "calendar_video"
     ],
     "timelineEvents": [],
-    "shows": "Recording / Meet or Teams link. Transcript panel empty until STT or import."
+    "shows": "Recording / Meet or Teams link. Transcript panel empty until STT or import.",
+    "own": "Faculty. Student if the tenant shares replay.",
+    "who": "Teacher (student if the tenant shares replay).",
+    "why": "Replay lives at Google or Microsoft; we store the pointer, not the file.",
+    "how": "Open the Meet/Teams recording. Transcript panel stays empty until STT or an import \u2014 do not fake captions.",
+    "when": "After class, for replay or notes.",
+    "roles": [
+      "faculty"
+    ]
   },
   {
     "id": "record",
@@ -447,7 +567,15 @@
     "timelineEvents": [
       "session.recorded"
     ],
-    "shows": "Attendance, notes, board photos, link. Fan-out to each attendee timeline."
+    "shows": "Attendance, notes, board photos, link. Fan-out to each attendee timeline.",
+    "own": "Faculty must write. System fans out to timelines.",
+    "who": "The teacher.",
+    "why": "This is the ledger write after class. Channels do not replace it.",
+    "how": "Write attendance, notes, board photos, and the link. That write fans out to each attendee timeline.",
+    "when": "Immediately after class. Do not skip this screen.",
+    "roles": [
+      "faculty"
+    ]
   },
   {
     "id": "library",
@@ -474,7 +602,15 @@
       "storage"
     ],
     "timelineEvents": [],
-    "shows": "Lessons, files, links. Visibility per cohort."
+    "shows": "Lessons, files, links. Visibility per cohort.",
+    "own": "Faculty curates. Student consumes.",
+    "who": "Student consumes; teacher curates.",
+    "why": "Content between sessions needs a place that is not a WhatsApp file dump.",
+    "how": "Lessons, files, and links with visibility per cohort. Folders follow the tenant taxonomy.",
+    "when": "Between classes, or as drip content in a cohort course.",
+    "roles": [
+      "student"
+    ]
   },
   {
     "id": "lesson",
@@ -502,7 +638,15 @@
     "timelineEvents": [
       "content.viewed"
     ],
-    "shows": "Single lesson / module viewer."
+    "shows": "Single lesson / module viewer.",
+    "own": "Faculty authors. Student completes.",
+    "who": "The student.",
+    "why": "Opening or finishing a module must be a timeline event, not a silent file view.",
+    "how": "Open one module. Progress writes to the record.",
+    "when": "When assigned, or self-paced between sessions.",
+    "roles": [
+      "student"
+    ]
   },
   {
     "id": "assign-issue",
@@ -532,7 +676,15 @@
     "timelineEvents": [
       "assignment.issued"
     ],
-    "shows": "Issue homework with due date."
+    "shows": "Issue homework with due date.",
+    "own": "Faculty.",
+    "who": "The teacher.",
+    "why": "Homework is a dated obligation on the record, not a chat reminder.",
+    "how": "Issue homework with a due date. WhatsApp may remind parent/teacher \u2014 it does not replace the assignment.",
+    "when": "After class, or as a standing weekly task.",
+    "roles": [
+      "faculty"
+    ]
   },
   {
     "id": "assign-grade",
@@ -561,7 +713,15 @@
     "timelineEvents": [
       "assignment.graded"
     ],
-    "shows": "Submit, grade, return."
+    "shows": "Submit, grade, return.",
+    "own": "Faculty grades. Student submits.",
+    "who": "Teacher grades; student submits first.",
+    "why": "Returned work must land on the timeline so a parent can see it without a second app.",
+    "how": "Submit, mark, return.",
+    "when": "After the due date, or as work comes in.",
+    "roles": [
+      "faculty"
+    ]
   },
   {
     "id": "qbank",
@@ -588,7 +748,15 @@
       "storage"
     ],
     "timelineEvents": [],
-    "shows": "Item bank tagged by tenant taxonomy, not a hardcoded syllabus."
+    "shows": "Item bank tagged by tenant taxonomy, not a hardcoded syllabus.",
+    "own": "Faculty or content assistant.",
+    "who": "Teacher or content assistant.",
+    "why": "Reusable items tagged by tenant topics \u2014 never a hardcoded syllabus in core.",
+    "how": "Hand-pick or filter by tag into practice and tests.",
+    "when": "Before building a practice set or mock.",
+    "roles": [
+      "faculty"
+    ]
   },
   {
     "id": "practice-build",
@@ -617,7 +785,15 @@
     "timelineEvents": [
       "practice.assigned"
     ],
-    "shows": "Same-day or scheduled practice set from tags or hand-pick."
+    "shows": "Same-day or scheduled practice set from tags or hand-pick.",
+    "own": "Faculty.",
+    "who": "The teacher.",
+    "why": "Exam-prep needs a same-day practice loop; other templates may leave this off.",
+    "how": "Same-day or scheduled set from tags or hand-pick.",
+    "when": "After a concept class, or as a weekly drill window.",
+    "roles": [
+      "faculty"
+    ]
   },
   {
     "id": "practice-play",
@@ -642,7 +818,15 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Student practice player."
+    "shows": "Student practice player.",
+    "own": "Student.",
+    "who": "The student.",
+    "why": "The learner does the work. No fake instant tutor in the player.",
+    "how": "Answer on the phone. Honest timer and progress.",
+    "when": "Same day as class, or inside the assigned window.",
+    "roles": [
+      "student"
+    ]
   },
   {
     "id": "practice-result",
@@ -668,7 +852,15 @@
     "timelineEvents": [
       "practice.completed"
     ],
-    "shows": "Score plus tagged misses. A row cannot close on a percentage alone."
+    "shows": "Score plus tagged misses. A row cannot close on a percentage alone.",
+    "own": "Student sees it. Faculty owns the next action.",
+    "who": "Student first; teacher uses Analysis next.",
+    "why": "A row cannot close on a percentage alone \u2014 tags drive what happens next.",
+    "how": "Score plus tagged misses.",
+    "when": "Immediately after the set.",
+    "roles": [
+      "student"
+    ]
   },
   {
     "id": "test-setup",
@@ -695,7 +887,15 @@
     "timelineEvents": [
       "test.scheduled"
     ],
-    "shows": "Timed paper setup."
+    "shows": "Timed paper setup.",
+    "own": "Faculty.",
+    "who": "The teacher.",
+    "why": "A timed paper is a scheduled event, not a casual practice set.",
+    "how": "Build the paper from the bank and set the window.",
+    "when": "Mock week, or end of a module in a cohort course.",
+    "roles": [
+      "faculty"
+    ]
   },
   {
     "id": "test-runner",
@@ -722,7 +922,15 @@
     "timelineEvents": [
       "test.submitted"
     ],
-    "shows": "Student test runner with timer."
+    "shows": "Student test runner with timer.",
+    "own": "Student.",
+    "who": "The student.",
+    "why": "An attempt must write even if they leave early.",
+    "how": "Timed runner during the window only.",
+    "when": "During the scheduled window only.",
+    "roles": [
+      "student"
+    ]
   },
   {
     "id": "analysis",
@@ -749,7 +957,15 @@
     "timelineEvents": [
       "analysis.actioned"
     ],
-    "shows": "Most-missed items, tags, required action."
+    "shows": "Most-missed items, tags, required action.",
+    "own": "Faculty.",
+    "who": "The teacher.",
+    "why": "Misses become the next class \u2014 this is the exam-prep spine after practise.",
+    "how": "Most-missed items, tags, required next action (re-teach, practice, backlog).",
+    "when": "After a practice set or mock, before the next class.",
+    "roles": [
+      "faculty"
+    ]
   },
   {
     "id": "doubt-student",
@@ -779,7 +995,15 @@
     "timelineEvents": [
       "doubt.asked"
     ],
-    "shows": "Photo or text doubt. Honest queue, not fake instant."
+    "shows": "Photo or text doubt. Honest queue, not fake instant.",
+    "own": "Student asks. Faculty answers.",
+    "who": "The student.",
+    "why": "Doubts must live in-product so they are not lost in WhatsApp. Honest queue \u2014 no fake instant.",
+    "how": "Photo or text into the queue.",
+    "when": "Stuck after class, practice, or homework.",
+    "roles": [
+      "student"
+    ]
   },
   {
     "id": "doubt-teacher",
@@ -807,7 +1031,15 @@
     "timelineEvents": [
       "doubt.answered"
     ],
-    "shows": "Teacher triage. SLA timer. WhatsApp ping on new / SLA, not a second inbox."
+    "shows": "Teacher triage. SLA timer. WhatsApp ping on new / SLA, not a second inbox.",
+    "own": "Faculty. Assistant may triage.",
+    "who": "The teacher (assistant may triage).",
+    "why": "Unanswered doubts need an SLA. WhatsApp is a ping, not a second inbox.",
+    "how": "Triage the queue. Resolve here so the timeline has the answer.",
+    "when": "Daily backlog, especially after practice.",
+    "roles": [
+      "faculty"
+    ]
   },
   {
     "id": "messages",
@@ -835,7 +1067,15 @@
     "timelineEvents": [
       "message.sent"
     ],
-    "shows": "In-platform threads so the record exists. WhatsApp may notify."
+    "shows": "In-platform threads so the record exists. WhatsApp may notify.",
+    "own": "Faculty owns the thread.",
+    "who": "Teacher starts; student (and parent if linked) reply.",
+    "why": "1:1 coaching must exist as a record, not only as a WhatsApp chat.",
+    "how": "In-platform threads. WhatsApp may notify teacher, parent, or admin.",
+    "when": "Anything that is not a one-to-cohort announcement.",
+    "roles": [
+      "faculty"
+    ]
   },
   {
     "id": "announce",
@@ -866,7 +1106,15 @@
     "timelineEvents": [
       "announcement.posted"
     ],
-    "shows": "One-to-cohort broadcast. Parent WhatsApp if opted in."
+    "shows": "One-to-cohort broadcast. Parent WhatsApp if opted in.",
+    "own": "Faculty or owner.",
+    "who": "Teacher or owner.",
+    "why": "One message to a cohort \u2014 schedule, dates, policy \u2014 not 1:1 coaching.",
+    "how": "Broadcast. Parent WhatsApp if opted in. Students are not on WhatsApp unless the owner enabled it.",
+    "when": "Schedule changes, exam dates, policy.",
+    "roles": [
+      "faculty"
+    ]
   },
   {
     "id": "timeline",
@@ -889,7 +1137,16 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Append-only event stream for one student. The ledger."
+    "shows": "Append-only event stream for one student. The ledger.",
+    "own": "Student is the subject. System writes. Faculty and parent read.",
+    "who": "Student owns the stream; teacher and parent read.",
+    "why": "This is the ledger. Channels deliver; they do not replace this screen.",
+    "how": "Append-only event log. Automatic writes from session record, practice, payments, doubts.",
+    "when": "After every session, assignment, payment, or doubt.",
+    "roles": [
+      "system",
+      "student"
+    ]
   },
   {
     "id": "notif-prefs",
@@ -918,7 +1175,15 @@
       "sms"
     ],
     "timelineEvents": [],
-    "shows": "Role-aware channel + event checklist: teacher, parent, admin. Student WhatsApp off unless owner enabled."
+    "shows": "Role-aware channel + event checklist: teacher, parent, admin. Student WhatsApp off unless owner enabled.",
+    "own": "Signed-in person. Owner gates student WhatsApp.",
+    "who": "The person signed in (student here; staff/parent have the same idea).",
+    "why": "Channels are optional; the ledger is not. Student WhatsApp stays off unless the owner enabled it.",
+    "how": "Channel + event checklist for teacher, parent, admin (and student if gated on).",
+    "when": "First login, and whenever they want quieter notifications.",
+    "roles": [
+      "student"
+    ]
   },
   {
     "id": "student-dash",
@@ -944,7 +1209,15 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Next session, open practice, doubts, this week."
+    "shows": "Next session, open practice, doubts, this week.",
+    "own": "Student.",
+    "who": "The student.",
+    "why": "Opening the app should show the next action, not a hunt through menus.",
+    "how": "Next session, open practice, open doubts, this week. Few controls, clear next step.",
+    "when": "Opening the app, not during a live class.",
+    "roles": [
+      "student"
+    ]
   },
   {
     "id": "teacher-dash",
@@ -970,7 +1243,15 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Cohort health: attendance, practice completion, doubt backlog."
+    "shows": "Cohort health: attendance, practice completion, doubt backlog.",
+    "own": "Faculty.",
+    "who": "The teacher.",
+    "why": "Cohort health in one place \u2014 who is behind \u2014 instead of a second spreadsheet.",
+    "how": "Attendance, practice completion, doubt backlog. Jump to the record.",
+    "when": "Morning briefing before class.",
+    "roles": [
+      "faculty"
+    ]
   },
   {
     "id": "owner",
@@ -996,7 +1277,15 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Operating scorecard plus quota bars (80% / 100%). Feature kill switches."
+    "shows": "Operating scorecard plus quota bars (80% / 100%). Feature kill switches.",
+    "own": "Owner / admin.",
+    "who": "Owner / admin.",
+    "why": "Running the business (scorecard, quotas, kill switches) is not teaching a class.",
+    "how": "Quota bars warn at 80% and can block paid sends at 100%. Caps throttle cost, not always-on core.",
+    "when": "Operating the workspace, not during a live session.",
+    "roles": [
+      "admin"
+    ]
   },
   {
     "id": "reports",
@@ -1025,7 +1314,15 @@
     "timelineEvents": [
       "report.sent"
     ],
-    "shows": "Parent/term reports and CSV. Parent WhatsApp when a report is ready."
+    "shows": "Parent/term reports and CSV. Parent WhatsApp when a report is ready.",
+    "own": "Faculty or owner produce. Parent receives a slice.",
+    "who": "Teacher or owner; parent gets a slice.",
+    "why": "A term view of the timeline \u2014 not a parallel gradebook.",
+    "how": "Term reports and CSV. Parent WhatsApp when a report is ready.",
+    "when": "Weekly check-in or term-end.",
+    "roles": [
+      "faculty"
+    ]
   },
   {
     "id": "mentor",
@@ -1054,7 +1351,16 @@
     "timelineEvents": [
       "backlog.booked"
     ],
-    "shows": "Short slots on skipped work \u2014 not re-teaching."
+    "shows": "Short slots on skipped work \u2014 not re-teaching.",
+    "own": "Faculty or assigned mentor.",
+    "who": "Teacher or assigned mentor.",
+    "why": "Catch skipped work in a short slot \u2014 not re-teach the whole class.",
+    "how": "Backlog items, often auto-created from missed practice.",
+    "when": "After a tagged fail or two missed practices.",
+    "roles": [
+      "system",
+      "faculty"
+    ]
   },
   {
     "id": "billing",
@@ -1083,7 +1389,15 @@
     "timelineEvents": [
       "invoice.issued"
     ],
-    "shows": "Student fee plans and invoices (tenant collecting from learners)."
+    "shows": "Student fee plans and invoices (tenant collecting from learners).",
+    "own": "Owner or assistant with billing rights.",
+    "who": "Owner (or assistant with billing rights).",
+    "why": "The tenant collects from learners here. Separate from the platform subscription (F2).",
+    "how": "Fee plans and invoices.",
+    "when": "Enrolment and renewals.",
+    "roles": [
+      "admin"
+    ]
   },
   {
     "id": "payments",
@@ -1113,7 +1427,16 @@
       "payment.captured",
       "payment.failed"
     ],
-    "shows": "Pay an invoice. Admin/parent WhatsApp on captured or failed."
+    "shows": "Pay an invoice. Admin/parent WhatsApp on captured or failed.",
+    "own": "Payer (student or parent). Owner configures collection.",
+    "who": "Whoever pays \u2014 student or parent.",
+    "why": "Paying an invoice must write to the timeline; WhatsApp only notifies.",
+    "how": "Pay in-app. Admin and parent WhatsApp on captured or failed.",
+    "when": "When an invoice is due.",
+    "roles": [
+      "parent",
+      "student"
+    ]
   },
   {
     "id": "subscription",
@@ -1144,7 +1467,15 @@
       "quota.warned",
       "quota.blocked"
     ],
-    "shows": "Tier, meters, caps at or below sold quota, channel matrix, 24h WhatsApp pause."
+    "shows": "Tier, meters, caps at or below sold quota, channel matrix, 24h WhatsApp pause.",
+    "own": "Owner.",
+    "who": "Owner.",
+    "why": "Platform cost (WhatsApp, storage, seats) must be visible and cap-able.",
+    "how": "Plan and meters. Warn at 80%. Caps throttle usage; they do not remove identity, timeline, or this screen.",
+    "when": "Monthly ops, and whenever a bar approaches the cap.",
+    "roles": [
+      "admin"
+    ]
   },
   {
     "id": "payouts",
@@ -1170,7 +1501,15 @@
       "payments_platform"
     ],
     "timelineEvents": [],
-    "shows": "Multi-teacher payout statements."
+    "shows": "Multi-teacher payout statements.",
+    "own": "Institute owner.",
+    "who": "Institute owner.",
+    "why": "Institutes share revenue with teachers after collections. Starter 1-on-1 usually skips this.",
+    "how": "Revenue-share runs after a billing cycle.",
+    "when": "After collections, institute-scale only.",
+    "roles": [
+      "admin"
+    ]
   },
   {
     "id": "audit",
@@ -1196,7 +1535,15 @@
       "storage"
     ],
     "timelineEvents": [],
-    "shows": "Staff mutation log and data export."
+    "shows": "Staff mutation log and data export.",
+    "own": "Owner.",
+    "who": "Owner.",
+    "why": "Who changed what, plus export, for disputes and DPDP / GDPR.",
+    "how": "Audit log and workspace export. Guardian consent for minors is captured at enrolment.",
+    "when": "Staff change, a dispute, or a data request \u2014 not daily teaching.",
+    "roles": [
+      "admin"
+    ]
   },
   {
     "id": "onboard-kind",
@@ -1220,7 +1567,15 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "What kind of tutoring? Sets ~15 module toggles. Not a subject picker."
+    "shows": "What kind of tutoring? Sets ~15 module toggles. Not a subject picker.",
+    "own": "Owner.",
+    "who": "Owner at signup.",
+    "why": "The tutoring shape must be chosen before modules turn on. Everything is a gallery, not the default live tenant.",
+    "how": "Pick exam-prep, 1-on-1, K-12, skills, music, or explore Everything.",
+    "when": "First setup step, before template and branding.",
+    "roles": [
+      "admin"
+    ]
   },
   {
     "id": "template-gallery",
@@ -1244,7 +1599,15 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Named templates: exam-prep, 1-on-1, K-12, skills, music, everything."
+    "shows": "Named templates: exam-prep, 1-on-1, K-12, skills, music, everything.",
+    "own": "Owner.",
+    "who": "Owner.",
+    "why": "See which modules each template turns on before going live.",
+    "how": "Stay on Everything only to explore; ship a focused template, then add modules.",
+    "when": "After kind, before branding.",
+    "roles": [
+      "admin"
+    ]
   },
   {
     "id": "automation",
@@ -1268,7 +1631,15 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Opt-in when \u2192 then rules. Opinion as choice, not law."
+    "shows": "Opt-in when \u2192 then rules. Opinion as choice, not law.",
+    "own": "Owner.",
+    "who": "Owner.",
+    "why": "When \u2192 then rules without code. Opinions as choices, not law.",
+    "how": "e.g. session with no same-day practice \u2192 warn; two missed practices \u2192 backlog.",
+    "when": "After the teaching loop is live \u2014 not on day 0.",
+    "roles": [
+      "admin"
+    ]
   },
   {
     "id": "integrations",
@@ -1301,6 +1672,14 @@
     "timelineEvents": [
       "integration.disconnected"
     ],
-    "shows": "Connect Google, Teams, WhatsApp, SMS, email, payments. Freeze a port without deleting data."
+    "shows": "Connect Google, Teams, WhatsApp, SMS, email, payments. Freeze a port without deleting data.",
+    "own": "Owner.",
+    "who": "Owner.",
+    "why": "Vendor ports sit at the edge. Logic stays in services. Mock until keys exist.",
+    "how": "Meet/Teams, WhatsApp, email, payments.",
+    "when": "After branding, before going live with real students.",
+    "roles": [
+      "admin"
+    ]
   }
 ]

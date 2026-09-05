@@ -552,7 +552,7 @@ var TEMPLATES=[
   roles:['student','faculty','admin','parent','system'],
   steps:[
    ['onboard-kind','admin','Onboard'],['branding','admin','Onboard'],
-   ['roster','admin','Enrol'],['cohort-builder','faculty','Enrol'],['student-login','student','Enrol'],
+   ['roster','admin','Enrol'],['cohort-builder','faculty','Enrol'],['student-login','student','Enrol'],['parent-link','parent','Enrol'],
    ['schedule','faculty','Schedule'],['session-pre','faculty','Schedule'],
    ['join','student','Teach'],['live-teacher','faculty','Teach'],['live-student','student','Teach'],
    ['session-video','faculty','Teach'],['record','faculty','Teach'],
@@ -562,7 +562,8 @@ var TEMPLATES=[
    ['mentor','system','Support','A missed practice auto-books a backlog slot'],
    ['doubt-student','student','Support'],['doubt-teacher','faculty','Support'],['mentor','faculty','Support'],
    ['test-setup','faculty','Assess'],['test-runner','student','Assess'],
-   ['timeline','student','Review'],['teacher-dash','faculty','Review'],['reports','faculty','Review'],['parent-home','parent','Review'],
+   ['timeline','student','Review'],['teacher-dash','faculty','Review'],['reports','faculty','Review'],
+   ['messages','parent','Support'],['notif-prefs','parent','Support'],['practice-result','parent','Assess'],['timeline','parent','Review'],['reports','parent','Review'],['parent-home','parent','Review'],
    ['owner','admin','Operate'],
    ['billing','admin','Bill'],['payments','parent','Bill']
   ]},
@@ -595,7 +596,8 @@ var TEMPLATES=[
    ['timeline','system','Teach','Attendance + notes → student timeline'],
    ['assign-issue','faculty','Practise'],['practice-play','student','Practise'],
    ['doubt-student','student','Support'],['doubt-teacher','faculty','Support'],['messages','faculty','Support'],['announce','faculty','Support'],
-   ['timeline','student','Review'],['teacher-dash','faculty','Review'],['reports','faculty','Review'],['parent-home','parent','Review'],
+   ['timeline','student','Review'],['teacher-dash','faculty','Review'],['reports','faculty','Review'],
+   ['messages','parent','Support'],['notif-prefs','parent','Support'],['practice-result','parent','Assess'],['timeline','parent','Review'],['reports','parent','Review'],['parent-home','parent','Review'],
    ['billing','admin','Bill'],['payments','parent','Bill']
   ]},
  {id:'t4',short:'Skills',name:'Skills / cohort course',tint:'violet',tier:'Cohort',
@@ -629,6 +631,7 @@ var TEMPLATES=[
    ['assign-issue','faculty','Practise'],
    ['messages','faculty','Support'],['announce','faculty','Support'],
    ['timeline','student','Review'],['parent-home','parent','Review'],['reports','faculty','Review'],
+   ['messages','parent','Support'],['notif-prefs','parent','Support'],['timeline','parent','Review'],['reports','parent','Review'],
    ['billing','admin','Bill'],['payments','parent','Bill']
   ]},
  {id:'t6',short:'Everything',name:'Everything',tint:'ink',tier:'Institute',
@@ -650,9 +653,10 @@ var TEMPLATES=[
    ['qbank','faculty','Practise'],['practice-build','faculty','Practise'],['practice-play','student','Practise'],['assign-issue','faculty','Practise'],
    ['test-setup','faculty','Assess'],['test-runner','student','Assess'],['practice-result','student','Assess'],['assign-grade','faculty','Assess'],['analysis','faculty','Assess'],
    ['doubt-student','student','Support'],['doubt-teacher','faculty','Support'],['messages','faculty','Support'],['announce','faculty','Support'],['mentor','faculty','Support'],['notif-prefs','student','Support'],
-   ['student-dash','student','Review'],['teacher-dash','faculty','Review'],['timeline','student','Review'],['reports','faculty','Review'],['parent-home','parent','Review'],
+   ['student-dash','student','Review'],['teacher-dash','faculty','Review'],['timeline','student','Review'],['reports','faculty','Review'],
+   ['messages','parent','Support'],['notif-prefs','parent','Support'],['practice-result','parent','Assess'],['timeline','parent','Review'],['reports','parent','Review'],['parent-home','parent','Review'],
    ['owner','admin','Operate'],['subscription','admin','Operate'],['payouts','admin','Operate'],
-   ['billing','admin','Bill'],['payments','student','Bill'],
+   ['billing','admin','Bill'],['payments','parent','Bill'],
    ['automation','admin','Configure'],['integrations','admin','Configure'],['audit','admin','Configure']
   ]}
 ];
@@ -1698,7 +1702,7 @@ function aboutHTML(){
 }
 
 /* ================= router + render ================= */
-var state={vp:'auto',view:'home',tpl:'t1',cur:null};
+var state={vp:'auto',view:'home',tpl:'t1',cur:null,asRole:null};
 try{var v=localStorage.getItem('tos_vp');if(v)state.vp=v;}catch(e){}
 try{var tp=localStorage.getItem('tos_tpl');if(tp&&TById(tp))state.tpl=tp;}catch(e){}
 document.querySelectorAll('#vpSeg button').forEach(function(b){b.classList.toggle('on',b.dataset.vp===state.vp);});
@@ -1713,9 +1717,13 @@ function urlFor(tid,id){
 }
 function stepFor(tid,id){
  var T=TById(tid);
+ var prefer=ROLE_ONLY||(state&&state.asRole)||null;
+ if(T && prefer){
+  for(var i=0;i<T.steps.length;i++){if(T.steps[i][0]===id&&T.steps[i][1]===prefer)return {r:T.steps[i][1],st:T.steps[i][2]};}
+ }
  if(T){
-  for(var i=0;i<T.steps.length;i++){if(T.steps[i][0]===id&&!T.steps[i][3])return {r:T.steps[i][1],st:T.steps[i][2]};}
-  for(var j=0;j<T.steps.length;j++){if(T.steps[j][0]===id)return {r:T.steps[j][1],st:T.steps[j][2]};}
+  for(var j=0;j<T.steps.length;j++){if(T.steps[j][0]===id&&!T.steps[j][3])return {r:T.steps[j][1],st:T.steps[j][2]};}
+  for(var k=0;k<T.steps.length;k++){if(T.steps[k][0]===id)return {r:T.steps[k][1],st:T.steps[k][2]};}
  }
  return {r:S[id].role,st:'—'};
 }
@@ -1760,7 +1768,8 @@ function flowbar(tid,id){
 function frame(tid,id){
  var m=S[id], body=R[id]?R[id]():'<div style="padding:40px 24px" class="muted">Screen stub — '+id+'</div>';
  var role=stepFor(tid,id).r;
- var vp=state.vp==='auto'?m.frame:state.vp;
+ var autoFrame=(role==='parent'&&(id==='reports'||id==='messages'||id==='notif-prefs'))?'phone':m.frame;
+ var vp=state.vp==='auto'?autoFrame:state.vp;
  var tint='tint-'+ROLE[role].tint;
  if(vp==='phone'){
   return '<div class="dev dev--phone '+tint+'"><div class="pstat"><span>9:41</span><span>5G ▪▪▪ 82%</span></div><div class="dev__scr"><div class="phonewrap">'+body+'</div></div>'+flowbar(tid,id)+'</div>';
@@ -1836,7 +1845,14 @@ document.getElementById('tplSel').addEventListener('change',function(){var v=thi
 
 document.addEventListener('click',function(e){
  var g=e.target.closest('[data-goto]');
- if(g){e.preventDefault();closeDrawer();go(g.getAttribute('data-goto'));return;}
+ if(g){
+  e.preventDefault();closeDrawer();
+  if(g.getAttribute('data-as')) state.asRole=g.getAttribute('data-as');
+  else if(g.closest('.pnav')) state.asRole='parent';
+  else if(g.getAttribute('data-fnode')!=null && STEPQ[g.getAttribute('data-fnode')]) state.asRole=STEPQ[g.getAttribute('data-fnode')][1];
+  else if(!g.closest('.pnav')) state.asRole=null;
+  go(g.getAttribute('data-goto'));return;
+ }
  if(e.target.closest('[data-close]')||e.target.id==='modal'){document.getElementById('modal').classList.remove('open');return;}
  if(e.target.id==='aboutBtn2'||e.target.id==='aboutLink'){openAbout();return;}
 });
