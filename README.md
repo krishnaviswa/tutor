@@ -166,7 +166,7 @@ PM  /speckit.specify + /speckit.clarify
 
 Status: `Draft` → `Specified` → `In Progress` → `Testing` → `Accepted`.
 
-Active feature: [specs/001-platform-architecture/](specs/001-platform-architecture/). Cursor rules ↔ Claude Code: see [CLAUDE.md](CLAUDE.md). Sync: `scripts/check_agent_config_sync.py`.
+Active feature: [specs/002-sim-spine/](specs/002-sim-spine/) (runnable spine simulation). Architecture pack: [specs/001-platform-architecture/](specs/001-platform-architecture/) (Specified; no implement). Cursor rules ↔ Claude Code: see [CLAUDE.md](CLAUDE.md). Sync: `scripts/check_agent_config_sync.py`.
 
 ---
 
@@ -184,8 +184,8 @@ Active feature: [specs/001-platform-architecture/](specs/001-platform-architectu
 
 | ID | Title | Status |
 |---|---|---|
-| 001-platform-architecture | Swim-lane HTML, catalog, README hub, Spec Kit, parity | Specified (this pass; no implement) |
-| (next) | Phase 0 tenant spine: workspace, auth stub, flags | Draft |
+| 001-platform-architecture | Swim-lane HTML, catalog, README hub, Spec Kit, parity | Specified (no `/speckit.implement`) |
+| 002-sim-spine | Local FastAPI + durable store + seed + auth stub + record→timeline + quotas | Specified — waiting human OK before implement |
 
 ---
 
