@@ -2,6 +2,14 @@
 
 FastAPI `/api/v1` simulation: SQLAlchemy models for PostgreSQL, default **SQLite file** `data/sim.db`. All vendor ports mock.
 
+Optional local Postgres (Docker Desktop + Compose from repo root):
+
+```bash
+docker compose up -d postgres
+```
+
+Then set `DATABASE_URL=postgresql+psycopg://tutor:tutor@127.0.0.1:5432/tutoros` and start the API. Tests stay on in-memory SQLite.
+
 ```bash
 cd backend
 pip install -r requirements.txt
