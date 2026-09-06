@@ -1,5 +1,5 @@
 {
   "featureDirectory": "specs/003-catalog-complete",
   "featureName": "003-catalog-complete",
-  "note": "Active Spec Kit feature is this directory, not the git branch. Override with SPECIFY_FEATURE_DIRECTORY. 001-platform-architecture remains Specified; no /speckit.implement on 001. 002-sim-spine is protected (Tester + Accept); do not rewrite the spine. 003 implement is blocked until plan-viewer.html is approved in chat."
+  "note": "Active Spec Kit directory is this path, not the git branch. Override with SPECIFY_FEATURE_DIRECTORY. 001-platform-architecture remains Specified; no /speckit.implement on 001. 002-sim-spine is Accepted and protected; do not rewrite the spine. 003-catalog-complete is Accepted (shell/sim; screens not wired)."
 }

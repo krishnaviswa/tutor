@@ -9,7 +9,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 0,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "router",
     "figmaNodeId": null,
     "apis": [
@@ -41,7 +41,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 0,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "student-login",
     "figmaNodeId": null,
     "apis": [
@@ -79,7 +79,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 0,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "staff-login",
     "figmaNodeId": null,
     "apis": [
@@ -118,7 +118,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 0,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "wsetup",
     "figmaNodeId": null,
     "apis": [
@@ -154,7 +154,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 0,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "branding",
     "figmaNodeId": null,
     "apis": [
@@ -188,7 +188,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 1,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "roster",
     "figmaNodeId": null,
     "apis": [
@@ -227,7 +227,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 1,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "cohort-builder",
     "figmaNodeId": null,
     "apis": [
@@ -262,7 +262,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 3,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "parent-link",
     "figmaNodeId": null,
     "apis": [
@@ -301,7 +301,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 3,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "parent-home",
     "figmaNodeId": null,
     "apis": [
@@ -334,7 +334,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "schedule",
     "figmaNodeId": null,
     "apis": [
@@ -375,7 +375,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "session-pre",
     "figmaNodeId": null,
     "apis": [
@@ -410,7 +410,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "join",
     "figmaNodeId": null,
     "apis": [
@@ -447,7 +447,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "live-teacher",
     "figmaNodeId": null,
     "apis": [
@@ -482,7 +482,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "live-student",
     "figmaNodeId": null,
     "apis": [
@@ -516,7 +516,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "session-video",
     "figmaNodeId": null,
     "apis": [
@@ -550,7 +550,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "record",
     "figmaNodeId": null,
     "apis": [
@@ -588,7 +588,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 2,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "library",
     "figmaNodeId": null,
     "apis": [
@@ -623,7 +623,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 2,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "lesson",
     "figmaNodeId": null,
     "apis": [
@@ -659,7 +659,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 2,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "assign-issue",
     "figmaNodeId": null,
     "apis": [
@@ -697,7 +697,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 2,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "assign-grade",
     "figmaNodeId": null,
     "apis": [
@@ -734,7 +734,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 2,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "qbank",
     "figmaNodeId": null,
     "apis": [
@@ -769,7 +769,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 2,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "practice-build",
     "figmaNodeId": null,
     "apis": [
@@ -806,7 +806,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 2,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "practice-play",
     "figmaNodeId": null,
     "apis": [
@@ -839,7 +839,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 2,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "practice-result",
     "figmaNodeId": null,
     "apis": [
@@ -874,7 +874,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 3,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "test-setup",
     "figmaNodeId": null,
     "apis": [
@@ -909,7 +909,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 3,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "test-runner",
     "figmaNodeId": null,
     "apis": [
@@ -944,7 +944,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 2,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "analysis",
     "figmaNodeId": null,
     "apis": [
@@ -979,7 +979,7 @@
     "domain": "D",
     "domainName": "Record & communication",
     "phase": 3,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "doubt-student",
     "figmaNodeId": null,
     "apis": [
@@ -1017,7 +1017,7 @@
     "domain": "D",
     "domainName": "Record & communication",
     "phase": 3,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "doubt-teacher",
     "figmaNodeId": null,
     "apis": [
@@ -1053,7 +1053,7 @@
     "domain": "D",
     "domainName": "Record & communication",
     "phase": 3,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "messages",
     "figmaNodeId": null,
     "apis": [
@@ -1090,7 +1090,7 @@
     "domain": "D",
     "domainName": "Record & communication",
     "phase": 3,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "announce",
     "figmaNodeId": null,
     "apis": [
@@ -1129,7 +1129,7 @@
     "domain": "D",
     "domainName": "Record & communication",
     "phase": 0,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "timeline",
     "figmaNodeId": null,
     "apis": [
@@ -1162,7 +1162,7 @@
     "domain": "D",
     "domainName": "Record & communication",
     "phase": 1,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "notif-prefs",
     "figmaNodeId": null,
     "apis": [
@@ -1200,7 +1200,7 @@
     "domain": "E",
     "domainName": "Progress & analytics",
     "phase": 1,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "student-dash",
     "figmaNodeId": null,
     "apis": [
@@ -1234,7 +1234,7 @@
     "domain": "E",
     "domainName": "Progress & analytics",
     "phase": 2,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "teacher-dash",
     "figmaNodeId": null,
     "apis": [
@@ -1268,7 +1268,7 @@
     "domain": "E",
     "domainName": "Progress & analytics",
     "phase": 3,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "owner",
     "figmaNodeId": null,
     "apis": [
@@ -1302,7 +1302,7 @@
     "domain": "E",
     "domainName": "Progress & analytics",
     "phase": 3,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "reports",
     "figmaNodeId": null,
     "apis": [
@@ -1340,7 +1340,7 @@
     "domain": "E",
     "domainName": "Progress & analytics",
     "phase": 3,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "mentor",
     "figmaNodeId": null,
     "apis": [
@@ -1378,7 +1378,7 @@
     "domain": "F",
     "domainName": "Business & operations",
     "phase": 4,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "billing",
     "figmaNodeId": null,
     "apis": [
@@ -1415,7 +1415,7 @@
     "domain": "F",
     "domainName": "Business & operations",
     "phase": 4,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "payments",
     "figmaNodeId": null,
     "apis": [
@@ -1454,7 +1454,7 @@
     "domain": "F",
     "domainName": "Business & operations",
     "phase": 0,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "subscription",
     "figmaNodeId": null,
     "apis": [
@@ -1493,7 +1493,7 @@
     "domain": "F",
     "domainName": "Business & operations",
     "phase": 4,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "payouts",
     "figmaNodeId": null,
     "apis": [
@@ -1527,7 +1527,7 @@
     "domain": "F",
     "domainName": "Business & operations",
     "phase": 4,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "audit",
     "figmaNodeId": null,
     "apis": [
@@ -1561,7 +1561,7 @@
     "domain": "G",
     "domainName": "Configuration & templates",
     "phase": 0,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "onboard-kind",
     "figmaNodeId": null,
     "apis": [
@@ -1593,7 +1593,7 @@
     "domain": "G",
     "domainName": "Configuration & templates",
     "phase": 0,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "template-gallery",
     "figmaNodeId": null,
     "apis": [
@@ -1625,7 +1625,7 @@
     "domain": "G",
     "domainName": "Configuration & templates",
     "phase": 4,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "automation",
     "figmaNodeId": null,
     "apis": [
@@ -1657,7 +1657,7 @@
     "domain": "G",
     "domainName": "Configuration & templates",
     "phase": 4,
-    "status": "empty",
+    "status": "shell",
     "demoKey": "integrations",
     "figmaNodeId": null,
     "apis": [

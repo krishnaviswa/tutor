@@ -29,7 +29,7 @@
   },
   {
     "id": "PATCH /api/v1/workspaces/current/branding",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/students",
@@ -85,27 +85,27 @@
   },
   {
     "id": "POST /api/v1/sessions/{id}/video-link",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/join/{token}",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "POST /api/v1/join/{token}/enter",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/sessions/{id}/live",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "POST /api/v1/sessions/{id}/engagement",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/sessions/{id}/video",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/sessions/{id}/record",
@@ -117,55 +117,55 @@
   },
   {
     "id": "GET /api/v1/content",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "POST /api/v1/content",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/content/{id}",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "POST /api/v1/assignments",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/assignments",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/assignments/{id}/submissions",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "POST /api/v1/assignments/{id}/grade",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/questions",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "POST /api/v1/questions",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "POST /api/v1/practice-sets",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/practice-sets",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/practice-sets/{id}/play",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "POST /api/v1/practice-sets/{id}/attempt",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/attempts/{id}",
@@ -173,43 +173,43 @@
   },
   {
     "id": "POST /api/v1/tests",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/tests",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/tests/{id}/run",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "POST /api/v1/tests/{id}/submit",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/analysis/{cohortId}",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "PATCH /api/v1/analysis/{id}/action",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/doubts",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "POST /api/v1/doubts",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/doubts/queue",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "PATCH /api/v1/doubts/{id}",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/threads",
@@ -217,15 +217,15 @@
   },
   {
     "id": "POST /api/v1/threads/{id}/messages",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "POST /api/v1/announcements",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/announcements",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/students/{id}/timeline",
@@ -241,11 +241,11 @@
   },
   {
     "id": "GET /api/v1/me/dashboard",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/teacher/dashboard",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/owner/console",
@@ -261,23 +261,23 @@
   },
   {
     "id": "POST /api/v1/reports/export",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/backlog",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "POST /api/v1/backlog/{id}/book",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/plans",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "POST /api/v1/invoices",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/invoices/mine",
@@ -285,7 +285,7 @@
   },
   {
     "id": "POST /api/v1/payments/checkout",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/billing/subscription",
@@ -297,42 +297,42 @@
   },
   {
     "id": "POST /api/v1/billing/whatsapp-pause",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/payouts",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/audit",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "POST /api/v1/data-export",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "POST /api/v1/workspaces/current/template",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/templates",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/automation-rules",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "PATCH /api/v1/automation-rules/{id}",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "GET /api/v1/integrations",
-    "status": "planned"
+    "status": "sim"
   },
   {
     "id": "POST /api/v1/integrations/{name}/connect",
-    "status": "planned"
+    "status": "sim"
   }
 ]

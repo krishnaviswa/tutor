@@ -1,6 +1,6 @@
 # tasks.md — 002-sim-spine
 
-Builder implemented on `cursor/002-sim-spine` after human OK. Tester + PM Accept still open.
+Builder implemented on `cursor/002-sim-spine` after human OK. **Tester + PM Accept closed** (`test-report.md`, Ship). Do not expand this slice.
 
 ## Gate
 

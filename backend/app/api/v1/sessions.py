@@ -4,12 +4,14 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.api.v1.deps import ports_dep, require_roles
+from app.api.v1.deps import current_principal, ports_dep, require_roles
 from app.db import get_db
-from app.models.tables import Attendance, ScheduledSession, SessionRecord, Workspace
+from app.models.tables import Attendance, ScheduledSession, SessionRecord, TranscriptEvent, Workspace, new_id
 from app.ports.mocks import MockPorts
 from app.services.auth import Principal
 from app.services import record as record_svc
+from app.services import timeline
+from app.services.scope import enrolled_in_session_cohort
 
 router = APIRouter()
 
@@ -28,6 +30,12 @@ class SessionPatch(BaseModel):
 class RecordPatch(BaseModel):
     notes: str | None = None
     attendance: list[dict] | None = None
+
+
+class EngagementIn(BaseModel):
+    kind: str = "poll"
+    payload: dict = {}
+
 
 
 def _session_out(s: ScheduledSession) -> dict:
@@ -148,3 +156,95 @@ def patch_record(
         body.attendance,
         bool(ws.student_whatsapp) if ws else False,
     )
+
+
+@router.post("/sessions/{session_id}/video-link")
+def video_link(
+    session_id: str,
+    db: Session = Depends(get_db),
+    ports: MockPorts = Depends(ports_dep),
+    principal: Principal = Depends(require_roles("owner", "teacher")),
+):
+    s = _get(db, principal.workspace_id, session_id)
+    s.video_url = ports.create_video_link(s.id)
+    if not s.join_token:
+        s.join_token = new_id()
+    if not s.recording_url:
+        s.recording_url = f"mock://record/{s.id}"
+    db.flush()
+    return {"session_id": s.id, "video_url": s.video_url, "join_token": s.join_token}
+
+
+@router.get("/sessions/{session_id}/live")
+def live(
+    session_id: str,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(current_principal),
+):
+    s = _get(db, principal.workspace_id, session_id)
+    if principal.role in ("owner", "teacher"):
+        view = "teacher"
+    elif principal.role == "student" and enrolled_in_session_cohort(
+        db, s.workspace_id, s.cohort_id, principal.user_id
+    ):
+        view = "student"
+    else:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "forbidden")
+    return {
+        "session": _session_out(s),
+        "view": view,
+        "video_url": s.video_url,
+        "engagement": s.engagement or [],
+        "provider": "mock",
+    }
+
+
+@router.post("/sessions/{session_id}/engagement")
+def engagement(
+    session_id: str,
+    body: EngagementIn,
+    db: Session = Depends(get_db),
+    ports: MockPorts = Depends(ports_dep),
+    principal: Principal = Depends(require_roles("owner", "teacher")),
+):
+    s = _get(db, principal.workspace_id, session_id)
+    events = list(s.engagement or [])
+    events.append({"kind": body.kind, "payload": body.payload, "actor_user_id": principal.user_id})
+    s.engagement = events
+    note = f"Live engagement: {body.kind}"
+    att = (
+        db.query(Attendance)
+        .filter(Attendance.workspace_id == principal.workspace_id, Attendance.session_id == s.id)
+        .all()
+    )
+    for a in att:
+        timeline.append(db, principal.workspace_id, a.student_id, "engagement", note, principal.user_id)
+    ws = db.get(Workspace, principal.workspace_id)
+    from app.services import notify
+
+    notify.dispatch_after_timeline(
+        db, ports, principal.workspace_id, note, bool(ws.student_whatsapp) if ws else False
+    )
+    db.flush()
+    return {"session_id": s.id, "engagement": s.engagement}
+
+
+@router.get("/sessions/{session_id}/video")
+def session_video(
+    session_id: str,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner", "teacher")),
+):
+    s = _get(db, principal.workspace_id, session_id)
+    transcripts = (
+        db.query(TranscriptEvent)
+        .filter(TranscriptEvent.workspace_id == principal.workspace_id, TranscriptEvent.session_id == s.id)
+        .all()
+    )
+    return {
+        "session_id": s.id,
+        "recording_url": s.recording_url,
+        "video_url": s.video_url,
+        "transcript": [],
+        "transcript_count": len(transcripts),
+    }

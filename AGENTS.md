@@ -13,7 +13,7 @@
 | Role children (generated) | tutor-platform-role-*.html |
 | Screen / API / entity contracts | catalog/*.json |
 | Governing rules | .specify/memory/constitution.md |
-| In-flight feature | path in `.specify/feature.json` — not the git branch |
+| Active Spec Kit dir | path in `.specify/feature.json` — not the git branch |
 | Cursor ↔ Claude pairing | CLAUDE.md |
 
 ## Spec Kit
@@ -22,7 +22,7 @@ Commands: `/speckit.constitution`, `/speckit.specify`, `/speckit.clarify`, `/spe
 
 Sequence: PM specify+clarify → Architect plan+checklist+analyze → tasks → **human OK** → Builder implement → Tester → PM Accept.
 
-**Do not `/speckit.implement` for 001-platform-architecture** (architecture pack). 002 spine is protected (Tester + Accept). Active feature directory: **003-catalog-complete** (no implement until hub HTML OK).
+**Do not `/speckit.implement` for 001-platform-architecture** (architecture pack). 002 spine is Accepted and protected. 003-catalog-complete is Accepted (shell/sim; screens not wired). Spec Kit dir in `.specify/feature.json`: **003-catalog-complete**.
 
 Active feature directory: `.specify/feature.json`. `git checkout` does not change it. Override: `SPECIFY_FEATURE_DIRECTORY`.
 
@@ -38,5 +38,5 @@ Every `.cursor/rules/*.mdc` has a Claude Code mirror. Change both in the same co
 - `scripts/` — catalog build, role HTML mint, parity
 - `backend/` — FastAPI `/api/v1` against local Compose Postgres; mock ports; pytest in-memory SQLite
 - `docker-compose.yml` — local `postgres` (required for local API work until hosted)
+- `frontend/` — Next.js 15 App Router; one route per catalog screen id
 - `tutor-platform-role-*.html` — generated from demo; do not edit
-- No Next.js `frontend/` app yet (stub CLAUDE.md so pairing is valid)

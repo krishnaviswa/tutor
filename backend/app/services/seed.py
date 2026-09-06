@@ -7,11 +7,16 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
 from app.models.tables import (
+    AutomationRule,
     Cohort,
+    ContentItem,
     Enrollment,
     FeatureFlag,
     Identity,
     ParentLink,
+    Plan,
+    PracticeSet,
+    Question,
     QuotaPolicy,
     ScheduledSession,
     StaffMembership,
@@ -24,7 +29,38 @@ from app.models.tables import (
 )
 from app.services.quota import ALWAYS_ON
 
-SLICE_MODULES = list(ALWAYS_ON) + ["A4", "A5", "B1"]
+CATALOG_MODULES = list(ALWAYS_ON) + [
+    "A4",
+    "A5",
+    "B1",
+    "B2",
+    "B3",
+    "B4",
+    "B5",
+    "B6",
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "C5",
+    "D1",
+    "D2",
+    "D3",
+    "D5",
+    "E1",
+    "E2",
+    "E3",
+    "E4",
+    "E5",
+    "F1",
+    "F3",
+    "F5",
+    "F6",
+    "G3",
+    "G4",
+    "G5",
+]
+SLICE_MODULES = list(CATALOG_MODULES)
 
 WS_EXAM = "aaaaaaaa-0001-4000-8000-000000000001"
 WS_LANG = "aaaaaaaa-0002-4000-8000-000000000002"
@@ -169,6 +205,47 @@ def seed_workspace_ids(
     db.flush()
     db.add(Topic(id=topic_id, workspace_id=ws_id, taxonomy_id=tax_id, name=topic_name))
     db.add(FeatureFlag(workspace_id=ws_id, modules=SLICE_MODULES))
+    db.flush()
+    qid = f"cccccccc-{tag}-4000-8000-000000000025"
+    db.add(
+        Question(
+            id=qid,
+            workspace_id=ws_id,
+            topic_id=topic_id,
+            stem=f"{topic_name} check",
+            choices=["A", "B"],
+            answer="A",
+            created_by=people["teacher"],
+        )
+    )
+    db.add(
+        PracticeSet(
+            id=f"cccccccc-{tag}-4000-8000-000000000026",
+            workspace_id=ws_id,
+            title=f"{topic_name} set",
+            question_ids=[qid],
+            created_by=people["teacher"],
+        )
+    )
+    db.add(
+        ContentItem(
+            workspace_id=ws_id,
+            topic_id=topic_id,
+            title=f"{topic_name} notes",
+            body="Seed material",
+            created_by=people["teacher"],
+        )
+    )
+    db.add(Plan(workspace_id=ws_id, name="Seat", amount_cents=500))
+    db.add(
+        AutomationRule(
+            workspace_id=ws_id,
+            name="After record ping",
+            trigger="session_recorded",
+            action="timeline",
+            enabled=1,
+        )
+    )
     _meters(db, ws_id, whatsapp_used, whatsapp_cap, policy)
     db.flush()
     return {

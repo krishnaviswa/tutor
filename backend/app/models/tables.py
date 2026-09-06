@@ -73,6 +73,9 @@ class Workspace(Base):
     name: Mapped[str] = mapped_column(String(200))
     kind: Mapped[str] = mapped_column(String(40))  # exam-prep | one-on-one | music
     student_whatsapp: Mapped[int] = mapped_column(Integer, default=0)
+    whatsapp_paused: Mapped[int] = mapped_column(Integer, default=0)
+    branding: Mapped[dict] = mapped_column(JSON, default=dict)
+    integrations: Mapped[list] = mapped_column(JSON, default=list)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
@@ -133,6 +136,10 @@ class ScheduledSession(Base):
     teacher_user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
     title: Mapped[str] = mapped_column(String(200))
     starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    join_token: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
+    video_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    recording_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    engagement: Mapped[list] = mapped_column(JSON, default=list)
 
 
 class Attendance(Base):
@@ -232,3 +239,210 @@ class QuotaPolicy(Base):
     workspace_id: Mapped[str] = mapped_column(String(36), index=True)
     meter_key: Mapped[str] = mapped_column(String(40))
     policy: Mapped[str] = mapped_column(String(20))  # warn | block | allow_overage
+
+
+
+class ContentItem(Base):
+    __tablename__ = "content_items"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    topic_id: Mapped[str | None] = mapped_column(ForeignKey("topics.id"), nullable=True)
+    title: Mapped[str] = mapped_column(String(200))
+    body: Mapped[str] = mapped_column(Text, default="")
+    storage_path: Mapped[str] = mapped_column(String(500), default="")
+    created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Assignment(Base):
+    __tablename__ = "assignments"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    cohort_id: Mapped[str | None] = mapped_column(ForeignKey("cohorts.id"), nullable=True)
+    title: Mapped[str] = mapped_column(String(200))
+    body: Mapped[str] = mapped_column(Text, default="")
+    created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Submission(Base):
+    __tablename__ = "submissions"
+    __table_args__ = (UniqueConstraint("workspace_id", "assignment_id", "student_id", name="uq_submission"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    assignment_id: Mapped[str] = mapped_column(ForeignKey("assignments.id"))
+    student_id: Mapped[str] = mapped_column(ForeignKey("students.id"))
+    body: Mapped[str] = mapped_column(Text, default="")
+    grade: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    feedback: Mapped[str] = mapped_column(Text, default="")
+    graded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class Question(Base):
+    __tablename__ = "questions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    topic_id: Mapped[str | None] = mapped_column(ForeignKey("topics.id"), nullable=True)
+    stem: Mapped[str] = mapped_column(Text)
+    choices: Mapped[list] = mapped_column(JSON, default=list)
+    answer: Mapped[str] = mapped_column(String(400), default="")
+    created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+
+
+class PracticeSet(Base):
+    __tablename__ = "practice_sets"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    title: Mapped[str] = mapped_column(String(200))
+    question_ids: Mapped[list] = mapped_column(JSON, default=list)
+    created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+
+
+class Test(Base):
+    __test__ = False
+    __tablename__ = "tests"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    title: Mapped[str] = mapped_column(String(200))
+    question_ids: Mapped[list] = mapped_column(JSON, default=list)
+    cohort_id: Mapped[str | None] = mapped_column(ForeignKey("cohorts.id"), nullable=True)
+    created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+
+
+class Attempt(Base):
+    __tablename__ = "attempts"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    student_id: Mapped[str] = mapped_column(ForeignKey("students.id"))
+    practice_set_id: Mapped[str | None] = mapped_column(ForeignKey("practice_sets.id"), nullable=True)
+    test_id: Mapped[str | None] = mapped_column(ForeignKey("tests.id"), nullable=True)
+    answers: Mapped[dict] = mapped_column(JSON, default=dict)
+    score: Mapped[int] = mapped_column(Integer, default=0)
+    max_score: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Doubt(Base):
+    __tablename__ = "doubts"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    student_id: Mapped[str] = mapped_column(ForeignKey("students.id"))
+    topic_id: Mapped[str | None] = mapped_column(ForeignKey("topics.id"), nullable=True)
+    body: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(20), default="open")
+    answer: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Message(Base):
+    __tablename__ = "messages"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    thread_id: Mapped[str] = mapped_column(String(36), index=True)
+    student_id: Mapped[str | None] = mapped_column(ForeignKey("students.id"), nullable=True)
+    sender_user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    body: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Announcement(Base):
+    __tablename__ = "announcements"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    cohort_id: Mapped[str | None] = mapped_column(ForeignKey("cohorts.id"), nullable=True)
+    title: Mapped[str] = mapped_column(String(200))
+    body: Mapped[str] = mapped_column(Text, default="")
+    created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class NotificationPref(Base):
+    __tablename__ = "notification_prefs"
+    __table_args__ = (UniqueConstraint("workspace_id", "user_id", name="uq_notif_pref"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    prefs: Mapped[dict] = mapped_column(JSON, default=dict)
+
+
+class NotificationDelivery(Base):
+    """Channel journal. Ledger remains timeline_events."""
+
+    __tablename__ = "notification_deliveries"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    channel: Mapped[str] = mapped_column(String(20))
+    to_role: Mapped[str] = mapped_column(String(20))
+    body: Mapped[str] = mapped_column(Text, default="")
+    status: Mapped[str] = mapped_column(String(20), default="sent")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Plan(Base):
+    __tablename__ = "plans"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    name: Mapped[str] = mapped_column(String(200))
+    amount_cents: Mapped[int] = mapped_column(Integer, default=0)
+    interval: Mapped[str] = mapped_column(String(20), default="month")
+
+
+class Invoice(Base):
+    __tablename__ = "invoices"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    student_id: Mapped[str] = mapped_column(ForeignKey("students.id"))
+    plan_id: Mapped[str | None] = mapped_column(ForeignKey("plans.id"), nullable=True)
+    amount_cents: Mapped[int] = mapped_column(Integer, default=0)
+    status: Mapped[str] = mapped_column(String(20), default="open")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Payout(Base):
+    __tablename__ = "payouts"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    amount_cents: Mapped[int] = mapped_column(Integer, default=0)
+    status: Mapped[str] = mapped_column(String(20), default="pending")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class AutomationRule(Base):
+    __tablename__ = "automation_rules"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    name: Mapped[str] = mapped_column(String(200))
+    trigger: Mapped[str] = mapped_column(String(80), default="")
+    action: Mapped[str] = mapped_column(String(80), default="")
+    enabled: Mapped[int] = mapped_column(Integer, default=1)
+    payload: Mapped[dict] = mapped_column(JSON, default=dict)
+
+
+class BacklogItem(Base):
+    __tablename__ = "backlog_items"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    student_id: Mapped[str | None] = mapped_column(ForeignKey("students.id"), nullable=True)
+    session_id: Mapped[str | None] = mapped_column(ForeignKey("scheduled_sessions.id"), nullable=True)
+    title: Mapped[str] = mapped_column(String(200))
+    kind: Mapped[str] = mapped_column(String(40), default="mentor")
+    status: Mapped[str] = mapped_column(String(20), default="open")
+    payload: Mapped[dict] = mapped_column(JSON, default=dict)
+    booked_session_id: Mapped[str | None] = mapped_column(ForeignKey("scheduled_sessions.id"), nullable=True)

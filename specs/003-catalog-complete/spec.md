@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| **Status** | Specified (Architect artifacts written; implement blocked until HTML guide + human OK) |
+| **Status** | Accepted (shell/sim; screens not wired; 002 remains protected) |
 | **Role** | PM (specify + clarify) |
 | **Feature directory** | `specs/003-catalog-complete` |
 
@@ -90,6 +90,6 @@ Humans asked for the **remaining catalog-complete product as one Spec Kit featur
 - [x] Architect: `plan.md` + checklist + analyze
 - [x] Tasks (`tasks.md`)
 - [x] `plan-viewer.html` master + satellite HTML (functional, technical, sequence)
-- [ ] Human OK on the HTML guide (blocks `/speckit.implement`)
-- [ ] `/speckit.implement` (Builder; only after HTML OK)
-- [ ] Tester + PM Accept
+- [x] Human OK on the HTML guide (blocks `/speckit.implement`)
+- [x] `/speckit.implement` (Builder; after HTML OK)
+- [x] Tester + PM Accept (`specs/003-catalog-complete/test-report.md`; 20 pytest passed; shell/sim)

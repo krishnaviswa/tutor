@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| **Status** | In Progress (Builder implemented; Tester + Accept open) |
+| **Status** | Accepted (protected spine; do not rewrite) |
 | **Role** | PM (specify + clarify) |
 | **Feature directory** | `specs/002-sim-spine` |
 
@@ -81,4 +81,4 @@ This feature is the first **runnable local simulation of the spine**: durable ro
 - [x] Tasks (`tasks.md`)
 - [x] Human OK (8-step Spec Kit gate — required before implement)
 - [x] `/speckit.implement` (Builder; 002 sim-spine)
-- [ ] Tester + PM Accept
+- [x] Tester + PM Accept (`specs/002-sim-spine/test-report.md`; 11 pytest passed; 003 must not expand this slice)

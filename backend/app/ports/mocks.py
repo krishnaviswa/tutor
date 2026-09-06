@@ -36,3 +36,12 @@ class MockPorts:
     def local_put(self, path: str) -> str:
         self.storage.append({"path": path, "provider": "local"})
         return path
+
+    def checkout_invoice(self, invoice_id: str, amount_cents: int) -> dict:
+        self.payments.append(
+            {"invoice_id": invoice_id, "amount_cents": amount_cents, "provider": "mock"}
+        )
+        return {"status": "mock_ok", "invoice_id": invoice_id, "provider": "mock"}
+
+    def connect_integration(self, name: str) -> dict:
+        return {"name": name, "connected": True, "provider": "mock"}

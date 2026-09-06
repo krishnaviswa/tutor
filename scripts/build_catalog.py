@@ -390,7 +390,7 @@ def parse_screens() -> list[dict]:
                 "domain": dom,
                 "domainName": DOMAINS[dom],
                 "phase": PHASE_BY_MOD.get(mod, 4),
-                "status": "empty",
+                "status": "shell",
                 "demoKey": sid,
                 "figmaNodeId": None,
                 "apis": extra.get("apis", []),
@@ -549,15 +549,12 @@ def entities() -> list[dict]:
         "attendance", "session_records", "transcript_events", "timeline_events",
         "feature_flags", "audit_log", "taxonomies", "topics",
         "usage_meters", "quota_policies",
-    ]
-    later = [
         "questions", "attempts", "doubts", "messages", "invoices",
         "notification_prefs", "notification_deliveries",
         "content_items", "assignments", "submissions", "practice_sets", "tests",
         "announcements", "plans", "payouts", "automation_rules", "backlog_items",
     ]
     out = [{"id": e, "tier": "spine"} for e in spine]
-    out += [{"id": e, "tier": "later"} for e in later]
     return out
 
 
@@ -634,7 +631,7 @@ def apis(screens: list[dict]) -> list[str]:
         for a in s["apis"]:
             if a not in seen:
                 seen.append(a)
-    return [{"id": a, "status": "sim" if a in SIM_APIS else "planned"} for a in seen]
+    return [{"id": a, "status": "sim"} for a in seen]
 
 
 def main() -> None:

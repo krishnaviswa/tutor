@@ -1,6 +1,8 @@
-# TutorOS backend (002-sim-spine)
+# TutorOS backend
 
-FastAPI `/api/v1`: SQLAlchemy models for PostgreSQL. **Local (not hosted):** Docker Compose Postgres is the store. **pytest:** in-memory SQLite. All vendor, AI, and production-auth ports stay mock.
+FastAPI `/api/v1` against SQLAlchemy models written for PostgreSQL. **Local (not hosted):** Docker Compose Postgres is the store. **pytest:** in-memory SQLite. Vendor, AI, and production-auth ports stay mock.
+
+002 spine routes stay. 003 adds remaining catalog paths (branding, join/live/video, content, assignments, practice, tests, doubts, threads, announcements, dashboards, billing/checkout mock, payouts, audit, templates, automation, integrations). No `/sim/*` paths.
 
 ```bash
 # from repo root
@@ -22,7 +24,7 @@ curl -s -X POST http://127.0.0.1:8000/api/v1/auth/otp/verify -H "Content-Type: a
 Exam-prep faculty does not need a staff-login screen; teaching APIs work after this stub.
 
 ```bash
-pytest
+python -m pytest
 ```
 
 Seeded workspaces: `exam-prep`, `language-1on1`, `music`. Biology is not required.
