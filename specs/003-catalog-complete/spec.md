@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| **Status** | Specified (Architect artifacts written; implement blocked until HTML guide + human OK) |
+| **Status** | In Progress (human OK on HTML guide; Builder implementing) |
 | **Role** | PM (specify + clarify) |
 | **Feature directory** | `specs/003-catalog-complete` |
 
@@ -90,6 +90,6 @@ Humans asked for the **remaining catalog-complete product as one Spec Kit featur
 - [x] Architect: `plan.md` + checklist + analyze
 - [x] Tasks (`tasks.md`)
 - [x] `plan-viewer.html` master + satellite HTML (functional, technical, sequence)
-- [ ] Human OK on the HTML guide (blocks `/speckit.implement`)
-- [ ] `/speckit.implement` (Builder; only after HTML OK)
+- [x] Human OK on the HTML guide (blocks `/speckit.implement`)
+- [x] `/speckit.implement` (Builder; after HTML OK)
 - [ ] Tester + PM Accept

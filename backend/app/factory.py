@@ -1,7 +1,23 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1 import auth, cohorts, owner, parent, sessions, students, stubs, workspaces
+from app.api.v1 import (
+    assessments,
+    assignments,
+    auth,
+    cohorts,
+    comms,
+    content,
+    extras,
+    join,
+    owner,
+    parent,
+    practice,
+    sessions,
+    students,
+    stubs,
+    workspaces,
+)
 from app.config import DATA_DIR, get_settings
 from app.db import init_db, session_factory
 from app.middleware.idempotency import IdempotencyMiddleware
@@ -51,7 +67,14 @@ def create_app(*, seed: bool = True) -> FastAPI:
     application.include_router(students.router, prefix=api)
     application.include_router(cohorts.router, prefix=api)
     application.include_router(parent.router, prefix=api)
+    application.include_router(join.router, prefix=api)
     application.include_router(sessions.router, prefix=api)
+    application.include_router(content.router, prefix=api)
+    application.include_router(assignments.router, prefix=api)
+    application.include_router(practice.router, prefix=api)
+    application.include_router(assessments.router, prefix=api)
+    application.include_router(comms.router, prefix=api)
+    application.include_router(extras.router, prefix=api)
     application.include_router(owner.router, prefix=api)
     application.include_router(stubs.router, prefix=api)
     return application

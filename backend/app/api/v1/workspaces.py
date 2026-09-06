@@ -23,6 +23,12 @@ class WorkspacePatch(BaseModel):
     student_whatsapp: int | None = None
 
 
+class BrandingIn(BaseModel):
+    logo: str | None = None
+    accent: str | None = None
+    tagline: str | None = None
+
+
 def _out(ws: Workspace) -> dict:
     return {
         "id": ws.id,
@@ -30,6 +36,8 @@ def _out(ws: Workspace) -> dict:
         "name": ws.name,
         "kind": ws.kind,
         "student_whatsapp": bool(ws.student_whatsapp),
+        "whatsapp_paused": bool(ws.whatsapp_paused),
+        "branding": ws.branding or {},
     }
 
 
@@ -75,4 +83,21 @@ def patch_current(
         for m in ALWAYS_ON:
             modules.add(m)
         flags.modules = list(modules)
+    return _out(ws)
+
+
+@router.patch("/workspaces/current/branding")
+def patch_branding(
+    body: BrandingIn,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner")),
+):
+    ws = db.get(Workspace, principal.workspace_id)
+    if not ws:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "workspace")
+    branding = dict(ws.branding or {})
+    data = body.model_dump(exclude_none=True)
+    branding.update(data)
+    ws.branding = branding
+    db.flush()
     return _out(ws)

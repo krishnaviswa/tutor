@@ -81,70 +81,70 @@
   },
   {
     "id": "questions",
-    "tier": "later"
+    "tier": "spine"
   },
   {
     "id": "attempts",
-    "tier": "later"
+    "tier": "spine"
   },
   {
     "id": "doubts",
-    "tier": "later"
+    "tier": "spine"
   },
   {
     "id": "messages",
-    "tier": "later"
+    "tier": "spine"
   },
   {
     "id": "invoices",
-    "tier": "later"
+    "tier": "spine"
   },
   {
     "id": "notification_prefs",
-    "tier": "later"
+    "tier": "spine"
   },
   {
     "id": "notification_deliveries",
-    "tier": "later"
+    "tier": "spine"
   },
   {
     "id": "content_items",
-    "tier": "later"
+    "tier": "spine"
   },
   {
     "id": "assignments",
-    "tier": "later"
+    "tier": "spine"
   },
   {
     "id": "submissions",
-    "tier": "later"
+    "tier": "spine"
   },
   {
     "id": "practice_sets",
-    "tier": "later"
+    "tier": "spine"
   },
   {
     "id": "tests",
-    "tier": "later"
+    "tier": "spine"
   },
   {
     "id": "announcements",
-    "tier": "later"
+    "tier": "spine"
   },
   {
     "id": "plans",
-    "tier": "later"
+    "tier": "spine"
   },
   {
     "id": "payouts",
-    "tier": "later"
+    "tier": "spine"
   },
   {
     "id": "automation_rules",
-    "tier": "later"
+    "tier": "spine"
   },
   {
     "id": "backlog_items",
-    "tier": "later"
+    "tier": "spine"
   }
 ]

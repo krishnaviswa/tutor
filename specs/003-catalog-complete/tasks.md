@@ -6,10 +6,10 @@ Phase gate: if 002 pytest fails, **stop** and report before the next phase.
 
 ## Gate
 
-- [ ] Human walked spec.md + plan.md
-- [ ] Human reviewed HTML guide (master + satellites)
-- [ ] Human OK to `/speckit.implement`
-- [ ] Branch not `main` / `master`
+- [x] Human walked spec.md + plan.md
+- [x] Human reviewed HTML guide (master + satellites)
+- [x] Human OK to `/speckit.implement`
+- [x] Branch not `main` / `master` (`cursor/003-catalog-complete`)
 
 ---
 

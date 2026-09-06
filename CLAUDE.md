@@ -1,14 +1,14 @@
 # TutorOS
 
-Subject-neutral remote tutoring workspace. Monorepo (`backend/` 002 sim; Next.js not built).
+Subject-neutral remote tutoring workspace. Monorepo (`backend/` FastAPI; `frontend/` Next.js 15 shells).
 
 > This file is the Claude Code equivalent of `.cursor/rules/project.mdc`.
 > Keep in sync — see **Cursor ↔ Claude Code parity** below.
 
 ## Stack
 
-- UI: Next.js 15 App Router, TypeScript (`frontend/` later)
-- API: FastAPI, `/api/v1` (`backend/` 002-sim-spine)
+- UI: Next.js 15 App Router, TypeScript (`frontend/` — one route per catalog screen)
+- API: FastAPI, `/api/v1` (`backend/` 002 spine + 003 catalog APIs)
 - Data: PostgreSQL via Docker Compose locally (`workspace_id` on every business table). Hosted: host DSN. pytest: in-memory SQLite only.
 - Auth: OTP + magic link + JWT; roles `owner` | `teacher` | `assistant` | `student` | `parent`
 

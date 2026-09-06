@@ -1,11 +1,11 @@
 ---
-description: Next.js conventions (stub until frontend exists)
+description: Next.js conventions
 globs: frontend/**/*.{ts,tsx}
 alwaysApply: false
 ---
 
-# Next.js (planned)
+# Next.js
 
-No frontend app yet. When it exists: one route per `catalog/screens.json` id. Tokens from the demo HTML. Do not restyle `empty` screens against invented UI. Local data is FastAPI + Compose Postgres (README §1), not HTML files.
+One route per `catalog/screens.json` id. Tokens from the demo HTML. Do not restyle `empty` screens against invented UI. Do not invent a 48th screen. Exam-prep navigation omits `staff-login`. Local data is FastAPI + Compose Postgres (README §1), not HTML files.
 
 See README §3 and `frontend/CLAUDE.md`.

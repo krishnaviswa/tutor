@@ -17,15 +17,14 @@ def test_parent_home_linked_child_only(client):
     assert client.get(f"/api/v1/students/{other}/timeline", headers=auth(parent)).status_code in (403, 404)
 
 
-def test_parent_hub_stubs_empty(client):
+def test_parent_hub_reads_empty_until_child_rows(client):
     parent = login(client, "+9101p", WS_EXAM, "parent")
     h = auth(parent)
     assert client.get("/api/v1/reports", headers=h).json() == []
     assert client.get("/api/v1/invoices/mine", headers=h).json() == []
     assert client.get("/api/v1/threads", headers=h).json() == []
     attempt = client.get("/api/v1/attempts/none", headers=h)
-    assert attempt.status_code == 200
-    assert attempt.json()["empty"] is True
+    assert attempt.status_code == 404
     prefs = client.get("/api/v1/notifications/prefs", headers=h).json()
     assert prefs["student"]["whatsapp"] is False
 

@@ -17,6 +17,10 @@ class QuotaPatch(BaseModel):
     policy: str | None = None
 
 
+class PauseIn(BaseModel):
+    paused: bool = True
+
+
 @router.get("/owner/console")
 def owner_console(
     db: Session = Depends(get_db),
@@ -71,3 +75,17 @@ def patch_quotas(
             db.add(QuotaPolicy(workspace_id=principal.workspace_id, meter_key=body.meter_key, policy=body.policy))
     db.flush()
     return {"meters": quota_svc.snapshot(db, principal.workspace_id)}
+
+
+@router.post("/billing/whatsapp-pause")
+def whatsapp_pause(
+    body: PauseIn,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner")),
+):
+    ws = db.get(Workspace, principal.workspace_id)
+    if not ws:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "workspace")
+    ws.whatsapp_paused = 1 if body.paused else 0
+    db.flush()
+    return {"whatsapp_paused": bool(ws.whatsapp_paused)}
