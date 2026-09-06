@@ -6,6 +6,8 @@ alwaysApply: false
 
 # Testing
 
-Backend: mock providers, tenant isolation, record→timeline, quotas. No live vendors.
+Backend: mock providers, tenant isolation, record→timeline, quotas. No live vendors, AI, or IdP.
+
+pytest: in-memory SQLite. Local functional checks: Compose Postgres + `/api/v1` (README §1).
 
 Parity scripts: `scripts/check_architecture_parity.py`, `scripts/check_agent_config_sync.py`.

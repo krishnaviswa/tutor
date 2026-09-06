@@ -1,20 +1,16 @@
 # TutorOS backend (002-sim-spine)
 
-FastAPI `/api/v1` simulation: SQLAlchemy models for PostgreSQL, default **SQLite file** `data/sim.db`. All vendor ports mock.
-
-Optional local Postgres (Docker Desktop + Compose from repo root):
+FastAPI `/api/v1`: SQLAlchemy models for PostgreSQL. **Local (not hosted):** Docker Compose Postgres is the store. **pytest:** in-memory SQLite. All vendor, AI, and production-auth ports stay mock.
 
 ```bash
+# from repo root
 docker compose up -d postgres
-```
-
-Then set `DATABASE_URL=postgresql+psycopg://tutor:tutor@127.0.0.1:5432/tutoros` and start the API. Tests stay on in-memory SQLite.
-
-```bash
 cd backend
 pip install -r requirements.txt
 python -m uvicorn app.main:app --reload --port 8000
 ```
+
+`DATABASE_URL` defaults to `postgresql+psycopg://tutor:tutor@127.0.0.1:5432/tutoros`. When hosted, set the host DSN. Do not point the running API at SQLite.
 
 Auth stub: OTP code `000000`. Example exam-prep teacher:
 

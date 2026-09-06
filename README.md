@@ -8,7 +8,7 @@ Example pack (optional, not requirements): [docs/examples/neet-biology/](docs/ex
 
 This file is the single product map for humans and for any LLM (Cursor or Claude Code). In-flight features live under `specs/`. When a feature is Accepted, this README absorbs the delta.
 
-**Application code (002-sim-spine):** FastAPI in `backend/` with a durable SQLite sim file (Postgres-shaped models). Demo HTML remains UI gold; Next.js is not built.
+**Local running stack:** FastAPI in `backend/` talks to **Docker Compose PostgreSQL** for every local backend write (roster, sessions, timeline, quotas, parent hub). Demo HTML remains UI gold and is not yet wired to that API. Next.js is not built. Vendor, AI, and production auth stay **mock** until hosted (or a later feature turns a port live).
 
 ---
 
@@ -17,7 +17,7 @@ This file is the single product map for humans and for any LLM (Cursor or Claude
 | You are a… | Read |
 |---|---|
 | **Anyone / LLM** | This disclaimer, [§1](#1-quick-start), [§2](#2-logical-design) |
-| **Product manager** | §2, [§10](#10-spec-kit--role-workflow), `specs/002-sim-spine/spec.md` |
+| **Product manager** | §2, [§10](#10-spec-kit--role-workflow), `specs/003-catalog-complete/spec.md` |
 | **Architect** | [§3](#3-architecture), [§5](#5-domain-model), [§8](#8-auth), [§9](#9-ports-whatsapp-quotas) |
 | **Builder** | Do not implement until spec status is Specified and you are asked. Then §3–§7. |
 | **Tester** | [§10](#10-spec-kit--role-workflow) after code exists |
@@ -28,7 +28,27 @@ This file is the single product map for humans and for any LLM (Cursor or Claude
 
 ## 1. Quick start
 
-No Docker yet. Open in a browser:
+**Agents (Cursor, Claude Code, cloud):** until the API is hosted, **Postgres is the local backend**. Do not persist app data in SQLite. Do not treat a stopped container as “no database.” Start Compose, then run FastAPI. Unit tests are the only SQLite path (`sqlite:///:memory:` in `backend/tests/conftest.py`).
+
+**Local vs hosted**
+
+| Where | `DATABASE_URL` | What you mock |
+|---|---|---|
+| This machine (not hosted) | `postgresql+psycopg://tutor:tutor@127.0.0.1:5432/tutoros` — Compose service `postgres` in [docker-compose.yml](docker-compose.yml) | All **ports**: SMS, email, WhatsApp, push, Meet/Teams, payments, object storage-as-S3. **Auth** is the stub (OTP `000000`, magic link, JWT) — not a live IdP. **AI / LLM vendors** are not called. |
+| Hosted | The host’s Postgres DSN | Same mocks until a feature sets a live provider in `.env` |
+
+Local functional testing of product behavior (tenant isolation, record → timeline, quotas, parent home, roster) **goes through `/api/v1` against that Postgres**. Static HTML is the UI map, not the store.
+
+```bash
+docker compose up -d postgres          # container tutoros-postgres; wait until healthy
+cd backend
+pip install -r requirements.txt
+python -m uvicorn app.main:app --reload --port 8000
+```
+
+Default API `DATABASE_URL` matches Compose. Copy [.env.example](.env.example) if you need a file. Seeded workspaces: `exam-prep`, `language-1on1`, `music`. Auth stub: [backend/README.md](backend/README.md).
+
+**Product maps (static HTML, no API required)** — open in a browser:
 
 | Open | What it is |
 |---|---|
@@ -50,7 +70,7 @@ python scripts/check_architecture_parity.py
 python scripts/check_agent_config_sync.py --range origin/main...HEAD
 ```
 
-Active Spec Kit feature is `.specify/feature.json` (`specs/001-platform-architecture`), not the git branch. Override with `SPECIFY_FEATURE_DIRECTORY`.
+Active Spec Kit feature is `.specify/feature.json` (currently `specs/003-catalog-complete`), not the git branch. Override with `SPECIFY_FEATURE_DIRECTORY`.
 
 ---
 
@@ -80,7 +100,7 @@ Entry (role + workspace)
   → PostgreSQL (workspace_id on every business table)
 ```
 
-UI later: Next.js 15. API later: FastAPI. This pass: catalog + HTML only. Screen status: `empty` → `shell` → `wired`. All 47 are `empty`.
+UI later: Next.js 15 (one route per catalog screen id). API now: FastAPI `/api/v1` against local Postgres. Demo HTML is still UI gold; screens remain `empty` until wired. Status: `empty` → `shell` → `wired`. All 47 are `empty`. Do not invent a 48th id.
 
 ---
 
@@ -90,7 +110,7 @@ UI later: Next.js 15. API later: FastAPI. This pass: catalog + HTML only. Screen
 |---|---|
 | Next.js App Router | One route per catalog screen id |
 | FastAPI `/api/v1` | Thin routers, OpenAPI, ports as Protocols |
-| PostgreSQL | UUID + JSONB, no SQLite |
+| PostgreSQL | Product and **local** store (Compose until hosted). UUID + JSONB. SQLite only for pytest memory. |
 | Spec Kit + PM/Architect/Builder/Tester | Cursor and Claude Code share the same files |
 | Mock-default ports | CI never needs vendor keys |
 
@@ -132,6 +152,8 @@ All routes **planned** unless catalog `status` is `sim` (002 spine). Full list: 
 
 ## 8. Auth
 
+Local and CI use the **auth stub** (OTP `000000`, magic link, JWT claims). Do not call a live SMS IdP, Google staff login, or institute SSO until a feature turns those ports on.
+
 Four mechanisms, not one library:
 
 1. **Identity:** phone OTP default (`sms` port); email magic link; staff Google later; institute SSO later. No student password in v1.
@@ -164,21 +186,21 @@ PM  /speckit.specify + /speckit.clarify
  → Architect  /speckit.plan + checklist + /speckit.analyze
  → /speckit.tasks
  → human OK
- → Builder  /speckit.implement     (002-sim-spine in progress)
+ → Builder  /speckit.implement     (002 spine built; 003 blocked until hub HTML OK)
  → Tester  report + /speckit.converge
  → PM Accept  (same PR updates this README + catalog + architecture HTML)
 ```
 
 Status: `Draft` → `Specified` → `In Progress` → `Testing` → `Accepted`.
 
-Active feature: [specs/002-sim-spine/](specs/002-sim-spine/) (runnable spine simulation). Architecture pack: [specs/001-platform-architecture/](specs/001-platform-architecture/) (Specified; no implement). Cursor rules ↔ Claude Code: see [CLAUDE.md](CLAUDE.md). Sync: `scripts/check_agent_config_sync.py`.
+Active feature: [specs/003-catalog-complete/](specs/003-catalog-complete/). Spine simulation: [specs/002-sim-spine/](specs/002-sim-spine/) (Builder done; Tester + Accept open). Architecture pack: [specs/001-platform-architecture/](specs/001-platform-architecture/) (Specified; no implement). Cursor rules ↔ Claude Code: see [CLAUDE.md](CLAUDE.md). Sync: `scripts/check_agent_config_sync.py`.
 
 ---
 
 ## 11. Known gaps
 
-- Next.js UI, Docker, Figma, live OTP/Meet/Razorpay/WhatsApp are not in 002.
-- 002 FastAPI sim lives in `backend/` (SQLite file default, mock ports). Demo mocks still do not save into HTML.
+- Next.js UI and Figma are not built. Demo HTML is not wired to FastAPI yet — local product data lives in Postgres via the API, not in the HTML files.
+- Docker Compose Postgres **is** the local backend. Live OTP / Meet / Razorpay / WhatsApp / Meta / AI vendors are **not** connected (mock ports).
 - All 47 screens remain `empty` in the demo. Do not invent ids.
 - Demo **incomplete** vs all six tracks: some spine screens still sit only on Everything. `staff-login` is on 1-on-1, K-12, Skills, Music, and Everything; Exam-prep omits it on purpose (faculty starts at cohort/schedule). Fill remaining gaps later — **same ids**, no new screens.
 - Inbound WhatsApp replies not in v1.

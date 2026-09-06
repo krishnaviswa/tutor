@@ -6,6 +6,6 @@ alwaysApply: false
 
 # Database
 
-SQLAlchemy models written for PostgreSQL. Local sim default is SQLite file. `workspace_id` on every business table. `topics` / `taxonomies` — never syllabus tables.
+SQLAlchemy models written for PostgreSQL. Local app/API default is Compose Postgres (`DATABASE_URL` in README §1). pytest uses in-memory SQLite only. `workspace_id` on every business table. `topics` / `taxonomies` — never syllabus tables.
 
 Spine listed in README §5 and `catalog/entities.json`.

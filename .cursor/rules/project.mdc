@@ -10,7 +10,7 @@ Subject-neutral remote tutoring workspace. Monorepo (`backend/` 002 sim; Next.js
 ## Stack
 - UI: Next.js 15 App Router, TypeScript (`frontend/` later)
 - API: FastAPI, `/api/v1` (`backend/` 002-sim-spine)
-- Data: PostgreSQL-shaped SQLAlchemy; local sim SQLite file (`workspace_id` on every business table)
+- Data: PostgreSQL via Docker Compose locally (`workspace_id` on every business table). Hosted: host DSN. pytest: in-memory SQLite only.
 - Auth: OTP + magic link + JWT; roles `owner` | `teacher` | `assistant` | `student` | `parent`
 
 ## Source of truth

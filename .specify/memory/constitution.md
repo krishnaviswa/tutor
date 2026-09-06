@@ -24,4 +24,4 @@ TutorOS is a **subject-neutral** remote tutoring workspace. Any subject a tutor 
 
 ## Stack (002 sim + planned production)
 
-Next.js 15 App Router (UI, not in 002) · FastAPI `/api/v1` (002 scaffold) · PostgreSQL (models); local sim SQLite file · layered monolith + ports.
+Next.js 15 App Router (UI, not built) · FastAPI `/api/v1` · PostgreSQL locally via Compose until hosted · pytest in-memory SQLite · layered monolith + ports (mock default; no live AI/IdP/vendors).

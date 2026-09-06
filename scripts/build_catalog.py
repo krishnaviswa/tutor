@@ -577,7 +577,7 @@ def ports() -> list[dict]:
 
 def env_vars() -> list[dict]:
     return [
-        {"name": "DATABASE_URL", "comment": "Postgres DSN in production; 002 sim defaults to SQLite file"},
+        {"name": "DATABASE_URL", "comment": "Local Compose Postgres until hosted; pytest uses memory SQLite"},
         {"name": "JWT_SECRET", "comment": "Sim/dev signing key. Never commit production secrets"},
         {"name": "SMS_PROVIDER", "comment": "mock | msg91"},
         {"name": "EMAIL_PROVIDER", "comment": "mock | ses | postmark"},
