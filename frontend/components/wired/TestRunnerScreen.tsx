@@ -1,13 +1,21 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { catalogRoute } from "@/lib/screens";
 import { AppBar, Empty, Err } from "./bits";
 
+const LIMIT_SEC = 15 * 60;
+
 type Test = { id: string; title: string };
 type Run = { id: string; title: string; questions: { id: string; stem: string; choices: string[] }[] };
+
+function clock(sec: number) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
 
 export function TestRunnerScreen() {
   const router = useRouter();
@@ -16,6 +24,7 @@ export function TestRunnerScreen() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [left, setLeft] = useState(LIMIT_SEC);
 
   useEffect(() => {
     api("/api/v1/tests")
@@ -28,13 +37,14 @@ export function TestRunnerScreen() {
     try {
       setRun((await api(`/api/v1/tests/${id}/run`)) as Run);
       setAnswers({});
+      setLeft(LIMIT_SEC);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
   }
 
-  async function submit() {
-    if (!run) return;
+  const submit = useCallback(async () => {
+    if (!run || busy) return;
     setBusy(true);
     setError("");
     try {
@@ -45,14 +55,25 @@ export function TestRunnerScreen() {
       router.push(`${catalogRoute("practice-result")}?attempt=${att.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
-    } finally {
       setBusy(false);
     }
-  }
+  }, [answers, busy, router, run]);
+
+  useEffect(() => {
+    if (!run) return;
+    const t = window.setInterval(() => {
+      setLeft((s) => (s <= 1 ? 0 : s - 1));
+    }, 1000);
+    return () => window.clearInterval(t);
+  }, [run]);
+
+  useEffect(() => {
+    if (run && left === 0) void submit();
+  }, [left, run, submit]);
 
   return (
     <>
-      <AppBar title="Test" />
+      <AppBar title="Test" extra={run ? <span className="pill">{clock(left)}</span> : undefined} />
       <div className="appwrap">
         <Err message={error} />
         {!run ? (
@@ -68,6 +89,7 @@ export function TestRunnerScreen() {
         ) : (
           <>
             <h3>{run.title}</h3>
+            <p className="muted">Auto-submits at 00:00.</p>
             {run.questions.map((q, i) => (
               <div key={q.id} className="card">
                 <div className="k">Q{i + 1}</div>
@@ -86,7 +108,7 @@ export function TestRunnerScreen() {
               </div>
             ))}
             <button className="hot hot--btn" type="button" disabled={busy} onClick={() => void submit()}>
-              Submit test
+              {busy ? "Submitting…" : "Submit test"}
             </button>
           </>
         )}

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/lib/api";
 
 type StudentRow = {
@@ -49,17 +49,26 @@ export function RosterScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+  const [pasting, setPasting] = useState(false);
+  const [pasteText, setPasteText] = useState("");
+  const [inviteToken, setInviteToken] = useState("");
+  const [role, setRole] = useState("teacher");
   const [saving, setSaving] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const fileRef = useRef<HTMLInputElement | null>(null);
+
+  const canWrite = role === "owner" || role === "teacher" || role === "assistant";
 
   const load = useCallback(async () => {
-    const [st, co] = await Promise.all([
+    const [st, co, me] = await Promise.all([
       api("/api/v1/students") as Promise<StudentRow[]>,
       api("/api/v1/cohorts") as Promise<CohortRow[]>,
+      api("/api/v1/auth/me") as Promise<{ role?: string }>,
     ]);
     setStudents(Array.isArray(st) ? st : []);
     setCohorts(Array.isArray(co) ? co : []);
+    if (me?.role) setRole(me.role);
   }, []);
 
   useEffect(() => {
@@ -112,24 +121,151 @@ export function RosterScreen() {
     }
   }
 
+  function parseRows(text: string): { display_name: string; phone: string | null }[] {
+    return text
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .filter((line) => !/^name\s*,/i.test(line))
+      .map((line) => {
+        const parts = line.split(/[,;\t]/).map((p) => p.trim()).filter(Boolean);
+        if (parts.length >= 2) return { display_name: parts[0], phone: parts[1] };
+        if (/^\+?\d/.test(parts[0] || "")) return { display_name: parts[0], phone: parts[0] };
+        return { display_name: parts[0], phone: null };
+      });
+  }
+
+  async function importRows(rows: { display_name: string; phone: string | null }[]) {
+    if (!rows.length) {
+      setError("No rows to import.");
+      return;
+    }
+    setSaving(true);
+    setError(null);
+    try {
+      await api("/api/v1/students/import", {
+        method: "POST",
+        body: JSON.stringify({ rows }),
+      });
+      setPasting(false);
+      setPasteText("");
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function onCsv(file: File) {
+    const text = await file.text();
+    await importRows(parseRows(text));
+  }
+
+  async function mintInvite() {
+    const sid = students[0]?.id;
+    if (!sid) {
+      setError("Add a student first.");
+      return;
+    }
+    setSaving(true);
+    setError(null);
+    try {
+      const row = (await api("/api/v1/parent-links", {
+        method: "POST",
+        body: JSON.stringify({ student_id: sid }),
+      })) as { token: string };
+      setInviteToken(row.token);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <>
       <h2>Students</h2>
       <span className="k">{loading ? "Loading roster…" : kicker}</span>
       <div className="row" style={{ marginBottom: 12 }}>
-        <button
-          type="button"
-          className="btn btn--dark btn--sm"
-          style={{ cursor: "pointer" }}
-          onClick={() => setAdding((open) => !open)}
-        >
-          + Add student
-        </button>
-        <span className="btn btn--sm">Import CSV</span>
-        <span className="btn btn--sm">Invite link</span>
-        <span className="btn btn--sm">Paste WhatsApp list</span>
+        {canWrite ? (
+          <button
+            type="button"
+            className="btn btn--dark btn--sm"
+            style={{ cursor: "pointer" }}
+            onClick={() => setAdding((open) => !open)}
+          >
+            + Add student
+          </button>
+        ) : null}
+        {canWrite ? (
+          <>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".csv,text/csv,text/plain"
+              hidden
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (file) void onCsv(file);
+              }}
+            />
+            <button
+              type="button"
+              className="btn btn--sm"
+              style={{ cursor: "pointer" }}
+              disabled={saving}
+              onClick={() => fileRef.current?.click()}
+            >
+              Import CSV
+            </button>
+            <button
+              type="button"
+              className="btn btn--sm"
+              style={{ cursor: "pointer" }}
+              disabled={saving}
+              onClick={() => void mintInvite()}
+            >
+              Invite link
+            </button>
+            <button
+              type="button"
+              className="btn btn--sm"
+              style={{ cursor: "pointer" }}
+              onClick={() => setPasting((open) => !open)}
+            >
+              Paste WhatsApp list
+            </button>
+          </>
+        ) : null}
       </div>
-      {adding ? (
+      {inviteToken ? (
+        <div className="card" style={{ marginBottom: 12 }}>
+          <div className="k">Parent invite token</div>
+          <p className="muted" style={{ fontFamily: "var(--mono)" }}>{inviteToken}</p>
+        </div>
+      ) : null}
+      {pasting ? (
+        <form
+          className="card"
+          style={{ marginBottom: 12 }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            void importRows(parseRows(pasteText));
+          }}
+        >
+          <h3>Paste WhatsApp list</h3>
+          <label className="field">
+            <span>One name,phone per line</span>
+            <textarea className="field__in" rows={4} value={pasteText} onChange={(e) => setPasteText(e.target.value)} />
+          </label>
+          <button type="submit" className="btn btn--dark btn--sm" disabled={saving}>
+            Import list
+          </button>
+        </form>
+      ) : null}
+      {adding && canWrite ? (
         <form className="card" onSubmit={onAdd} style={{ marginBottom: 12 }}>
           <h3>Add student</h3>
           <label className="field">

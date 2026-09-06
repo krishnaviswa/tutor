@@ -33,7 +33,15 @@ export function LiveStudentScreen() {
   }, [sessionId]);
 
   return (
-    <div className="studio" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    <div className="studio" style={{ display: "flex", flexDirection: "column", minHeight: "70vh" }}>
+      {!sessionId ? (
+        <div style={{ padding: 16 }}>
+          <p className="muted">Join from the waiting room so attendance is recorded.</p>
+          <Link href={catalogRoute("join")} className="hot hot--btn">
+            Open join
+          </Link>
+        </div>
+      ) : null}
       <div className="vmain" style={{ aspectRatio: "3/4", flex: 1 }}>
         {live?.session.title || "Waiting"} · {live?.view || "student"}
         <div style={{ width: "100%" }}>{live?.video_url || "Join from the waiting room first"}</div>

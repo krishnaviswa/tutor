@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.deps import current_principal, ports_dep, require_roles
 from app.db import get_db
-from app.models.tables import Attendance, ScheduledSession, SessionRecord, TranscriptEvent, Workspace, new_id
+from app.models.tables import Attendance, Cohort, ScheduledSession, SessionRecord, TranscriptEvent, Workspace, new_id
 from app.ports.mocks import MockPorts
 from app.services.auth import Principal
 from app.services import record as record_svc
@@ -75,6 +75,13 @@ def create_session(
     db: Session = Depends(get_db),
     principal: Principal = Depends(require_roles("owner", "teacher")),
 ):
+    cohort = (
+        db.query(Cohort)
+        .filter(Cohort.id == body.cohort_id, Cohort.workspace_id == principal.workspace_id)
+        .first()
+    )
+    if not cohort:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "cohort")
     s = ScheduledSession(
         workspace_id=principal.workspace_id,
         cohort_id=body.cohort_id,

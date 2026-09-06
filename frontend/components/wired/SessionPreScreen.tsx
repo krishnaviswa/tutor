@@ -62,7 +62,9 @@ function btnStyle(extra?: CSSProperties): CSSProperties {
 
 export function SessionPreScreen() {
   const params = useSearchParams();
-  const sessionId = params.get("session") || "";
+  const paramId = params.get("session") || "";
+  const [fallbackId, setFallbackId] = useState("");
+  const sessionId = paramId || fallbackId;
   const [session, setSession] = useState<SessionRow | null>(null);
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [cohortName, setCohortName] = useState("");
@@ -89,6 +91,16 @@ export function SessionPreScreen() {
       setError(err instanceof Error ? err.message : String(err));
     }
   }, []);
+
+  useEffect(() => {
+    if (paramId) return;
+    api("/api/v1/sessions")
+      .then((rows) => {
+        const list = rows as SessionRow[];
+        if (list[0]) setFallbackId(list[0].id);
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : String(err)));
+  }, [paramId]);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -118,7 +130,7 @@ export function SessionPreScreen() {
     return (
       <>
         <h2>Session</h2>
-        <p className="muted">Pick a session from the calendar.</p>
+        <p className="muted">No sessions yet — create one on the calendar.</p>
         <Link href="/app/faculty/schedule" className="hot hot--btn" style={btnStyle({ textDecoration: "none" })}>
           Back to schedule
         </Link>

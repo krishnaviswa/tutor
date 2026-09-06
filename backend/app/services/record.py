@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from sqlalchemy.orm import Session
 
-from app.models.tables import Attendance, Enrollment, ScheduledSession, SessionRecord, utcnow
+from app.models.tables import Attendance, AutomationRule, BacklogItem, Enrollment, ScheduledSession, SessionRecord, Student, utcnow
 from app.ports.mocks import MockPorts
 from app.services import notify, timeline
 
@@ -42,15 +42,23 @@ def patch_record(
             Attendance.session_id == session.id,
         ).delete()
         for row in attendance:
+            sid = row["student_id"]
+            st = (
+                db.query(Student)
+                .filter(Student.id == sid, Student.workspace_id == workspace_id)
+                .first()
+            )
+            if not st:
+                continue
             db.add(
                 Attendance(
                     workspace_id=workspace_id,
                     session_id=session.id,
-                    student_id=row["student_id"],
+                    student_id=st.id,
                     status=row.get("status", "present"),
                 )
             )
-            student_ids.append(row["student_id"])
+            student_ids.append(st.id)
     else:
         student_ids = [
             e.student_id
@@ -71,6 +79,38 @@ def patch_record(
             actor_user_id,
         )
         events.append(ev.id)
+    rules = (
+        db.query(AutomationRule)
+        .filter(
+            AutomationRule.workspace_id == workspace_id,
+            AutomationRule.trigger == "session_recorded",
+            AutomationRule.enabled == 1,
+        )
+        .all()
+    )
+    for rule in rules:
+        if rule.action == "backlog":
+            db.add(
+                BacklogItem(
+                    workspace_id=workspace_id,
+                    session_id=session.id,
+                    title=rule.name or "After record",
+                    kind="automation",
+                    status="open",
+                    payload={"trigger": rule.trigger, "rule_id": rule.id},
+                )
+            )
+        else:
+            for sid in student_ids:
+                ev = timeline.append(
+                    db,
+                    workspace_id,
+                    sid,
+                    "automation",
+                    f"Rule: {rule.name}",
+                    actor_user_id,
+                )
+                events.append(ev.id)
     notify_result = notify.dispatch_after_timeline(
         db, ports, workspace_id, body, student_whatsapp_on
     )

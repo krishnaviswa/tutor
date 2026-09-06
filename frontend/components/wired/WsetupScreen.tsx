@@ -8,10 +8,13 @@ import { Err } from "./bits";
 
 type Ws = { id: string; name: string; slug: string; kind: string };
 
+const KINDS = ["exam-prep", "one-on-one", "music"];
+
 export function WsetupScreen() {
   const [ws, setWs] = useState<Ws | null>(null);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
+  const [kind, setKind] = useState("exam-prep");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -22,6 +25,7 @@ export function WsetupScreen() {
         setWs(w);
         setName(w.name);
         setSlug(w.slug);
+        setKind(w.kind || "exam-prep");
       })
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }
@@ -53,7 +57,7 @@ export function WsetupScreen() {
     try {
       await api("/api/v1/workspaces", {
         method: "POST",
-        body: JSON.stringify({ slug, name, kind: "exam-prep" }),
+        body: JSON.stringify({ slug, name, kind }),
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -78,6 +82,14 @@ export function WsetupScreen() {
           <span>Workspace slug</span>
           <input className="field__in" value={slug} onChange={(e) => setSlug(e.target.value)} />
           <em>Current {ws?.id}</em>
+        </label>
+        <label className="field">
+          <span>Kind</span>
+          <select className="field__in" value={kind} onChange={(e) => setKind(e.target.value)}>
+            {KINDS.map((k) => (
+              <option key={k} value={k}>{k}</option>
+            ))}
+          </select>
         </label>
         <div className="row">
           <button className="hot hot--btn" type="submit" disabled={busy}>

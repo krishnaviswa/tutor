@@ -16,8 +16,12 @@ export function OwnerScreen() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    api("/api/v1/owner/console")
-      .then((row) => setData(row as Console))
+    Promise.all([api("/api/v1/owner/console"), api("/api/v1/usage")])
+      .then(([consoleRow, usageRow]) => {
+        const c = consoleRow as Console;
+        const meters = (usageRow as { meters?: Console["usage"] }).meters;
+        setData({ ...c, usage: meters ?? c.usage });
+      })
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }, []);
 

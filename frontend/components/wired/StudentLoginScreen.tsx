@@ -13,8 +13,10 @@ const exam = MOCK_TENANTS["exam-prep"];
 export function StudentLoginScreen() {
   const router = useRouter();
   const [phone, setPhone] = useState(exam.phones.student);
+  const [email, setEmail] = useState(exam.emails.student);
   const [ws, setWs] = useState(exam.workspaceId);
   const [digits, setDigits] = useState<string[]>(() => OTP_CODE.split(""));
+  const [mode, setMode] = useState<"otp" | "magic">("otp");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const boxes = useRef<Array<HTMLInputElement | null>>([]);
@@ -54,13 +56,23 @@ export function StudentLoginScreen() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
-    const code = digits.join("");
-    if (code.length !== 6) {
-      setError("Enter the 6-digit code.");
-      return;
-    }
     setBusy(true);
     try {
+      if (mode === "magic") {
+        const ver = (await api("/api/v1/auth/magic-link", {
+          method: "POST",
+          body: JSON.stringify({ email, workspace_id: ws, role: "student" }),
+        })) as { token: string };
+        setToken(ver.token);
+        router.replace(catalogRoute("student-dash"));
+        return;
+      }
+      const code = digits.join("");
+      if (code.length !== 6) {
+        setError("Enter the 6-digit code.");
+        setBusy(false);
+        return;
+      }
       const start = (await api("/api/v1/auth/otp/start", {
         method: "POST",
         body: JSON.stringify({ phone, workspace_id: ws }),
@@ -93,33 +105,52 @@ export function StudentLoginScreen() {
       <span className="av av--lg" style={{ background: "var(--accent)", borderRadius: 12 }}>
         T
       </span>
-      <h2 style={{ fontSize: "1.25rem", margin: "16px 0 6px" }}>Enter the 6-digit code</h2>
+      <h2 style={{ fontSize: "1.25rem", margin: "16px 0 6px" }}>
+        {mode === "magic" ? "Magic link" : "Enter the 6-digit code"}
+      </h2>
       <p className="muted" style={{ marginBottom: 18 }}>
-        Sent to {masked}. Mock code {OTP_CODE}.
+        Sent to {masked}. Mock code {OTP_CODE}. Magic link is the same stub JWT.
       </p>
-      <div className="row" style={{ gap: 8, flexWrap: "nowrap", marginBottom: 14 }}>
-        {digits.map((d, i) => (
-          <input
-            key={i}
-            ref={(el) => {
-              boxes.current[i] = el;
-            }}
-            className={`otp-d${d ? " is-filled" : ""}`}
-            inputMode="numeric"
-            autoComplete={i === 0 ? "one-time-code" : "off"}
-            maxLength={1}
-            aria-label={`Digit ${i + 1}`}
-            value={d}
-            onChange={(ev) => setDigitAt(i, ev.target.value)}
-            onKeyDown={(ev) => onKeyDown(i, ev)}
-            onPaste={i === 0 ? onPaste : undefined}
-          />
-        ))}
+      <div className="chips" style={{ marginBottom: 12 }}>
+        <button type="button" className={`chip${mode === "otp" ? " on" : ""}`} onClick={() => setMode("otp")}>
+          Phone OTP
+        </button>
+        <button type="button" className={`chip${mode === "magic" ? " on" : ""}`} onClick={() => setMode("magic")}>
+          Magic link
+        </button>
       </div>
+      {mode === "otp" ? (
+        <div className="row" style={{ gap: 8, flexWrap: "nowrap", marginBottom: 14 }}>
+          {digits.map((d, i) => (
+            <input
+              key={i}
+              ref={(el) => {
+                boxes.current[i] = el;
+              }}
+              className={`otp-d${d ? " is-filled" : ""}`}
+              inputMode="numeric"
+              autoComplete={i === 0 ? "one-time-code" : "off"}
+              maxLength={1}
+              aria-label={`Digit ${i + 1}`}
+              value={d}
+              onChange={(ev) => setDigitAt(i, ev.target.value)}
+              onKeyDown={(ev) => onKeyDown(i, ev)}
+              onPaste={i === 0 ? onPaste : undefined}
+            />
+          ))}
+        </div>
+      ) : (
+        <label className="field">
+          <span>Email</span>
+          <input className="field__in" value={email} autoComplete="email" onChange={(ev) => setEmail(ev.target.value)} />
+        </label>
+      )}
+      {mode === "otp" ? (
       <label className="field">
         <span>Phone</span>
         <input className="field__in" value={phone} autoComplete="tel" onChange={(ev) => setPhone(ev.target.value)} />
       </label>
+      ) : null}
       <label className="field">
         <span>Workspace</span>
         <input
@@ -131,7 +162,7 @@ export function StudentLoginScreen() {
       </label>
       <Err message={error} />
       <button className="hot hot--btn" type="submit" disabled={busy}>
-        {busy ? "Verifying" : "Verify"}
+        {busy ? "Verifying" : mode === "magic" ? "Send magic link" : "Verify"}
       </button>
       <div className="card card--wash" style={{ marginTop: 22 }}>
         <div className="k" style={{ marginBottom: 4 }}>One identity</div>

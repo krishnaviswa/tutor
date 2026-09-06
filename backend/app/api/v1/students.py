@@ -51,7 +51,7 @@ def list_students(
 def create_student(
     body: StudentIn,
     db: Session = Depends(get_db),
-    principal: Principal = Depends(require_roles("owner", "assistant")),
+    principal: Principal = Depends(require_roles("owner", "teacher", "assistant")),
 ):
     return _out(_add_student(db, principal.workspace_id, body))
 
@@ -60,7 +60,7 @@ def create_student(
 def import_students(
     body: ImportIn,
     db: Session = Depends(get_db),
-    principal: Principal = Depends(require_roles("owner", "assistant")),
+    principal: Principal = Depends(require_roles("owner", "teacher", "assistant")),
 ):
     created = [_out(_add_student(db, principal.workspace_id, row)) for row in body.rows]
     return {"created": created}
