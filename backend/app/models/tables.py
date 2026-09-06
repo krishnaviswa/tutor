@@ -87,6 +87,7 @@ class StaffMembership(Base):
     workspace_id: Mapped[str] = mapped_column(String(36), index=True)
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
     role: Mapped[str] = mapped_column(String(20))  # owner | teacher | assistant
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class Student(Base):
@@ -107,6 +108,7 @@ class ParentLink(Base):
     parent_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     token: Mapped[str] = mapped_column(String(64), unique=True)
     accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class Cohort(Base):
@@ -115,6 +117,7 @@ class Cohort(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     workspace_id: Mapped[str] = mapped_column(String(36), index=True)
     name: Mapped[str] = mapped_column(String(200))
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class Enrollment(Base):
@@ -253,6 +256,7 @@ class ContentItem(Base):
     storage_path: Mapped[str] = mapped_column(String(500), default="")
     created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class Assignment(Base):
@@ -265,6 +269,7 @@ class Assignment(Base):
     body: Mapped[str] = mapped_column(Text, default="")
     created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class Submission(Base):
@@ -279,6 +284,7 @@ class Submission(Base):
     grade: Mapped[str | None] = mapped_column(String(40), nullable=True)
     feedback: Mapped[str] = mapped_column(Text, default="")
     graded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class Question(Base):
@@ -291,6 +297,7 @@ class Question(Base):
     choices: Mapped[list] = mapped_column(JSON, default=list)
     answer: Mapped[str] = mapped_column(String(400), default="")
     created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class PracticeSet(Base):
@@ -301,6 +308,7 @@ class PracticeSet(Base):
     title: Mapped[str] = mapped_column(String(200))
     question_ids: Mapped[list] = mapped_column(JSON, default=list)
     created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class Test(Base):
@@ -313,6 +321,7 @@ class Test(Base):
     question_ids: Mapped[list] = mapped_column(JSON, default=list)
     cohort_id: Mapped[str | None] = mapped_column(ForeignKey("cohorts.id"), nullable=True)
     created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class Attempt(Base):
@@ -327,6 +336,7 @@ class Attempt(Base):
     score: Mapped[int] = mapped_column(Integer, default=0)
     max_score: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class Doubt(Base):
@@ -340,6 +350,7 @@ class Doubt(Base):
     status: Mapped[str] = mapped_column(String(20), default="open")
     answer: Mapped[str] = mapped_column(Text, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class Message(Base):
@@ -352,6 +363,7 @@ class Message(Base):
     sender_user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
     body: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class Announcement(Base):
@@ -364,6 +376,7 @@ class Announcement(Base):
     body: Mapped[str] = mapped_column(Text, default="")
     created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class NotificationPref(Base):
@@ -398,6 +411,7 @@ class Plan(Base):
     name: Mapped[str] = mapped_column(String(200))
     amount_cents: Mapped[int] = mapped_column(Integer, default=0)
     interval: Mapped[str] = mapped_column(String(20), default="month")
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class Invoice(Base):
@@ -410,6 +424,7 @@ class Invoice(Base):
     amount_cents: Mapped[int] = mapped_column(Integer, default=0)
     status: Mapped[str] = mapped_column(String(20), default="open")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class Payout(Base):
@@ -420,6 +435,7 @@ class Payout(Base):
     amount_cents: Mapped[int] = mapped_column(Integer, default=0)
     status: Mapped[str] = mapped_column(String(20), default="pending")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    meta: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class AutomationRule(Base):

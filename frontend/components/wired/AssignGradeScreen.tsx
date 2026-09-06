@@ -6,7 +6,14 @@ import { api } from "@/lib/api";
 import { Empty, Err } from "./bits";
 
 type Asg = { id: string; title: string };
-type Sub = { id: string; student_id: string; grade?: string | null; feedback?: string | null };
+type Sub = {
+  id: string;
+  student_id: string;
+  grade?: string | null;
+  feedback?: string | null;
+  late?: boolean;
+  resubmit_count?: number;
+};
 
 export function AssignGradeScreen() {
   const params = useSearchParams();
@@ -87,7 +94,11 @@ export function AssignGradeScreen() {
                 }}
               >
                 <div className="t">{s.student_id}</div>
-                <div className="s muted">{s.grade || "ungraded"}</div>
+                <div className="s muted">
+                  {s.grade || "ungraded"}
+                  {s.late ? " · late" : ""}
+                  {s.resubmit_count != null ? ` · resubmit ${s.resubmit_count}` : ""}
+                </div>
               </button>
             ))
           )}

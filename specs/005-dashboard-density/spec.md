@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| **Status** | In Progress |
+| **Status** | Accepted |
 | **Role** | PM (specify) + Architect (plan) |
 | **Feature directory** | `specs/005-dashboard-density` |
 | **Action items** | [tasks.md](tasks.md) |
@@ -13,7 +13,7 @@
 
 005 lifts **demo density** onto the **same screen ids** and the **same API paths**. Backend computes named operating facts from the existing ledger. Frontend renders them the way `tutor-platform-demo.html` already does. No new catalog screen. No marketplace. No live Razorpay. Biology / NEET remains an example tenant pack.
 
-Human OK to specify this feature is the 2026-09-06 comparison chat. **Do not `/speckit.implement` until a later human OK on these tasks.**
+Human OK to specify this feature is the 2026-09-06 comparison chat. Implemented T7.1–T7.11; T7.12 Accept 2026-09-06.
 
 ## User stories
 
@@ -83,7 +83,7 @@ Human OK to specify this feature is the 2026-09-06 comparison chat. **Do not `/s
 
 ## Definition of done
 
-- [tasks.md](tasks.md) T7.1–T7.12 complete.
-- AC 1–13 evidenced in `test-report.md`.
-- Demo HTML remains gold; Next.js matches it on the density screens.
-- Product map (README, hub, work-log) says 005 Accepted.
+- [x] [tasks.md](tasks.md) T7.1–T7.12 complete.
+- [x] AC 1–13 evidenced in [test-report.md](test-report.md).
+- [x] Demo HTML remains gold; Next.js matches it on the density screens.
+- [x] Product map (README, hub, work-log) says 005 Accepted.

@@ -7,6 +7,7 @@ from app.db import get_db
 from app.models.tables import ContentItem, Topic
 from app.ports.mocks import MockPorts
 from app.services.auth import Principal
+from app.services.internal_v2 import meta_of, put_meta
 from app.services.progress import content_out
 
 router = APIRouter()
@@ -17,6 +18,9 @@ class ContentIn(BaseModel):
     body: str = ""
     topic_id: str | None = None
     storage_path: str = ""
+    kind: str | None = None
+    playlist_ids: list[str] | None = None
+    drip_at: str | None = None
 
 
 def _out(row: ContentItem, db: Session | None = None, *, lesson: bool = False) -> dict:
@@ -59,6 +63,7 @@ def create_content(
     )
     db.add(row)
     db.flush()
+    put_meta(row, kind=body.kind, playlist_ids=body.playlist_ids, drip_at=body.drip_at, views=0)
     return _out(row, db)
 
 

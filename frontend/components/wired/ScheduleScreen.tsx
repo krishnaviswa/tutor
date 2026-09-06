@@ -161,7 +161,12 @@ export function ScheduleScreen() {
       setEditingId(null);
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.startsWith("409")) {
+        setError("That slot conflicts with another class.");
+      } else {
+        setError(msg);
+      }
     } finally {
       setBusy(false);
     }

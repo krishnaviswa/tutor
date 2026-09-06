@@ -53,6 +53,7 @@ a:hover{text-decoration:underline}
 .wrap{max-width:1200px;margin:0 auto;padding:28px 20px 72px}
 .lede{color:var(--ink-soft);max-width:72ch;margin:8px 0 18px}
 .warn{background:var(--amber-wash);border:1px solid color-mix(in srgb,var(--amber) 35%,var(--line));border-radius:12px;padding:12px 14px;margin:14px 0}
+.ok{background:var(--accent-wash);border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));border-radius:12px;padding:12px 14px;margin:14px 0}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow);margin:12px 0}
 .card h3{font-size:1.05rem;margin-bottom:6px}
 .tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:2px 7px;margin:0 4px 4px 0}
@@ -81,8 +82,9 @@ th{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:
 <div class="wrap">
 <div class="eyebrow">Arm of the snowflake</div>
 <h1>Catalog seed map</h1>
-<p class="lede">What is tagged in Compose Postgres so each product workflow has rows. Same pack in all three tenants (exam-prep, language-1on1, music). Biology is not a domain. OTP is always <span class="mono">000000</span>. Wipe and reload: <span class="mono">cd backend; python -m app.seed_cli --reset</span>.</p>
-<div class="warn">Attendance for a <strong>live</strong> class is not pre-written. Join → enter is the attendance write (platform truth, not the Meet URL). Transcript stays empty. 005 seeds <em>historical</em> week attendance for dashboard bars. GET <span class="mono">/reports</span> returns a term slice. No live vendors.</div>
+<p class="lede">One row per catalog screen. Tags are the last 12 digits of <span class="mono">cccccccc-0001-…</span> (exam-prep). Language uses <span class="mono">0002</span>, music <span class="mono">0003</span>. Same pack in every tenant. OTP is always <span class="mono">000000</span>. Wipe: <span class="mono">cd backend; python -m app.seed_cli --reset</span>.</p>
+<div class="ok">This pack is built for <strong>state contrast</strong>, not one happy path: recorded vs upcoming vs no-video sessions; graded vs ungraded homework; 1/2 vs 0/2 practice and a 2/2 test; accepted vs pending parent link; enrolled vs unenrolled student; enabled vs disabled automation; open vs paid invoices; parent cannot see student-2 fees or threads until they accept <span class="mono">link-exam-prep-pending</span>.</div>
+<div class="warn">Join → enter writes or updates attendance (platform truth, not the Meet URL). Seed session …022 already has present/absent so you can contrast a clean enter on <span class="mono">join-exam-prep-next</span>. Transcript stays empty. 005 also seeds historical week bars. No live vendors.</div>
 
 <div class="card">
   <div class="eyebrow">Tenants</div>
@@ -90,12 +92,42 @@ th{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:
   <table>
     <thead><tr><th>Slug / kind</th><th>Workspace id</th><th>Phones</th><th>WhatsApp meter</th></tr></thead>
     <tbody>
-      <tr><td>exam-prep</td><td class="mono">aaaaaaaa-0001-4000-8000-000000000001</td><td class="mono">+9101o t a s p · s2</td><td>80/100 warn</td></tr>
-      <tr><td>language-1on1</td><td class="mono">aaaaaaaa-0002-4000-8000-000000000002</td><td class="mono">+9102o t a s p · s2</td><td>100/100 block</td></tr>
-      <tr><td>music</td><td class="mono">aaaaaaaa-0003-4000-8000-000000000003</td><td class="mono">+9103o t a s p · s2</td><td>10/100 warn</td></tr>
+      <tr><td>exam-prep</td><td class="mono">aaaaaaaa-0001-4000-8000-000000000001</td><td class="mono">+9101o t a s p · s2 · s3</td><td>80/100 warn</td></tr>
+      <tr><td>language-1on1</td><td class="mono">aaaaaaaa-0002-4000-8000-000000000002</td><td class="mono">+9102o t a s p · s2 · s3</td><td>100/100 block</td></tr>
+      <tr><td>music</td><td class="mono">aaaaaaaa-0003-4000-8000-000000000003</td><td class="mono">+9103o t a s p · s2 · s3</td><td>10/100 warn</td></tr>
     </tbody>
   </table>
-  <p class="lede" style="margin-top:10px">IDs below use tag <span class="mono">0001</span> (exam-prep). Language uses <span class="mono">0002</span>, music <span class="mono">0003</span>. Tokens: <span class="mono">join-{slug}</span>, <span class="mono">link-{slug}</span>, <span class="mono">thread-{slug}</span>.</p>
+  <p class="lede" style="margin-top:10px">Tokens: <span class="mono">join-{slug}</span>, <span class="mono">join-{slug}-next</span>, <span class="mono">link-{slug}</span>, <span class="mono">link-{slug}-pending</span>, <span class="mono">thread-{slug}</span>, <span class="mono">thread-{slug}-s2</span>.</p>
+</div>
+
+<div class="card">
+  <div class="eyebrow">State tags</div>
+  <h3>What each variation is for</h3>
+  <table>
+    <thead><tr><th>Tag</th><th>Row</th><th>State this variation is for</th></tr></thead>
+    <tbody>
+      <tr><td>…020</td><td>Student 1</td><td>Linked child, full record, present on …022</td></tr>
+      <tr><td>…040</td><td>Student 2</td><td>Enrolled, parent pending, absent on …022, 0/2 practice</td></tr>
+      <tr><td>…066</td><td>Student 3</td><td>Roster only — not in a cohort. Join enter is 403. Phone +9101s3</td></tr>
+      <tr><td>…021</td><td>Main cohort</td><td>Students 1 and 2</td></tr>
+      <tr><td>…067</td><td>Overflow cohort</td><td>Empty — cohort-builder blank list</td></tr>
+      <tr><td>…022</td><td>Seed session</td><td>Past. join-exam-prep. Meet + recording. Present/absent</td></tr>
+      <tr><td>…053</td><td>Upcoming (density)</td><td>join-exam-prep-next. Meet, no recording. Dashboard next class</td></tr>
+      <tr><td>…073</td><td>Needs video link</td><td>No join token, no video — session-pre attach/mint</td></tr>
+      <tr><td>…029 / …051</td><td>Homework + grade A</td><td>Already returned work</td></tr>
+      <tr><td>…074 / …075</td><td>Worksheet ungraded</td><td>Student 2 submitted; grade on assign-grade</td></tr>
+      <tr><td>…025 · …042 · …077</td><td>Questions</td><td>In set, in set, unused bank item</td></tr>
+      <tr><td>…026 / …076</td><td>Practice sets</td><td>Two questions vs empty set</td></tr>
+      <tr><td>…031 / …050 / …032</td><td>Attempts</td><td>1/2 incomplete, 0/2 miss, 2/2 test</td></tr>
+      <tr><td>…033 · …034 · …083</td><td>Doubts</td><td>Open, answered+[clip], student-2 open</td></tr>
+      <tr><td>thread-… / …-s2</td><td>Messages</td><td>Parent-visible vs teacher-only until pending accept</td></tr>
+      <tr><td>…036 · …037 · …082</td><td>Invoices</td><td>Student 1 open/paid; student 2 open (hidden from parent)</td></tr>
+      <tr><td>…038 / …080</td><td>Payouts</td><td>Pending vs paid</td></tr>
+      <tr><td>…039 / …086</td><td>Mentor</td><td>Open recap vs booked follow-up on …053</td></tr>
+      <tr><td>…043 / …079</td><td>Automation</td><td>Enabled after-record vs disabled assignment ping</td></tr>
+      <tr><td>link-… / -pending</td><td>Parent links</td><td>Accepted student 1 vs pending student 2</td></tr>
+    </tbody>
+  </table>
 </div>
 
 <div class="card">
@@ -107,7 +139,7 @@ th{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:
     <tbody>
       <tr><td>router</td><td>workspace kind</td><td>Three doors. Exam-prep teacher skips staff-login.</td></tr>
       <tr><td>student-login / staff-login</td><td>phones +9101s / +9101t / +9101o / +9101a</td><td>OTP 000000. JWT after verify.</td></tr>
-      <tr><td>parent-link</td><td class="mono">link-exam-prep</td><td>Already accepted; lands parent-home.</td></tr>
+      <tr><td>parent-link</td><td class="mono">link-exam-prep · link-exam-prep-pending</td><td>Accepted lands parent-home. Accept pending to attach student 2.</td></tr>
       <tr><td>wsetup / onboard-kind / template-gallery</td><td>workspace + flags + templates API</td><td>Current tenant; apply template keeps always-on.</td></tr>
       <tr><td>branding</td><td>workspaces.branding</td><td>Accent #2E7D4F, tagline.</td></tr>
     </tbody>
@@ -119,8 +151,8 @@ th{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:
   <h3>Schedule, join, live, record</h3>
   <div class="kvs">
     <b>Cohort</b><span class="mono">cccccccc-0001-4000-8000-000000000021</span>
-    <b>Session</b><span class="mono">cccccccc-0001-4000-8000-000000000022 · Seed session</span>
-    <b>Join token</b><span class="mono">join-exam-prep</span>
+    <b>Session</b><span class="mono">…022 Seed session (recorded) · …053 upcoming · …073 no video</span>
+    <b>Join token</b><span class="mono">join-exam-prep · join-exam-prep-next</span>
     <b>Video</b><span class="mono">mock://meet/…022</span>
     <b>Recording</b><span class="mono">mock://rec/…022</span>
     <b>Engagement</b><span>one teacher poll “Ready?”</span>
@@ -129,9 +161,9 @@ th{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:
   <table>
     <thead><tr><th>Screen</th><th>Seed tag</th><th>Workflow</th></tr></thead>
     <tbody>
-      <tr><td>roster / cohort-builder</td><td>student …020 (parent-linked) + student 2 …040 (no parent)</td><td>Two students in one cohort.</td></tr>
-      <tr><td>schedule / session-pre</td><td>session + join token + video URL</td><td>Attach already done; token is seeded.</td></tr>
-      <tr><td>join</td><td class="mono">?token=join-exam-prep</td><td>Preview then enter writes attendance.</td></tr>
+      <tr><td>roster / cohort-builder</td><td>…020 · …040 enrolled · …066 unenrolled · …067 empty</td><td>Three names. Overflow has no students. Status pills are UI.</td></tr>
+      <tr><td>schedule / session-pre</td><td>…022 attach done · …073 needs mint</td><td>Draft has no token or video.</td></tr>
+      <tr><td>join</td><td class="mono">join-exam-prep or join-exam-prep-next</td><td>Upcoming is the clean enter. Student 3 is 403. …022 already present/absent.</td></tr>
       <tr><td>live-teacher / live-student</td><td>video_url + engagement JSON</td><td>Mock Meet. Student cannot POST engagement.</td></tr>
       <tr><td>session-video</td><td>recording_url</td><td>Transcript array empty.</td></tr>
       <tr><td>record</td><td>session_records notes</td><td>Patch still allowed; timeline already has session_recorded.</td></tr>
@@ -148,18 +180,18 @@ th{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:
     <b>Questions</b><span class="mono">…025 check, …042 follow-up</span>
     <b>Set</b><span class="mono">…026</span>
     <b>Test</b><span class="mono">…030</span>
-    <b>Homework</b><span class="mono">…029 + graded submission A</span>
-    <b>Attempts</b><span class="mono">…031 student 1/1, …032 test 2/2, …050 student2 0/1</span>
+    <b>Homework</b><span class="mono">…029 graded A · …074 ungraded (student 2)</span>
+    <b>Attempts</b><span class="mono">…031 1/2 · …032 test 2/2 · …050 student2 0/2</span>
   </div>
   <table>
     <thead><tr><th>Screen</th><th>Workflow</th></tr></thead>
     <tbody>
       <tr><td>library / lesson</td><td>List notes; open …027.</td></tr>
-      <tr><td>assign-issue / assign-grade</td><td>Homework listed; submission already graded A.</td></tr>
-      <tr><td>qbank / practice-build</td><td>Two questions; set includes both after pack.</td></tr>
-      <tr><td>practice-play / practice-result</td><td>Play …026; result …031.</td></tr>
-      <tr><td>test-setup / test-runner</td><td>Test …030; student can submit again.</td></tr>
-      <tr><td>analysis</td><td>Cohort scores for both students (1/1 and 0/1).</td></tr>
+      <tr><td>assign-issue / assign-grade</td><td>Listed both; grade the worksheet or leave the A.</td></tr>
+      <tr><td>qbank / practice-build</td><td>Three stems; empty set …076; unused …077.</td></tr>
+      <tr><td>practice-play / practice-result</td><td>Play …026; contrast 1/2 vs 0/2.</td></tr>
+      <tr><td>test-setup / test-runner</td><td>Test …030 already 2/2; student can submit again.</td></tr>
+      <tr><td>analysis</td><td>Cohort scores 1/2 and 0/2 on the set.</td></tr>
     </tbody>
   </table>
 </div>
@@ -170,9 +202,9 @@ th{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:
   <table>
     <thead><tr><th>Screen</th><th>Seed tag</th><th>Workflow</th></tr></thead>
     <tbody>
-      <tr><td>doubt-student / doubt-teacher</td><td>open …033, answered …034</td><td>Queue has two; teacher can patch the open one.</td></tr>
-      <tr><td>messages</td><td class="mono">thread-exam-prep</td><td>Teacher then parent. Parent sees linked child only.</td></tr>
-      <tr><td>announce</td><td>…035 This week</td><td>Cohort-scoped. Timeline announcement events for both students.</td></tr>
+      <tr><td>doubt-student / doubt-teacher</td><td>open …033, answered …034, student-2 …083</td><td>Queue has three; teacher can patch an open one.</td></tr>
+      <tr><td>messages</td><td class="mono">thread-exam-prep · thread-exam-prep-s2</td><td>Parent sees linked child only until pending accept.</td></tr>
+      <tr><td>announce</td><td>…035 cohort · …087 workspace</td><td>Cohort vs every-cohort notice.</td></tr>
       <tr><td>notif-prefs</td><td>student + parent prefs rows</td><td>Student WhatsApp false.</td></tr>
     </tbody>
   </table>
@@ -181,14 +213,14 @@ th{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:
 <div class="card">
   <div class="eyebrow">Job 5 — record &amp; progress</div>
   <h3>Timeline is the ledger</h3>
-  <p class="lede">Events on student …020: session_recorded, assignment_graded, practice_attempted, doubt_opened. Student 2 has practice_attempted only. Deliveries table is a channel journal (one mock WhatsApp to teacher), not the ledger.</p>
+  <p class="lede">Student …020: session_recorded, assignment_graded, practice_attempted 1/2, doubt_opened. Student 2: practice 0/2 and open doubt. Deliveries: sent WhatsApp to teacher plus skipped_quota to parent.</p>
   <table>
     <thead><tr><th>Screen</th><th>Workflow</th></tr></thead>
     <tbody>
       <tr><td>timeline</td><td>Child rows in exam only.</td></tr>
       <tr><td>student-dash / teacher-dash / owner</td><td>Counts from sessions, students, attempts.</td></tr>
-      <tr><td>reports</td><td>GET list is empty (API stub). Export POST returns students + attempts JSON.</td></tr>
-      <tr><td>mentor</td><td>Backlog …039 Mentor recap, status open — book onto the seed session.</td></tr>
+      <tr><td>reports</td><td>GET term slice for the linked child. Export POST still JSON.</td></tr>
+      <tr><td>mentor</td><td>…039 open recap · …086 booked on upcoming</td></tr>
     </tbody>
   </table>
 </div>
@@ -198,9 +230,9 @@ th{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:
   <h3>Plans, invoices, mock checkout</h3>
   <div class="kvs">
     <b>Plan</b><span class="mono">…028 Seat ₹5.00 / month</span>
-    <b>Open invoice</b><span class="mono">…036 — payments checkout</span>
+    <b>Open invoice</b><span class="mono">…036 student 1 · …082 student 2 (parent hidden)</span>
     <b>Paid invoice</b><span class="mono">…037</span>
-    <b>Payout</b><span class="mono">…038 pending ₹2.50</span>
+    <b>Payout</b><span class="mono">…038 pending · …080 paid</span>
   </div>
   <table>
     <thead><tr><th>Screen</th><th>Workflow</th></tr></thead>
@@ -219,8 +251,65 @@ th{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:
   <table>
     <thead><tr><th>Screen</th><th>Seed tag</th><th>Workflow</th></tr></thead>
     <tbody>
-      <tr><td>automation</td><td>…043 After record ping → timeline</td><td>Toggle enabled.</td></tr>
+      <tr><td>automation</td><td>…043 enabled · …079 disabled</td><td>Toggle both.</td></tr>
       <tr><td>integrations</td><td>calendar_video connected (mock)</td><td>Connect others; live_calls stay 0.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <div class="eyebrow">All 47 screens</div>
+  <h3>Seed that drives each catalog id</h3>
+  <table>
+    <thead><tr><th>Screen</th><th>Seed that drives it</th><th>What you can do</th></tr></thead>
+    <tbody>
+      <tr><td>router</td><td>Workspace kind exam-prep</td><td>Three doors. Exam-prep teacher skips staff-login in the demo track.</td></tr>
+      <tr><td>student-login</td><td>+9101s / s2 / s3</td><td>OTP 000000. s3 lands with no cohort.</td></tr>
+      <tr><td>staff-login</td><td>+9101o t a</td><td>OTP 000000 then JWT.</td></tr>
+      <tr><td>wsetup</td><td>workspace + flags</td><td>Current tenant; modules on.</td></tr>
+      <tr><td>branding</td><td>workspaces.branding</td><td>Accent #2E7D4F, tagline.</td></tr>
+      <tr><td>roster</td><td>…020 …040 …066</td><td>Three names. Add / paste still work.</td></tr>
+      <tr><td>cohort-builder</td><td>…021 vs …067</td><td>Filled vs empty overflow.</td></tr>
+      <tr><td>parent-link</td><td>link-exam-prep · link-exam-prep-pending</td><td>Accept pending attaches student 2.</td></tr>
+      <tr><td>parent-home</td><td>linked …020 only until pending</td><td>Fees/threads for child 1. Density numbers.</td></tr>
+      <tr><td>schedule</td><td>…022 …053 …073 + hist …060–065</td><td>Past recorded, next class, draft, week bars.</td></tr>
+      <tr><td>session-pre</td><td>…073</td><td>Attach/mint video + join token.</td></tr>
+      <tr><td>join</td><td>join-exam-prep or -next</td><td>Preview then enter. Student 3 is 403.</td></tr>
+      <tr><td>live-teacher</td><td>video_url + poll</td><td>Mock Meet. POST engagement allowed.</td></tr>
+      <tr><td>live-student</td><td>same session</td><td>Student cannot POST engagement.</td></tr>
+      <tr><td>session-video</td><td>recording_url on …022</td><td>Transcript array empty. …073 has none.</td></tr>
+      <tr><td>record</td><td>notes + present/absent</td><td>Patch still allowed.</td></tr>
+      <tr><td>library</td><td>…027 notes · …052 video · …078 handout</td><td>Kinds differ (JSON vs mock path).</td></tr>
+      <tr><td>lesson</td><td>…027 notes + clip fields</td><td>Open notes; next practice …026.</td></tr>
+      <tr><td>assign-issue</td><td>…029 · …074</td><td>Issue more against the cohort.</td></tr>
+      <tr><td>assign-grade</td><td>…051 A · …075 ungraded</td><td>Return A or grade the worksheet (timeline).</td></tr>
+      <tr><td>qbank</td><td>…025 …042 …077</td><td>Unused item is not in a set.</td></tr>
+      <tr><td>practice-build</td><td>…026 vs …076</td><td>Filled vs empty question_ids.</td></tr>
+      <tr><td>practice-play</td><td>…026</td><td>Two stems. Student 1 already answered one.</td></tr>
+      <tr><td>practice-result</td><td>…031 1/2 · …050 0/2</td><td>Incomplete vs miss.</td></tr>
+      <tr><td>test-setup</td><td>…030</td><td>Two questions, cohort scoped.</td></tr>
+      <tr><td>test-runner</td><td>…032 2/2</td><td>Submit again writes a new attempt.</td></tr>
+      <tr><td>analysis</td><td>attempts on …026</td><td>Cohort contrast.</td></tr>
+      <tr><td>doubt-student</td><td>…033 open · …034 answered</td><td>Open another; student 2 has …083.</td></tr>
+      <tr><td>doubt-teacher</td><td>queue of three</td><td>Patch an open row.</td></tr>
+      <tr><td>messages</td><td>thread-exam-prep · -s2</td><td>Parent cannot see -s2 until pending accept.</td></tr>
+      <tr><td>announce</td><td>…035 · …087</td><td>Cohort vs workspace-wide.</td></tr>
+      <tr><td>timeline</td><td>events on …020 / …040</td><td>Child rows in exam only.</td></tr>
+      <tr><td>notif-prefs</td><td>…047 …048</td><td>Student WhatsApp false. Deliveries …049 sent · …088 skipped_quota.</td></tr>
+      <tr><td>student-dash</td><td>next …053 · due 1 unanswered</td><td>005 named facts. Practice incomplete by design.</td></tr>
+      <tr><td>teacher-dash</td><td>chase student 2</td><td>Absent + 0/2 practice. Cohort size 2.</td></tr>
+      <tr><td>owner</td><td>scorecard + usage 80/100</td><td>Three students count as active.</td></tr>
+      <tr><td>reports</td><td>term slice for linked child</td><td>Parent sees student 1. Export POST still JSON.</td></tr>
+      <tr><td>mentor</td><td>…039 open · …086 booked</td><td>Book the recap or inspect the booked follow-up.</td></tr>
+      <tr><td>billing</td><td>Seat …028 · Term …081</td><td>Issue more invoices against …020 or …040.</td></tr>
+      <tr><td>payments</td><td>…036 open · …037 paid · …082 hidden</td><td>Pay …036 (mock). Parent does not see …082 yet.</td></tr>
+      <tr><td>subscription</td><td>whatsapp pause flag</td><td>Owner pause still works.</td></tr>
+      <tr><td>payouts</td><td>…038 pending · …080 paid</td><td>Two statuses.</td></tr>
+      <tr><td>audit</td><td>…041 catalog_seed</td><td>Owner action log.</td></tr>
+      <tr><td>onboard-kind</td><td>workspace.kind</td><td>exam-prep already chosen.</td></tr>
+      <tr><td>template-gallery</td><td>templates API</td><td>Apply keeps always-on.</td></tr>
+      <tr><td>automation</td><td>…043 on · …079 off</td><td>Toggle enabled.</td></tr>
+      <tr><td>integrations</td><td>calendar_video connected</td><td>Connect others; live_calls stay 0.</td></tr>
     </tbody>
   </table>
 </div>

@@ -4,7 +4,14 @@ import { useEffect, useState, type FormEvent } from "react";
 import { api } from "@/lib/api";
 import { Empty, Err } from "./bits";
 
-type Row = { id: string; title: string; body: string; cohort_id?: string | null };
+type Row = {
+  id: string;
+  title: string;
+  body: string;
+  cohort_id?: string | null;
+  scheduled_at?: string;
+  channels?: string[];
+};
 type Cohort = { id: string; name: string };
 
 export function AnnounceScreen() {
@@ -36,7 +43,7 @@ export function AnnounceScreen() {
     try {
       await api("/api/v1/announcements", {
         method: "POST",
-        body: JSON.stringify({ title, body, cohort_id: cohortId || null }),
+        body: JSON.stringify({ title, body, cohort_id: cohortId || null, channels: ["in_app"] }),
       });
       setTitle("");
       setBody("");
@@ -85,6 +92,9 @@ export function AnnounceScreen() {
             <div className="gr">
               <div className="t">{r.title}</div>
               <div className="s">{r.body}</div>
+              <div className="s muted">
+                {[r.scheduled_at, (r.channels || []).join(", ")].filter(Boolean).join(" · ")}
+              </div>
             </div>
           </div>
         ))

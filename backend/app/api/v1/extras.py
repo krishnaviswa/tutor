@@ -21,6 +21,7 @@ from app.models.tables import (
 )
 from app.ports.mocks import MockPorts
 from app.services.auth import Principal
+from app.services.internal_v2 import auto_invoice, fee_visible_for, meta_of, run_miss_automation
 from app.services.progress import invoice_out, report_slice, student_dashboard, teacher_dashboard
 from app.services.quota import ALWAYS_ON
 from app.services.scope import linked_student_ids, student_for_principal
@@ -55,6 +56,9 @@ class InvoiceIn(BaseModel):
     student_id: str
     amount_cents: int
     plan_id: str | None = None
+    auto: bool = False
+    coupon: str | None = None
+    days_used: int = 0
 
 
 class CheckoutIn(BaseModel):
@@ -217,7 +221,16 @@ def list_plans(
     principal: Principal = Depends(require_roles("owner")),
 ):
     rows = db.query(Plan).filter(Plan.workspace_id == principal.workspace_id).all()
-    return [{"id": r.id, "name": r.name, "amount_cents": r.amount_cents, "interval": r.interval} for r in rows]
+    return [
+        {
+            "id": r.id,
+            "name": r.name,
+            "amount_cents": r.amount_cents,
+            "interval": r.interval,
+            **meta_of(r),
+        }
+        for r in rows
+    ]
 
 
 @router.post("/invoices")
@@ -229,11 +242,36 @@ def create_invoice(
     st = db.query(Student).filter(Student.id == body.student_id, Student.workspace_id == principal.workspace_id).first()
     if not st:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "student")
+    if body.auto:
+        if not body.plan_id:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "plan_id")
+        plan = db.query(Plan).filter(Plan.id == body.plan_id, Plan.workspace_id == principal.workspace_id).first()
+        if not plan:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "plan")
+        ws = db.get(Workspace, principal.workspace_id)
+        row = auto_invoice(
+            db,
+            principal.workspace_id,
+            st.id,
+            plan,
+            coupon=body.coupon,
+            days_used=body.days_used,
+            ws=ws,
+        )
+        return {
+            "id": row.id,
+            "student_id": row.student_id,
+            "amount_cents": row.amount_cents,
+            "status": row.status,
+            "auto": True,
+            "coupon": meta_of(row).get("coupon"),
+        }
     row = Invoice(
         workspace_id=principal.workspace_id,
         student_id=st.id,
         plan_id=body.plan_id,
         amount_cents=body.amount_cents,
+        meta={"coupon": body.coupon} if body.coupon else {},
     )
     db.add(row)
     db.flush()
@@ -251,7 +289,8 @@ def invoices_mine(
         q = q.filter(Invoice.student_id == st.id)
     elif principal.role == "parent":
         allowed = linked_student_ids(db, principal)
-        q = q.filter(Invoice.student_id.in_(allowed or [""]))
+        visible = [sid for sid in allowed if fee_visible_for(db, principal, sid)]
+        q = q.filter(Invoice.student_id.in_(visible or [""]))
     rows = q.all()
     return [invoice_out(r) for r in rows]
 
@@ -288,7 +327,17 @@ def list_payouts(
     principal: Principal = Depends(require_roles("owner")),
 ):
     rows = db.query(Payout).filter(Payout.workspace_id == principal.workspace_id).all()
-    return [{"id": r.id, "amount_cents": r.amount_cents, "status": r.status} for r in rows]
+    return [
+        {
+            "id": r.id,
+            "amount_cents": r.amount_cents,
+            "status": r.status,
+            "teacher_name": meta_of(r).get("teacher_name"),
+            "period": meta_of(r).get("period"),
+            "sessions": meta_of(r).get("sessions"),
+        }
+        for r in rows
+    ]
 
 
 @router.get("/audit")
@@ -381,8 +430,9 @@ def patch_rule(
         row.trigger = body.trigger
     if body.action is not None:
         row.action = body.action
+    ran = run_miss_automation(db, principal.workspace_id) if row.enabled else []
     db.flush()
-    return {"id": row.id, "enabled": bool(row.enabled), "name": row.name}
+    return {"id": row.id, "enabled": bool(row.enabled), "name": row.name, "ran": ran}
 
 
 @router.get("/integrations")

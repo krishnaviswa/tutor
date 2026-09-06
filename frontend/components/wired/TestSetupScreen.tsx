@@ -7,7 +7,7 @@ import { catalogRoute } from "@/lib/screens";
 import { Empty, Err } from "./bits";
 
 type Q = { id: string; stem: string };
-type Test = { id: string; title: string; question_ids: string[] };
+type Test = { id: string; title: string; question_ids: string[]; negative_mark?: boolean };
 type Cohort = { id: string; name: string };
 
 export function TestSetupScreen() {
@@ -17,6 +17,7 @@ export function TestSetupScreen() {
   const [title, setTitle] = useState("Mock");
   const [picked, setPicked] = useState<string[]>([]);
   const [cohortId, setCohortId] = useState("");
+  const [negativeMark, setNegativeMark] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -41,7 +42,12 @@ export function TestSetupScreen() {
     try {
       await api("/api/v1/tests", {
         method: "POST",
-        body: JSON.stringify({ title, question_ids: picked, cohort_id: cohortId || null }),
+        body: JSON.stringify({
+          title,
+          question_ids: picked,
+          cohort_id: cohortId || null,
+          negative_mark: negativeMark,
+        }),
       });
       load();
     } catch (err) {
@@ -82,6 +88,14 @@ export function TestSetupScreen() {
             <span>{q.stem}</span>
           </label>
         ))}
+        <label className="list__i">
+          <input
+            type="checkbox"
+            checked={negativeMark}
+            onChange={(e) => setNegativeMark(e.target.checked)}
+          />
+          <span>negative_mark</span>
+        </label>
         <button className="hot hot--btn" type="submit" disabled={busy}>
           Create test
         </button>
@@ -92,7 +106,10 @@ export function TestSetupScreen() {
         tests.map((t) => (
           <div key={t.id} className="card">
             <div className="sb">
-              <div className="t">{t.title}</div>
+              <div>
+                <div className="t">{t.title}</div>
+                {t.negative_mark ? <div className="s muted">negative_mark</div> : null}
+              </div>
               <Link href={catalogRoute("test-runner")} className="hot--link">
                 Runner
               </Link>

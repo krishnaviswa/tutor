@@ -8,6 +8,7 @@ from app.api.v1.deps import require_roles
 from app.db import get_db
 from app.models.tables import ParentLink, Student, new_id
 from app.services.auth import Principal
+from app.services.internal_v2 import put_meta
 from app.services.progress import parent_home as parent_home_payload
 
 router = APIRouter()
@@ -15,6 +16,7 @@ router = APIRouter()
 
 class LinkIn(BaseModel):
     student_id: str
+    fee_visible: bool = True
 
 
 @router.post("/parent-links")
@@ -31,9 +33,11 @@ def create_link(
     if not st:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "student")
     token = new_id()
-    db.add(ParentLink(workspace_id=principal.workspace_id, student_id=st.id, token=token))
+    link = ParentLink(workspace_id=principal.workspace_id, student_id=st.id, token=token)
+    db.add(link)
     db.flush()
-    return {"token": token, "student_id": st.id}
+    put_meta(link, fee_visible=body.fee_visible)
+    return {"token": token, "student_id": st.id, "fee_visible": body.fee_visible}
 
 
 @router.post("/parent-links/{token}/accept")

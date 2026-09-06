@@ -4,7 +4,15 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { Empty, Err } from "./bits";
 
-type Doubt = { id: string; student_id: string; body: string; status: string; answer?: string | null };
+type Doubt = {
+  id: string;
+  student_id: string;
+  body: string;
+  status: string;
+  answer?: string | null;
+  queue_position?: number;
+  sla_hours?: number;
+};
 
 export function DoubtTeacherScreen() {
   const [rows, setRows] = useState<Doubt[]>([]);
@@ -64,7 +72,12 @@ export function DoubtTeacherScreen() {
                 }}
               >
                 <div className="t">{r.body}</div>
-                <div className="s muted">{r.status}</div>
+                <div className="s muted">
+                  {r.status}
+                  {r.queue_position != null || r.sla_hours != null
+                    ? ` · #${r.queue_position ?? "—"} · ${r.sla_hours ?? 0}h`
+                    : ""}
+                </div>
               </button>
             ))
           )}

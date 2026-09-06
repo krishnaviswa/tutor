@@ -8,6 +8,7 @@ from app.models.tables import Attempt, PracticeSet, Question, Topic, Workspace
 from app.ports.mocks import MockPorts
 from app.services.auth import Principal
 from app.services import notify, timeline
+from app.services.internal_v2 import auto_assemble, bump_question_usage, meta_of, next_item, put_meta
 from app.services.scope import can_read_student, student_for_principal
 
 router = APIRouter()
@@ -18,24 +19,34 @@ class QuestionIn(BaseModel):
     choices: list[str] = []
     answer: str = ""
     topic_id: str | None = None
+    difficulty: str | None = None
+    tags: list[str] | None = None
 
 
 class PracticeSetIn(BaseModel):
     title: str
     question_ids: list[str] = []
+    auto_assemble: dict | None = None
 
 
 class AttemptIn(BaseModel):
     answers: dict = {}
+    elapsed_ms: int | None = None
+    partial: dict | None = None
 
 
 def _q_out(q: Question, *, hide_answer: bool) -> dict:
+    m = meta_of(q)
     data = {
         "id": q.id,
         "workspace_id": q.workspace_id,
         "topic_id": q.topic_id,
         "stem": q.stem,
         "choices": q.choices or [],
+        "difficulty": m.get("difficulty") or "core",
+        "tags": m.get("tags") or [],
+        "usage_count": int(m.get("usage_count") or 0),
+        "duplicate_of": m.get("duplicate_of"),
     }
     if not hide_answer:
         data["answer"] = q.answer
@@ -85,6 +96,7 @@ def create_question(
     )
     db.add(q)
     db.flush()
+    put_meta(q, difficulty=body.difficulty or "core", tags=body.tags or [], usage_count=0)
     return _q_out(q, hide_answer=False)
 
 
@@ -94,7 +106,10 @@ def list_sets(
     principal: Principal = Depends(require_roles("owner", "teacher", "student")),
 ):
     rows = db.query(PracticeSet).filter(PracticeSet.workspace_id == principal.workspace_id).all()
-    return [{"id": r.id, "title": r.title, "question_ids": r.question_ids or []} for r in rows]
+    return [
+        {"id": r.id, "title": r.title, "question_ids": r.question_ids or [], **{k: v for k, v in meta_of(r).items() if k != "question_ids"}}
+        for r in rows
+    ]
 
 
 @router.post("/practice-sets")
@@ -103,11 +118,15 @@ def create_set(
     db: Session = Depends(get_db),
     principal: Principal = Depends(require_roles("owner", "teacher")),
 ):
+    qids = body.question_ids
+    if body.auto_assemble:
+        qids = auto_assemble(db, principal.workspace_id, body.auto_assemble)
     row = PracticeSet(
         workspace_id=principal.workspace_id,
         title=body.title,
-        question_ids=body.question_ids,
+        question_ids=qids,
         created_by=principal.user_id,
+        meta={"auto_assemble": body.auto_assemble or {}, "tag": (body.auto_assemble or {}).get("tag")},
     )
     db.add(row)
     db.flush()
@@ -132,7 +151,12 @@ def play_set(
         q = db.query(Question).filter(Question.id == qid, Question.workspace_id == principal.workspace_id).first()
         if q:
             questions.append(_q_out(q, hide_answer=True))
-    return {"id": row.id, "title": row.title, "questions": questions}
+    return {
+        "id": row.id,
+        "title": row.title,
+        "questions": questions,
+        "next_item": next_item(db, principal.workspace_id, []),
+    }
 
 
 @router.post("/practice-sets/{set_id}/attempt")
@@ -159,9 +183,11 @@ def attempt_set(
         answers=body.answers or {},
         score=got,
         max_score=max_s,
+        meta={"elapsed_ms": body.elapsed_ms or 0, "partial": body.partial or {}},
     )
     db.add(att)
     db.flush()
+    bump_question_usage(db, principal.workspace_id, row.question_ids or [])
     note = f"Practice attempt on {row.title}: {got}/{max_s}"
     timeline.append(db, principal.workspace_id, st.id, "practice_attempted", note, principal.user_id)
     ws = db.get(Workspace, principal.workspace_id)

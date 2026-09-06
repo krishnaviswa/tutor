@@ -10,6 +10,7 @@ from app.models.tables import Assignment, Submission, Workspace
 from app.ports.mocks import MockPorts
 from app.services.auth import Principal
 from app.services import notify, timeline
+from app.services.internal_v2 import meta_of, put_meta
 from app.services.scope import can_read_student
 
 router = APIRouter()
@@ -19,21 +20,30 @@ class AssignmentIn(BaseModel):
     title: str
     body: str = ""
     cohort_id: str | None = None
+    rubric: list[dict] | None = None
+    due_at: str | None = None
+    allow_resubmit: bool = False
 
 
 class GradeIn(BaseModel):
     submission_id: str
     grade: str
     feedback: str = ""
+    partial: dict | None = None
+    allow_resubmit: bool | None = None
 
 
 def _asg_out(row: Assignment) -> dict:
+    m = meta_of(row)
     return {
         "id": row.id,
         "workspace_id": row.workspace_id,
         "cohort_id": row.cohort_id,
         "title": row.title,
         "body": row.body,
+        "rubric": m.get("rubric") or [],
+        "due_at": m.get("due_at"),
+        "allow_resubmit": bool(m.get("allow_resubmit")),
     }
 
 
@@ -61,6 +71,7 @@ def create_assignment(
     )
     db.add(row)
     db.flush()
+    put_meta(row, rubric=body.rubric or [], due_at=body.due_at, allow_resubmit=body.allow_resubmit)
     return _asg_out(row)
 
 
@@ -89,6 +100,9 @@ def list_submissions(
             "body": r.body,
             "grade": r.grade,
             "feedback": r.feedback,
+            "late": bool(meta_of(r).get("late")),
+            "resubmit_count": int(meta_of(r).get("resubmit_count") or 0),
+            "partial": meta_of(r).get("partial") or {},
         }
         for r in rows
     ]
@@ -125,6 +139,7 @@ def grade_submission(
     sub.grade = body.grade
     sub.feedback = body.feedback
     sub.graded_at = datetime.now(timezone.utc)
+    put_meta(sub, partial=body.partial or {}, allow_resubmit=body.allow_resubmit)
     note = f"Assignment graded: {asg.title} ({body.grade})"
     timeline.append(db, principal.workspace_id, sub.student_id, "assignment_graded", note, principal.user_id)
     ws = db.get(Workspace, principal.workspace_id)

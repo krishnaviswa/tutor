@@ -33,10 +33,15 @@ def seed_density_facts(
     tag = ws_id.split("-")[1]
     now = datetime.now(timezone.utc)
     upcoming_id = cid(tag, 53)
+    next_token = f"join-{slug}-next"
     row = db.get(ScheduledSession, upcoming_id)
     if row:
         row.title = topic_name
         row.starts_at = now + timedelta(hours=6)
+        if not row.join_token:
+            row.join_token = next_token
+        if not row.video_url:
+            row.video_url = f"mock://meet/{upcoming_id}"
     else:
         db.add(
             ScheduledSession(
@@ -46,7 +51,7 @@ def seed_density_facts(
                 teacher_user_id=people["teacher"],
                 title=topic_name,
                 starts_at=now + timedelta(hours=6),
-                join_token=None,
+                join_token=next_token,
                 video_url=f"mock://meet/{upcoming_id}",
                 engagement=[],
             )

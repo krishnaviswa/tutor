@@ -4,8 +4,9 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.deps import require_roles
 from app.db import get_db
-from app.models.tables import Cohort, Enrollment, Student
+from app.models.tables import Cohort, Enrollment, Student, new_id
 from app.services.auth import Principal
+from app.services.internal_v2 import meta_of, put_meta
 
 router = APIRouter()
 
@@ -17,6 +18,8 @@ class CohortIn(BaseModel):
 class CohortPatch(BaseModel):
     name: str | None = None
     student_ids: list[str] | None = None
+    waitlist: list[str] | None = None
+    waitlist_add: str | None = None
 
 
 def _out(c: Cohort, db: Session) -> dict:
@@ -26,7 +29,19 @@ def _out(c: Cohort, db: Session) -> dict:
             Enrollment.workspace_id == c.workspace_id, Enrollment.cohort_id == c.id
         )
     ]
-    return {"id": c.id, "workspace_id": c.workspace_id, "name": c.name, "student_ids": ids}
+    m = meta_of(c)
+    token = m.get("invite_token")
+    if not token:
+        token = f"invite-{c.id[-8:]}"
+        put_meta(c, invite_token=token)
+    return {
+        "id": c.id,
+        "workspace_id": c.workspace_id,
+        "name": c.name,
+        "student_ids": ids,
+        "invite_token": token,
+        "waitlist": m.get("waitlist") or [],
+    }
 
 
 @router.get("/cohorts")
@@ -44,7 +59,7 @@ def create_cohort(
     db: Session = Depends(get_db),
     principal: Principal = Depends(require_roles("owner", "teacher")),
 ):
-    c = Cohort(workspace_id=principal.workspace_id, name=body.name)
+    c = Cohort(workspace_id=principal.workspace_id, name=body.name, meta={"invite_token": new_id()})
     db.add(c)
     db.flush()
     return _out(c, db)
@@ -80,5 +95,12 @@ def patch_cohort(
             if not st:
                 raise HTTPException(status.HTTP_400_BAD_REQUEST, "student not in workspace")
             db.add(Enrollment(workspace_id=principal.workspace_id, cohort_id=c.id, student_id=sid))
+    if body.waitlist is not None:
+        put_meta(c, waitlist=body.waitlist)
+    if body.waitlist_add:
+        wait = list(meta_of(c).get("waitlist") or [])
+        if body.waitlist_add not in wait:
+            wait.append(body.waitlist_add)
+        put_meta(c, waitlist=wait)
     db.flush()
     return _out(c, db)

@@ -10,6 +10,7 @@ from app.services.auth import Principal
 from app.services import notify, timeline
 from app.services.scope import student_for_principal
 from app.api.v1.practice import _q_out, _score
+from app.services.internal_v2 import meta_of, put_meta, score_with_rules
 
 router = APIRouter()
 
@@ -18,10 +19,14 @@ class TestIn(BaseModel):
     title: str
     question_ids: list[str] = []
     cohort_id: str | None = None
+    sections: list[dict] | None = None
+    negative_mark: bool = False
 
 
 class SubmitIn(BaseModel):
     answers: dict = {}
+    partial: dict | None = None
+    resume: bool = False
 
 
 class AnalysisActionIn(BaseModel):
@@ -31,12 +36,15 @@ class AnalysisActionIn(BaseModel):
 
 
 def _test_out(row: Test) -> dict:
+    m = meta_of(row)
     return {
         "id": row.id,
         "title": row.title,
         "question_ids": row.question_ids or [],
         "cohort_id": row.cohort_id,
         "workspace_id": row.workspace_id,
+        "sections": m.get("sections") or [],
+        "negative_mark": bool(m.get("negative_mark")),
     }
 
 
@@ -52,6 +60,7 @@ def create_test(
         question_ids=body.question_ids,
         cohort_id=body.cohort_id,
         created_by=principal.user_id,
+        meta={"sections": body.sections or [], "negative_mark": body.negative_mark},
     )
     db.add(row)
     db.flush()
@@ -81,7 +90,25 @@ def run_test(
         q = db.query(Question).filter(Question.id == qid, Question.workspace_id == principal.workspace_id).first()
         if q:
             questions.append(_q_out(q, hide_answer=True))
-    return {"id": row.id, "title": row.title, "questions": questions}
+    last = (
+        db.query(Attempt)
+        .filter(
+            Attempt.workspace_id == principal.workspace_id,
+            Attempt.test_id == row.id,
+            Attempt.student_id == student_for_principal(db, principal).id,
+        )
+        .order_by(Attempt.created_at.desc())
+        .first()
+    )
+    return {
+        "id": row.id,
+        "title": row.title,
+        "questions": questions,
+        "sections": meta_of(row).get("sections") or [],
+        "negative_mark": bool(meta_of(row).get("negative_mark")),
+        "palette": [q["id"] for q in questions],
+        "resume": last.answers if last else {},
+    }
 
 
 @router.post("/tests/{test_id}/submit")
@@ -97,6 +124,9 @@ def submit_test(
         raise HTTPException(status.HTTP_404_NOT_FOUND, "test")
     st = student_for_principal(db, principal)
     got, max_s = _score(db, principal.workspace_id, row.question_ids or [], body.answers or {})
+    got = score_with_rules(
+        got, max_s, negative_mark=bool(meta_of(row).get("negative_mark")), partial=body.partial
+    )
     att = Attempt(
         workspace_id=principal.workspace_id,
         student_id=st.id,
@@ -104,6 +134,7 @@ def submit_test(
         answers=body.answers or {},
         score=got,
         max_score=max_s,
+        meta={"partial": body.partial or {}, "resume": body.resume},
     )
     db.add(att)
     db.flush()
@@ -138,7 +169,12 @@ def analysis(
         by_student.setdefault(a.student_id, []).append(
             {"id": a.id, "score": a.score, "max_score": a.max_score, "test_id": a.test_id}
         )
-    return {"cohort_id": cohort_id, "students": by_student}
+    return {
+        "cohort_id": cohort_id,
+        "view": "cohort",
+        "forced_action": True,
+        "students": by_student,
+    }
 
 
 @router.patch("/analysis/{finding_id}/action")
@@ -148,6 +184,8 @@ def analysis_action(
     db: Session = Depends(get_db),
     principal: Principal = Depends(require_roles("owner", "teacher")),
 ):
+    if not (body.action or "").strip():
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "action required")
     student_id = body.student_id
     if student_id:
         st = (

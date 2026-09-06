@@ -24,8 +24,14 @@ type Console = {
   cohort_pnl?: { name: string; in_cents: number; margin_pct: number }[];
 };
 
+type WorkspaceCurrent = {
+  auth_methods?: string[];
+  preview_mode?: boolean;
+};
+
 export function OwnerScreen() {
   const [data, setData] = useState<Console | null>(null);
+  const [workspace, setWorkspace] = useState<WorkspaceCurrent | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -36,6 +42,9 @@ export function OwnerScreen() {
         setData({ ...c, usage: meters ?? c.usage });
       })
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
+    api("/api/v1/workspaces/current")
+      .then((row) => setWorkspace(row as WorkspaceCurrent))
+      .catch(() => undefined);
   }, []);
 
   const sc = data?.scorecard;
@@ -82,6 +91,9 @@ export function OwnerScreen() {
                 <div className="stat__l">Churn risk</div>
               </div>
             </div>
+          ) : null}
+          {workspace && (workspace.auth_methods || workspace.preview_mode !== undefined) ? (
+            <p className="muted">Sign-in: {(workspace.auth_methods || []).join(", ")}</p>
           ) : null}
           <div className="grid g2" style={{ alignItems: "start", marginBottom: 14 }}>
             <div className="card">

@@ -9,4 +9,4 @@
 - [x] Workspace isolation (language teacher cannot see exam-prep chase names)
 - [x] Mock payments; `live_calls == 0`
 - [x] Seed named facts after catalog pack
-- [ ] T7.12 PM Accept (wired matches demo density on eight screens)
+- [x] T7.12 PM Accept (wired matches demo density on eight screens)

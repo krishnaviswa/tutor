@@ -24,19 +24,26 @@ export type MockTenant = {
   };
   studentId: string;
   student2Id: string;
+  student3Id: string;
   cohortId: string;
+  emptyCohortId: string;
   sessionId: string;
+  sessionNextId: string;
+  sessionDraftId: string;
   topicId: string;
   questionId: string;
   question2Id: string;
   practiceSetId: string;
   testId: string;
   assignmentId: string;
+  assignmentUngradedId: string;
   attemptPracticeId: string;
   contentId: string;
   invoiceOpenId: string;
   joinToken: string;
+  joinTokenNext: string;
   parentLinkToken: string;
+  parentLinkPending: string;
   threadId: string;
 };
 
@@ -69,19 +76,26 @@ function tenant(
     },
     studentId: `cccccccc-${tag}-4000-8000-000000000020`,
     student2Id: `cccccccc-${tag}-4000-8000-000000000040`,
+    student3Id: `cccccccc-${tag}-4000-8000-000000000066`,
     cohortId: `cccccccc-${tag}-4000-8000-000000000021`,
+    emptyCohortId: `cccccccc-${tag}-4000-8000-000000000067`,
     sessionId: `cccccccc-${tag}-4000-8000-000000000022`,
+    sessionNextId: `cccccccc-${tag}-4000-8000-000000000053`,
+    sessionDraftId: `cccccccc-${tag}-4000-8000-000000000073`,
     topicId: `cccccccc-${tag}-4000-8000-000000000024`,
     questionId: `cccccccc-${tag}-4000-8000-000000000025`,
     question2Id: `cccccccc-${tag}-4000-8000-000000000042`,
     practiceSetId: `cccccccc-${tag}-4000-8000-000000000026`,
     testId: `cccccccc-${tag}-4000-8000-000000000030`,
     assignmentId: `cccccccc-${tag}-4000-8000-000000000029`,
+    assignmentUngradedId: `cccccccc-${tag}-4000-8000-000000000074`,
     attemptPracticeId: `cccccccc-${tag}-4000-8000-000000000031`,
     contentId: `cccccccc-${tag}-4000-8000-000000000027`,
     invoiceOpenId: `cccccccc-${tag}-4000-8000-000000000036`,
     joinToken: `join-${key}`,
+    joinTokenNext: `join-${key}-next`,
     parentLinkToken: `link-${key}`,
+    parentLinkPending: `link-${key}-pending`,
     threadId: `thread-${key}`,
   };
 }

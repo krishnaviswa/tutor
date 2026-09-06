@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import { catalogRoute } from "@/lib/screens";
 import { Empty, Err } from "./bits";
 
-type Cohort = { id: string; name: string; student_ids: string[] };
+type Cohort = { id: string; name: string; student_ids: string[]; invite_token?: string; waitlist?: string[] };
 type Student = { id: string; display_name: string };
 
 export function CohortBuilderScreen() {
@@ -107,7 +107,11 @@ export function CohortBuilderScreen() {
             cohorts.map((c) => (
               <div key={c.id} className="card">
                 <div className="t">{c.name}</div>
-                <div className="s muted">{(c.student_ids || []).length} students</div>
+                <div className="s muted">
+                  {(c.student_ids || []).length} students
+                  {c.invite_token ? ` · ${c.invite_token}` : ""}
+                  {` · waitlist ${(c.waitlist || []).length}`}
+                </div>
               </div>
             ))
           )}

@@ -14,6 +14,9 @@ type Item = {
   kind?: string;
   duration_label?: string;
   progress_pct?: number;
+  playlist_ids?: string[];
+  drip_at?: string | null;
+  views?: number;
 };
 
 export function LibraryScreen() {
@@ -106,6 +109,9 @@ export function LibraryScreen() {
                 <div className="t">{it.title}</div>
                 <div className="s muted">
                   {kind} · {dur}
+                  {(it.playlist_ids || []).length ? ` · playlist ${it.playlist_ids?.length}` : ""}
+                  {it.drip_at ? ` · drip ${it.drip_at}` : ""}
+                  {it.views ? ` · ${it.views} views` : ""}
                 </div>
                 {pct > 0 ? (
                   <div style={{ height: 4, background: "var(--sunk)", borderRadius: 2, marginTop: 6 }}>

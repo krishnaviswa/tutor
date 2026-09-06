@@ -45,17 +45,14 @@ export function LiveTeacherScreen() {
     if (sessionId) loadLive(sessionId);
   }, [sessionId]);
 
-  async function poll() {
+  async function postEngagement(kind: string, payload: Record<string, unknown>) {
     if (!sessionId) return;
     setBusy(true);
     setError("");
     try {
       await api(`/api/v1/sessions/${sessionId}/engagement`, {
         method: "POST",
-        body: JSON.stringify({
-          kind: "poll",
-          payload: { prompt: "Quick check" },
-        }),
+        body: JSON.stringify({ kind, payload }),
       });
       loadLive(sessionId);
     } catch (err) {
@@ -91,9 +88,24 @@ export function LiveTeacherScreen() {
             {e.kind}
           </div>
         ))}
-        <button className="hot hot--btn" type="button" disabled={busy} onClick={() => void poll()} style={{ marginTop: 8 }}>
-          Push poll
-        </button>
+        <div className="row" style={{ marginTop: 8 }}>
+          <button
+            className="hot hot--btn"
+            type="button"
+            disabled={busy}
+            onClick={() => void postEngagement("poll", { prompt: "Quick check" })}
+          >
+            Push poll
+          </button>
+          <button
+            className="hot hot--btn"
+            type="button"
+            disabled={busy}
+            onClick={() => void postEngagement("chat", { text: "Check in" })}
+          >
+            Chat
+          </button>
+        </div>
       </div>
       <Err message={error} />
       <div className="ctrls">

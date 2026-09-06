@@ -13,6 +13,7 @@ type Child = {
   latest_practice?: { score: number; total: number; title: string } | null;
   latest_test?: { score: number; max: number; title: string } | null;
   fee_due?: { amount_cents: number; due_on: string; status: string } | null;
+  fee_visible?: boolean;
   activity_summary?: string;
 };
 
@@ -101,9 +102,15 @@ export function ParentHomeScreen() {
         <Link href={catalogRoute("payments")} className="hot hot--card">
           <div className="k" style={{ color: "var(--crimson)" }}>Fees & receipts</div>
           <div style={{ fontWeight: 600, margin: "3px 0" }}>
-            {fee ? `${rupees(fee.amount_cents)} due ${fee.due_on}` : "No open invoice"}
+            {child?.fee_visible === false
+              ? "Fees hidden for this guardian"
+              : fee
+                ? `${rupees(fee.amount_cents)} due ${fee.due_on}`
+                : "No open invoice"}
           </div>
-          <div className="muted">{fee?.status || "Pay, then history + receipts"}</div>
+          <div className="muted">
+            {child?.fee_visible === false ? "" : fee?.status || "Pay, then history + receipts"}
+          </div>
         </Link>
         <Link href={catalogRoute("messages")} className="hot hot--card">
           <div className="k" style={{ color: "var(--tint)" }}>Message the teacher</div>

@@ -30,6 +30,7 @@ from app.models.tables import (
     Workspace,
 )
 from app.services.auth import Principal
+from app.services.internal_v2 import fee_visible_for
 from app.services.scope import linked_student_ids, student_for_principal
 
 PARENT_HUB = [
@@ -66,15 +67,18 @@ def _pct(n: float, d: float) -> int:
 
 
 def content_meta(row: ContentItem) -> dict:
+    data = dict(getattr(row, "meta", None) or {})
     raw = (row.storage_path or "").strip()
     if raw.startswith("{"):
         try:
-            data = json.loads(raw)
-            if isinstance(data, dict):
-                return data
+            parsed = json.loads(raw)
+            if isinstance(parsed, dict):
+                merged = dict(parsed)
+                merged.update(data)
+                return merged
         except json.JSONDecodeError:
             pass
-    return {}
+    return data
 
 
 def _practice_sets(db: Session, workspace_id: str) -> list[PracticeSet]:
@@ -103,6 +107,9 @@ def content_out(row: ContentItem, db: Session | None = None, *, lesson: bool = F
         "kind": str(meta.get("kind") or "notes"),
         "duration_label": str(meta.get("duration_label") or ""),
         "progress_pct": int(meta.get("progress_pct") or 0),
+        "playlist_ids": meta.get("playlist_ids") or [],
+        "drip_at": meta.get("drip_at"),
+        "views": int(meta.get("views") or 0),
     }
     if lesson:
         notes = meta.get("notes") or []
@@ -486,7 +493,7 @@ def _fee_due(invoices: list[Invoice]) -> dict | None:
     return {"amount_cents": out["amount_cents"], "due_on": out["due_on"], "status": out["state"]}
 
 
-def child_slice(db: Session, workspace_id: str, st: Student) -> dict:
+def child_slice(db: Session, workspace_id: str, st: Student, *, fee_visible: bool = True) -> dict:
     att_rows = (
         db.query(Attendance)
         .filter(Attendance.workspace_id == workspace_id, Attendance.student_id == st.id)
@@ -514,7 +521,8 @@ def child_slice(db: Session, workspace_id: str, st: Student) -> dict:
         "attendance": {"present": present, "total": len(att_rows)},
         "latest_practice": practice,
         "latest_test": test,
-        "fee_due": _fee_due(invoices),
+        "fee_due": _fee_due(invoices) if fee_visible else None,
+        "fee_visible": fee_visible,
         "activity_summary": (event.body if event else "No activity yet.")[:120],
     }
 
@@ -525,7 +533,14 @@ def parent_home(db: Session, principal: Principal) -> dict:
     for sid in allowed:
         st = db.get(Student, sid)
         if st and st.workspace_id == principal.workspace_id:
-            children.append(child_slice(db, principal.workspace_id, st))
+            children.append(
+                child_slice(
+                    db,
+                    principal.workspace_id,
+                    st,
+                    fee_visible=fee_visible_for(db, principal, st.id),
+                )
+            )
     return {"children": children, "hub": list(PARENT_HUB)}
 
 

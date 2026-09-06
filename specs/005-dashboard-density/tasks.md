@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In Progress · T7.1–T7.11 landed; T7.12 Accept open |
+| **Status** | Accepted |
 | **Spec** | [spec.md](spec.md) · [plan.md](plan.md) |
 | **Rule** | Same 47 screen ids. Same `/api/v1` paths. Named facts, not counts. |
 | **Branch** | `cursor/005-dashboard-density` when implementing — never `main` |

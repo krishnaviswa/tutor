@@ -4,13 +4,24 @@ import { useEffect, useState, type FormEvent } from "react";
 import { api } from "@/lib/api";
 import { Empty, Err } from "./bits";
 
-type Question = { id: string; stem: string; choices: string[]; answer?: string; topic_id?: string | null };
+type Question = {
+  id: string;
+  stem: string;
+  choices: string[];
+  answer?: string;
+  topic_id?: string | null;
+  difficulty?: string;
+  tags?: string[];
+  usage_count?: number;
+};
 
 export function QbankScreen() {
   const [rows, setRows] = useState<Question[]>([]);
   const [stem, setStem] = useState("");
   const [choices, setChoices] = useState("A, B");
   const [answer, setAnswer] = useState("A");
+  const [difficulty, setDifficulty] = useState("");
+  const [tags, setTags] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState<Question | null>(null);
@@ -36,9 +47,13 @@ export function QbankScreen() {
           stem,
           choices: choices.split(",").map((s) => s.trim()).filter(Boolean),
           answer,
+          difficulty: difficulty || undefined,
+          tags: tags.split(",").map((s) => s.trim()).filter(Boolean),
         }),
       });
       setStem("");
+      setDifficulty("");
+      setTags("");
       load();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -65,6 +80,14 @@ export function QbankScreen() {
           <span>Answer</span>
           <input className="field__in" value={answer} onChange={(e) => setAnswer(e.target.value)} />
         </label>
+        <label className="field">
+          <span>Difficulty</span>
+          <input className="field__in" value={difficulty} onChange={(e) => setDifficulty(e.target.value)} />
+        </label>
+        <label className="field">
+          <span>Tags (comma)</span>
+          <input className="field__in" value={tags} onChange={(e) => setTags(e.target.value)} />
+        </label>
         <button className="hot hot--btn" type="submit" disabled={busy}>
           New item
         </button>
@@ -78,6 +101,8 @@ export function QbankScreen() {
               <tr>
                 <th>Stem</th>
                 <th>Choices</th>
+                <th>Difficulty</th>
+                <th>Usage</th>
               </tr>
             </thead>
             <tbody>
@@ -85,6 +110,8 @@ export function QbankScreen() {
                 <tr key={r.id} onClick={() => setOpen(r)} style={{ cursor: "pointer" }}>
                   <td>{r.stem}</td>
                   <td className="muted">{(r.choices || []).join(" · ")}</td>
+                  <td className="muted">{r.difficulty || ""}</td>
+                  <td className="muted">{r.usage_count ?? ""}</td>
                 </tr>
               ))}
             </tbody>

@@ -6,7 +6,14 @@ import { api } from "@/lib/api";
 import { catalogRoute } from "@/lib/screens";
 import { Empty, Err } from "./bits";
 
-type Asg = { id: string; title: string; body: string; cohort_id?: string | null };
+type Asg = {
+  id: string;
+  title: string;
+  body: string;
+  cohort_id?: string | null;
+  due_at?: string | null;
+  allow_resubmit?: boolean;
+};
 type Cohort = { id: string; name: string };
 
 export function AssignIssueScreen() {
@@ -15,6 +22,8 @@ export function AssignIssueScreen() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [cohortId, setCohortId] = useState("");
+  const [dueAt, setDueAt] = useState("");
+  const [allowResubmit, setAllowResubmit] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -38,10 +47,18 @@ export function AssignIssueScreen() {
     try {
       await api("/api/v1/assignments", {
         method: "POST",
-        body: JSON.stringify({ title, body, cohort_id: cohortId || null }),
+        body: JSON.stringify({
+          title,
+          body,
+          cohort_id: cohortId || null,
+          due_at: dueAt || null,
+          allow_resubmit: allowResubmit,
+        }),
       });
       setTitle("");
       setBody("");
+      setDueAt("");
+      setAllowResubmit(false);
       load();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -75,6 +92,23 @@ export function AssignIssueScreen() {
             ))}
           </select>
         </label>
+        <label className="field">
+          <span>Due</span>
+          <input
+            className="field__in"
+            type="datetime-local"
+            value={dueAt}
+            onChange={(e) => setDueAt(e.target.value)}
+          />
+        </label>
+        <label className="list__i" style={{ cursor: "pointer" }}>
+          <input
+            type="checkbox"
+            checked={allowResubmit}
+            onChange={(e) => setAllowResubmit(e.target.checked)}
+          />
+          <span>allow_resubmit</span>
+        </label>
         <button className="hot hot--btn" type="submit" disabled={busy}>
           Issue
         </button>
@@ -88,6 +122,7 @@ export function AssignIssueScreen() {
               <div>
                 <div className="t">{r.title}</div>
                 <div className="s muted">{r.body}</div>
+                {r.due_at ? <div className="s muted">{r.due_at}</div> : null}
               </div>
               <Link href={`${catalogRoute("assign-grade")}?id=${r.id}`} className="hot--link">
                 Grade

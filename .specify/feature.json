@@ -1,5 +1,5 @@
 {
-  "featureDirectory": "specs/005-dashboard-density",
-  "featureName": "005-dashboard-density",
-  "note": "Active Spec Kit directory is this path, not the git branch. Override with SPECIFY_FEATURE_DIRECTORY. 001-platform-architecture remains Specified; no /speckit.implement on 001. 002-sim-spine is Accepted and protected. 003-catalog-complete is Accepted (shell/sim APIs). 004-wire-demo-ui is Accepted (47 screens wired). 005-dashboard-density is In Progress — named facts on existing ids via services/progress.py. T7.12 Accept still open. Visual board: density-map.html."
+  "featureDirectory": "specs/006-internal-v2",
+  "featureName": "006-internal-v2",
+  "note": "Active Spec Kit directory is this path, not the git branch. Override with SPECIFY_FEATURE_DIRECTORY. 001-platform-architecture remains Specified; no /speckit.implement on 001. 002-sim-spine is Accepted and protected. 003-catalog-complete is Accepted (shell/sim APIs). 004-wire-demo-ui is Accepted (47 screens wired). 005-dashboard-density is Accepted (named facts). 006-internal-v2 is Accepted (in-app blueprint v2; mock ports sealed — no live Meet/SMS/email/WhatsApp/Razorpay/Stripe/FCM/S3)."
 }
