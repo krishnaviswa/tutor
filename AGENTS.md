@@ -13,7 +13,7 @@
 | Role children (generated) | tutor-platform-role-*.html |
 | Screen / API / entity contracts | catalog/*.json |
 | Governing rules | .specify/memory/constitution.md |
-| In-flight feature | path in `.specify/feature.json` — not the git branch |
+| Active Spec Kit dir | path in `.specify/feature.json` — not the git branch |
 | Cursor ↔ Claude pairing | CLAUDE.md |
 
 ## Spec Kit
@@ -22,7 +22,7 @@ Commands: `/speckit.constitution`, `/speckit.specify`, `/speckit.clarify`, `/spe
 
 Sequence: PM specify+clarify → Architect plan+checklist+analyze → tasks → **human OK** → Builder implement → Tester → PM Accept.
 
-**Do not `/speckit.implement` for 001-platform-architecture** (architecture pack). 002 spine is Accepted and protected. Active feature directory: **003-catalog-complete**.
+**Do not `/speckit.implement` for 001-platform-architecture** (architecture pack). 002 spine is Accepted and protected. 003-catalog-complete is Accepted (shell/sim; screens not wired). Spec Kit dir in `.specify/feature.json`: **003-catalog-complete**.
 
 Active feature directory: `.specify/feature.json`. `git checkout` does not change it. Override: `SPECIFY_FEATURE_DIRECTORY`.
 

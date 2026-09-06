@@ -1,6 +1,6 @@
 # plan.md — 003-catalog-complete
 
-Status: **Specified** (Architect). Human OK is approval of the HTML implementation guide (`plan-viewer.html` + satellites). No `/speckit.implement` until that OK.
+Status: **Accepted** (Architect Specified; Builder implemented; Tester Ship at shell/sim). Human OK was approval of the HTML implementation guide (`plan-viewer.html` + satellites). Screens remain `shell`.
 
 001-platform-architecture stays the architecture pack. 002-sim-spine stays the protected spine sim. 003 extends the catalog; it does not rewrite 001 or 002.
 

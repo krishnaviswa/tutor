@@ -388,8 +388,9 @@ function layerView(){
   if(state.layer==='ui') extra='<div class="row"><button type="button" class="hot primary" data-goto="ui">Open 47 screens by domain</button></div>';
   if(state.layer==='mw') extra='<ul class="plain">'+MW.map(function(m){return '<li>'+m+'</li>';}).join('')+'</ul>';
   if(state.layer==='ports') extra='<ul class="plain">'+C.ports.map(function(p){return '<li><code>'+p.id+'</code> · '+p.env+' default <code>'+p.default+'</code>'+(p.roles?' · WhatsApp roles: '+p.roles.join(', ')+'; student default '+p.studentDefault:'')+'</li>';}).join('')+'</ul>';
-  if(state.layer==='db') extra='<ul class="plain">'+C.entities.filter(function(e){return e.tier==='spine';}).map(function(e){return '<li><code>'+e.id+'</code></li>';}).join('')+'</ul><p class="muted" style="margin-top:8px">Later: '+C.entities.filter(function(e){return e.tier==='later';}).map(function(e){return e.id;}).join(', ')+'</p>';
-  if(state.layer==='api') extra='<p class="muted">'+C.apis.length+' planned routes. Open a screen card to see the ones it uses.</p>';
+  var laterEnt=C.entities.filter(function(e){return e.tier==='later';});
+  if(state.layer==='db') extra='<ul class="plain">'+C.entities.filter(function(e){return e.tier==='spine';}).map(function(e){return '<li><code>'+e.id+'</code></li>';}).join('')+'</ul>'+(laterEnt.length?'<p class="muted" style="margin-top:8px">Later: '+laterEnt.map(function(e){return e.id;}).join(', ')+'</p>':'');
+  if(state.layer==='api') extra='<p class="muted">'+C.apis.length+' catalog routes (sim). Open a screen card to see the ones it uses.</p>';
   if(state.layer==='svc') extra='<ul class="plain"><li>TimelinePort.append</li><li>ModuleFlags.ensure</li><li>SessionRecord.fanout</li><li>Notify.dispatch (teacher, parent, admin; student if enabled)</li><li>QuotaGuard.check</li></ul>';
   if(state.layer==='entry') extra='<div class="row">'+ROLES.map(function(r){return '<button type="button" class="hot" data-goto="ui" data-role="'+r+'">'+r+'</button>';}).join('')+'</div>';
   return crumb([{label:'Home',view:'start'},{label:'Layers',view:'layers'},{label:L.t}])+layerStepNav()+'<h1>'+L.t+'</h1><p class="lead">'+L.d+'</p>'+extra;
@@ -437,7 +438,7 @@ function screenView(){
     whyBlock(s)+
     '<p class="muted">Route <code>'+s.route+'</code> · chrome role '+s.role+' · frame '+s.frame+'</p>'+
     '<div class="call"><b>Shows</b>'+s.shows+'</div>'+
-    '<div class="call"><b>APIs (planned)</b>'+(s.apis.length?s.apis.map(function(a){return '<div><code>'+a+'</code></div>';}).join(''):'None')+'</div>'+
+    '<div class="call"><b>APIs</b>'+(s.apis.length?s.apis.map(function(a){return '<div><code>'+a+'</code></div>';}).join(''):'None')+'</div>'+
     '<div class="call"><b>Entities</b>'+(s.entities.length?s.entities.map(function(e){return '<code>'+e+'</code> ';}).join(''):'—')+'</div>'+
     '<div class="call"><b>Ports</b>'+(s.ports.length?s.ports.map(function(e){return '<code>'+e+'</code> ';}).join(''):'none')+'</div>'+
     '<div class="call"><b>Timeline events</b>'+(s.timelineEvents.length?s.timelineEvents.join(', '):'—')+'</div>'+

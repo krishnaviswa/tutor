@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| **Status** | In Progress (human OK on HTML guide; Builder implementing) |
+| **Status** | Accepted (shell/sim; screens not wired; 002 remains protected) |
 | **Role** | PM (specify + clarify) |
 | **Feature directory** | `specs/003-catalog-complete` |
 
@@ -92,4 +92,4 @@ Humans asked for the **remaining catalog-complete product as one Spec Kit featur
 - [x] `plan-viewer.html` master + satellite HTML (functional, technical, sequence)
 - [x] Human OK on the HTML guide (blocks `/speckit.implement`)
 - [x] `/speckit.implement` (Builder; after HTML OK)
-- [ ] Tester + PM Accept
+- [x] Tester + PM Accept (`specs/003-catalog-complete/test-report.md`; 20 pytest passed; shell/sim)

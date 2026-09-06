@@ -20,7 +20,7 @@ This file is the single product map for humans and for any LLM (Cursor or Claude
 | **Product manager** | §2, [§10](#10-spec-kit--role-workflow), `specs/003-catalog-complete/spec.md` |
 | **Architect** | [§3](#3-architecture), [§5](#5-domain-model), [§8](#8-auth), [§9](#9-ports-whatsapp-quotas) |
 | **Builder** | Do not implement until spec status is Specified and you are asked. Then §3–§7. |
-| **Tester** | [§10](#10-spec-kit--role-workflow) after code exists |
+| **Tester** | [§10](#10-spec-kit--role-workflow), [§12](#12-feature-backlog) feature→test index |
 
 **In 60 seconds:** A tutor’s workspace lets people in, runs a remote session (Google Meet or Microsoft Teams), writes a timeline, optionally assigns practice and doubts, and notifies teacher / parent / admin on WhatsApp (channel, not ledger). Subject is tenant taxonomy, not a SKU.
 
@@ -70,7 +70,7 @@ python scripts/check_architecture_parity.py
 python scripts/check_agent_config_sync.py --range origin/main...HEAD
 ```
 
-Active Spec Kit feature is `.specify/feature.json` (currently `specs/003-catalog-complete`), not the git branch. Override with `SPECIFY_FEATURE_DIRECTORY`.
+Active Spec Kit directory is `.specify/feature.json` (currently `specs/003-catalog-complete`, **Accepted**), not the git branch. Override with `SPECIFY_FEATURE_DIRECTORY`.
 
 ---
 
@@ -118,11 +118,9 @@ UI: Next.js 15 (one route per catalog screen id) in `frontend/`. API: FastAPI `/
 
 ## 5. Domain model
 
-Spine: `workspaces`, `users`, `identities`, `sessions_auth`, `staff_memberships`, `students`, `parent_links`, `cohorts`, `enrollments`, `scheduled_sessions`, `attendance`, `session_records`, `transcript_events` (empty until STT), `timeline_events`, `feature_flags`, `audit_log`, **`taxonomies` / `topics`**, `usage_meters`, `quota_policies`.
+Spine: `workspaces`, `users`, `identities`, `sessions_auth`, `staff_memberships`, `students`, `parent_links`, `cohorts`, `enrollments`, `scheduled_sessions`, `attendance`, `session_records`, `transcript_events` (empty until STT), `timeline_events`, `feature_flags`, `audit_log`, **`taxonomies` / `topics`**, `usage_meters`, `quota_policies`, plus 003 workspace-scoped tables: `questions`, `attempts`, `doubts`, `messages`, `invoices`, `notification_prefs`, `notification_deliveries`, `content_items`, `assignments`, `submissions`, `practice_sets`, `tests`, `announcements`, `plans`, `payouts`, `automation_rules`, `backlog_items`.
 
 Never `biology_chapters` or exam-board tables. Content hangs off `topic_id`.
-
-Later: questions, attempts, doubts, messages, invoices.
 
 Always-on (cannot flag off): A1, A2, A3, G1, G2, D4, F2. Caps throttle **usage**, not existence.
 
@@ -186,14 +184,14 @@ PM  /speckit.specify + /speckit.clarify
  → Architect  /speckit.plan + checklist + /speckit.analyze
  → /speckit.tasks
  → human OK
- → Builder  /speckit.implement     (002 Accepted and protected; 003 In Progress after hub HTML OK)
+ → Builder  /speckit.implement     (002 and 003 Accepted; 002 protected)
  → Tester  report + /speckit.converge
  → PM Accept  (same PR updates this README + catalog + architecture HTML)
 ```
 
 Status: `Draft` → `Specified` → `In Progress` → `Testing` → `Accepted`.
 
-Active feature: [specs/003-catalog-complete/](specs/003-catalog-complete/). Spine simulation: [specs/002-sim-spine/](specs/002-sim-spine/) (Accepted, protected). Architecture pack: [specs/001-platform-architecture/](specs/001-platform-architecture/) (Specified; no implement). Cursor rules ↔ Claude Code: see [CLAUDE.md](CLAUDE.md). Sync: `scripts/check_agent_config_sync.py`.
+Last Accepted feature dir: [specs/003-catalog-complete/](specs/003-catalog-complete/). Spine simulation: [specs/002-sim-spine/](specs/002-sim-spine/) (Accepted, protected). Architecture pack: [specs/001-platform-architecture/](specs/001-platform-architecture/) (Specified; no implement). Cursor rules ↔ Claude Code: see [CLAUDE.md](CLAUDE.md). Sync: `scripts/check_agent_config_sync.py`.
 
 ---
 
@@ -214,7 +212,14 @@ Active feature: [specs/003-catalog-complete/](specs/003-catalog-complete/). Spin
 |---|---|---|
 | 001-platform-architecture | Swim-lane HTML, catalog, README hub, Spec Kit, parity | Specified (no `/speckit.implement`) |
 | 002-sim-spine | Local FastAPI + durable store + seed + auth stub + record→timeline + quotas | Accepted (protected; do not rewrite) |
-| 003-catalog-complete | Remaining catalog APIs + later entities + Next.js one route per existing screen id | In Progress (human OK; Builder on `cursor/003-catalog-complete`) |
+| 003-catalog-complete | Remaining catalog APIs + later entities + Next.js one route per existing screen id | Accepted (shell/sim; screens not wired) |
+
+Feature → test index (pytest: `cd backend; python -m pytest`, in-memory SQLite, `live_calls == 0`):
+
+| Feature | Tests |
+|---|---|
+| 002-sim-spine | `backend/tests/test_isolation.py`, `test_record_timeline.py`, `test_quotas_rbac.py`, `test_parent.py` — [test-report](specs/002-sim-spine/test-report.md) |
+| 003-catalog-complete | 002 suite plus `test_isolation_003.py`, `test_003_api.py` (20 passed) — [test-report](specs/003-catalog-complete/test-report.md) |
 
 ---
 

@@ -1,5 +1,7 @@
 # tasks.md — 003-catalog-complete
 
+Builder implemented on `cursor/003-catalog-complete` after human OK. **Tester + PM Accept closed** (`test-report.md`, Ship, shell/sim). Screens remain `shell`. Do not invent ids. Do not expand 002.
+
 Builder implements **only after** human OK on `plan-viewer.html`. Branch `cursor/003-catalog-complete`, never `main`.
 
 Phase gate: if 002 pytest fails, **stop** and report before the next phase.
@@ -577,6 +579,7 @@ Phase gate: if 002 pytest fails, **stop** and report before the next phase.
 - **Files:** spec DoD, README §12
 - **Commands:** `cd backend; pytest`; `/speckit.converge`
 - **Risks:** Accept only if catalog ids unchanged, mocks hold, and HTML was approved before implement started.
+- **Status:** done (2026-09-06) — Ship at shell/sim; 20 pytest; 002 protected.
 
 ---
 
