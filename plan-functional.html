@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Functional map — TutorOS implementation guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;0,700;1,400&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script src="catalog/hub-chrome.js"></script>
+<style>
+:root{
+  --ground:#F3F6F0; --surface:#FBFCF9; --sunk:#EBEFE6; --raised:#FFFFFF;
+  --ink:#182019; --ink-soft:#4C574F; --ink-faint:#7E8A81;
+  --line:#D6DCCF; --line-soft:#E4E9DD;
+  --accent:#2E7D4F; --accent-ink:#1E5738; --accent-wash:#E4EFE5;
+  --amber:#AF6C22; --amber-wash:#F5E9D8;
+  --crimson:#A4384A; --crimson-wash:#F3E0E1;
+  --sky:#2C6C88; --sky-wash:#DDEAEE;
+  --violet:#6A4C93; --violet-wash:#E9E2F1;
+  --serif:"Spectral",Georgia,"Times New Roman",serif;
+  --sans:"Hanken Grotesk",system-ui,-apple-system,Segoe UI,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --shadow:0 1px 2px rgba(24,32,25,.04), 0 12px 34px -12px rgba(24,32,25,.18);
+  --nav:240px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0C110E; --surface:#171E19; --sunk:#10150F; --raised:#1E251F;
+    --ink:#E6ECE3; --ink-soft:#A4AEA4; --ink-faint:#6C776E;
+    --line:#26302A; --line-soft:#1D251F;
+    --accent:#5CB57C; --accent-ink:#8CD3A5; --accent-wash:#173224;
+    --amber:#D3944F; --amber-wash:#332413;
+    --crimson:#D06E7A; --crimson-wash:#331A1E;
+    --sky:#6BA7C2; --sky-wash:#122831;
+    --violet:#A98FD6; --violet-wash:#241C33;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 40px -14px rgba(0,0,0,.6);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:600;line-height:1.15;margin:0}
+p{margin:0}
+a{color:var(--accent-ink);text-decoration:none}
+a:hover{text-decoration:underline}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.eyebrow{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint)}
+.topbar{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--ground) 90%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft)}
+.topbar__in{max-width:1440px;margin:0 auto;padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-family:var(--serif);font-weight:600;font-size:16px;display:flex;align-items:center;gap:8px}
+.brand .ph{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:2px 7px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tabs a,.tabs button,.chip,.theme-btn{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;
+  background:var(--surface);color:var(--ink-soft);border:1px solid var(--line);border-radius:999px;
+  padding:6px 11px;cursor:pointer;text-decoration:none
+}
+.tabs a.on,.chip.on{background:var(--accent-wash);color:var(--accent-ink);border-color:var(--accent)}
+.layout{max-width:1440px;margin:0 auto;display:grid;grid-template-columns:var(--nav) 1fr;gap:0;min-height:calc(100vh - 54px)}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+.side{padding:22px 16px 40px;border-right:1px solid var(--line-soft);position:sticky;top:54px;height:calc(100vh - 54px);overflow:auto}
+@media (max-width:900px){.side{position:relative;top:0;height:auto;border-right:0;border-bottom:1px solid var(--line-soft)}}
+.side a{display:block;padding:6px 8px;border-radius:8px;color:var(--ink-soft);font-size:13px}
+.side a:hover,.side a.on{background:var(--sunk);text-decoration:none;color:var(--ink)}
+.main{padding:28px 28px 80px;min-width:0}
+.hero{margin-bottom:22px}
+.hero h1{font-size:2rem;letter-spacing:-.02em;margin:6px 0 10px}
+.lede{color:var(--ink-soft);max-width:72ch}
+.warn{background:var(--amber-wash);border:1px solid color-mix(in srgb,var(--amber) 35%, var(--line));border-radius:12px;padding:12px 14px;margin:16px 0;color:var(--ink)}
+.gate{background:var(--accent-wash);border:1px solid color-mix(in srgb,var(--accent) 35%, var(--line));border-radius:12px;padding:16px 18px;margin:28px 0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:16px 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow)}
+.card h3{font-size:1.05rem;margin-bottom:6px}
+.muted{color:var(--ink-soft);font-size:.92rem}
+.tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:2px 7px;margin:0 4px 4px 0}
+.tag.cp{border-color:var(--amber);color:var(--amber)}
+.tag.s{color:var(--accent-ink)}.tag.m{color:var(--sky)}.tag.l{color:var(--crimson)}
+.tag.sim{background:var(--accent-wash)}.tag.planned{background:var(--amber-wash)}.tag.empty{background:var(--sunk)}.tag.later{background:var(--violet-wash)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+input[type=search]{flex:1;min-width:180px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--raised);color:var(--ink);font:inherit}
+.phase{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:12px 0;overflow:hidden}
+.phase__h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;cursor:pointer;width:100%;background:transparent;border:0;color:inherit;text-align:left}
+.phase__h:hover{background:var(--sunk)}
+.task{border-top:1px solid var(--line-soft);padding:12px 14px}
+.task.critical{box-shadow:inset 3px 0 0 var(--amber)}
+.task h4{font-size:1rem;margin:0 0 6px;font-family:var(--sans);font-weight:600}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:800px){.grid2{grid-template-columns:1fr}}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+th{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);font-weight:500}
+code,.mono{font-family:var(--mono);font-size:12px}
+.path{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0 18px}
+.path span{font-family:var(--mono);font-size:11px;background:var(--amber-wash);border:1px solid color-mix(in srgb,var(--amber) 40%,var(--line));border-radius:8px;padding:4px 8px}
+.path .arr{color:var(--ink-faint);background:none;border:0;padding:0}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:10px 0 16px;background:var(--surface)}
+.pair .col{padding:14px}
+.pair .col:first-child{border-right:1px solid var(--line-soft);background:var(--sky-wash)}
+.pair .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
+@media (max-width:800px){.pair{grid-template-columns:1fr}.pair .col:first-child{border-right:0;border-bottom:1px solid var(--line-soft)}}
+ul.clean{margin:8px 0 0;padding-left:18px}
+.kvs{display:grid;grid-template-columns:120px 1fr;gap:4px 10px;font-size:13px;margin-top:8px}
+.kvs b{font-weight:600;color:var(--ink-faint);font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding-top:2px}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topbar__in">
+  <div class="brand">TutorOS <span class="ph">docs not app</span></div>
+  <nav class="tabs"><a href="product-viewer.html">Product</a><a class="on" href="plan-functional.html">Functional</a><a href="plan-technical.html">Technical</a><a href="plan-sequence.html">Sequence</a><a href="work-log.html">Work log</a></nav>
+  <button class="theme-btn" type="button" id="themeBtn">Black</button>
+</div></header>
+<div class="layout">
+  <aside class="side">
+    <div class="eyebrow">On this page</div>
+    <a href="#jobs">Seven jobs</a><a href="#roles">Roles</a><a href="#screens">47 screens</a><a href="#templates">Templates</a><a href="#journeys">Journeys</a><a href="#parent">Parent hub</a>
+    
+    <div class="eyebrow" style="margin-top:18px">Also in repo</div>
+    <a href="product-viewer.html">Product book</a>
+    <a href="work-log.html">Work log</a>
+    <a href="tutor-platform-architecture.html">Architecture map</a>
+    <a href="tutor-platform-demo.html">Demo UI gold</a>
+    <a href="tutor-platform-explorer.html">Module explorer</a>
+    <a href="README.md">README.md</a>
+    <a href="specs/003-catalog-complete/spec.md">003 spec</a>
+    
+  </aside>
+  <main class="main">
+    
+<section class="hero" id="jobs">
+  <div class="eyebrow">Functional map</div>
+  <h1>What the product does</h1>
+  <p class="lede">TutorOS is subject-neutral. Templates are arrangements of seven jobs, not subject SKUs. Biology/NEET/NCERT is one exam-prep example tenant.</p>
+</section>
+<ol><li><strong>Let people in.</strong> router, student-login, staff-login, wsetup, roster, cohort-builder, parent-link</li><li><strong>Schedule and deliver.</strong> schedule, session-pre, join, live-teacher, live-student</li><li><strong>Practice.</strong> qbank, practice-build, practice-play, practice-result, test-setup, test-runner, analysis</li><li><strong>Doubts.</strong> doubt-student, doubt-teacher</li><li><strong>Record.</strong> record, session-video, timeline</li><li><strong>Progress.</strong> student-dash, teacher-dash, owner, reports, mentor</li><li><strong>Money.</strong> billing, payments, subscription, payouts</li></ol>
+<section id="roles" style="margin-top:24px">
+  <h2>Roles</h2>
+  <div class="cards">
+    <article class="card"><h3>Owner</h3><p class="muted">Workspace, branding, quotas, billing, templates, integrations. Screens under /app/admin.</p></article>
+    <article class="card"><h3>Teacher</h3><p class="muted">Cohorts, schedule, live, record, practice, doubts, announce. Exam-prep starts at cohort/schedule — not staff-login.</p></article>
+    <article class="card"><h3>Assistant</h3><p class="muted">Roster rights. Not owner consoles. Not required to PATCH record.</p></article>
+    <article class="card"><h3>Student</h3><p class="muted">Join, live, library, practice, tests, own timeline, own dashboard, doubts, payments.</p></article>
+    <article class="card"><h3>Parent</h3><p class="muted">parent-home is a slice of the linked child: timeline, reports, practice-result, payments, messages, notif-prefs.</p></article>
+  </div>
+</section>
+<section id="templates" style="margin-top:24px">
+  <h2>Templates (named toggle sets)</h2>
+  <p class="muted">exam-prep, 1-on-1, K-12, skills, music, everything. Exam-prep omits staff-login. Others include it. Same 47 ids everywhere.</p>
+</section>
+<section id="journeys" style="margin-top:24px">
+  <h2>Primary journeys (functional sequence)</h2>
+  <div class="pair"><div class="col"><div class="lbl">Exam-prep faculty</div><p>onboard-kind → branding → roster → cohort-builder → schedule → session-pre → live-teacher → record → analysis</p></div><div class="col"><div class="lbl">Technical already in 002</div><p>roster, cohort, schedule, record, timeline APIs are sim. Live/join/analysis are planned.</p></div></div>
+  <div class="pair"><div class="col"><div class="lbl">Student</div><p>router → student-login → join → live-student → practice-play → timeline → student-dash</p></div><div class="col"><div class="lbl">Technical</div><p>OTP stub 000000. Join/live/practice APIs planned. Timeline sim.</p></div></div>
+  <div class="pair"><div class="col"><div class="lbl">Parent</div><p>parent-link accept → parent-home → child timeline / reports / practice-result / payments / messages / notif-prefs</p></div><div class="col"><div class="lbl">Technical</div><p>Home + timeline sim. Other children stub-empty until 003 tables exist.</p></div></div>
+</section>
+<section id="parent" style="margin-top:24px">
+  <h2>Parent hub rule</h2>
+  <p class="lede">Not a second gradebook. Same six child screen ids. After 003 data work they show real rows for the linked child in workspace A only.</p>
+</section>
+<section id="screens" style="margin-top:24px">
+  <h2>Every screen (47)</h2>
+  <p class="muted">UI status is empty until Next.js wires them. API column: sim = 002 live store; planned = 003; mixed = some sim some planned.</p>
+  <div style="overflow:auto"><table><thead><tr><th>id</th><th>title</th><th>route</th><th>mod</th><th>phase</th><th>status</th></tr></thead><tbody>
+  <tr><td><span class='mono'>router</span></td><td>Role router</td><td class='mono'>/app/student/router</td><td>A2</td><td>P0</td><td><span class='tag empty'>empty</span> <span class='tag sim'>sim API</span></td></tr><tr><td><span class='mono'>student-login</span></td><td>Student sign-in</td><td class='mono'>/app/student/student-login</td><td>A2</td><td>P0</td><td><span class='tag empty'>empty</span> <span class='tag sim'>sim API</span></td></tr><tr><td><span class='mono'>staff-login</span></td><td>Staff sign-in</td><td class='mono'>/app/faculty/staff-login</td><td>A3</td><td>P0</td><td><span class='tag empty'>empty</span> <span class='tag sim'>sim API</span></td></tr><tr><td><span class='mono'>wsetup</span></td><td>Workspace setup</td><td class='mono'>/app/admin/wsetup</td><td>A1</td><td>P0</td><td><span class='tag empty'>empty</span> <span class='tag sim'>sim API</span></td></tr><tr><td><span class='mono'>branding</span></td><td>Branding & domain</td><td class='mono'>/app/admin/branding</td><td>A1</td><td>P0</td><td><span class='tag empty'>empty</span> <span class='tag planned'>mixed API</span></td></tr><tr><td><span class='mono'>roster</span></td><td>Roster</td><td class='mono'>/app/admin/roster</td><td>A5</td><td>P1</td><td><span class='tag empty'>empty</span> <span class='tag sim'>sim API</span></td></tr><tr><td><span class='mono'>cohort-builder</span></td><td>Cohort builder</td><td class='mono'>/app/faculty/cohort-builder</td><td>A5</td><td>P1</td><td><span class='tag empty'>empty</span> <span class='tag sim'>sim API</span></td></tr><tr><td><span class='mono'>parent-link</span></td><td>Parent link</td><td class='mono'>/app/parent/parent-link</td><td>A4</td><td>P3</td><td><span class='tag empty'>empty</span> <span class='tag sim'>sim API</span></td></tr><tr><td><span class='mono'>parent-home</span></td><td>Parent home</td><td class='mono'>/app/parent</td><td>A4</td><td>P3</td><td><span class='tag empty'>empty</span> <span class='tag sim'>sim API</span></td></tr><tr><td><span class='mono'>schedule</span></td><td>Schedule / calendar</td><td class='mono'>/app/faculty/schedule</td><td>B1</td><td>P1</td><td><span class='tag empty'>empty</span> <span class='tag sim'>sim API</span></td></tr><tr><td><span class='mono'>session-pre</span></td><td>Session detail (pre-class)</td><td class='mono'>/app/faculty/session-pre</td><td>B1</td><td>P1</td><td><span class='tag empty'>empty</span> <span class='tag planned'>mixed API</span></td></tr><tr><td><span class='mono'>join</span></td><td>Join page / waiting room</td><td class='mono'>/app/student/join</td><td>B2</td><td>P1</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>live-teacher</span></td><td>Live session console</td><td class='mono'>/app/faculty/live-teacher</td><td>B2</td><td>P1</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>live-student</span></td><td>Live session view</td><td class='mono'>/app/student/live-student</td><td>B2</td><td>P1</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>session-video</span></td><td>Session video & transcript</td><td class='mono'>/app/faculty/session-video</td><td>B2</td><td>P1</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>record</span></td><td>Session record & event transcript</td><td class='mono'>/app/faculty/record</td><td>B3</td><td>P1</td><td><span class='tag empty'>empty</span> <span class='tag sim'>sim API</span></td></tr><tr><td><span class='mono'>library</span></td><td>Content library</td><td class='mono'>/app/student/library</td><td>B5</td><td>P2</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>lesson</span></td><td>Lesson / module viewer</td><td class='mono'>/app/student/lesson</td><td>B5</td><td>P2</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>assign-issue</span></td><td>Assignment issue</td><td class='mono'>/app/faculty/assign-issue</td><td>B6</td><td>P2</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>assign-grade</span></td><td>Assignment submit & grade</td><td class='mono'>/app/faculty/assign-grade</td><td>B6</td><td>P2</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>qbank</span></td><td>Question bank</td><td class='mono'>/app/faculty/qbank</td><td>C1</td><td>P2</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>practice-build</span></td><td>Practice set builder</td><td class='mono'>/app/faculty/practice-build</td><td>C2</td><td>P2</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>practice-play</span></td><td>Practice player</td><td class='mono'>/app/student/practice-play</td><td>C2</td><td>P2</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>practice-result</span></td><td>Practice result & tagged key</td><td class='mono'>/app/student/practice-result</td><td>C4</td><td>P2</td><td><span class='tag empty'>empty</span> <span class='tag sim'>sim API</span></td></tr><tr><td><span class='mono'>test-setup</span></td><td>Test / mock setup</td><td class='mono'>/app/faculty/test-setup</td><td>C3</td><td>P3</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>test-runner</span></td><td>Test runner</td><td class='mono'>/app/student/test-runner</td><td>C3</td><td>P3</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>analysis</span></td><td>Analysis → remediation board</td><td class='mono'>/app/faculty/analysis</td><td>C5</td><td>P2</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>doubt-student</span></td><td>Doubts queue (student)</td><td class='mono'>/app/student/doubt-student</td><td>D1</td><td>P3</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>doubt-teacher</span></td><td>Doubts triage (teacher)</td><td class='mono'>/app/faculty/doubt-teacher</td><td>D1</td><td>P3</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>messages</span></td><td>Message threads</td><td class='mono'>/app/faculty/messages</td><td>D2</td><td>P3</td><td><span class='tag empty'>empty</span> <span class='tag planned'>mixed API</span></td></tr><tr><td><span class='mono'>announce</span></td><td>Announcements</td><td class='mono'>/app/faculty/announce</td><td>D3</td><td>P3</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>timeline</span></td><td>Student timeline / record log</td><td class='mono'>/app/student/timeline</td><td>D4</td><td>P0</td><td><span class='tag empty'>empty</span> <span class='tag sim'>sim API</span></td></tr><tr><td><span class='mono'>notif-prefs</span></td><td>Notification preferences</td><td class='mono'>/app/student/notif-prefs</td><td>D5</td><td>P1</td><td><span class='tag empty'>empty</span> <span class='tag sim'>sim API</span></td></tr><tr><td><span class='mono'>student-dash</span></td><td>Student dashboard</td><td class='mono'>/app/student</td><td>E1</td><td>P1</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>teacher-dash</span></td><td>Teacher dashboard</td><td class='mono'>/app/faculty/teacher-dash</td><td>E2</td><td>P2</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>owner</span></td><td>Owner console</td><td class='mono'>/app/admin</td><td>E3</td><td>P3</td><td><span class='tag empty'>empty</span> <span class='tag sim'>sim API</span></td></tr><tr><td><span class='mono'>reports</span></td><td>Reports & exports</td><td class='mono'>/app/faculty/reports</td><td>E4</td><td>P3</td><td><span class='tag empty'>empty</span> <span class='tag planned'>mixed API</span></td></tr><tr><td><span class='mono'>mentor</span></td><td>Mentor / backlog workflow</td><td class='mono'>/app/faculty/mentor</td><td>E5</td><td>P3</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>billing</span></td><td>Student billing & plans</td><td class='mono'>/app/admin/billing</td><td>F1</td><td>P4</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>payments</span></td><td>Payments & invoices</td><td class='mono'>/app/student/payments</td><td>F3</td><td>P4</td><td><span class='tag empty'>empty</span> <span class='tag planned'>mixed API</span></td></tr><tr><td><span class='mono'>subscription</span></td><td>Platform subscription & usage</td><td class='mono'>/app/admin/subscription</td><td>F2</td><td>P0</td><td><span class='tag empty'>empty</span> <span class='tag planned'>mixed API</span></td></tr><tr><td><span class='mono'>payouts</span></td><td>Payouts / revenue share</td><td class='mono'>/app/admin/payouts</td><td>F5</td><td>P4</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>audit</span></td><td>Audit log & data export</td><td class='mono'>/app/admin/audit</td><td>F6</td><td>P4</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>onboard-kind</span></td><td>What kind of tutoring?</td><td class='mono'>/app/admin/onboard-kind</td><td>G2</td><td>P0</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>template-gallery</span></td><td>Template gallery</td><td class='mono'>/app/admin/template-gallery</td><td>G2</td><td>P0</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>automation</span></td><td>Automation rules</td><td class='mono'>/app/admin/automation</td><td>G4</td><td>P4</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr><tr><td><span class='mono'>integrations</span></td><td>Integrations</td><td class='mono'>/app/admin/integrations</td><td>G5</td><td>P4</td><td><span class='tag empty'>empty</span> <span class='tag planned'>planned API</span></td></tr>
+  </tbody></table></div>
+</section>
+
+  </main>
+</div>
+<script>
+if(window.TutorOSHub) TutorOSHub.boot({trail:[
+  {label:'Product book',href:'product-viewer.html'},
+  {label:'Functional map'}
+]});
+
+</script>
+</body></html>

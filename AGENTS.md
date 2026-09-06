@@ -6,6 +6,7 @@
 
 | You need | Read |
 |---|---|
+| **Share the product (hub)** | [product-viewer.html](product-viewer.html) — components + task tiles. Work log: [work-log.html](work-log.html) |
 | Product + architecture | README.md |
 | System map (clickable) | tutor-platform-architecture.html |
 | UI gold (incomplete) | tutor-platform-demo.html |

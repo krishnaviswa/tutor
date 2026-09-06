@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| **Status** | Draft (Architect artifacts next; implement blocked until HTML plan viewer + human OK) |
+| **Status** | Specified (Architect artifacts written; implement blocked until HTML guide + human OK) |
 | **Role** | PM (specify + clarify) |
 | **Feature directory** | `specs/003-catalog-complete` |
 
@@ -35,6 +35,7 @@ Humans asked for the **remaining catalog-complete product as one Spec Kit featur
 17. **As** anyone using the app URL, **I want** Next.js routes for every existing catalog screen id **so that** UI gold in the demo can be wired (`empty` → `shell` → `wired`) without a 48th screen. Exam-prep faculty still must not be forced through `staff-login`.
 18. **As** an owner, **I want** notification preferences to persist on `notif-prefs` **so that** teacher/parent/admin channels can be chosen; student WhatsApp stays owner-gated default off.
 19. **As** an operator, **I want** catalog, README, and architecture HTML updated in the same Accept change when screens, APIs, or tables change **so that** the product map stays true.
+20. **As** a chief architect or lead, **I want** a master interactive HTML guide with complete navigation (functional map, technical map, sequenced implementation steps, task plan) **so that** I can review every catalog piece and every build phase before any 003 application code is written.
 
 ## Acceptance criteria
 
@@ -56,6 +57,7 @@ Humans asked for the **remaining catalog-complete product as one Spec Kit featur
 16. **Given** Accept, **when** screens, APIs, tables, or ports changed, **then** the same change updates README, catalog, and architecture HTML (regenerated from demo where required).
 17. **Given** optional local Postgres, **when** `DATABASE_URL` points at Compose Postgres, **then** the same models run; unit tests may stay on in-memory SQLite. Engine choice is not a product SKU.
 18. **Given** Biology / NEET / NCERT files under `docs/examples/`, **when** 003 ships, **then** they remain example-only; seeds stay job arrangements (exam-prep, language 1-on-1, music), not a Biology product.
+19. **Given** the HTML implementation guide (`plan-viewer.html` and satellites), **when** a lead reviews before implement, **then** they can navigate functional jobs, technical contracts, and sequenced E2E steps covering all 47 screens, catalog APIs, and entities — documentation only, not the running app.
 
 ## Out of scope
 
@@ -74,7 +76,7 @@ Humans asked for the **remaining catalog-complete product as one Spec Kit featur
 ## Clarify (closed)
 
 - **One giant feature by human request.** Remaining catalog (entities + APIs + Next.js for 47 existing ids) is Specified here. Internal phase gates still apply: a failing 002 test stops the next phase.
-- **HTML plan gate.** After tasks, `plan-viewer.html` is the first deliverable. Implement is blocked until a human approves that file in chat.
+- **HTML plan gate.** After tasks, the first deliverable is an interactive HTML suite: master `plan-viewer.html` plus satellites for functional map, technical map, and sequenced E2E steps. Implement is blocked until a human approves that guide in chat. It is documentation, not the app.
 - **001 vs 002 vs 003.** 001 = architecture pack (Specified, no implement). 002 = spine sim (protected; Tester + Accept first). 003 = remaining catalog-complete product.
 - **Demo stays gold.** Wire existing ids. Incomplete focused tracks are allowed; do not invent screens to fill them.
 - **Mock default.** Simulate vendors; do not call them. Timeline is the ledger.
@@ -85,9 +87,9 @@ Humans asked for the **remaining catalog-complete product as one Spec Kit featur
 
 - [x] User stories + numbered AC above
 - [x] Clarify closed (folded into this spec)
-- [ ] Architect: `plan.md` + checklist + analyze
-- [ ] Tasks (`tasks.md`)
-- [ ] `plan-viewer.html` generated
-- [ ] Human OK on `plan-viewer.html` (blocks `/speckit.implement`)
+- [x] Architect: `plan.md` + checklist + analyze
+- [x] Tasks (`tasks.md`)
+- [x] `plan-viewer.html` master + satellite HTML (functional, technical, sequence)
+- [ ] Human OK on the HTML guide (blocks `/speckit.implement`)
 - [ ] `/speckit.implement` (Builder; only after HTML OK)
 - [ ] Tester + PM Accept

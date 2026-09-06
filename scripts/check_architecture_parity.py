@@ -36,6 +36,8 @@ def main() -> int:
     html = (ROOT / "tutor-platform-architecture.html").read_text(encoding="utf-8")
     if "catalog/embed.js" not in html:
         fail("architecture HTML must script-src catalog/embed.js")
+    if "catalog/hub-chrome.js" not in html:
+        fail("architecture HTML must script-src catalog/hub-chrome.js")
     if "data-screen=" not in html:
         fail("architecture HTML has no data-screen attributes")
     embed = (ROOT / "catalog/embed.js").read_text(encoding="utf-8")
@@ -156,6 +158,36 @@ def main() -> int:
         actual = path.read_text(encoding="utf-8")
         if actual.replace("\r\n", "\n") != expected.replace("\r\n", "\n"):
             fail(f"{path.name} out of sync with demo — run scripts/build_role_html.py")
+
+    hub = ROOT / "product-viewer.html"
+    log = ROOT / "work-log.html"
+    if not hub.is_file():
+        fail("missing product-viewer.html hub")
+    else:
+        hub_text = hub.read_text(encoding="utf-8")
+        for needle, label in (
+            ("tutor-platform-demo.html", "demo"),
+            ("tutor-platform-architecture.html", "architecture"),
+            ("tutor-platform-explorer.html", "explorer"),
+            ("work-log.html", "work-log"),
+        ):
+            if needle not in hub_text:
+                fail(f"product-viewer.html must link {label} ({needle})")
+        if "catalog/hub-chrome.js" not in hub_text:
+            fail("product-viewer.html must load catalog/hub-chrome.js")
+    if not log.is_file():
+        fail("missing work-log.html")
+    elif "product-viewer.html" not in log.read_text(encoding="utf-8"):
+        fail("work-log.html must link back to product-viewer.html")
+    for arm, label in (
+        (ROOT / "tutor-platform-demo.html", "demo"),
+        (ROOT / "tutor-platform-architecture.html", "architecture"),
+        (ROOT / "tutor-platform-explorer.html", "explorer"),
+    ):
+        if "product-viewer.html" not in arm.read_text(encoding="utf-8"):
+            fail(f"{label} HTML must link back to product-viewer.html")
+        if "catalog/hub-chrome.js" not in arm.read_text(encoding="utf-8"):
+            fail(f"{label} HTML must load catalog/hub-chrome.js")
 
     if errors:
         print("architecture-parity: FAIL")

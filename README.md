@@ -32,6 +32,11 @@ No Docker yet. Open in a browser:
 
 | Open | What it is |
 |---|---|
+| [product-viewer.html](product-viewer.html) | **Product book (hub)** — key components + task tiles (T0.1…). Not the app. [plan-viewer.html](plan-viewer.html) redirects here. |
+| [work-log.html](work-log.html) | Chronological status. Links back to the hub. |
+| [plan-functional.html](plan-functional.html) | Functional map: seven jobs, roles, 47 screens, templates, journeys |
+| [plan-technical.html](plan-technical.html) | Technical map: layers, entities, 84 APIs, ports, modules, protected tests |
+| [plan-sequence.html](plan-sequence.html) | End-to-end build order: functional + technical paired by phase |
 | [tutor-platform-architecture.html](tutor-platform-architecture.html) | System map: entry → six tracks → layers → 47 screens → follow the call |
 | [tutor-platform-demo.html](tutor-platform-demo.html) | UI gold (47 screens, six templates). **Incomplete** — focused tracks omit some spine screens |
 | [tutor-platform-role-student.html](tutor-platform-role-student.html) | Generated child: student lane only |
@@ -187,7 +192,7 @@ Active feature: [specs/002-sim-spine/](specs/002-sim-spine/) (runnable spine sim
 |---|---|---|
 | 001-platform-architecture | Swim-lane HTML, catalog, README hub, Spec Kit, parity | Specified (no `/speckit.implement`) |
 | 002-sim-spine | Local FastAPI + durable store + seed + auth stub + record→timeline + quotas | In Progress (Builder done; Tester + Accept open; protected) |
-| 003-catalog-complete | Remaining catalog APIs + later entities + Next.js one route per existing screen id | Draft (spec + plan + tasks + `plan-viewer.html`; no implement until HTML OK) |
+| 003-catalog-complete | Remaining catalog APIs + later entities + Next.js one route per existing screen id | Specified (`product-viewer.html` hub; no implement until HTML OK) |
 
 ---
 

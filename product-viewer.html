@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Product book — TutorOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;600&family=Hanken+Grotesk:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script src="catalog/hub-chrome.js"></script>
+<style>
+:root{
+  --ground:#F3F6F0; --surface:#FBFCF9; --sunk:#EBEFE6; --raised:#FFFFFF;
+  --ink:#182019; --ink-soft:#4C574F; --ink-faint:#7E8A81;
+  --line:#D6DCCF; --line-soft:#E4E9DD;
+  --accent:#2E7D4F; --accent-ink:#1E5738; --accent-wash:#E4EFE5;
+  --amber:#AF6C22; --amber-wash:#F5E9D8;
+  --crimson:#A4384A; --crimson-wash:#F3E0E1;
+  --sky:#2C6C88; --sky-wash:#DDEAEE;
+  --serif:"Spectral",Georgia,"Times New Roman",serif;
+  --sans:"Hanken Grotesk",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --shadow:0 1px 2px rgba(24,32,25,.04), 0 12px 34px -12px rgba(24,32,25,.18);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0C110E; --surface:#171E19; --sunk:#10150F; --raised:#1E251F;
+    --ink:#E6ECE3; --ink-soft:#A4AEA4; --ink-faint:#6C776E;
+    --line:#26302A; --line-soft:#1D251F;
+    --accent:#5CB57C; --accent-ink:#8CD3A5; --accent-wash:#173224;
+    --amber:#D3944F; --amber-wash:#332413;
+    --crimson:#D06E7A; --crimson-wash:#331A1E;
+    --sky:#6BA7C2; --sky-wash:#122831;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 40px -14px rgba(0,0,0,.6);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5}
+h1,h2,h3{font-family:var(--serif);font-weight:600;margin:0}
+p{margin:0}
+a{color:var(--accent-ink);text-decoration:none}
+a:hover{text-decoration:underline}
+button{font-family:inherit;cursor:pointer}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint)}
+.topbar{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--ground) 90%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft)}
+.topbar__in{max-width:1200px;margin:0 auto;padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-family:var(--serif);font-weight:600}
+.brand .ph{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:2px 7px;margin-left:8px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tabs a,.theme-btn,.chip{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;
+  background:var(--surface);color:var(--ink-soft);border:1px solid var(--line);border-radius:999px;padding:6px 11px
+}
+.tabs a.on{background:var(--accent-wash);color:var(--accent-ink);border-color:var(--accent);text-decoration:none}
+.wrap{max-width:1200px;margin:0 auto;padding:28px 20px 72px}
+.lede{color:var(--ink-soft);max-width:68ch;margin:8px 0 18px}
+.snow{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:14px 0 28px}
+.arm{display:block;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow);color:inherit;text-decoration:none}
+.arm:hover{border-color:var(--ink-faint);text-decoration:none}
+.arm h3{font-size:1rem;margin:4px 0}
+.arm p{color:var(--ink-soft);font-size:.85rem}
+.tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:2px 7px;margin-right:4px}
+.tag.pending{background:var(--sunk)}.tag.done{background:var(--accent-wash)}.tag.cp{border-color:var(--amber);color:var(--amber)}
+.phase{margin:18px 0}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.tile{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 11px;color:inherit}
+.tile:hover{border-color:var(--accent)}
+.tile .id{font-family:var(--mono);font-size:12px;font-weight:600}
+.tile .tt{font-size:.82rem;color:var(--ink-soft);margin-top:4px;display:block}
+.path{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 20px}
+.path button,.path span{font-family:var(--mono);font-size:11px;background:var(--amber-wash);border:1px solid color-mix(in srgb,var(--amber) 40%,var(--line));border-radius:8px;padding:4px 8px;color:inherit}
+.drawer{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:80;display:none;align-items:flex-end;justify-content:center}
+.drawer.on{display:flex}
+.panel{background:var(--raised);width:min(640px,100%);max-height:86vh;overflow:auto;border-radius:16px 16px 0 0;padding:20px 20px 28px;box-shadow:var(--shadow)}
+.kvs{display:grid;grid-template-columns:100px 1fr;gap:6px 12px;font-size:13px;margin-top:12px}
+.kvs b{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint)}
+.log{border-top:1px solid var(--line-soft);padding:12px 0}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+input[type=search]{flex:1;min-width:160px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--raised);color:var(--ink);font:inherit}
+.mono{font-family:var(--mono);font-size:12px}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topbar__in">
+  <div class="brand">TutorOS <span class="ph">product book</span></div>
+  
+<nav class="tabs">
+  <a class="on" href="product-viewer.html">Product</a>
+  <a href="plan-functional.html">Functional</a>
+  <a href="plan-technical.html">Technical</a>
+  <a href="plan-sequence.html">Sequence</a>
+  <a href="work-log.html">Work log</a>
+</nav>
+  <button class="theme-btn" type="button" id="themeBtn">Black</button>
+</div></header>
+<div class="wrap">
+<div class="eyebrow">Center of the snowflake</div>
+<h1>Product book</h1>
+<p class="lede">This page names the pieces and sends you there. Demo, architecture, and explorer stay in their own HTML. Click a task tile for files, tests, and log. Implementation has not started until you approve in chat.</p>
+<div class="eyebrow">Key components</div>
+<div class="snow"><a class="arm" href="tutor-platform-demo.html"><div class="eyebrow">open</div><h3>Screens</h3><p>Demo UI gold — 47 ids. Incomplete tracks stay incomplete.</p></a><a class="arm" href="tutor-platform-architecture.html"><div class="eyebrow">open</div><h3>Stack walk</h3><p>Architecture map. Follow the call. Catalog-driven.</p></a><a class="arm" href="tutor-platform-explorer.html"><div class="eyebrow">open</div><h3>Modules & pricing</h3><p>Explorer — toggles, tiers, build sequence.</p></a><a class="arm" href="work-log.html"><div class="eyebrow">open</div><h3>Work log</h3><p>Status history. Filter by task. Always returns here.</p></a><a class="arm" href="plan-functional.html"><div class="eyebrow">open</div><h3>Functional map</h3><p>Jobs, roles, journeys, every screen.</p></a><a class="arm" href="plan-technical.html"><div class="eyebrow">open</div><h3>Technical map</h3><p>Layers, APIs, entities, ports, tests.</p></a><a class="arm" href="plan-sequence.html"><div class="eyebrow">open</div><h3>E2E sequence</h3><p>Functional + technical paired by phase.</p></a><a class="arm" href="README.md"><div class="eyebrow">open</div><h3>README</h3><p>Text product map. Accepted deltas land here.</p></a><a class="arm" href="catalog/screens.json"><div class="eyebrow">open</div><h3>Catalog</h3><p>Screen / API / entity contracts.</p></a><a class="arm" href="specs/003-catalog-complete/spec.md"><div class="eyebrow">open</div><h3>003 spec</h3><p>In-flight feature. Active dir in feature.json.</p></a><a class="arm" href="backend/README.md"><div class="eyebrow">open</div><h3>Backend</h3><p>002 FastAPI sim. Protected tests.</p></a><a class="arm" href="AGENTS.md"><div class="eyebrow">open</div><h3>Agent guide</h3><p>Where Cursor and Claude Code start.</p></a></div>
+<div class="eyebrow" id="path">Critical path</div>
+<div class="path" id="cpath"></div>
+<div class="eyebrow" id="tasks">Task plan</div>
+<p class="lede">Id, title, status. Click a tile. Source: <span class="mono">specs/003-catalog-complete/tasks.md</span>.</p>
+<div class="filters">
+  <input id="q" type="search" placeholder="Search T0.1, title…">
+  <button class="chip" data-f="all" type="button">All</button>
+  <button class="chip" data-f="critical" type="button">Critical</button>
+  <button class="chip" data-f="pending" type="button">Pending</button>
+</div>
+<div id="board"></div>
+<div class="drawer" id="drawer"><div class="panel" id="panel"></div></div>
+</div>
+<script>
+function hubTrail(extra){
+  var items=[{label:'Product book'}];
+  if(extra) items=[{label:'Product book',href:'product-viewer.html'}, extra];
+  if(window.TutorOSHub) TutorOSHub.paintTrail(items);
+}
+if(window.TutorOSHub) TutorOSHub.boot({trail:[{label:'Product book'}]});
+
+const TASKS = [{"id": "T0.1", "title": "Prove 002 suite still green", "phase": "002-closeout", "owner": "Test and QA", "complexity": "S", "depends": [], "critical": true, "ac": "1, 6, 7", "files": "backend/tests/*.py", "commands": "cd backend; pytest", "risks": "Red test is a 002 regression. live_calls == 0 must hold.", "status": "pending"}, {"id": "T0.2", "title": "Tester converge 002", "phase": "002-closeout", "owner": "Test and QA", "complexity": "S", "depends": ["T0.1"], "critical": true, "ac": "7", "files": "specs/002-sim-spine/spec.md", "commands": "/speckit.converge", "risks": "Do not expand 002 slice.", "status": "pending"}, {"id": "T0.3", "title": "PM Accept 002", "phase": "002-closeout", "owner": "Integration and Docs", "complexity": "S", "depends": ["T0.2"], "critical": true, "ac": "7, 16", "files": "specs/002-sim-spine/spec.md, README.md \u00a712", "commands": "(status edit)", "risks": "Do not start 003 implement here.", "status": "pending"}, {"id": "T1.1", "title": "Python API local run", "phase": "Environment", "owner": "Build Engineer", "complexity": "S", "depends": ["T0.1"], "critical": true, "ac": "4, 17", "files": "backend/README.md, .env.example", "commands": "uvicorn app.main:app --reload --port 8000", "risks": "No secrets. Ports stay mock.", "status": "pending"}, {"id": "T1.2", "title": "Node toolchain for Next.js", "phase": "Environment", "owner": "Build Engineer", "complexity": "S", "depends": ["T1.1"], "critical": true, "ac": "11", "files": "(none until T4.1)", "commands": "node -v", "risks": "Do not scaffold Next.js in this task.", "status": "pending"}, {"id": "T1.3", "title": "Optional Compose Postgres", "phase": "Environment", "owner": "Build Engineer", "complexity": "S", "depends": ["T1.1"], "critical": false, "ac": "17", "files": "docker-compose.yml", "commands": "docker compose up -d postgres", "risks": "Optional. Tests stay SQLite memory.", "status": "pending"}, {"id": "T2.1", "title": "Content, assignments, submissions", "phase": "DB", "owner": "Data/DB", "complexity": "M", "depends": ["T0.1"], "critical": true, "ac": "2, 8", "files": "backend/app/models/tables.py", "commands": "cd backend; pytest", "risks": "workspace_id on every new table.", "status": "pending"}, {"id": "T2.2", "title": "Questions, practice_sets, attempts, tests", "phase": "DB", "owner": "Data/DB", "complexity": "L", "depends": ["T2.1"], "critical": true, "ac": "2, 8", "files": "backend/app/models/tables.py", "commands": "cd backend; pytest", "risks": "No exam-board or Biology tables.", "status": "pending"}, {"id": "T2.3", "title": "Doubts, messages, announcements, prefs, deliveries", "phase": "DB", "owner": "Data/DB", "complexity": "M", "depends": ["T2.1"], "critical": true, "ac": "2, 8, 10", "files": "backend/app/models/tables.py", "commands": "cd backend; pytest", "risks": "Deliveries are a channel journal, not the ledger.", "status": "pending"}, {"id": "T2.4", "title": "Plans, invoices, payouts", "phase": "DB", "owner": "Data/DB", "complexity": "M", "depends": ["T2.1"], "critical": true, "ac": "2, 8", "files": "backend/app/models/tables.py", "commands": "cd backend; pytest", "risks": "No Razorpay ids required.", "status": "pending"}, {"id": "T2.5", "title": "Automation_rules, backlog_items", "phase": "DB", "owner": "Data/DB", "complexity": "S", "depends": ["T2.1"], "critical": false, "ac": "2, 8", "files": "backend/app/models/tables.py", "commands": "cd backend; pytest", "risks": "No new screen ids.", "status": "pending"}, {"id": "T2.6", "title": "Isolation tests for new tables", "phase": "DB", "owner": "Test and QA", "complexity": "M", "depends": ["T2.2", "T2.3", "T2.4", "T2.5"], "critical": true, "ac": "1, 2", "files": "backend/tests/test_isolation.py", "commands": "cd backend; pytest", "risks": "Do not weaken 002 isolation cases.", "status": "pending"}, {"id": "T3.1", "title": "Branding PATCH + WhatsApp pause", "phase": "Backend", "owner": "Backend", "complexity": "S", "depends": ["T2.6"], "critical": false, "ac": "9", "files": "workspaces.py, owner.py", "commands": "cd backend; pytest", "risks": "Pause is a flag, not a new screen.", "status": "pending"}, {"id": "T3.2", "title": "Video-link + join + attendance", "phase": "Backend", "owner": "Backend", "complexity": "M", "depends": ["T2.6"], "critical": true, "ac": "4, 9, 13", "files": "sessions.py, ports/mocks.py", "commands": "cd backend; pytest", "risks": "Mock video URL. Join writes attendance. Meet URL is not truth.", "status": "pending"}, {"id": "T3.3", "title": "Live session + engagement", "phase": "Backend", "owner": "Backend", "complexity": "L", "depends": ["T3.2"], "critical": true, "ac": "9, 13", "files": "sessions.py", "commands": "cd backend; pytest", "risks": "No live Google Meet. Student cannot POST teacher engagement.", "status": "pending"}, {"id": "T3.4", "title": "Session video (transcript empty)", "phase": "Backend", "owner": "Backend", "complexity": "S", "depends": ["T3.2"], "critical": false, "ac": "9, 14", "files": "sessions.py", "commands": "cd backend; pytest", "risks": "Do not fake captions.", "status": "pending"}, {"id": "T3.5", "title": "Content library + lesson", "phase": "Backend", "owner": "Backend", "complexity": "M", "depends": ["T2.1", "T2.6"], "critical": true, "ac": "9", "files": "content router", "commands": "cd backend; pytest", "risks": "topic_id only. Storage local.", "status": "pending"}, {"id": "T3.6", "title": "Assignments issue + grade", "phase": "Backend", "owner": "Backend", "complexity": "M", "depends": ["T3.5"], "critical": false, "ac": "9, 10", "files": "assignments router", "commands": "cd backend; pytest", "risks": "Grade may timeline-append in workspace A only.", "status": "pending"}, {"id": "T3.7", "title": "Question bank", "phase": "Backend", "owner": "Backend", "complexity": "M", "depends": ["T2.2", "T2.6"], "critical": true, "ac": "9", "files": "questions router", "commands": "cd backend; pytest", "risks": "Topics not chapters.", "status": "pending"}, {"id": "T3.8", "title": "Practice sets + attempts + timeline", "phase": "Backend", "owner": "Backend", "complexity": "L", "depends": ["T3.7"], "critical": true, "ac": "9, 10, 12", "files": "practice router, stubs.py attempts", "commands": "cd backend; pytest", "risks": "Changes 002 empty attempt stub. Isolation.", "status": "pending"}, {"id": "T3.9", "title": "Tests + analysis", "phase": "Backend", "owner": "Backend", "complexity": "L", "depends": ["T3.8"], "critical": true, "ac": "9", "files": "tests/analysis routers", "commands": "cd backend; pytest", "risks": "C6 must not invent APIs.", "status": "pending"}, {"id": "T3.10", "title": "Doubts", "phase": "Backend", "owner": "Backend", "complexity": "M", "depends": ["T2.3", "T2.6"], "critical": false, "ac": "9, 10", "files": "doubts router", "commands": "cd backend; pytest", "risks": "Timeline after write. Mock notify.", "status": "pending"}, {"id": "T3.11", "title": "Message threads (real)", "phase": "Backend", "owner": "Backend", "complexity": "M", "depends": ["T2.3", "T2.6"], "critical": false, "ac": "9, 12", "files": "stubs.py threads", "commands": "cd backend; pytest", "risks": "Empty GET /threads becomes a list. Parent linked-child only.", "status": "pending"}, {"id": "T3.12", "title": "Announcements", "phase": "Backend", "owner": "Backend", "complexity": "S", "depends": ["T2.3", "T2.6"], "critical": false, "ac": "9, 10", "files": "announcements router", "commands": "cd backend; pytest", "risks": "Cohort scoped to workspace.", "status": "pending"}, {"id": "T3.13", "title": "Notification prefs on table", "phase": "Backend", "owner": "Backend", "complexity": "S", "depends": ["T2.3"], "critical": false, "ac": "9, 10, 12", "files": "notification_prefs", "commands": "cd backend; pytest", "risks": "Student WhatsApp default off.", "status": "pending"}, {"id": "T3.14", "title": "Student and teacher dashboards", "phase": "Backend", "owner": "Backend", "complexity": "M", "depends": ["T3.3", "T3.8"], "critical": false, "ac": "9", "files": "dashboard routers", "commands": "cd backend; pytest", "risks": "Aggregates only. Do not break owner console.", "status": "pending"}, {"id": "T3.15", "title": "Reports export + mentor backlog", "phase": "Backend", "owner": "Backend", "complexity": "M", "depends": ["T2.5", "T3.8"], "critical": false, "ac": "9", "files": "reports/backlog routers", "commands": "cd backend; pytest", "risks": "Export stays workspace-scoped.", "status": "pending"}, {"id": "T3.16", "title": "Plans, invoices, mock checkout", "phase": "Backend", "owner": "Backend", "complexity": "L", "depends": ["T2.4", "T2.6"], "critical": true, "ac": "4, 9, 12", "files": "billing routers, payments mock", "commands": "cd backend; pytest", "risks": "No Razorpay. Parent invoices for linked child only.", "status": "pending"}, {"id": "T3.17", "title": "Payouts, audit list, data-export", "phase": "Backend", "owner": "Backend", "complexity": "M", "depends": ["T2.4"], "critical": false, "ac": "9", "files": "payouts/audit routers", "commands": "cd backend; pytest", "risks": "Audit read owner-only.", "status": "pending"}, {"id": "T3.18", "title": "Templates apply", "phase": "Backend", "owner": "Backend", "complexity": "M", "depends": ["T2.6"], "critical": false, "ac": "9, 11", "files": "feature_flags, template routes", "commands": "cd backend; pytest", "risks": "Always-on modules cannot turn off. Exam-prep omits staff-login.", "status": "pending"}, {"id": "T3.19", "title": "Automation rules", "phase": "Backend", "owner": "Backend", "complexity": "M", "depends": ["T2.5"], "critical": false, "ac": "9", "files": "automation router", "commands": "cd backend; pytest", "risks": "Actions write timeline or backlog, not a new inbox.", "status": "pending"}, {"id": "T3.20", "title": "Integrations mock connect", "phase": "Backend", "owner": "Backend", "complexity": "M", "depends": ["T3.2"], "critical": false, "ac": "4, 9", "files": "integrations router", "commands": "cd backend; pytest", "risks": "live_calls remains 0.", "status": "pending"}, {"id": "T3.21", "title": "Backend full regression", "phase": "Backend", "owner": "Test and QA", "complexity": "M", "depends": ["T3.1", "T3.9", "T3.11", "T3.16", "T3.20"], "critical": true, "ac": "1, 2, 3, 4, 9", "files": "backend/tests/**", "commands": "cd backend; pytest", "risks": "Phase gate. Stop if 002 cases fail.", "status": "pending"}, {"id": "T4.1", "title": "Next.js 15 App Router scaffold", "phase": "Frontend", "owner": "Build Engineer", "complexity": "L", "depends": ["T1.2", "T3.21"], "critical": true, "ac": "5, 11", "files": "frontend/", "commands": "npm run dev", "risks": "One route per catalog route. No invented pages.", "status": "pending"}, {"id": "T4.2", "title": "Auth shell screens", "phase": "Frontend", "owner": "Frontend", "complexity": "M", "depends": ["T4.1"], "critical": true, "ac": "5, 11", "files": "router, student-login, staff-login", "commands": "OTP 000000 against local API", "risks": "Exam-prep nav must not force staff-login.", "status": "pending"}, {"id": "T4.3", "title": "Wire 002-backed screens", "phase": "Frontend", "owner": "Frontend", "complexity": "L", "depends": ["T4.2"], "critical": true, "ac": "5, 11, 12", "files": "wsetup, roster, cohort-builder, schedule, record, timeline, parent-*, owner, subscription", "commands": "exercise seeded workspaces", "risks": "Demo is UI gold. Isolation across tenants.", "status": "pending"}, {"id": "T4.4", "title": "Domain B remaining UI", "phase": "Frontend", "owner": "Frontend", "complexity": "L", "depends": ["T4.3", "T3.3", "T3.5", "T3.6"], "critical": true, "ac": "5, 11, 13, 14", "files": "join, live-*, session-video, library, lesson, assign-*", "commands": "npm run dev + API", "risks": "Mock video. Empty transcript.", "status": "pending"}, {"id": "T4.5", "title": "Domain C practice UI", "phase": "Frontend", "owner": "Frontend", "complexity": "L", "depends": ["T4.3", "T3.9"], "critical": true, "ac": "5, 11", "files": "qbank, practice-*, test-*, analysis", "commands": "play one seeded set", "risks": "No adaptive-only screen.", "status": "pending"}, {"id": "T4.6", "title": "Domain D remaining UI", "phase": "Frontend", "owner": "Frontend", "complexity": "M", "depends": ["T4.3", "T3.10", "T3.11", "T3.12"], "critical": false, "ac": "5, 11", "files": "doubt-*, messages, announce", "commands": "npm run dev", "risks": "WhatsApp is a channel toggle, not a second inbox.", "status": "pending"}, {"id": "T4.7", "title": "Domain E remaining UI", "phase": "Frontend", "owner": "Frontend", "complexity": "M", "depends": ["T4.3", "T3.14", "T3.15"], "critical": false, "ac": "5, 11", "files": "student-dash, teacher-dash, reports, mentor", "commands": "npm run dev", "risks": "Dashboards read aggregates only.", "status": "pending"}, {"id": "T4.8", "title": "Domain F remaining UI", "phase": "Frontend", "owner": "Frontend", "complexity": "M", "depends": ["T4.3", "T3.16", "T3.17"], "critical": false, "ac": "5, 11, 12", "files": "billing, payments, payouts, audit", "commands": "mock checkout path", "risks": "No live Razorpay.", "status": "pending"}, {"id": "T4.9", "title": "Domain G + branding UI", "phase": "Frontend", "owner": "Frontend", "complexity": "M", "depends": ["T4.3", "T3.18", "T3.19", "T3.20"], "critical": false, "ac": "5, 11", "files": "branding, onboard-kind, template-gallery, automation, integrations", "commands": "npm run dev", "risks": "Templates must not disable always-on modules.", "status": "pending"}, {"id": "T5.1", "title": "Catalog status bumps", "phase": "Integration", "owner": "Integration and Docs", "complexity": "M", "depends": ["T4.4", "T4.5"], "critical": true, "ac": "3, 16", "files": "catalog/*.json", "commands": "python scripts/build_catalog.py", "risks": "Never new ids. Demo wins.", "status": "pending"}, {"id": "T5.2", "title": "Parity + agent sync", "phase": "Integration", "owner": "Integration and Docs", "complexity": "S", "depends": ["T5.1"], "critical": true, "ac": "16", "files": "scripts/check_*.py", "commands": "python scripts/check_architecture_parity.py", "risks": "Regenerate architecture; do not add screens.", "status": "pending"}, {"id": "T5.3", "title": "Architecture HTML + role HTML regen", "phase": "Integration", "owner": "Integration and Docs", "complexity": "S", "depends": ["T5.1"], "critical": false, "ac": "16", "files": "tutor-platform-role-*.html", "commands": "python scripts/build_role_html.py", "risks": "Do not hand-edit generated role HTML.", "status": "pending"}, {"id": "T6.1", "title": "README absorb 003", "phase": "Docs", "owner": "Integration and Docs", "complexity": "S", "depends": ["T5.2"], "critical": true, "ac": "16", "files": "README.md", "commands": "(edit)", "risks": "Biology remains example.", "status": "pending"}, {"id": "T6.2", "title": "Frontend README", "phase": "Docs", "owner": "Integration and Docs", "complexity": "S", "depends": ["T4.1"], "critical": false, "ac": "16", "files": "frontend/README.md, frontend/CLAUDE.md", "commands": "(edit)", "risks": "Keep Cursor/Claude pairing.", "status": "pending"}, {"id": "T6.3", "title": "Backend README remaining APIs", "phase": "Docs", "owner": "Integration and Docs", "complexity": "S", "depends": ["T3.21"], "critical": false, "ac": "16", "files": "backend/README.md", "commands": "(edit)", "risks": "OTP stub stays documented.", "status": "pending"}, {"id": "T6.4", "title": "Tester converge + PM Accept 003", "phase": "Docs", "owner": "Test and QA", "complexity": "M", "depends": ["T4.9", "T5.2", "T6.1"], "critical": true, "ac": "1, 15, 16", "files": "spec DoD, README \u00a712", "commands": "pytest; /speckit.converge", "risks": "Accept only if HTML was approved before implement.", "status": "pending"}];
+const PHASES = [["002-closeout", "P0 \u2014 002 close-out"], ["Environment", "P1 \u2014 Environment"], ["DB", "P2 \u2014 Database"], ["Backend", "P3 \u2014 Backend"], ["Frontend", "P4 \u2014 Frontend"], ["Integration", "P5 \u2014 Integration"], ["Docs", "P6 \u2014 Docs"]];
+const LOGS = [{"date": "2026-09-06", "task": "HUB", "title": "003 Specified; first HTML guide", "body": "Wrote specs/003-catalog-complete (spec, plan, checklist, analyze, tasks). First plan-viewer suite was documentation only. No /speckit.implement."}, {"date": "2026-09-06", "task": "HUB", "title": "Product book snowflake", "body": "Hub is product-viewer.html. Work log split to work-log.html. Demo, architecture, explorer stay in their files and link back. Task tiles: id, title, status; click for files/tests/commands."}];
+const CP = ["T0.1","T1.1","T2.1","T2.2","T2.6","T3.2","T3.7","T3.8","T3.9","T3.16","T3.21","T4.1","T4.2","T4.3","T4.4","T4.5","T5.1","T5.2","T6.1","T6.4"];
+let filter='all', q='';
+function byId(id){return TASKS.find(t=>t.id===id);}
+function openTask(id){
+  const t=byId(id); if(!t) return;
+  location.hash=id;
+  const logs=LOGS.filter(l=>l.task===id || (id==='HUB' && l.task==='HUB'));
+  document.getElementById('panel').innerHTML=
+    '<button class="chip" type="button" id="closeD">Close</button> '+
+    '<a class="chip" href="work-log.html#'+id+'">Work log</a>'+
+    '<h2 style="margin:12px 0 6px">'+t.id+' — '+t.title+'</h2>'+
+    '<span class="tag '+t.status+'">'+t.status+'</span>'+(t.critical?'<span class="tag cp">critical</span>':'')+
+    '<span class="tag">'+t.owner+'</span><span class="tag">'+t.complexity+'</span>'+
+    '<div class="kvs"><b>Phase</b><span>'+t.phase+'</span><b>Depends</b><span>'+(t.depends.join(', ')||'—')+
+    '</span><b>AC</b><span>'+t.ac+'</span><b>Files</b><span class="mono">'+t.files+
+    '</span><b>Commands</b><span class="mono">'+t.commands+'</span><b>Risks</b><span>'+t.risks+
+    '</span><b>Log</b><span>'+(logs.length?logs.map(l=>l.date+' — '+l.title).join('; '):'No entries yet. See work-log.html')+'</span></div>';
+  document.getElementById('drawer').classList.add('on');
+  document.getElementById('closeD').onclick=closeTask;
+  document.getElementById('drawer').onclick=function(e){ if(e.target.id==='drawer') closeTask(); };
+  hubTrail({label:t.id+' — '+t.title});
+}
+function closeTask(){ document.getElementById('drawer').classList.remove('on'); if(location.hash) history.replaceState(null,'',location.pathname); hubTrail(); }
+function render(){
+  const host=document.getElementById('board'); host.innerHTML='';
+  PHASES.forEach(([pid,label])=>{
+    const items=TASKS.filter(t=>t.phase===pid).filter(t=>{
+      if(filter==='critical' && !t.critical) return false;
+      if(filter==='pending' && t.status!=='pending') return false;
+      if(q && !(t.id+' '+t.title).toLowerCase().includes(q)) return false;
+      return true;
+    });
+    if(!items.length) return;
+    const sec=document.createElement('section'); sec.className='phase';
+    sec.innerHTML='<h2 style="font-size:1.1rem;margin-bottom:8px">'+label+'</h2><div class="tiles"></div>';
+    const tiles=sec.querySelector('.tiles');
+    items.forEach(t=>{
+      const b=document.createElement('button'); b.className='tile'; b.type='button';
+      b.innerHTML='<span class="id">'+t.id+'</span> <span class="tag '+t.status+'">'+t.status+'</span>'+(t.critical?'<span class="tag cp">cp</span>':'')+'<span class="tt">'+t.title+'</span>';
+      b.onclick=()=>openTask(t.id);
+      tiles.appendChild(b);
+    });
+    host.appendChild(sec);
+  });
+}
+document.getElementById('cpath').innerHTML=CP.map(id=>' <button type="button" data-id="'+id+'">'+id+'</button>').join('');
+document.getElementById('cpath').onclick=e=>{ const b=e.target.closest('button'); if(b) openTask(b.dataset.id); };
+document.getElementById('q').oninput=e=>{q=e.target.value.toLowerCase();render();};
+document.querySelectorAll('[data-f]').forEach(c=>c.onclick=()=>{ filter=c.dataset.f; render(); });
+render();
+if(location.hash) openTask(location.hash.slice(1));
+window.onhashchange=()=>{ if(location.hash) openTask(location.hash.slice(1)); else closeTask(); };
+
+</script>
+</body></html>

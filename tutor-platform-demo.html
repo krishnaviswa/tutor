@@ -4,6 +4,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="catalog/hub-chrome.js"></script>
 
 <style>
 :root{
@@ -424,7 +425,8 @@ body.showhot .flownode{box-shadow:0 0 0 3px var(--tint-wash);}
       <button data-vp="phone">Phone</button>
       <button data-vp="web">Web</button>
     </div>
-    <button class="iconbtn" id="themeBtn">Theme</button>
+    <a class="iconbtn" href="product-viewer.html" title="Product book">Book</a>
+    <button class="iconbtn" id="themeBtn">Black</button>
   </div>
 </header>
 
@@ -446,11 +448,7 @@ body.showhot .flownode{box-shadow:0 0 0 3px var(--tint-wash);}
 /* Child role files set this to student|faculty|admin|parent|system. Demo backbone stays null — no extra chrome. */
 var ROLE_ONLY=null;
 /* ================= theme ================= */
-var root=document.documentElement, tb=document.getElementById('themeBtn');
-var torder=['system','light','dark'], ti=0;
-try{var sv=localStorage.getItem('tos_theme');if(sv)ti=Math.max(0,torder.indexOf(sv));}catch(e){}
-function applyTheme(){var m=torder[ti];if(m==='system'){root.removeAttribute('data-theme');tb.textContent='Theme · Auto';}else{root.setAttribute('data-theme',m);tb.textContent='Theme · '+m[0].toUpperCase()+m.slice(1);}try{localStorage.setItem('tos_theme',m);}catch(e){}if(state&&state.view==='flow')requestAnimationFrame(drawWires);}
-tb.addEventListener('click',function(){ti=(ti+1)%torder.length;applyTheme();});
+if(window.TutorOSHub) TutorOSHub.bindTheme(document.getElementById('themeBtn'),{onChange:function(){if(state&&state.view==='flow')requestAnimationFrame(drawWires);}});
 
 /* ================= icons ================= */
 var ICONS={
@@ -1901,6 +1899,25 @@ function syncChrome(){
   a.classList.toggle('on',on);
  });
  document.querySelectorAll('#vpSeg button').forEach(function(b){b.classList.toggle('on',b.dataset.vp===state.vp);});
+ if(window.TutorOSHub){
+  var demoHome=ROLE_ONLY?(ROLE[ROLE_ONLY].label+' home'):'Demo home';
+  var items=[{label:'Product book',href:'product-viewer.html'}];
+  if(state.view==='home') items.push({label:demoHome});
+  else{
+   items.push({label:demoHome,href:'#/home'});
+   if(state.view==='compare') items.push({label:'Compare'});
+   else if(state.view==='flow'){
+    var Tf=TById(state.tpl);
+    items.push({label:(Tf?Tf.name:state.tpl)+' flow'});
+   } else {
+    var Ts=TById(state.tpl);
+    items.push({label:(Ts?Ts.name:state.tpl)+' flow',href:'#/'+(state.tpl||'t1')+'/flow'});
+    var scr=S[state.cur];
+    items.push({label:scr?scr.t:state.cur});
+   }
+  }
+  TutorOSHub.paintTrail(items);
+ }
 }
 function render(){
  var h=location.hash.replace(/^#\/?/,''),parts=h.split('/').filter(Boolean);
@@ -1999,6 +2016,7 @@ if(ROLE_ONLY){
   if(/^t[1-6]$/.test(o.value)&&!TById(o.value))o.remove();
  });
 }
-applyTheme();applyHot();buildDrawer();render();
+if(window.TutorOSHub) TutorOSHub.apply();
+applyHot();buildDrawer();render();
 })();
 </script>

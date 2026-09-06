@@ -20,6 +20,7 @@ TutorOS is a **subject-neutral** remote tutoring workspace. Any subject a tutor 
 8. **Ports at vendor edges.** Mock default in CI. Routers never call Google, Meta, or disk. Services never know HTTP.
 9. **Spec-driven.** PM `/speckit.specify` + `/speckit.clarify` → Architect `/speckit.plan` + checklist + `/speckit.analyze` → tasks → **human OK** → Builder `/speckit.implement` → Tester → PM Accept. No implement before Specified.
 10. **Cursor ↔ Claude Code parity.** A convention change updates both sides in the same commit (`scripts/check_agent_config_sync.py`).
+11. **Product book hub.** `product-viewer.html` is the shareable entry (snowflake). Demo HTML remains UI gold; architecture HTML remains the stack walk; explorer remains modules and pricing. Those files keep their own content and link **back** to the hub. Chronology lives in `work-log.html`. Do not copy golds into the hub. When catalog, spec, or status changes: update the owning file, refresh hub tile status, append a work-log line — same change.
 
 ## Stack (002 sim + planned production)
 

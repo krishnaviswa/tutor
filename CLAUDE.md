@@ -16,7 +16,7 @@ Subject-neutral remote tutoring workspace. Monorepo (`backend/` 002 sim; Next.js
 
 `README.md` is the single product document. Biology / NEET / NCERT is an **example tenant**, not the domain.
 
-Also: `tutor-platform-architecture.html`, `catalog/`, `.specify/memory/constitution.md`.
+Share / navigate: `[product-viewer.html](product-viewer.html)` (hub). Arms: demo (UI gold), architecture (stack walk), explorer (modules/pricing), `[work-log.html](work-log.html)`. Also: `tutor-platform-architecture.html`, `catalog/`, `.specify/memory/constitution.md`.
 
 See `[AGENTS.md](AGENTS.md)` for the repo map.
 
@@ -32,6 +32,8 @@ See `[AGENTS.md](AGENTS.md)` for the repo map.
 8. Spec-driven: no `/speckit.implement` before Specified + human OK.
 9. Claude Code subagents use the project roles (product-manager, architect, tester). Spec Kit commands live in `.claude/commands/` and `.cursor/commands/`.
 
+**Product book:** `product-viewer.html` is the hub. Demo / architecture / explorer stay in their HTML and link back. Append `work-log.html` when status or catalog changes. Do not copy those golds into the hub.
+
 ## Multi-agent workflow
 
 Mirrors `.cursor/rules/agents/workflow.mdc`:
@@ -40,6 +42,8 @@ Mirrors `.cursor/rules/agents/workflow.mdc`:
 PM (specify + clarify) → Architect (plan + checklist + analyze) → tasks
  → human OK → Builder (implement) → Tester → PM Accept
 ```
+
+When Accepted, the same PR updates `README.md`, `catalog/`, architecture HTML, `product-viewer.html` (tile status), and `work-log.html` if screens, APIs, tables, or ports changed.
 
 Status: Draft → Specified → In Progress → Testing → Accepted.
 

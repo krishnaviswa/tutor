@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="catalog/hub-chrome.js"></script>
 
 <style>
 :root{
@@ -267,7 +268,8 @@ footer.page{
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 3c3.5 3 3.5 15 0 18M12 3c-3.5 3-3.5 15 0 18M3.2 9.5h17.6M3.2 14.5h17.6"/></svg>
       TutorOS <span class="ph">placeholder name</span>
     </div>
-    <button class="theme-btn" id="themeBtn" type="button">Theme</button>
+    <a class="theme-btn" href="product-viewer.html" style="text-decoration:none">Product book</a>
+    <button class="theme-btn" id="themeBtn" type="button">Black</button>
   </div>
 </header>
 
@@ -315,11 +317,7 @@ footer.page{
 <script>
 (function(){
 /* ---------------- theme ---------------- */
-var root=document.documentElement, tb=document.getElementById('themeBtn');
-var order=['system','light','dark'], ti=0;
-function applyTheme(){var m=order[ti];if(m==='system'){root.removeAttribute('data-theme');tb.textContent='Theme · Auto';}else{root.setAttribute('data-theme',m);tb.textContent='Theme · '+m[0].toUpperCase()+m.slice(1);}}
-tb.addEventListener('click',function(){ti=(ti+1)%order.length;applyTheme();});
-applyTheme();
+if(window.TutorOSHub) TutorOSHub.bindTheme(document.getElementById('themeBtn'));
 
 /* ---------------- data ---------------- */
 var DOMAINS={A:'Identity & Access',B:'Teaching & Sessions',C:'Practice & Assessment',D:'Doubts & Communication',E:'Progress & Analytics',F:'Business & Operations',G:'Configuration & Templates'};
@@ -870,9 +868,27 @@ function viewPackaging(r){
   '<p class="disc">Margin is healthy because video defaults to the tenant Google Meet ($0 marginal). Hosted rooms and speech-to-text change the maths — keep them as opt-in metered add-ons, never bundled. Payment-gateway fees are pass-through and borne by the tenant or the student.</p>';
 }
 
+function explorerTrail(){
+ var labels={screens:'Screens',concepts:'Build concepts',sequence:'Build sequence',packaging:'Packaging'};
+ var items=[{label:'Product book',href:'product-viewer.html'}];
+ if(state.view==='screens') items.push({label:'Explorer home'});
+ else{
+  items.push({label:'Explorer home',goto:'explorer-home'});
+  items.push({label:labels[state.view]||state.view});
+ }
+ if(window.TutorOSHub) TutorOSHub.paintTrail(items);
+}
+document.addEventListener('click',function(e){
+ var g=e.target.closest('[data-goto="explorer-home"]');
+ if(!g) return;
+ e.preventDefault();
+ state.view='screens';
+ render();
+});
 function render(){
  var r=resolve();
  renderRail(r); renderSummary(r); renderNotices(r); renderTabs(); renderView();
+ explorerTrail();
 }
 render();
 })();
