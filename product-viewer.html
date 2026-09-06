@@ -99,6 +99,7 @@ input[type=search]{flex:1;min-width:160px;border:1px solid var(--line);border-ra
   <a href="plan-functional.html">Functional</a>
   <a href="plan-technical.html">Technical</a>
   <a href="plan-sequence.html">Sequence</a>
+  <a href="seed-map.html">Seed map</a>
   <a href="work-log.html">Work log</a>
 </nav>
   <button class="theme-btn" type="button" id="themeBtn">Black</button>
@@ -183,23 +184,24 @@ input[type=search]{flex:1;min-width:160px;border:1px solid var(--line);border-ra
 </div>
 <div class="ids">
   <div class="eyebrow">Exam-prep seed ids</div>
-  <p class="lede" style="margin-bottom:0">Default tenant on every LoginGate. Join token is <em>not</em> seeded — mint it on session-pre (Attach mock video), then open join.</p>
+  <p class="lede" style="margin-bottom:0">Default tenant on every LoginGate. Full map: <a href="seed-map.html">seed-map.html</a>. Wipe: <span class="mono">python -m app.seed_cli --reset</span>.</p>
   <dl>
     <dt>Workspace id</dt><dd>aaaaaaaa-0001-4000-8000-000000000001</dd>
     <dt>Student id</dt><dd>cccccccc-0001-4000-8000-000000000020</dd>
+    <dt>Student 2</dt><dd>cccccccc-0001-4000-8000-000000000040 (no parent link)</dd>
     <dt>Cohort id</dt><dd>cccccccc-0001-4000-8000-000000000021</dd>
     <dt>Session id</dt><dd>cccccccc-0001-4000-8000-000000000022</dd>
     <dt>Topic id</dt><dd>cccccccc-0001-4000-8000-000000000024</dd>
     <dt>Question id</dt><dd>cccccccc-0001-4000-8000-000000000025</dd>
     <dt>Practice set id</dt><dd>cccccccc-0001-4000-8000-000000000026</dd>
     <dt>Parent invite</dt><dd>link-exam-prep</dd>
-    <dt>Join token</dt><dd>minted after teacher attaches mock video on /app/faculty/session-pre</dd>
+    <dt>Join token</dt><dd>join-exam-prep</dd>
     <dt>JWT</dt><dd>none until OTP verify; then browser localStorage</dd>
     <dt>Operator list</dt><dd><a href="http://localhost:3000/operator">/operator</a> — not a catalog screen</dd>
   </dl>
 </div>
 <div class="eyebrow">Key components</div>
-<div class="snow"><a class="arm" href="#try"><div class="eyebrow">local</div><h3>Try the app</h3><p>Owner, teacher, student, parent — URLs, phones, OTP, tokens.</p></a><a class="arm" href="tutor-platform-demo.html"><div class="eyebrow">open</div><h3>Screens</h3><p>Demo UI gold — 47 ids. Incomplete tracks stay incomplete.</p></a><a class="arm" href="tutor-platform-architecture.html"><div class="eyebrow">open</div><h3>Stack walk</h3><p>Architecture map. Follow the call. Catalog-driven.</p></a><a class="arm" href="tutor-platform-explorer.html"><div class="eyebrow">open</div><h3>Modules & pricing</h3><p>Explorer — toggles, tiers, build sequence.</p></a><a class="arm" href="work-log.html"><div class="eyebrow">open</div><h3>Work log</h3><p>Status history. Filter by task. Always returns here.</p></a><a class="arm" href="plan-functional.html"><div class="eyebrow">open</div><h3>Functional map</h3><p>Jobs, roles, journeys, every screen.</p></a><a class="arm" href="plan-technical.html"><div class="eyebrow">open</div><h3>Technical map</h3><p>Layers, APIs, entities, ports, tests.</p></a><a class="arm" href="plan-sequence.html"><div class="eyebrow">open</div><h3>E2E sequence</h3><p>Functional + technical paired by phase.</p></a><a class="arm" href="README.md"><div class="eyebrow">open</div><h3>README</h3><p>Text product map. Accepted deltas land here.</p></a><a class="arm" href="catalog/screens.json"><div class="eyebrow">open</div><h3>Catalog</h3><p>Screen / API / entity contracts.</p></a><a class="arm" href="specs/004-wire-demo-ui/spec.md"><div class="eyebrow">open</div><h3>004 spec</h3><p>Accepted. Demo UI wired onto /api/v1. Last feature dir in feature.json.</p></a><a class="arm" href="backend/README.md"><div class="eyebrow">open</div><h3>Backend</h3><p>002 FastAPI sim. Protected tests.</p></a><a class="arm" href="AGENTS.md"><div class="eyebrow">open</div><h3>Agent guide</h3><p>Where Cursor and Claude Code start.</p></a></div>
+<div class="snow"><a class="arm" href="#try"><div class="eyebrow">local</div><h3>Try the app</h3><p>Owner, teacher, student, parent — URLs, phones, OTP, tokens.</p></a><a class="arm" href="seed-map.html"><div class="eyebrow">open</div><h3>Seed map</h3><p>Which Postgres rows power each catalog workflow.</p></a><a class="arm" href="tutor-platform-demo.html"><div class="eyebrow">open</div><h3>Screens</h3><p>Demo UI gold — 47 ids. Incomplete tracks stay incomplete.</p></a><a class="arm" href="tutor-platform-architecture.html"><div class="eyebrow">open</div><h3>Stack walk</h3><p>Architecture map. Follow the call. Catalog-driven.</p></a><a class="arm" href="tutor-platform-explorer.html"><div class="eyebrow">open</div><h3>Modules & pricing</h3><p>Explorer — toggles, tiers, build sequence.</p></a><a class="arm" href="work-log.html"><div class="eyebrow">open</div><h3>Work log</h3><p>Status history. Filter by task. Always returns here.</p></a><a class="arm" href="plan-functional.html"><div class="eyebrow">open</div><h3>Functional map</h3><p>Jobs, roles, journeys, every screen.</p></a><a class="arm" href="plan-technical.html"><div class="eyebrow">open</div><h3>Technical map</h3><p>Layers, APIs, entities, ports, tests.</p></a><a class="arm" href="plan-sequence.html"><div class="eyebrow">open</div><h3>E2E sequence</h3><p>Functional + technical paired by phase.</p></a><a class="arm" href="README.md"><div class="eyebrow">open</div><h3>README</h3><p>Text product map. Accepted deltas land here.</p></a><a class="arm" href="catalog/screens.json"><div class="eyebrow">open</div><h3>Catalog</h3><p>Screen / API / entity contracts.</p></a><a class="arm" href="specs/004-wire-demo-ui/spec.md"><div class="eyebrow">open</div><h3>004 spec</h3><p>Accepted. Demo UI wired onto /api/v1. Last feature dir in feature.json.</p></a><a class="arm" href="backend/README.md"><div class="eyebrow">open</div><h3>Backend</h3><p>002 FastAPI sim. Protected tests.</p></a><a class="arm" href="AGENTS.md"><div class="eyebrow">open</div><h3>Agent guide</h3><p>Where Cursor and Claude Code start.</p></a></div>
 <div class="eyebrow" id="path">Critical path</div>
 <div class="path" id="cpath"></div>
 <div class="eyebrow" id="tasks">Task plan</div>

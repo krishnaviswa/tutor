@@ -23,12 +23,21 @@ export type MockTenant = {
     parent: string;
   };
   studentId: string;
+  student2Id: string;
   cohortId: string;
   sessionId: string;
   topicId: string;
   questionId: string;
+  question2Id: string;
   practiceSetId: string;
+  testId: string;
+  assignmentId: string;
+  attemptPracticeId: string;
+  contentId: string;
+  invoiceOpenId: string;
+  joinToken: string;
   parentLinkToken: string;
+  threadId: string;
 };
 
 function tenant(
@@ -59,12 +68,21 @@ function tenant(
       parent: `parent@${key}.sim`,
     },
     studentId: `cccccccc-${tag}-4000-8000-000000000020`,
+    student2Id: `cccccccc-${tag}-4000-8000-000000000040`,
     cohortId: `cccccccc-${tag}-4000-8000-000000000021`,
     sessionId: `cccccccc-${tag}-4000-8000-000000000022`,
     topicId: `cccccccc-${tag}-4000-8000-000000000024`,
     questionId: `cccccccc-${tag}-4000-8000-000000000025`,
+    question2Id: `cccccccc-${tag}-4000-8000-000000000042`,
     practiceSetId: `cccccccc-${tag}-4000-8000-000000000026`,
+    testId: `cccccccc-${tag}-4000-8000-000000000030`,
+    assignmentId: `cccccccc-${tag}-4000-8000-000000000029`,
+    attemptPracticeId: `cccccccc-${tag}-4000-8000-000000000031`,
+    contentId: `cccccccc-${tag}-4000-8000-000000000027`,
+    invoiceOpenId: `cccccccc-${tag}-4000-8000-000000000036`,
+    joinToken: `join-${key}`,
     parentLinkToken: `link-${key}`,
+    threadId: `thread-${key}`,
   };
 }
 
