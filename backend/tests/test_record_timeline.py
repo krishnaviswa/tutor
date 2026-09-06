@@ -23,7 +23,7 @@ def test_record_fans_out_timeline_in_workspace_a_only(client):
     lang_students = client.get("/api/v1/students", headers=auth(lang_teacher)).json()
     other = lang_students[0]["id"]
     other_tl = client.get(f"/api/v1/students/{other}/timeline", headers=auth(lang_teacher)).json()
-    assert not any(e["event_type"] == "session_recorded" for e in other_tl)
+    assert not any("Covered Unit 1" in (e.get("body") or "") for e in other_tl)
 
 
 def test_exam_prep_teacher_skips_staff_login_screen(client):
@@ -39,7 +39,7 @@ def test_exam_prep_teacher_skips_staff_login_screen(client):
 def test_student_own_timeline_only(client):
     student = login(client, "+9101s", WS_EXAM, "student")
     teacher = login(client, "+9101t", WS_EXAM, "teacher")
-    sid = client.get("/api/v1/students", headers=auth(teacher)).json()[0]["id"]
+    sid = client.get("/api/v1/me/dashboard", headers=auth(student)).json()["student_id"]
     assert client.get(f"/api/v1/students/{sid}/timeline", headers=auth(student)).status_code == 200
     lang_teacher = login(client, "+9102t", WS_LANG, "teacher")
     other = client.get("/api/v1/students", headers=auth(lang_teacher)).json()[0]["id"]

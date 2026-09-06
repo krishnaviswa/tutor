@@ -46,7 +46,7 @@ pip install -r requirements.txt
 python -m uvicorn app.main:app --reload --port 8000
 ```
 
-Default API `DATABASE_URL` matches Compose. Copy [.env.example](.env.example) if you need a file. Seeded workspaces: `exam-prep`, `language-1on1`, `music`. Auth stub: [backend/README.md](backend/README.md).
+Default API `DATABASE_URL` matches Compose. Copy [.env.example](.env.example) if you need a file. Seeded workspaces: `exam-prep`, `language-1on1`, `music` (catalog pack: [seed-map.html](seed-map.html)). Wipe and reload: `cd backend; python -m app.seed_cli --reset`. Auth stub: [backend/README.md](backend/README.md).
 
 **Product maps (static HTML, no API required)** — open in a browser:
 

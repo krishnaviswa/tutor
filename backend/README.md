@@ -27,4 +27,11 @@ Exam-prep faculty does not need a staff-login screen; teaching APIs work after t
 python -m pytest
 ```
 
-Seeded workspaces: `exam-prep`, `language-1on1`, `music`. Biology is not required.
+Seeded workspaces: `exam-prep`, `language-1on1`, `music`. Catalog pack (assignments, tests, doubts, threads, invoices, \u2026) is included. Biology is not required.
+
+Wipe local Postgres and reload:
+
+```bash
+cd backend
+python -m app.seed_cli --reset
+```
