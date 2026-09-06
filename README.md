@@ -186,7 +186,8 @@ Active feature: [specs/002-sim-spine/](specs/002-sim-spine/) (runnable spine sim
 | ID | Title | Status |
 |---|---|---|
 | 001-platform-architecture | Swim-lane HTML, catalog, README hub, Spec Kit, parity | Specified (no `/speckit.implement`) |
-| 002-sim-spine | Local FastAPI + durable store + seed + auth stub + record→timeline + quotas | In Progress (human OK; implement) |
+| 002-sim-spine | Local FastAPI + durable store + seed + auth stub + record→timeline + quotas | In Progress (Builder done; Tester + Accept open; protected) |
+| 003-catalog-complete | Remaining catalog APIs + later entities + Next.js one route per existing screen id | Draft (spec + plan + tasks + `plan-viewer.html`; no implement until HTML OK) |
 
 ---
 
