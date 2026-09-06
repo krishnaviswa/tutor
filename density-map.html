@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>005 density — TutorOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;600&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script src="catalog/hub-chrome.js"></script>
+<style>
+:root{
+  --ground:#F3F6F0; --surface:#FBFCF9; --sunk:#EBEFE6; --raised:#FFFFFF;
+  --ink:#182019; --ink-soft:#4C574F; --ink-faint:#7E8A81;
+  --line:#D6DCCF; --line-soft:#E4E9DD;
+  --accent:#2E7D4F; --accent-ink:#1E5738; --accent-wash:#E4EFE5;
+  --amber:#AF6C22; --amber-wash:#F5E9D8;
+  --crimson:#A4384A; --crimson-wash:#F3E0E1;
+  --sky:#2C6C88; --sky-wash:#DDEAEE;
+  --serif:"Spectral",Georgia,"Times New Roman",serif;
+  --sans:"Hanken Grotesk",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --shadow:0 1px 2px rgba(24,32,25,.04), 0 12px 34px -12px rgba(24,32,25,.18);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0C110E; --surface:#171E19; --sunk:#10150F; --raised:#1E251F;
+    --ink:#E6ECE3; --ink-soft:#A4AEA4; --ink-faint:#6C776E;
+    --line:#26302A; --line-soft:#1D251F;
+    --accent:#5CB57C; --accent-ink:#8CD3A5; --accent-wash:#173224;
+    --amber:#D3944F; --amber-wash:#332413;
+    --crimson:#D06E7A; --crimson-wash:#331A1E;
+    --sky:#6BA7C2; --sky-wash:#122831;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 40px -14px rgba(0,0,0,.6);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5}
+h1,h2,h3{font-family:var(--serif);font-weight:600;margin:0}
+p{margin:0}
+a{color:var(--accent-ink);text-decoration:none}
+a:hover{text-decoration:underline}
+button{font-family:inherit;cursor:pointer}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint)}
+.topbar{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--ground) 90%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft)}
+.topbar__in{max-width:1200px;margin:0 auto;padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-family:var(--serif);font-weight:600}
+.brand .ph{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:2px 7px;margin-left:8px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tabs a,.theme-btn{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;
+  background:var(--surface);color:var(--ink-soft);border:1px solid var(--line);border-radius:999px;padding:6px 11px
+}
+.tabs a.on{background:var(--accent-wash);color:var(--accent-ink);border-color:var(--accent);text-decoration:none}
+.wrap{max-width:1200px;margin:0 auto;padding:28px 20px 72px}
+.lede{color:var(--ink-soft);max-width:74ch;margin:8px 0 18px}
+.warn{background:var(--amber-wash);border:1px solid color-mix(in srgb,var(--amber) 35%,var(--line));border-radius:12px;padding:12px 14px;margin:14px 0}
+.note{background:var(--sky-wash);border:1px solid color-mix(in srgb,var(--sky) 30%,var(--line));border-radius:12px;padding:12px 14px;margin:14px 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow)}
+.card h3{font-size:1.05rem;margin:4px 0 8px}
+.tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:2px 7px;margin:0 4px 4px 0}
+.tag.pending{background:var(--sunk)}
+.tag.done{background:var(--accent-wash)}
+.tag.cp{border-color:var(--amber);color:var(--amber)}
+.tag.bad{background:var(--crimson-wash);color:var(--crimson)}
+.tag.ok{background:var(--accent-wash);color:var(--accent-ink)}
+.mono{font-family:var(--mono);font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+th{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0 8px}
+@media(max-width:800px){.kpis{grid-template-columns:1fr 1fr}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi .v{font-family:var(--serif);font-size:1.7rem;line-height:1.1}
+.kpi .l{font-size:.82rem;color:var(--ink-soft);margin-top:6px}
+.kpi.bad .v{color:var(--crimson)}
+.kpi.ok .v{color:var(--accent-ink)}
+.bars{display:grid;gap:10px;margin:8px 0 4px}
+.bar-row{display:grid;grid-template-columns:140px 1fr 36px;gap:10px;align-items:center}
+.bar-row b{font-size:.82rem;font-weight:500}
+.track{height:10px;background:var(--sunk);border-radius:6px;overflow:hidden}
+.track i{display:block;height:100%;border-radius:6px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--ink-soft);margin:10px 0 0}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}
+@media(max-width:900px){.flow{grid-template-columns:1fr 1fr}}
+.flow .step{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+.flow .n{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
+.flow h3{font-size:.98rem;margin:4px 0 6px}
+.flow p{font-size:.82rem;color:var(--ink-soft)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:10px}
+.tile{text-align:left;background:var(--raised);border:1px solid var(--line);border-radius:10px;padding:12px}
+.tile .id{font-family:var(--mono);font-size:12px;font-weight:600}
+.tile .tt{display:block;font-size:.84rem;color:var(--ink-soft);margin-top:4px}
+.tile.cp{box-shadow:inset 3px 0 0 var(--amber)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+@media(max-width:900px){.grid3{grid-template-columns:1fr}}
+h2{font-size:1.35rem;margin:28px 0 8px}
+.links{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+.links a{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-radius:999px;padding:5px 10px;background:var(--surface);color:var(--ink-soft);text-decoration:none}
+.links a:hover{border-color:var(--accent);color:var(--accent-ink)}
+.skip{background:var(--crimson-wash);border:1px solid color-mix(in srgb,var(--crimson) 30%,var(--line));border-radius:12px;padding:12px 14px;margin:14px 0}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topbar__in">
+  <div class="brand">TutorOS <span class="ph">product book</span></div>
+  <nav class="tabs">
+    <a href="product-viewer.html">Product</a>
+    <a href="plan-functional.html">Functional</a>
+    <a href="plan-technical.html">Technical</a>
+    <a href="plan-sequence.html">Sequence</a>
+    <a href="seed-map.html">Seed map</a>
+    <a class="on" href="density-map.html">Density</a>
+    <a href="work-log.html">Work log</a>
+  </nav>
+  <button class="theme-btn" type="button" id="themeBtn">Black</button>
+</div></header>
+<div class="wrap">
+<div class="eyebrow">Arm of the snowflake · 005 Specified</div>
+<h1>Dashboard density</h1>
+<p class="lede">iSeekAcademy looks rich because every card is a named operating fact. TutorOS demo gold already has that picture. The live Next.js app collapsed it to counts. This page is the action board for lifting demo density onto the same 47 screen ids — open it in a browser, not a canvas.</p>
+<div class="links">
+  <a href="specs/005-dashboard-density/spec.md">spec.md</a>
+  <a href="specs/005-dashboard-density/plan.md">plan.md</a>
+  <a href="specs/005-dashboard-density/tasks.md">tasks.md</a>
+  <a href="tutor-platform-demo.html">Demo gold</a>
+  <a href="seed-map.html">Seed map</a>
+  <a href="https://iseekacademy.in/">iseekacademy.in</a>
+</div>
+
+<div class="warn"><strong>Your instinct was right.</strong> 004 wired routes. It did not carry tonight’s class title, due practice 0/16, attendance bars, or fee receipts. No new screen. Backend enriches existing <span class="mono">/api/v1</span> JSON. Frontend matches demo cards.</div>
+
+<div class="kpis">
+  <div class="kpi ok"><div class="v">9 / 10</div><div class="l">iSeek hero dashboard (marketing mock)</div></div>
+  <div class="kpi"><div class="v">8 / 10</div><div class="l">TutorOS demo HTML (UI gold)</div></div>
+  <div class="kpi bad"><div class="v">3 / 10</div><div class="l">Wired Next.js you actually run</div></div>
+  <div class="kpi bad"><div class="v">0</div><div class="l">Charts in the wired app today</div></div>
+</div>
+
+<h2>Richness by surface</h2>
+<p class="lede">Score 0–10: named facts + actions + charts on that surface. Source: iseekacademy.in homepage vs <span class="mono">tutor-platform-demo.html</span> vs <span class="mono">frontend/components/wired</span>. Sep 2026.</p>
+<div class="card">
+  <div class="legend">
+    <span><i style="background:var(--sky)"></i> iSeekAcademy shown</span>
+    <span><i style="background:var(--accent)"></i> TutorOS demo gold</span>
+    <span><i style="background:var(--crimson)"></i> Wired Next.js</span>
+  </div>
+  <div class="bars" id="scoreBars"></div>
+  <p class="lede" style="margin-top:10px;margin-bottom:0">Horizontal = surface. Bar length = density score out of 10.</p>
+</div>
+
+<h2>What they put on the page that you do not</h2>
+<div style="overflow:auto">
+<table>
+  <thead><tr><th>Surface</th><th>iSeekAcademy</th><th>Demo gold</th><th>Wired app now</th></tr></thead>
+  <tbody>
+    <tr><td>Public site</td><td>Branded homepage in 10 min</td><td>Login preview only</td><td>Tagline + 6 colours. <span class="mono">/</span> redirects to router</td></tr>
+    <tr><td>Owner</td><td>Rs. 2.5L, 186 students, 142 paid, 18 pending</td><td>38/40 sessions, Rs. 1.86L, P&amp;L, churn 3</td><td>Quota meters only</td></tr>
+    <tr><td>Teacher</td><td>34/38 present today</td><td>86% bars, 4 named at-risk students</td><td>3 numbers</td></tr>
+    <tr><td>Student home</td><td>3 pending tasks</td><td>6:30 named class, DPP 14 0/16, weak tags</td><td>N sessions, N attempts</td></tr>
+    <tr><td>Parent</td><td>87% average</td><td>5/6, 12/16, 512/720, fee due 5 Sep</td><td>Five links, no numbers</td></tr>
+    <tr><td>Fees</td><td>Paid / pending / overdue</td><td>Due Rs. 4,500 + receipts</td><td>Pay (mock)</td></tr>
+    <tr><td>Library</td><td>Notes, tests, videos (claimed)</td><td>Video 38 min, PDF, progress bars</td><td>Title + body</td></tr>
+    <tr><td>Charts</td><td>Fee mix + command centre</td><td>CSS bars on teacher-dash</td><td>None</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>Backend workflow to fill completeness</h2>
+<p class="lede">Same API paths. Richer JSON. Logic in <span class="mono">services/progress.py</span>, not routers. Seed must leave named facts after <span class="mono">python -m app.seed_cli --reset</span>.</p>
+<div class="flow">
+  <div class="step"><div class="n">01 Seed</div><h3>Named rows</h3><p>Upcoming session with title + starts_at. Due practice. Historical week attendance. At-risk student. Paid + pending invoice. Content kind + notes.</p></div>
+  <div class="step"><div class="n">02 Service</div><h3>progress.py</h3><p>Aggregate from existing tables only. workspace_id on every query. Parent scoped to linked child. No new tables. No new paths.</p></div>
+  <div class="step"><div class="n">03 APIs</div><h3>Same /api/v1</h3><p>Enrich me/dashboard, teacher/dashboard, owner/console, parent/home, invoices/mine, reports, content.</p></div>
+  <div class="step"><div class="n">04 UI</div><h3>Demo-shaped</h3><p>Wired screens render cards, bars, chase lists. CSS bars from demo. No new chart library. No 48th screen.</p></div>
+</div>
+
+<div class="card">
+  <div class="eyebrow">Payload contract — keep old keys, add these</div>
+  <table>
+    <thead><tr><th>Path</th><th>Add</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">GET /me/dashboard</td><td>next_session, due_practice, this_week, doubt, weak_tags</td></tr>
+      <tr><td class="mono">GET /teacher/dashboard</td><td>attendance_pct, attendance_week, practice_by_set, doubt_backlog, at_risk</td></tr>
+      <tr><td class="mono">GET /owner/console</td><td>scorecard, teachers, cohort_pnl — keep usage meters</td></tr>
+      <tr><td class="mono">GET /parent/home</td><td>attendance fraction, latest practice, latest test, fee_due</td></tr>
+      <tr><td class="mono">GET /invoices/mine</td><td>due_on, receipt_id, month label</td></tr>
+      <tr><td class="mono">GET /reports</td><td>term slice, not []</td></tr>
+      <tr><td class="mono">GET /content</td><td>kind, duration_label, progress_pct</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2>Action items T7.1 – T7.12</h2>
+<p class="lede">Pending implement. Human OK on specify is done. Implement needs a separate OK and a branch that is not main. Source: <span class="mono">specs/005-dashboard-density/tasks.md</span>.</p>
+<div class="tiles" id="tasks"></div>
+
+<div class="note" style="margin-top:22px"><strong>Critical path.</strong> T7.1 seed → T7.2 service → T7.3–T7.6 APIs → T7.7–T7.9 UI → T7.10 pytest → T7.11 docs → T7.12 Accept. Stop if 002 pytest goes red. <span class="mono">live_calls == 0</span>.</div>
+
+<div class="skip">
+  <div class="eyebrow">Do not copy from iSeek</div>
+  <p>Public academy homepage (not a catalog screen). Find-a-tutor marketplace. Certificates, leads CRM, AI papers. Live Razorpay. New chart library. Biology-only product copy.</p>
+</div>
+
+<div class="grid3">
+  <div class="card"><div class="eyebrow">Keep</div><h3>Ledger rules</h3><p class="lede" style="margin:0">Timeline is the ledger. Join writes attendance. Parent sees linked child only. QuotaGuard stays on owner. WhatsApp is a channel.</p></div>
+  <div class="card"><div class="eyebrow">Largest lag</div><h3>Wired screens are hollow</h3><p class="lede" style="margin:0">StudentDashScreen is three counts. TeacherDashScreen is three counts. OwnerScreen is quota. ParentHomeScreen has no scores.</p></div>
+  <div class="card"><div class="eyebrow">Not this feature</div><h3>Sales landing</h3><p class="lede" style="margin:0">iSeek’s marketing page is a different job from in-app density. Product-viewer stays the hub. Do not invent a public tenant homepage in 005.</p></div>
+</div>
+</div>
+<script>
+if(window.TutorOSHub) TutorOSHub.boot({trail:[
+  {label:'Product book',href:'product-viewer.html'},
+  {label:'005 density'}
+]});
+
+const SURFACES=[
+  {n:'Public brand site', iseek:9, demo:3, wired:0},
+  {n:'Owner console', iseek:8, demo:8, wired:2},
+  {n:'Teacher home', iseek:7, demo:8, wired:3},
+  {n:'Student home', iseek:6, demo:8, wired:3},
+  {n:'Parent portal', iseek:7, demo:7, wired:3},
+  {n:'Fees', iseek:9, demo:7, wired:3},
+  {n:'Library / lessons', iseek:5, demo:7, wired:2},
+  {n:'Charts', iseek:8, demo:6, wired:0}
+];
+const host=document.getElementById('scoreBars');
+SURFACES.forEach(function(s){
+  const wrap=document.createElement('div');
+  wrap.style.margin='12px 0 16px';
+  wrap.innerHTML='<div class="eyebrow" style="margin-bottom:6px">'+s.n+'</div>';
+  [['iseek',s.iseek,'var(--sky)'],['demo',s.demo,'var(--accent)'],['wired',s.wired,'var(--crimson)']].forEach(function(row){
+    const r=document.createElement('div');
+    r.className='bar-row';
+    r.innerHTML='<b></b><div class="track"><i></i></div><span class="mono"></span>';
+    r.querySelector('b').textContent=row[0];
+    r.querySelector('i').style.width=(row[1]*10)+'%';
+    r.querySelector('i').style.background=row[2];
+    r.querySelector('.mono').textContent=row[1];
+    wrap.appendChild(r);
+  });
+  host.appendChild(wrap);
+});
+
+const TASKS=[
+  {id:'T7.1',t:'Seed named operating facts',own:'Backend',cp:1},
+  {id:'T7.2',t:'progress.py aggregates service',own:'Backend',cp:1},
+  {id:'T7.3',t:'Enrich GET /me/dashboard',own:'Backend',cp:1},
+  {id:'T7.4',t:'Enrich GET /teacher/dashboard',own:'Backend',cp:1},
+  {id:'T7.5',t:'Enrich GET /owner/console',own:'Backend',cp:1},
+  {id:'T7.6',t:'Parent, invoices, reports, content',own:'Backend',cp:1},
+  {id:'T7.7',t:'Student home + library + lesson UI',own:'Frontend',cp:1},
+  {id:'T7.8',t:'Teacher dashboard bars + chase list',own:'Frontend',cp:1},
+  {id:'T7.9',t:'Owner, parent, payments, reports UI',own:'Frontend',cp:1},
+  {id:'T7.10',t:'Density tests + 002 gate',own:'QA',cp:1},
+  {id:'T7.11',t:'Catalog shows + product map',own:'Docs',cp:1},
+  {id:'T7.12',t:'Tester converge + PM Accept',own:'QA + PM',cp:1}
+];
+const box=document.getElementById('tasks');
+TASKS.forEach(function(t){
+  const d=document.createElement('div');
+  d.className='tile'+(t.cp?' cp':'');
+  d.innerHTML='<span class="id">'+t.id+'</span> <span class="tag pending">pending</span>'+(t.cp?'<span class="tag cp">cp</span>':'')+'<span class="tag">'+t.own+'</span><span class="tt">'+t.t+'</span>';
+  box.appendChild(d);
+});
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 {
-  "featureDirectory": "specs/004-wire-demo-ui",
-  "featureName": "004-wire-demo-ui",
-  "note": "Active Spec Kit directory is this path, not the git branch. Override with SPECIFY_FEATURE_DIRECTORY. 001-platform-architecture remains Specified; no /speckit.implement on 001. 002-sim-spine is Accepted and protected; do not rewrite the spine. 003-catalog-complete is Accepted (shell/sim APIs). 004-wire-demo-ui is Accepted (47 screens wired onto /api/v1; mock OTP 000000)."
+  "featureDirectory": "specs/005-dashboard-density",
+  "featureName": "005-dashboard-density",
+  "note": "Active Spec Kit directory is this path, not the git branch. Override with SPECIFY_FEATURE_DIRECTORY. 001-platform-architecture remains Specified; no /speckit.implement on 001. 002-sim-spine is Accepted and protected. 003-catalog-complete is Accepted (shell/sim APIs). 004-wire-demo-ui is Accepted (47 screens wired). 005-dashboard-density is Specified — lift demo named facts onto wired dashboards; do not implement until human OK on tasks.md. Visual board: density-map.html."
 }

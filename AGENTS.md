@@ -22,7 +22,7 @@ Commands: `/speckit.constitution`, `/speckit.specify`, `/speckit.clarify`, `/spe
 
 Sequence: PM specify+clarify → Architect plan+checklist+analyze → tasks → **human OK** → Builder implement → Tester → PM Accept.
 
-**Do not `/speckit.implement` for 001-platform-architecture** (architecture pack). 002 spine is Accepted and protected. 003-catalog-complete is Accepted (shell/sim APIs). 004-wire-demo-ui is Accepted (47 screens wired). Spec Kit dir in `.specify/feature.json`: **004-wire-demo-ui**.
+**Do not `/speckit.implement` for 001-platform-architecture** (architecture pack). 002 spine is Accepted and protected. 003-catalog-complete is Accepted (shell/sim APIs). 004-wire-demo-ui is Accepted (47 screens wired). Spec Kit dir in `.specify/feature.json`: **005-dashboard-density** (Specified; visual board [density-map.html](density-map.html)).
 
 Active feature directory: `.specify/feature.json`. `git checkout` does not change it. Override: `SPECIFY_FEATURE_DIRECTORY`.
 
