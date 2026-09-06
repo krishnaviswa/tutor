@@ -242,7 +242,7 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Batches / groups / 1-on-1 pairings. Topic taxonomy is tenant-defined.",
+    "shows": "Batches / groups / 1-on-1 pairings, invite token and waitlist. Topic taxonomy is tenant-defined.",
     "own": "Faculty. Owner may set structure.",
     "who": "Faculty or owner.",
     "why": "Teaching is grouped; 1-on-1 is a pairing. Topics are tenant taxonomy, not a baked syllabus.",
@@ -314,7 +314,7 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Guardian hub for linked children only: attendance fraction, latest practice, latest test, fee due date, activity, marksheet, receipts, teacher chat.",
+    "shows": "Guardian hub for linked children only: attendance, practice, test, fee due if this guardian can see fees, activity, marksheet, receipts, teacher chat.",
     "own": "Parent (read). Owner enables the parent module.",
     "who": "A linked parent.",
     "why": "The parent hub for their own child \u2014 not a second gradebook and not the class roster.",
@@ -355,7 +355,7 @@
       "session.rescheduled",
       "session.cancelled"
     ],
-    "shows": "Calendar of sessions. Create/reschedule notifies teacher, parent, admin via D5.",
+    "shows": "Calendar of sessions. Conflict detection on overlap. Student booking uses stored availability windows (not Google Calendar).",
     "own": "Faculty. Owner can view.",
     "who": "Faculty (owner can view).",
     "why": "Sessions must exist on a calendar before anyone can join.",
@@ -462,7 +462,7 @@
       "calendar_video"
     ],
     "timelineEvents": [],
-    "shows": "Teacher console shell around the video session.",
+    "shows": "Teacher console around the mock video session, with in-app chat and MCQ polls (not Meet events).",
     "own": "Faculty.",
     "who": "The teacher in session.",
     "why": "Notes, polls, and attendance must stay in TutorOS, not trapped in Meet chat.",
@@ -496,7 +496,7 @@
       "calendar_video"
     ],
     "timelineEvents": [],
-    "shows": "Student live view / waiting overlay.",
+    "shows": "Student live view / waiting overlay, with in-app chat (not Meet events).",
     "own": "Student in session; faculty hosts.",
     "who": "The student in session.",
     "why": "Join, leave, and later replay must attach to one identity.",
@@ -568,7 +568,7 @@
     "timelineEvents": [
       "session.recorded"
     ],
-    "shows": "Attendance, notes, board photos, link. Fan-out to each attendee timeline.",
+    "shows": "Attendance, notes, board photos, local capture of chat/poll events. Fan-out to each attendee timeline.",
     "own": "Faculty must write. System fans out to timelines.",
     "who": "The teacher.",
     "why": "This is the ledger write after class. Channels do not replace it.",
@@ -603,7 +603,7 @@
       "storage"
     ],
     "timelineEvents": [],
-    "shows": "Lessons with kind, duration, and progress. Visibility per cohort.",
+    "shows": "Lessons with kind, duration, progress, playlist, drip, and views. Visibility per cohort. Storage stays local.",
     "own": "Faculty curates. Student consumes.",
     "who": "Student consumes; teacher curates.",
     "why": "Content between sessions needs a place that is not a WhatsApp file dump.",
@@ -677,7 +677,7 @@
     "timelineEvents": [
       "assignment.issued"
     ],
-    "shows": "Issue homework with due date.",
+    "shows": "Issue homework with due date, rubric, and resubmit flag.",
     "own": "Faculty.",
     "who": "The teacher.",
     "why": "Homework is a dated obligation on the record, not a chat reminder.",
@@ -714,7 +714,7 @@
     "timelineEvents": [
       "assignment.graded"
     ],
-    "shows": "Submit, grade, return.",
+    "shows": "Submit, grade, return. Late and resubmit counts on the row.",
     "own": "Faculty grades. Student submits.",
     "who": "Teacher grades; student submits first.",
     "why": "Returned work must land on the timeline so a parent can see it without a second app.",
@@ -749,7 +749,7 @@
       "storage"
     ],
     "timelineEvents": [],
-    "shows": "Item bank tagged by tenant taxonomy, not a hardcoded syllabus.",
+    "shows": "Item bank tagged by tenant taxonomy, with difficulty lanes and usage counts \u2014 not a hardcoded syllabus.",
     "own": "Faculty or content assistant.",
     "who": "Teacher or content assistant.",
     "why": "Reusable items tagged by tenant topics \u2014 never a hardcoded syllabus in core.",
@@ -786,7 +786,7 @@
     "timelineEvents": [
       "practice.assigned"
     ],
-    "shows": "Same-day or scheduled practice set from tags or hand-pick.",
+    "shows": "Same-day or scheduled practice set from tags, hand-pick, or auto-assemble by difficulty.",
     "own": "Faculty.",
     "who": "The teacher.",
     "why": "Exam-prep needs a same-day practice loop; other templates may leave this off.",
@@ -889,7 +889,7 @@
     "timelineEvents": [
       "test.scheduled"
     ],
-    "shows": "Timed paper setup.",
+    "shows": "Timed paper setup with sections and optional negative marking.",
     "own": "Faculty.",
     "who": "The teacher.",
     "why": "A timed paper is a scheduled event, not a casual practice set.",
@@ -924,7 +924,7 @@
     "timelineEvents": [
       "test.submitted"
     ],
-    "shows": "Student test runner with timer.",
+    "shows": "Student test runner with timer, question palette, and resume.",
     "own": "Student.",
     "who": "The student.",
     "why": "An attempt must write even if they leave early.",
@@ -1069,7 +1069,7 @@
     "timelineEvents": [
       "message.sent"
     ],
-    "shows": "In-platform threads so the record exists. WhatsApp may notify.",
+    "shows": "In-platform threads with unread and local attachments so the record exists. WhatsApp may notify.",
     "own": "Faculty owns the thread.",
     "who": "Teacher starts; student (and parent if linked) reply.",
     "why": "1:1 coaching must exist as a record, not only as a WhatsApp chat.",
@@ -1109,7 +1109,7 @@
     "timelineEvents": [
       "announcement.posted"
     ],
-    "shows": "One-to-cohort broadcast. Parent WhatsApp if opted in.",
+    "shows": "One-to-cohort broadcast with scheduled_at and stored channel matrix. Send stays mock. Parent WhatsApp if opted in.",
     "own": "Faculty or owner.",
     "who": "Teacher or owner.",
     "why": "One message to a cohort \u2014 schedule, dates, policy \u2014 not 1:1 coaching.",
@@ -1140,7 +1140,7 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Append-only event stream for one student. The ledger.",
+    "shows": "Append-only event stream for one student. Filter by event_type; export=1 returns a slice. The ledger.",
     "own": "Student is the subject. System writes. Faculty and parent read.",
     "who": "Student owns the stream; teacher and parent read.",
     "why": "This is the ledger. Channels deliver; they do not replace this screen.",
@@ -1282,7 +1282,7 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Operating scorecard (sessions, students, practice %, SLA, revenue, churn) plus quota bars (80% / 100%). Feature kill switches.",
+    "shows": "Operating scorecard (sessions, students, practice %, SLA, revenue, churn) plus quota bars (80% / 100%). Sign-in methods and G1 preview. Feature kill switches.",
     "own": "Owner / admin.",
     "who": "Owner / admin.",
     "why": "Running the business (scorecard, quotas, kill switches) is not teaching a class.",
@@ -1395,7 +1395,7 @@
     "timelineEvents": [
       "invoice.issued"
     ],
-    "shows": "Student fee plans and invoices (tenant collecting from learners).",
+    "shows": "Student fee plans and invoices with auto-issue, coupons, and proration (tenant collecting from learners). Checkout stays mock.",
     "own": "Owner or assistant with billing rights.",
     "who": "Owner (or assistant with billing rights).",
     "why": "The tenant collects from learners here. Separate from the platform subscription (F2).",
@@ -1507,7 +1507,7 @@
       "payments_platform"
     ],
     "timelineEvents": [],
-    "shows": "Multi-teacher payout statements.",
+    "shows": "Multi-teacher payout statements (name, period, session count) without Stripe.",
     "own": "Institute owner.",
     "who": "Institute owner.",
     "why": "Institutes share revenue with teachers after collections. Starter 1-on-1 usually skips this.",
@@ -1637,7 +1637,7 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Opt-in when \u2192 then rules. Opinion as choice, not law.",
+    "shows": "Opt-in when \u2192 then rules. Missed-practice rules write backlog items. Opinion as choice, not law.",
     "own": "Owner.",
     "who": "Owner.",
     "why": "When \u2192 then rules without code. Opinions as choices, not law.",
