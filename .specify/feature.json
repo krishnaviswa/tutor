@@ -1,0 +1,5 @@
+{
+  "featureDirectory": "specs/002-sim-spine",
+  "featureName": "002-sim-spine",
+  "note": "Active Spec Kit feature is this directory, not the git branch. Override with SPECIFY_FEATURE_DIRECTORY. 001-platform-architecture remains Specified; no /speckit.implement on 001."
+}

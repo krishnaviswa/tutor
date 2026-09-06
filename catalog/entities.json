@@ -1,0 +1,150 @@
+[
+  {
+    "id": "workspaces",
+    "tier": "spine"
+  },
+  {
+    "id": "users",
+    "tier": "spine"
+  },
+  {
+    "id": "identities",
+    "tier": "spine"
+  },
+  {
+    "id": "sessions_auth",
+    "tier": "spine"
+  },
+  {
+    "id": "staff_memberships",
+    "tier": "spine"
+  },
+  {
+    "id": "students",
+    "tier": "spine"
+  },
+  {
+    "id": "parent_links",
+    "tier": "spine"
+  },
+  {
+    "id": "cohorts",
+    "tier": "spine"
+  },
+  {
+    "id": "enrollments",
+    "tier": "spine"
+  },
+  {
+    "id": "scheduled_sessions",
+    "tier": "spine"
+  },
+  {
+    "id": "attendance",
+    "tier": "spine"
+  },
+  {
+    "id": "session_records",
+    "tier": "spine"
+  },
+  {
+    "id": "transcript_events",
+    "tier": "spine"
+  },
+  {
+    "id": "timeline_events",
+    "tier": "spine"
+  },
+  {
+    "id": "feature_flags",
+    "tier": "spine"
+  },
+  {
+    "id": "audit_log",
+    "tier": "spine"
+  },
+  {
+    "id": "taxonomies",
+    "tier": "spine"
+  },
+  {
+    "id": "topics",
+    "tier": "spine"
+  },
+  {
+    "id": "questions",
+    "tier": "later"
+  },
+  {
+    "id": "attempts",
+    "tier": "later"
+  },
+  {
+    "id": "doubts",
+    "tier": "later"
+  },
+  {
+    "id": "messages",
+    "tier": "later"
+  },
+  {
+    "id": "invoices",
+    "tier": "later"
+  },
+  {
+    "id": "usage_meters",
+    "tier": "later"
+  },
+  {
+    "id": "quota_policies",
+    "tier": "later"
+  },
+  {
+    "id": "notification_prefs",
+    "tier": "later"
+  },
+  {
+    "id": "notification_deliveries",
+    "tier": "later"
+  },
+  {
+    "id": "content_items",
+    "tier": "later"
+  },
+  {
+    "id": "assignments",
+    "tier": "later"
+  },
+  {
+    "id": "submissions",
+    "tier": "later"
+  },
+  {
+    "id": "practice_sets",
+    "tier": "later"
+  },
+  {
+    "id": "tests",
+    "tier": "later"
+  },
+  {
+    "id": "announcements",
+    "tier": "later"
+  },
+  {
+    "id": "plans",
+    "tier": "later"
+  },
+  {
+    "id": "payouts",
+    "tier": "later"
+  },
+  {
+    "id": "automation_rules",
+    "tier": "later"
+  },
+  {
+    "id": "backlog_items",
+    "tier": "later"
+  }
+]

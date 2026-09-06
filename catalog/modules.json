@@ -1,0 +1,457 @@
+[
+  {
+    "id": "A1",
+    "name": "Workspace & branding",
+    "dependsOn": [],
+    "phase": 0,
+    "alwaysOn": true,
+    "entities": [
+      "workspaces"
+    ]
+  },
+  {
+    "id": "A2",
+    "name": "Student accounts",
+    "dependsOn": [
+      "A1"
+    ],
+    "phase": 0,
+    "alwaysOn": true,
+    "entities": [
+      "users",
+      "identities"
+    ]
+  },
+  {
+    "id": "A3",
+    "name": "Staff accounts & roles",
+    "dependsOn": [
+      "A1"
+    ],
+    "phase": 0,
+    "alwaysOn": true,
+    "entities": [
+      "staff_memberships"
+    ]
+  },
+  {
+    "id": "A4",
+    "name": "Parent / guardian accounts",
+    "dependsOn": [
+      "A2"
+    ],
+    "phase": 3,
+    "alwaysOn": false,
+    "entities": [
+      "parent_links"
+    ]
+  },
+  {
+    "id": "A5",
+    "name": "Enrollment & cohorts",
+    "dependsOn": [
+      "A2",
+      "A3"
+    ],
+    "phase": 1,
+    "alwaysOn": false,
+    "entities": [
+      "cohorts",
+      "enrollments",
+      "students"
+    ]
+  },
+  {
+    "id": "B1",
+    "name": "Scheduling & calendar",
+    "dependsOn": [
+      "A5"
+    ],
+    "phase": 1,
+    "alwaysOn": false,
+    "entities": [
+      "scheduled_sessions"
+    ]
+  },
+  {
+    "id": "B2",
+    "name": "Live session + video link",
+    "dependsOn": [
+      "B1"
+    ],
+    "phase": 1,
+    "alwaysOn": false,
+    "entities": [
+      "scheduled_sessions"
+    ]
+  },
+  {
+    "id": "B3",
+    "name": "Session record",
+    "dependsOn": [
+      "B2"
+    ],
+    "phase": 1,
+    "alwaysOn": false,
+    "entities": [
+      "session_records",
+      "attendance"
+    ]
+  },
+  {
+    "id": "B4",
+    "name": "In-session engagement",
+    "dependsOn": [
+      "B2"
+    ],
+    "phase": 3,
+    "alwaysOn": false,
+    "entities": []
+  },
+  {
+    "id": "B5",
+    "name": "Content library",
+    "dependsOn": [
+      "A1"
+    ],
+    "phase": 2,
+    "alwaysOn": false,
+    "entities": [
+      "content_items"
+    ]
+  },
+  {
+    "id": "B6",
+    "name": "Assignments",
+    "dependsOn": [
+      "A5"
+    ],
+    "phase": 2,
+    "alwaysOn": false,
+    "entities": [
+      "assignments",
+      "submissions"
+    ]
+  },
+  {
+    "id": "C1",
+    "name": "Question bank",
+    "dependsOn": [
+      "A1"
+    ],
+    "phase": 2,
+    "alwaysOn": false,
+    "entities": [
+      "questions"
+    ]
+  },
+  {
+    "id": "C2",
+    "name": "Practice sets",
+    "dependsOn": [
+      "C1"
+    ],
+    "phase": 2,
+    "alwaysOn": false,
+    "entities": [
+      "practice_sets"
+    ]
+  },
+  {
+    "id": "C3",
+    "name": "Tests & mocks",
+    "dependsOn": [
+      "C1"
+    ],
+    "phase": 3,
+    "alwaysOn": false,
+    "entities": [
+      "tests"
+    ]
+  },
+  {
+    "id": "C4",
+    "name": "Auto-grading",
+    "dependsOn": [
+      "C2"
+    ],
+    "phase": 2,
+    "alwaysOn": false,
+    "entities": [
+      "attempts"
+    ]
+  },
+  {
+    "id": "C5",
+    "name": "Analysis & remediation",
+    "dependsOn": [
+      "C4"
+    ],
+    "phase": 2,
+    "alwaysOn": false,
+    "entities": [
+      "attempts"
+    ]
+  },
+  {
+    "id": "C6",
+    "name": "Adaptive practice",
+    "dependsOn": [
+      "C5"
+    ],
+    "phase": 4,
+    "alwaysOn": false,
+    "entities": [
+      "attempts"
+    ]
+  },
+  {
+    "id": "D1",
+    "name": "Doubts queue",
+    "dependsOn": [
+      "A2"
+    ],
+    "phase": 3,
+    "alwaysOn": false,
+    "entities": [
+      "doubts"
+    ]
+  },
+  {
+    "id": "D2",
+    "name": "Message threads",
+    "dependsOn": [
+      "A2",
+      "A3"
+    ],
+    "phase": 3,
+    "alwaysOn": false,
+    "entities": [
+      "messages"
+    ]
+  },
+  {
+    "id": "D3",
+    "name": "Announcements",
+    "dependsOn": [
+      "A5"
+    ],
+    "phase": 3,
+    "alwaysOn": false,
+    "entities": [
+      "announcements"
+    ]
+  },
+  {
+    "id": "D4",
+    "name": "Student timeline",
+    "dependsOn": [
+      "A2"
+    ],
+    "phase": 0,
+    "alwaysOn": true,
+    "entities": [
+      "timeline_events"
+    ]
+  },
+  {
+    "id": "D5",
+    "name": "Notifications",
+    "dependsOn": [
+      "A2"
+    ],
+    "phase": 1,
+    "alwaysOn": false,
+    "entities": [
+      "notification_prefs",
+      "notification_deliveries"
+    ]
+  },
+  {
+    "id": "E1",
+    "name": "Student dashboard",
+    "dependsOn": [
+      "D4"
+    ],
+    "phase": 1,
+    "alwaysOn": false,
+    "entities": []
+  },
+  {
+    "id": "E2",
+    "name": "Teacher dashboard",
+    "dependsOn": [
+      "E1"
+    ],
+    "phase": 2,
+    "alwaysOn": false,
+    "entities": []
+  },
+  {
+    "id": "E3",
+    "name": "Owner console",
+    "dependsOn": [
+      "E2"
+    ],
+    "phase": 3,
+    "alwaysOn": false,
+    "entities": [
+      "usage_meters"
+    ]
+  },
+  {
+    "id": "E4",
+    "name": "Reports & exports",
+    "dependsOn": [
+      "E1"
+    ],
+    "phase": 3,
+    "alwaysOn": false,
+    "entities": []
+  },
+  {
+    "id": "E5",
+    "name": "Mentor / backlog",
+    "dependsOn": [
+      "C5",
+      "A5"
+    ],
+    "phase": 3,
+    "alwaysOn": false,
+    "entities": [
+      "backlog_items"
+    ]
+  },
+  {
+    "id": "F1",
+    "name": "Student billing",
+    "dependsOn": [
+      "A5"
+    ],
+    "phase": 4,
+    "alwaysOn": false,
+    "entities": [
+      "invoices",
+      "plans"
+    ]
+  },
+  {
+    "id": "F2",
+    "name": "Platform subscription & metering",
+    "dependsOn": [
+      "A1"
+    ],
+    "phase": 0,
+    "alwaysOn": true,
+    "entities": [
+      "usage_meters",
+      "quota_policies"
+    ]
+  },
+  {
+    "id": "F3",
+    "name": "Payments",
+    "dependsOn": [
+      "F1"
+    ],
+    "phase": 4,
+    "alwaysOn": false,
+    "entities": [
+      "invoices"
+    ]
+  },
+  {
+    "id": "F4",
+    "name": "Trials, coupons, referrals",
+    "dependsOn": [
+      "F1"
+    ],
+    "phase": 4,
+    "alwaysOn": false,
+    "entities": []
+  },
+  {
+    "id": "F5",
+    "name": "Multi-teacher payouts",
+    "dependsOn": [
+      "F1",
+      "A3"
+    ],
+    "phase": 4,
+    "alwaysOn": false,
+    "entities": [
+      "payouts"
+    ]
+  },
+  {
+    "id": "F6",
+    "name": "Compliance & data",
+    "dependsOn": [
+      "A1"
+    ],
+    "phase": 4,
+    "alwaysOn": false,
+    "entities": [
+      "audit_log"
+    ]
+  },
+  {
+    "id": "G1",
+    "name": "Module toggle engine",
+    "dependsOn": [
+      "A1"
+    ],
+    "phase": 0,
+    "alwaysOn": true,
+    "entities": [
+      "feature_flags"
+    ]
+  },
+  {
+    "id": "G2",
+    "name": "Templates / presets",
+    "dependsOn": [
+      "G1"
+    ],
+    "phase": 0,
+    "alwaysOn": true,
+    "entities": [
+      "feature_flags"
+    ]
+  },
+  {
+    "id": "G3",
+    "name": "Custom fields & taxonomy",
+    "dependsOn": [
+      "G1"
+    ],
+    "phase": 4,
+    "alwaysOn": false,
+    "entities": [
+      "taxonomies",
+      "topics"
+    ]
+  },
+  {
+    "id": "G4",
+    "name": "Automation rules",
+    "dependsOn": [
+      "G1"
+    ],
+    "phase": 4,
+    "alwaysOn": false,
+    "entities": [
+      "automation_rules"
+    ]
+  },
+  {
+    "id": "G5",
+    "name": "Integrations",
+    "dependsOn": [
+      "A1"
+    ],
+    "phase": 4,
+    "alwaysOn": false,
+    "entities": []
+  }
+]

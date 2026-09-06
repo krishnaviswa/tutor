@@ -1,0 +1,11 @@
+---
+description: Testing (stub until app exists)
+globs: backend/tests/**/*,frontend/**/*.test.*
+alwaysApply: false
+---
+
+# Testing (planned)
+
+No app tests yet. When they exist: mock providers, AC mapped, no live vendors.
+
+Parity scripts now: `scripts/check_architecture_parity.py`, `scripts/check_agent_config_sync.py`.

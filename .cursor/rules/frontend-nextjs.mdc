@@ -1,0 +1,11 @@
+---
+description: Next.js conventions (stub until frontend exists)
+globs: frontend/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Next.js (planned)
+
+No frontend app yet. When it exists: one route per `catalog/screens.json` id. Tokens from the demo HTML. Do not restyle `empty` screens against invented UI.
+
+See README §3 and `frontend/CLAUDE.md`.

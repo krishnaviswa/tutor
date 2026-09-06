@@ -1,0 +1,13 @@
+---
+description: Ports and integrations (stub)
+globs: backend/app/services/**/*
+alwaysApply: false
+---
+
+# Ports (planned)
+
+Protocol + mock default: calendar_video, sms, email, storage, payments_student, payments_platform, push, whatsapp.
+
+WhatsApp: teacher, parent, admin; student owner-gated. Channel after timeline write.
+
+See README §9 and `backend/app/services/CLAUDE.md`.

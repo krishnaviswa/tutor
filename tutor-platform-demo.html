@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-<title>TutorOS — 26-Screen Prototype</title>
+<title>TutorOS — Template Prototype</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -8,7 +8,7 @@
 <style>
 :root{
   --ground:#F3F6F0; --surface:#FBFCF9; --sunk:#EBEFE6; --raised:#FFFFFF;
-  --ink:#182019; --ink-soft:#4C574F; --ink-faint:#7E8A81;
+  --ink:#182019; --ink-soft:#3D4640; --ink-faint:#5C675F;
   --line:#D6DCCF; --line-soft:#E4E9DD;
   --accent:#2E7D4F; --accent-ink:#1E5738; --accent-wash:#E4EFE5;
   --amber:#AF6C22; --amber-wash:#F5E9D8;
@@ -20,6 +20,8 @@
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   --shadow:0 1px 2px rgba(24,32,25,.04), 0 12px 34px -12px rgba(24,32,25,.18);
   --tint:var(--accent); --tint-wash:var(--accent-wash);
+  --on-tint:#182019;
+  color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
@@ -32,6 +34,8 @@
     --sky:#6BA7C2; --sky-wash:#122831;
     --violet:#A98FD6; --violet-wash:#241C33;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 40px -14px rgba(0,0,0,.6);
+    --on-tint:#0c130e;
+    color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
@@ -44,6 +48,21 @@
   --sky:#6BA7C2; --sky-wash:#122831;
   --violet:#A98FD6; --violet-wash:#241C33;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 40px -14px rgba(0,0,0,.6);
+  --on-tint:#0c130e;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --ground:#F3F6F0; --surface:#FBFCF9; --sunk:#EBEFE6; --raised:#FFFFFF;
+  --ink:#182019; --ink-soft:#3D4640; --ink-faint:#5C675F;
+  --line:#D6DCCF; --line-soft:#E4E9DD;
+  --accent:#2E7D4F; --accent-ink:#1E5738; --accent-wash:#E4EFE5;
+  --amber:#AF6C22; --amber-wash:#F5E9D8;
+  --crimson:#A4384A; --crimson-wash:#F3E0E1;
+  --sky:#2C6C88; --sky-wash:#DDEAEE;
+  --violet:#6A4C93; --violet-wash:#E9E2F1;
+  --shadow:0 1px 2px rgba(24,32,25,.04), 0 12px 34px -12px rgba(24,32,25,.18);
+  --on-tint:#182019;
+  color-scheme:light;
 }
 
 *{box-sizing:border-box;}
@@ -54,18 +73,19 @@ p{margin:0;}
 button{font-family:inherit;}
 ::selection{background:var(--accent-wash);}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px;}
-.k{font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);}
+.k{font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);}
 
 /* ---------- top bar ---------- */
-#top{position:sticky;top:0;z-index:40;height:56px;display:flex;align-items:center;gap:10px;padding:0 14px;background:color-mix(in srgb,var(--ground) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft);}
-#top .brand{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-weight:600;font-size:15px;cursor:pointer;}
+#top{position:sticky;top:0;z-index:40;height:56px;display:flex;align-items:center;gap:9px;padding:0 12px;background:color-mix(in srgb,var(--ground) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft);}
+#top .brand{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-weight:600;font-size:15px;cursor:pointer;flex:none;}
 #top .brand svg{width:19px;height:19px;}
-#top .brand i{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:2px 6px;font-style:normal;}
+#top .brand i{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:2px 6px;font-style:normal;cursor:pointer;}
 .burger{border:1px solid var(--line);background:var(--surface);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);flex:none;}
+.tplsel{border:1px solid var(--line);background:var(--surface);border-radius:8px;height:31px;font-family:var(--mono);font-size:10px;color:var(--ink-soft);padding:0 6px;max-width:160px;flex:none;}
 .tnav{display:flex;align-items:center;gap:8px;margin:0 auto;font-family:var(--mono);font-size:11px;color:var(--ink-soft);}
 .tnav button{border:1px solid var(--line);background:var(--surface);border-radius:8px;width:26px;height:26px;cursor:pointer;color:var(--ink-soft);}
 .tnav button:disabled{opacity:.35;cursor:default;}
-.tnav .lbl{min-width:150px;text-align:center;}
+.tnav .lbl{min-width:170px;text-align:center;}
 .right{display:flex;align-items:center;gap:7px;flex:none;}
 .iconbtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;height:31px;padding:0 10px;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);display:inline-flex;align-items:center;gap:6px;}
 .iconbtn:hover{border-color:var(--ink-faint);color:var(--ink);}
@@ -73,10 +93,10 @@ button{font-family:inherit;}
 .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:none;}
 .seg button{border:0;background:var(--surface);padding:0 10px;height:31px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-faint);cursor:pointer;}
 .seg button.on{background:var(--ink);color:var(--ground);}
-@media(max-width:820px){.tnav .lbl{display:none;}.iconbtn .lbl{display:none;}.iconbtn{padding:0 8px;}}
+@media(max-width:960px){.tnav .lbl{display:none;}.iconbtn .lbl{display:none;}.iconbtn{padding:0 8px;}.tplsel{max-width:118px;}}
 
 /* ---------- drawer ---------- */
-#drawer{position:fixed;top:0;left:0;bottom:0;width:312px;max-width:86vw;background:var(--surface);border-right:1px solid var(--line);z-index:60;transform:translateX(-103%);transition:transform .22s ease;overflow-y:auto;padding:16px 14px 40px;}
+#drawer{position:fixed;top:0;left:0;bottom:0;width:320px;max-width:88vw;background:var(--surface);border-right:1px solid var(--line);z-index:60;transform:translateX(-103%);transition:transform .22s ease;overflow-y:auto;padding:16px 14px 40px;}
 #drawer.open{transform:none;}
 #drawer .dh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 #drawer .dh b{font-family:var(--serif);font-size:1rem;}
@@ -91,7 +111,7 @@ button{font-family:inherit;}
 .draw a small{display:block;font-size:.7rem;color:var(--ink-faint);font-weight:400;}
 
 /* ---------- stage + device ---------- */
-#stage{padding:26px 20px 64px;max-width:1240px;margin:0 auto;}
+#stage{padding:22px 20px 64px;max-width:1240px;margin:0 auto;}
 @media(max-width:560px){#stage{padding:14px 9px 48px;}}
 .dev{margin:0 auto;background:var(--raised);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;max-width:100%;}
 .dev--web{max-width:1180px;}
@@ -114,6 +134,9 @@ button{font-family:inherit;}
 .tint-accent{--tint:var(--accent);--tint-wash:var(--accent-wash);}
 .tint-sky{--tint:var(--sky);--tint-wash:var(--sky-wash);}
 .tint-violet{--tint:var(--violet);--tint-wash:var(--violet-wash);}
+.tint-crimson{--tint:var(--crimson);--tint-wash:var(--crimson-wash);}
+.tint-mute{--tint:var(--ink-faint);--tint-wash:var(--sunk);}
+.tint-ink{--tint:var(--ink);--tint-wash:var(--sunk);}
 
 /* ---------- app chrome (phone) ---------- */
 .appbar{display:flex;align-items:center;gap:10px;padding:15px 16px 12px;background:var(--tint-wash);}
@@ -206,7 +229,7 @@ button{font-family:inherit;}
 
 .chips{display:flex;gap:6px;flex-wrap:wrap;}
 .chip{font-family:var(--mono);font-size:9.5px;padding:4px 9px;border-radius:999px;background:var(--sunk);color:var(--ink-soft);border:1px solid var(--line-soft);}
-.chip.on{background:var(--tint);color:#fff;border-color:var(--tint);}
+.chip.on{background:var(--tint);color:var(--on-tint);border-color:var(--tint);}
 
 .list__i{display:flex;gap:11px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-soft);}
 .list__i:last-child{border-bottom:0;}
@@ -222,11 +245,11 @@ button{font-family:inherit;}
 .qopt{display:flex;gap:10px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:11px;margin-bottom:8px;font-size:.9rem;background:var(--raised);}
 .qopt.sel{border-color:var(--tint);background:var(--tint-wash);}
 .qopt i{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--ink-faint);display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.68rem;font-style:normal;flex:none;}
-.qopt.sel i{background:var(--tint);border-color:var(--tint);color:#fff;}
+.qopt.sel i{background:var(--tint);border-color:var(--tint);color:var(--on-tint);}
 
 .palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-width:270px;}
 .palette b{aspect-ratio:1;border-radius:7px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.7rem;color:var(--ink-faint);font-weight:400;}
-.palette b.a{background:var(--tint);color:#fff;border-color:var(--tint);}
+.palette b.a{background:var(--tint);color:var(--on-tint);border-color:var(--tint);}
 .palette b.m{border-color:var(--amber);color:var(--amber);}
 .palette b.c{outline:2px solid var(--tint);outline-offset:1px;}
 
@@ -241,22 +264,21 @@ button{font-family:inherit;}
 .sbar{background:#232c2f;border-radius:6px;height:8px;overflow:hidden;margin:5px 0;}
 .sbar b{display:block;height:100%;background:#5CB57C;}
 
-/* ---------- hotspots (the only real interaction) ---------- */
+/* ---------- hotspots ---------- */
 .hot{cursor:pointer;text-decoration:none;color:inherit;}
 .hot--row{display:block;border:1.5px solid color-mix(in srgb,var(--tint) 42%,transparent);border-radius:12px;padding:13px 14px;margin-bottom:9px;background:var(--surface);transition:transform .13s,border-color .13s,background .13s;}
 .hot--row:hover{border-color:var(--tint);background:var(--tint-wash);transform:translateY(-1px);}
 .hot--card{position:relative;display:block;border:1.5px solid color-mix(in srgb,var(--tint) 42%,transparent);border-radius:13px;padding:15px 40px 15px 15px;margin-bottom:10px;background:var(--surface);transition:transform .13s,border-color .13s,background .13s;}
 .hot--card:hover{border-color:var(--tint);background:var(--tint-wash);transform:translateY(-1px);}
 .hot--card::after{content:"→";position:absolute;right:15px;top:50%;transform:translateY(-50%);color:var(--tint);font-weight:700;}
-.hot--btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;background:var(--tint);color:#fff;border:none;font-family:var(--sans);font-weight:600;font-size:.88rem;cursor:pointer;transition:filter .13s;}
+.hot--btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;background:var(--tint);color:var(--on-tint);border:none;font-family:var(--sans);font-weight:600;font-size:.88rem;cursor:pointer;transition:filter .13s;}
 .hot--btn:hover{filter:brightness(1.07);}
 .hot--btn::after{content:"→";}
-.hot--btn.ghost{background:transparent;color:var(--tint);border:1.5px solid color-mix(in srgb,var(--tint) 45%,transparent);}
-:root[data-theme="dark"] .hot--btn:not(.ghost),:root:not([data-theme="light"]) .hot--btn:not(.ghost){color:#0c130e;}
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .hot--btn:not(.ghost){color:#fff;}}
+.hot--btn.ghost{background:transparent;color:var(--accent-ink);border:1.5px solid color-mix(in srgb,var(--tint) 45%,transparent);}
 .hot--link{border-bottom:2px solid var(--tint);color:var(--tint);cursor:pointer;font-weight:600;}
 body.showhot .hot--row,body.showhot .hot--card{box-shadow:0 0 0 3px var(--tint-wash);}
 body.showhot .hot--btn{box-shadow:0 0 0 4px var(--tint-wash);}
+body.showhot .flownode{box-shadow:0 0 0 3px var(--tint-wash);}
 
 .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);font-size:.8rem;font-family:var(--sans);cursor:default;}
 .btn--dark{background:var(--ink);color:var(--ground);border-color:var(--ink);}
@@ -264,7 +286,7 @@ body.showhot .hot--btn{box-shadow:0 0 0 4px var(--tint-wash);}
 
 .flowbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:var(--sunk);border-top:2px dashed var(--line);}
 .flowbar>div{min-width:0;display:flex;align-items:center;}
-.flowbar>div:first-child{flex:1;}
+.flowbar>div:first-child{flex:1;gap:8px;flex-wrap:wrap;}
 .flowbar>div:last-child{flex:none;}
 .flowbar .fb__l{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);text-align:center;flex:none;padding:0 6px;}
 .flowbar .prev{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -272,28 +294,93 @@ body.showhot .hot--btn{box-shadow:0 0 0 4px var(--tint-wash);}
 .flowbar .hot--btn{white-space:nowrap;padding:9px 14px;font-size:.82rem;}
 @media(max-width:440px){.flowbar .fb__l{display:none;}}
 
-/* ---------- map ---------- */
+/* ---------- screen header strip ---------- */
+.scrn__hdr{max-width:1180px;margin:0 auto 12px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:9px 14px;background:var(--tint-wash);border:1px solid color-mix(in srgb,var(--tint) 30%,transparent);border-radius:11px;}
+.scrn__crumb{font-size:.8rem;color:var(--ink-soft);display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.scrn__crumb b{color:var(--ink);}
+.sc__k{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--tint);}
+.sc__link{cursor:pointer;border-bottom:1px solid color-mix(in srgb,var(--tint) 45%,transparent);}
+.sc__link:hover{color:var(--accent-ink);border-bottom-color:var(--accent-ink);}
+.sc__sep{color:var(--ink-faint);}
+.scrn__metar{display:flex;align-items:center;gap:8px;}
+.rolebadge{font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--tint);color:var(--on-tint);}
+.modtag{font-family:var(--mono);font-size:9px;color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:3px 7px;}
+.sc__flow{font-family:var(--mono);font-size:10px;color:var(--tint);cursor:pointer;}
+
+.why{max-width:1180px;margin:0 auto 12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px 14px;box-shadow:var(--shadow);}
+.why>p.k{margin-bottom:8px;}
+.why__g{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:12px;}
+.why__g>div{min-width:0;}
+.why__g span{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-bottom:4px;}
+.why__g p{font-size:.82rem;color:var(--ink-soft);line-height:1.45;}
+.why--hero{margin:14px 0 0;box-shadow:none;background:var(--sunk);border-color:transparent;}
+@media(max-width:720px){.why__g{grid-template-columns:1fr;}}
+
+/* ---------- home ---------- */
 .mapwrap{max-width:1180px;margin:0 auto;}
 .maphero{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:26px;margin-bottom:20px;box-shadow:var(--shadow);}
 .maphero h1{font-size:clamp(1.5rem,3vw,2.15rem);letter-spacing:-.02em;margin:10px 0 12px;}
 .maphero h1 em{font-style:italic;color:var(--accent-ink);}
-.maphero p{color:var(--ink-soft);max-width:64ch;}
+.maphero p{color:var(--ink-soft);max-width:66ch;}
 .maphero .row{margin-top:18px;}
 .mapmeta{margin-top:14px;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);}
-.mapgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:14px;}
-.mapcol{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;}
-.mapcol__h{display:flex;align-items:center;gap:8px;font-weight:600;font-size:.9rem;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid var(--line-soft);}
-.mapcol__h i{width:20px;height:20px;border-radius:6px;background:var(--tint-wash);color:var(--tint);display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.68rem;font-weight:700;font-style:normal;flex:none;}
-.mapchip{display:block;padding:9px 10px;border-radius:9px;border:1px solid var(--line-soft);margin-bottom:6px;cursor:pointer;transition:border-color .13s,background .13s;}
-.mapchip:last-child{margin-bottom:0;}
-.mapchip:hover{border-color:var(--tint);background:var(--tint-wash);}
-.mapchip b{display:block;font-size:.83rem;}
-.mapchip span{display:block;font-size:.71rem;color:var(--ink-faint);margin-top:1px;}
+.tplgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;}
+.tplcard{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--tint);border-radius:14px;padding:16px;cursor:pointer;transition:transform .13s,border-color .13s;}
+.tplcard:hover{transform:translateY(-2px);border-color:var(--tint);}
+.tplcard__h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;}
+.tplcard__h h3{font-size:1.05rem;}
+.tplcard p{color:var(--ink-soft);font-size:.86rem;}
+.tplcard__shape{font-family:var(--mono);font-size:10px;color:var(--ink-faint);margin:10px 0 8px;}
+.tplcard__roles{display:flex;gap:9px;flex-wrap:wrap;}
+.rl{font-family:var(--mono);font-size:9px;display:inline-flex;align-items:center;gap:4px;color:var(--ink-soft);}
+.rl i{width:8px;height:8px;border-radius:2px;background:var(--tint);display:inline-block;}
+
+/* ---------- swimlane flow ---------- */
+.flowpage{max-width:1180px;margin:0 auto;}
+.flowhero{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--tint);border-radius:16px;padding:22px;margin-bottom:14px;box-shadow:var(--shadow);}
+.flowhero h1{font-size:clamp(1.35rem,2.6vw,1.95rem);margin:6px 0 8px;}
+.flowhero p{color:var(--ink-soft);max-width:70ch;}
+.flowhero .prev{cursor:pointer;color:var(--tint);}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;font-family:var(--mono);font-size:10px;color:var(--ink-soft);}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
+.swimwrap{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:14px;}
+.swim{display:grid;gap:9px;position:relative;min-width:760px;}
+.swim__stage{font-family:var(--mono);font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint);text-align:center;padding-bottom:6px;border-bottom:2px solid var(--line-soft);}
+.swim__lane{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--tint);display:flex;align-items:center;padding-right:8px;border-right:2px solid var(--tint-wash);}
+.swim__cell{display:flex;flex-direction:column;gap:7px;padding:4px 2px;min-height:44px;}
+.flownode{position:relative;display:block;text-align:left;border:1.5px solid color-mix(in srgb,var(--tint) 40%,transparent);background:var(--tint-wash);border-radius:10px;padding:8px 9px 8px 27px;cursor:pointer;transition:transform .12s,border-color .12s;}
+.flownode:hover{transform:translateY(-1px);border-color:var(--tint);}
+.flownode__n{position:absolute;left:6px;top:7px;width:16px;height:16px;border-radius:50%;background:var(--tint);color:var(--on-tint);font-family:var(--mono);font-size:8.5px;display:flex;align-items:center;justify-content:center;}
+.flownode__t{font-size:.78rem;font-weight:600;line-height:1.2;color:var(--ink);display:block;}
+.flownode--auto{border-style:dashed;background:transparent;}
+.flownode--auto .flownode__n{background:var(--ink-faint);color:var(--on-tint);}
+.flownode__a{display:block;font-size:.68rem;color:var(--ink-faint);margin-top:3px;line-height:1.3;}
+.swim__wires{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:0;}
+.swim__wires path{fill:none;stroke:var(--ink-faint);stroke-width:1.6;stroke-dasharray:2 4;opacity:.5;}
+.swim__cell .flownode{z-index:1;}
+
+/* ---------- compare ---------- */
+.cmptbl{width:100%;border-collapse:collapse;font-size:.8rem;}
+.cmptbl th{font-family:var(--mono);font-size:8.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-faint);padding:8px 6px;border-bottom:1px solid var(--line);text-align:center;vertical-align:bottom;}
+.cmptbl th:first-child{text-align:left;min-width:280px;}
+.cmptbl td{padding:10px 6px;border-bottom:1px solid var(--line-soft);text-align:center;vertical-align:top;}
+.cmptbl td:first-child{text-align:left;}
+.cmptbl tr.grp td{background:var(--sunk);font-family:var(--mono);font-size:8.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);}
+.cmptbl tr.spine td:first-child{border-left:3px solid var(--accent);padding-left:7px;}
+.cmptbl .dot{width:11px;height:11px;border-radius:50%;display:inline-block;cursor:pointer;}
+.cmptbl .cmpx{color:var(--line);}
+.cmptbl .cmpname{cursor:pointer;font-weight:600;color:var(--ink);}
+.cmptbl .cmpname:hover{color:var(--accent-ink);}
+.cmpmeta{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px 12px;margin-top:8px;}
+.cmpmeta>div{min-width:0;}
+.cmpmeta span{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-bottom:2px;font-weight:500;}
+.cmpmeta p{margin:0;font-size:.72rem;color:var(--ink-soft);line-height:1.4;font-weight:400;}
 
 /* ---------- modal + toast ---------- */
 .modal{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(10,14,11,.42);}
 .modal.open{display:flex;}
-.modal__c{background:var(--surface);border:1px solid var(--line);border-radius:14px;max-width:580px;width:100%;padding:24px;max-height:84vh;overflow-y:auto;box-shadow:var(--shadow);}
+.modal__c{background:var(--surface);border:1px solid var(--line);border-radius:14px;max-width:600px;width:100%;padding:24px;max-height:84vh;overflow-y:auto;box-shadow:var(--shadow);}
 .modal__c h3{font-size:1.2rem;margin-bottom:12px;}
 .modal__c p,.modal__c li{font-size:.86rem;color:var(--ink-soft);line-height:1.55;}
 .modal__c ul{padding-left:18px;margin:8px 0;}
@@ -313,12 +400,22 @@ body.showhot .hot--btn{box-shadow:0 0 0 4px var(--tint-wash);}
   <button class="burger" id="burger" aria-label="All screens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <div class="brand" id="brandHome">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 3c3.5 3 3.5 15 0 18M12 3c-3.5 3-3.5 15 0 18M3.2 9.5h17.6M3.2 14.5h17.6"/></svg>
-    TutorOS <i>prototype</i>
+    TutorOS <i id="brandTpl" title="Template home">templates</i>
   </div>
+  <select id="tplSel" class="tplsel" aria-label="Jump to a template">
+    <option value="home">Template home</option>
+    <option value="compare">Compare all six</option>
+    <option value="t1">1 · Exam-prep loop</option>
+    <option value="t2">2 · 1-on-1 subject tutor</option>
+    <option value="t3">3 · K-12 homework help</option>
+    <option value="t4">4 · Skills / cohort course</option>
+    <option value="t5">5 · Music / arts</option>
+    <option value="t6">6 · Everything</option>
+  </select>
   <nav class="tnav">
-    <button id="pv" aria-label="Previous screen">‹</button>
-    <span class="lbl" id="tlbl">26-screen walkthrough</span>
-    <button id="nx" aria-label="Next screen">›</button>
+    <button id="pv" aria-label="Previous">‹</button>
+    <span class="lbl" id="tlbl">template prototype</span>
+    <button id="nx" aria-label="Next">›</button>
   </nav>
   <div class="right">
     <button class="iconbtn on" id="hotBtn" title="Highlight the clickable areas"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg><span class="lbl">Hotspots</span></button>
@@ -333,7 +430,7 @@ body.showhot .hot--btn{box-shadow:0 0 0 4px var(--tint-wash);}
 
 <div id="scrim"></div>
 <aside id="drawer">
-  <div class="dh"><b>All 26 screens</b><span class="prev" id="aboutLink" style="cursor:pointer;color:var(--accent-ink);font-family:var(--mono);font-size:11px;">About ⓘ</span></div>
+  <div class="dh"><b>Templates &amp; screens</b><span class="prev" id="aboutLink" style="cursor:pointer;color:var(--accent-ink);font-family:var(--mono);font-size:11px;">About ⓘ</span></div>
   <div id="drawerBody"></div>
 </aside>
 
@@ -346,13 +443,14 @@ body.showhot .hot--btn{box-shadow:0 0 0 4px var(--tint-wash);}
 
 <script>
 (function(){
+/* Child role files set this to student|faculty|admin|parent|system. Demo backbone stays null — no extra chrome. */
+var ROLE_ONLY=null;
 /* ================= theme ================= */
 var root=document.documentElement, tb=document.getElementById('themeBtn');
 var torder=['system','light','dark'], ti=0;
 try{var sv=localStorage.getItem('tos_theme');if(sv)ti=Math.max(0,torder.indexOf(sv));}catch(e){}
-function applyTheme(){var m=torder[ti];if(m==='system'){root.removeAttribute('data-theme');tb.textContent='Theme · Auto';}else{root.setAttribute('data-theme',m);tb.textContent='Theme · '+m[0].toUpperCase()+m.slice(1);}try{localStorage.setItem('tos_theme',m);}catch(e){}}
+function applyTheme(){var m=torder[ti];if(m==='system'){root.removeAttribute('data-theme');tb.textContent='Theme · Auto';}else{root.setAttribute('data-theme',m);tb.textContent='Theme · '+m[0].toUpperCase()+m.slice(1);}try{localStorage.setItem('tos_theme',m);}catch(e){}if(state&&state.view==='flow')requestAnimationFrame(drawWires);}
 tb.addEventListener('click',function(){ti=(ti+1)%torder.length;applyTheme();});
-applyTheme();
 
 /* ================= icons ================= */
 var ICONS={
@@ -380,48 +478,257 @@ function stat(v,l,d,tone){return '<div class="stat"><div class="stat__v">'+v+'</
 function field(l,v,hint){return '<label class="field"><span>'+l+'</span><div class="field__in">'+v+'</div>'+(hint?'<em>'+hint+'</em>':'')+'</label>';}
 function bars(data){return '<div class="bars">'+data.map(function(d){return '<span class="bar"><b style="height:'+d[1]+'%"></b><em>'+d[0]+'</em></span>';}).join('')+'</div>';}
 function ring(pct){var r=40,c=2*Math.PI*r,off=c*(1-pct/100);return '<svg class="ring" viewBox="0 0 100 100"><circle class="ring__bg" cx="50" cy="50" r="'+r+'"/><circle class="ring__fg" cx="50" cy="50" r="'+r+'" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"/><text class="ring__t" x="50" y="50">'+pct+'%</text></svg>';}
-function hotBtn(label,goto,ghost){return '<button class="hot hot--btn'+(ghost?' ghost':'')+'" data-goto="'+goto+'">'+label+'</button>';}
-function next(goto,label){return '<button class="hot hot--btn" data-goto="'+goto+'">'+label+'</button>';}
+function hotBtn(label,goto,ghost,asRole){return '<button class="hot hot--btn'+(ghost?' ghost':'')+'" data-goto="'+goto+'"'+(asRole?' data-as="'+asRole+'"':'')+'>'+label+'</button>';}
 
-/* ================= data model ================= */
-var FLOWS=[
- {id:'f1',name:'Set up the workspace',tint:'amber',screens:['signup','template','branding','roster']},
- {id:'f2',name:'Everyone signs in',tint:'accent',screens:['router','student-login','staff-login']},
- {id:'f3',name:'Run a live class',tint:'sky',screens:['schedule','session-pre','live-teacher','record']},
- {id:'f4',name:'Student joins & learns',tint:'accent',screens:['student-dash','join','live-student','library','lesson']},
- {id:'f5',name:'The practice loop',tint:'sky',screens:['practice-build','practice-play','practice-result','analysis','test']},
- {id:'f6',name:'Doubts, records & oversight',tint:'violet',screens:['doubt-student','doubt-teacher','timeline','teacher-dash','owner']}
-];
-var TOUR=[];FLOWS.forEach(function(f){f.screens.forEach(function(s){TOUR.push(s);});});
-function flowOf(id){for(var i=0;i<FLOWS.length;i++)if(FLOWS[i].screens.indexOf(id)>=0)return FLOWS[i];return FLOWS[0];}
+/* ================= data: stages + roles ================= */
+var STAGES=['Onboard','Enrol','Schedule','Teach','Practise','Assess','Support','Review','Operate','Bill','Configure'];
+var ROLE={
+ student:{label:'Student',tint:'accent'},
+ faculty:{label:'Faculty',tint:'sky'},
+ admin:{label:'Admin / Owner',tint:'violet'},
+ parent:{label:'Parent',tint:'amber'},
+ system:{label:'System',tint:'mute'}
+};
 
+/* ================= data: screens ================= */
 var S={
- 'signup':{t:'Workspace setup',sub:'Name it, pick a URL, set the timezone',who:'Owner',frame:'web',tint:'amber'},
- 'template':{t:'Pick a template',sub:'One choice sets ~26 modules for you',who:'Owner',frame:'web',tint:'amber'},
- 'branding':{t:'Branding & domain',sub:'Logo, colour, custom domain, sender',who:'Owner',frame:'web',tint:'amber'},
- 'roster':{t:'Roster & cohorts',sub:'Import students, group them into batches',who:'Owner',frame:'web',tint:'amber'},
- 'router':{t:'Role router',sub:'One door — here to learn, or to teach',who:'Student',frame:'phone',tint:'accent'},
- 'student-login':{t:'Student sign-in',sub:'Phone OTP — one identity for the record',who:'Student',frame:'phone',tint:'accent'},
- 'staff-login':{t:'Staff sign-in',sub:'Email + 2FA for privileged accounts',who:'Teacher',frame:'web',tint:'sky'},
- 'schedule':{t:'Schedule / calendar',sub:'Recurring and one-off sessions',who:'Teacher',frame:'web',tint:'sky'},
- 'session-pre':{t:'Session detail (pre-class)',sub:'Everything about one class before it starts',who:'Teacher',frame:'web',tint:'sky'},
- 'live-teacher':{t:'Live session — teacher',sub:'Video, roster, chat, polls, doubts',who:'Teacher',frame:'web',tint:'sky'},
- 'record':{t:'Session record & event transcript',sub:'The after-class bundle — an event log',who:'Teacher',frame:'web',tint:'sky'},
- 'student-dash':{t:'Student dashboard',sub:'Next class, open practice, this week',who:'Student',frame:'phone',tint:'accent'},
- 'join':{t:'Join page / waiting room',sub:'The link they click to get into class',who:'Student',frame:'phone',tint:'accent'},
- 'live-student':{t:'Live session — student',sub:'The call plus quick-checks and doubts',who:'Student',frame:'phone',tint:'accent'},
- 'library':{t:'Content library',sub:'Lessons, videos, PDFs, playlists',who:'Student',frame:'phone',tint:'accent'},
- 'lesson':{t:'Lesson viewer',sub:'One lesson — video, notes, checks',who:'Student',frame:'phone',tint:'accent'},
- 'practice-build':{t:'Practice set builder',sub:'Assemble a same-day practice artefact',who:'Teacher',frame:'web',tint:'sky'},
- 'practice-play':{t:'Practice player',sub:'One question at a time, a real deadline',who:'Student',frame:'phone',tint:'accent'},
- 'practice-result':{t:'Result & tagged key',sub:'Every miss tagged, every tag an action',who:'Student',frame:'phone',tint:'accent'},
- 'analysis':{t:'Analysis → remediation',sub:'Most-missed items forced to carry an action',who:'Teacher',frame:'web',tint:'sky'},
- 'test':{t:'Test runner',sub:'Timed paper, palette, sections, resume',who:'Student',frame:'phone',tint:'accent'},
- 'doubt-student':{t:'Doubts queue — student',sub:'Photo or text in, an honest queue position',who:'Student',frame:'phone',tint:'accent'},
- 'doubt-teacher':{t:'Doubts triage — teacher',sub:'Tag, answer, attach a clip, resolve',who:'Teacher',frame:'web',tint:'sky'},
- 'timeline':{t:'Student timeline / record log',sub:'One stream — the full record',who:'Student',frame:'phone',tint:'accent'},
- 'teacher-dash':{t:'Teacher dashboard',sub:'Cohort health — who is behind',who:'Teacher',frame:'web',tint:'sky'},
- 'owner':{t:'Owner console',sub:'Operation-wide — delivery, SLA, revenue',who:'Owner',frame:'web',tint:'violet'}
+ 'router':{t:'Role router',role:'student',frame:'phone',mod:'A2',dom:'A'},
+ 'student-login':{t:'Student sign-in',role:'student',frame:'phone',mod:'A2',dom:'A'},
+ 'staff-login':{t:'Staff sign-in',role:'faculty',frame:'web',mod:'A3',dom:'A'},
+ 'wsetup':{t:'Workspace setup',role:'admin',frame:'web',mod:'A1',dom:'A'},
+ 'branding':{t:'Branding & domain',role:'admin',frame:'web',mod:'A1',dom:'A'},
+ 'roster':{t:'Roster',role:'admin',frame:'web',mod:'A5',dom:'A'},
+ 'cohort-builder':{t:'Cohort builder',role:'faculty',frame:'web',mod:'A5',dom:'A'},
+ 'parent-link':{t:'Parent link',role:'parent',frame:'phone',mod:'A4',dom:'A'},
+ 'parent-home':{t:'Parent home',role:'parent',frame:'phone',mod:'A4',dom:'A'},
+ 'schedule':{t:'Schedule / calendar',role:'faculty',frame:'web',mod:'B1',dom:'B'},
+ 'session-pre':{t:'Session detail (pre-class)',role:'faculty',frame:'web',mod:'B1',dom:'B'},
+ 'join':{t:'Join page / waiting room',role:'student',frame:'phone',mod:'B2',dom:'B'},
+ 'live-teacher':{t:'Live session console',role:'faculty',frame:'web',mod:'B2',dom:'B'},
+ 'live-student':{t:'Live session view',role:'student',frame:'phone',mod:'B2',dom:'B'},
+ 'session-video':{t:'Session video & transcript',role:'faculty',frame:'web',mod:'B2',dom:'B'},
+ 'record':{t:'Session record & event transcript',role:'faculty',frame:'web',mod:'B3',dom:'B'},
+ 'library':{t:'Content library',role:'student',frame:'phone',mod:'B5',dom:'B'},
+ 'lesson':{t:'Lesson / module viewer',role:'student',frame:'phone',mod:'B5',dom:'B'},
+ 'assign-issue':{t:'Assignment issue',role:'faculty',frame:'web',mod:'B6',dom:'B'},
+ 'assign-grade':{t:'Assignment submit & grade',role:'faculty',frame:'web',mod:'B6',dom:'B'},
+ 'qbank':{t:'Question bank',role:'faculty',frame:'web',mod:'C1',dom:'C'},
+ 'practice-build':{t:'Practice set builder',role:'faculty',frame:'web',mod:'C2',dom:'C'},
+ 'practice-play':{t:'Practice player',role:'student',frame:'phone',mod:'C2',dom:'C'},
+ 'practice-result':{t:'Practice result & tagged key',role:'student',frame:'phone',mod:'C4',dom:'C'},
+ 'test-setup':{t:'Test / mock setup',role:'faculty',frame:'web',mod:'C3',dom:'C'},
+ 'test-runner':{t:'Test runner',role:'student',frame:'phone',mod:'C3',dom:'C'},
+ 'analysis':{t:'Analysis → remediation board',role:'faculty',frame:'web',mod:'C5',dom:'C'},
+ 'doubt-student':{t:'Doubts queue (student)',role:'student',frame:'phone',mod:'D1',dom:'D'},
+ 'doubt-teacher':{t:'Doubts triage (teacher)',role:'faculty',frame:'web',mod:'D1',dom:'D'},
+ 'messages':{t:'Message threads',role:'faculty',frame:'web',mod:'D2',dom:'D'},
+ 'announce':{t:'Announcements',role:'faculty',frame:'web',mod:'D3',dom:'D'},
+ 'timeline':{t:'Student timeline / record log',role:'student',frame:'phone',mod:'D4',dom:'D'},
+ 'notif-prefs':{t:'Notification preferences',role:'student',frame:'phone',mod:'D5',dom:'D'},
+ 'student-dash':{t:'Student dashboard',role:'student',frame:'phone',mod:'E1',dom:'E'},
+ 'teacher-dash':{t:'Teacher dashboard',role:'faculty',frame:'web',mod:'E2',dom:'E'},
+ 'owner':{t:'Owner console',role:'admin',frame:'web',mod:'E3',dom:'E'},
+ 'reports':{t:'Reports & exports',role:'faculty',frame:'web',mod:'E4',dom:'E'},
+ 'mentor':{t:'Mentor / backlog workflow',role:'faculty',frame:'web',mod:'E5',dom:'E'},
+ 'billing':{t:'Student billing & plans',role:'admin',frame:'web',mod:'F1',dom:'F'},
+ 'payments':{t:'Payments & invoices',role:'student',frame:'phone',mod:'F3',dom:'F'},
+ 'subscription':{t:'Platform subscription & usage',role:'admin',frame:'web',mod:'F2',dom:'F'},
+ 'payouts':{t:'Payouts / revenue share',role:'admin',frame:'web',mod:'F5',dom:'F'},
+ 'audit':{t:'Audit log & data export',role:'admin',frame:'web',mod:'F6',dom:'F'},
+ 'onboard-kind':{t:'What kind of tutoring?',role:'admin',frame:'web',mod:'G2',dom:'G'},
+ 'template-gallery':{t:'Template gallery',role:'admin',frame:'web',mod:'G2',dom:'G'},
+ 'automation':{t:'Automation rules',role:'admin',frame:'web',mod:'G4',dom:'G'},
+ 'integrations':{t:'Integrations',role:'admin',frame:'web',mod:'G5',dom:'G'}
+};
+
+/* ================= data: templates + flows =================
+   step = [screen, role, stage] or [screen, role, stage, autoNote] */
+var TEMPLATES=[
+ {id:'t1',short:'Exam-prep',name:'Exam-prep loop',tint:'accent',tier:'Cohort',
+  shape:'Cohort · high-frequency · practice-heavy',
+  blurb:'Concept → same-day practice → tagged analysis → mock. NEET / JEE / boards. Faculty starts at cohort/schedule — this track has no staff sign-in step.',
+  modules:'Enrollment, cohorts, scheduling, session record, content, question bank, practice, tests, analysis, doubts, mentor backlog, dashboards',
+  roles:['student','faculty','admin','parent','system'],
+  steps:[
+   ['onboard-kind','admin','Onboard'],['branding','admin','Onboard'],
+   ['roster','admin','Enrol'],['cohort-builder','faculty','Enrol'],['student-login','student','Enrol'],['parent-link','parent','Enrol'],
+   ['schedule','faculty','Schedule'],['session-pre','faculty','Schedule'],
+   ['join','student','Teach'],['live-teacher','faculty','Teach'],['live-student','student','Teach'],
+   ['session-video','faculty','Teach'],['record','faculty','Teach'],
+   ['timeline','system','Teach','Record fans out to every attendee timeline'],
+   ['practice-build','faculty','Practise'],['practice-play','student','Practise'],['practice-result','student','Practise'],
+   ['analysis','faculty','Assess'],
+   ['mentor','system','Support','A missed practice auto-books a backlog slot'],
+   ['doubt-student','student','Support'],['doubt-teacher','faculty','Support'],['mentor','faculty','Support'],
+   ['test-setup','faculty','Assess'],['test-runner','student','Assess'],
+   ['timeline','student','Review'],['teacher-dash','faculty','Review'],['reports','faculty','Review'],
+   ['messages','parent','Support'],['notif-prefs','parent','Support'],['practice-result','parent','Assess'],['timeline','parent','Review'],['reports','parent','Review'],['parent-home','parent','Review'],
+   ['owner','admin','Operate'],
+   ['billing','admin','Bill'],['payments','parent','Bill']
+  ]},
+ {id:'t2',short:'1-on-1',name:'1-on-1 subject tutor',tint:'sky',tier:'Starter',
+  shape:'Language, maths, science · individual',
+  blurb:'Sessions, homework, a shared record, simple billing. No cohort, no question bank.',
+  modules:'Scheduling, session record, assignments, message threads, timeline, student dashboard, billing',
+  roles:['student','faculty','admin','system'],
+  steps:[
+   ['onboard-kind','admin','Onboard'],['branding','admin','Onboard'],
+   ['roster','admin','Enrol'],['student-login','student','Enrol'],['staff-login','faculty','Enrol'],
+   ['schedule','faculty','Schedule'],['session-pre','faculty','Schedule'],
+   ['join','student','Teach'],['live-teacher','faculty','Teach'],['session-video','faculty','Teach'],['record','faculty','Teach'],
+   ['timeline','system','Teach','Session lands on the student timeline'],
+   ['assign-issue','faculty','Practise'],['assign-grade','faculty','Assess'],
+   ['messages','faculty','Support'],['doubt-student','student','Support'],
+   ['timeline','student','Review'],['reports','faculty','Review'],
+   ['billing','admin','Bill'],['payments','student','Bill']
+  ]},
+ {id:'t3',short:'K-12',name:'K-12 homework help',tint:'amber',tier:'Cohort',
+  shape:'After-school · parent-facing',
+  blurb:'Short sessions, doubts, light practice, and a parent who can actually see what is happening.',
+  modules:'Parent accounts, scheduling, session record, assignments, doubts queue, message threads, teacher dashboard, reports',
+  roles:['student','faculty','admin','parent','system'],
+  steps:[
+   ['onboard-kind','admin','Onboard'],['branding','admin','Onboard'],
+   ['roster','admin','Enrol'],['parent-link','parent','Enrol'],['student-login','student','Enrol'],['staff-login','faculty','Enrol'],
+   ['schedule','faculty','Schedule'],
+   ['join','student','Teach'],['live-teacher','faculty','Teach'],['record','faculty','Teach'],
+   ['timeline','system','Teach','Attendance + notes → student timeline'],
+   ['assign-issue','faculty','Practise'],['practice-play','student','Practise'],
+   ['doubt-student','student','Support'],['doubt-teacher','faculty','Support'],['messages','faculty','Support'],['announce','faculty','Support'],
+   ['timeline','student','Review'],['teacher-dash','faculty','Review'],['reports','faculty','Review'],
+   ['messages','parent','Support'],['notif-prefs','parent','Support'],['practice-result','parent','Assess'],['timeline','parent','Review'],['reports','parent','Review'],['parent-home','parent','Review'],
+   ['billing','admin','Bill'],['payments','parent','Bill']
+  ]},
+ {id:'t4',short:'Skills',name:'Skills / cohort course',tint:'violet',tier:'Cohort',
+  shape:'Bootcamp · hobby · professional',
+  blurb:'Cohorts, a content library that drips, projects and a final assessment. No live-practice loop.',
+  modules:'Cohorts, session record, content library, assignments, tests, announcements, billing',
+  roles:['student','faculty','admin','system'],
+  steps:[
+   ['onboard-kind','admin','Onboard'],['branding','admin','Onboard'],
+   ['student-login','student','Enrol'],['staff-login','faculty','Enrol'],['cohort-builder','faculty','Enrol'],
+   ['schedule','faculty','Schedule'],['session-pre','faculty','Schedule'],
+   ['live-teacher','faculty','Teach'],['session-video','faculty','Teach'],['record','faculty','Teach'],
+   ['library','student','Teach'],['lesson','student','Teach'],
+   ['assign-issue','faculty','Practise'],['assign-grade','faculty','Assess'],
+   ['test-setup','faculty','Assess'],['test-runner','student','Assess'],
+   ['announce','faculty','Support'],
+   ['timeline','student','Review'],['teacher-dash','faculty','Review'],['reports','faculty','Review'],
+   ['billing','admin','Bill'],['payments','student','Bill']
+  ]},
+ {id:'t5',short:'Music',name:'Music / arts',tint:'crimson',tier:'Starter',
+  shape:'Recital-oriented · guardian-facing',
+  blurb:'Recurring 1-on-1s, a practice log, guardian visibility and recital scheduling.',
+  modules:'Scheduling, session record, parent accounts, message threads, reports, billing, payments',
+  roles:['student','faculty','admin','parent','system'],
+  steps:[
+   ['onboard-kind','admin','Onboard'],['branding','admin','Onboard'],
+   ['roster','admin','Enrol'],['parent-link','parent','Enrol'],['student-login','student','Enrol'],['staff-login','faculty','Enrol'],
+   ['schedule','faculty','Schedule'],['session-pre','faculty','Schedule'],
+   ['join','student','Teach'],['live-teacher','faculty','Teach'],['record','faculty','Teach'],
+   ['timeline','system','Teach','Practice-log note added to the timeline'],
+   ['assign-issue','faculty','Practise'],
+   ['messages','faculty','Support'],['announce','faculty','Support'],
+   ['timeline','student','Review'],['parent-home','parent','Review'],['reports','faculty','Review'],
+   ['messages','parent','Support'],['notif-prefs','parent','Support'],['timeline','parent','Review'],['reports','parent','Review'],
+   ['billing','admin','Bill'],['payments','parent','Bill']
+  ]},
+ {id:'t6',short:'Everything',name:'Everything',tint:'ink',tier:'Institute',
+  shape:'Institute exploring the full surface',
+  blurb:'Every module on — the master gallery, not a recommended tenant. Each screen states who uses it, how they use it, and when it fires.',
+  modules:'All modules on',
+  reason:{
+    who:'Product, design, and an institute owner reviewing the full surface. Not a starter tenant — focused templates (Exam-prep, 1-on-1, K-12, Skills, Music) turn modules off.',
+    how:'Walk the swimlane left to right. Open a card to read Who / How / When, then click through the mock. Numbered cards are human steps; dashed ⚙ cards are automatic writes (timeline fan-out).',
+    when:'Before Figma freeze and backend, or whenever you need a missing screen that a thinner template hid. Day-to-day tenants should pick a focused template, then add modules — not live on Everything forever.'
+  },
+  roles:['student','faculty','admin','parent','system'],
+  steps:[
+   ['onboard-kind','admin','Onboard'],['template-gallery','admin','Onboard'],['wsetup','admin','Onboard'],['branding','admin','Onboard'],
+   ['roster','admin','Enrol'],['cohort-builder','faculty','Enrol'],['router','student','Enrol'],['student-login','student','Enrol'],['staff-login','faculty','Enrol'],['parent-link','parent','Enrol'],
+   ['schedule','faculty','Schedule'],['session-pre','faculty','Schedule'],
+   ['join','student','Teach'],['live-teacher','faculty','Teach'],['live-student','student','Teach'],['session-video','faculty','Teach'],['record','faculty','Teach'],['library','student','Teach'],['lesson','student','Teach'],
+   ['timeline','system','Teach','Every module writes to one timeline'],
+   ['qbank','faculty','Practise'],['practice-build','faculty','Practise'],['practice-play','student','Practise'],['assign-issue','faculty','Practise'],
+   ['test-setup','faculty','Assess'],['test-runner','student','Assess'],['practice-result','student','Assess'],['assign-grade','faculty','Assess'],['analysis','faculty','Assess'],
+   ['doubt-student','student','Support'],['doubt-teacher','faculty','Support'],['messages','faculty','Support'],['announce','faculty','Support'],['mentor','faculty','Support'],['notif-prefs','student','Support'],
+   ['student-dash','student','Review'],['teacher-dash','faculty','Review'],['timeline','student','Review'],['reports','faculty','Review'],
+   ['messages','parent','Support'],['notif-prefs','parent','Support'],['practice-result','parent','Assess'],['timeline','parent','Review'],['reports','parent','Review'],['parent-home','parent','Review'],
+   ['owner','admin','Operate'],['subscription','admin','Operate'],['payouts','admin','Operate'],
+   ['billing','admin','Bill'],['payments','parent','Bill'],
+   ['automation','admin','Configure'],['integrations','admin','Configure'],['audit','admin','Configure']
+  ]}
+];
+function TById(id){for(var i=0;i<TEMPLATES.length;i++)if(TEMPLATES[i].id===id)return TEMPLATES[i];return null;}
+if(ROLE_ONLY){
+ TEMPLATES.forEach(function(t){ t.steps=t.steps.filter(function(s){return s[1]===ROLE_ONLY;}); });
+}
+TEMPLATES.forEach(function(t){
+ var seen={}; t.tour=[];
+ t.steps.forEach(function(s){
+  if(ROLE_ONLY==='system'){
+   var k=s[0]+'@'+s[2];
+   if(!seen[k]){ seen[k]=1; t.tour.push(s[0]); }
+  }else if(!s[3] && !seen[s[0]]){ seen[s[0]]=1; t.tour.push(s[0]); }
+ });
+});
+if(ROLE_ONLY){ TEMPLATES=TEMPLATES.filter(function(t){return t.steps.length>0;}); }
+var ALL=(TById('t6')||TEMPLATES[0]||{tour:[]}).tour.slice();
+function roleHas(id){
+ if(!ROLE_ONLY)return true;
+ return TEMPLATES.some(function(t){return t.steps.some(function(s){return s[0]===id;});});
+}
+
+/* ================= why this screen =================
+   own = accountable owner; who = who sits here; why = reason it exists; how = use; when = moment */
+var WHY={
+ 'router':{own:'Platform auth. Chrome is student until a role is chosen.',who:'Anyone opening the app URL without a remembered role.',why:'One URL serves three doors — student, staff, parent — without three bookmarks.',how:'Pick Student, Staff, or Parent. The app routes to the matching sign-in — one identity still threads the timeline.',when:'First visit, shared device, or after logout.'},
+ 'student-login':{own:'Student holds the identity. Owner chooses OTP vs magic-link.',who:'The learner.',why:'One identity for sessions, practice, doubts, and fees — no password in v1.',how:'Phone OTP by default; email magic-link optional. The same identity is used for the whole record.',when:'Every time they open the student app.'},
+ 'staff-login':{own:'Faculty or owner via staff membership.',who:'Teacher, assistant, or owner.',why:'Staff must not share the student app; membership decides the workspace.',how:'Same OTP / magic-link as students. Membership decides which console they enter.',when:'Opening the web teaching or owner console.'},
+ 'wsetup':{own:'Owner.',who:'Owner creating a workspace.',why:'The tenant spine must exist before branding, invites, or teaching.',how:'Name, timezone, subdomain. Always-on core stays on (identity, timeline, quotas). Feature flags for extra modules come next.',when:'Day 0 of a new tenant — before branding or invites.'},
+ 'branding':{own:'Owner.',who:'Owner.',why:'Learners must recognise the workspace as theirs, not a generic TutorOS shell.',how:'Logo, accent colour, subdomain. Custom domain is later.',when:'Immediately after workspace setup, before the first invite.'},
+ 'roster':{own:'Owner or assistant with roster rights.',who:'Owner or assistant.',why:'Who is enrolled is the source of seats, timelines, and billing — not a spreadsheet.',how:'Add students one by one or CSV import. Optional admin WhatsApp on new enrollment — not a second student list.',when:'Enrolment, then whenever someone joins or leaves.'},
+ 'cohort-builder':{own:'Faculty. Owner may set structure.',who:'Faculty or owner.',why:'Teaching is grouped; 1-on-1 is a pairing. Topics are tenant taxonomy, not a baked syllabus.',how:'Batches, groups, or 1-on-1 pairings. Topics are G3 — never exam-board tables in core.',when:'After roster, before the first scheduled class.'},
+ 'parent-link':{own:'Owner issues the invite; parent accepts.',who:'Guardian, invited by owner or teacher.',why:'A guardian needs access without a second student account.',how:'Open the invite token and confirm the student link. Then the parent hub: activity, marksheet, results, receipts, teacher chat — own child only.',when:'Enrolment for minors, or any tenant that wants a parent portal (K-12, music, exam-prep).'},
+ 'parent-home':{own:'Parent (read). Owner enables the parent module.',who:'A linked parent.',why:'The parent hub for their own child — not a second gradebook and not the class roster.',how:'Open activity (timeline), progress/marksheet (reports), test results (practice-result), fees and receipts (payments), and a thread with the teacher (messages). Read-only except pay and chat.',when:'After class, a result, a report, or an invoice — not during live teaching.'},
+ 'schedule':{own:'Faculty. Owner can view.',who:'Faculty (owner can view).',why:'Sessions must exist on a calendar before anyone can join.',how:'Create or move sessions. Reschedule notifies teacher, parent, and admin via D5 — students only if the owner enabled student WhatsApp.',when:'Weekly planning and same-day changes.'},
+ 'session-pre':{own:'Faculty.',who:'The teacher about to teach.',why:'Topic and video pointer must be set before the room opens. TutorOS does not host video.',how:'Confirm topic, cohort, Meet or Teams link, and the platform join URL.',when:'Before the session starts.'},
+ 'join':{own:'Student action; faculty owns the session.',who:'The student.',why:'Attendance is joining through the platform, not opening Meet in another tab.',how:'Waiting room. Stay here until class starts.',when:'Minutes before class.'},
+ 'live-teacher':{own:'Faculty.',who:'The teacher in session.',why:'Notes, polls, and attendance must stay in TutorOS, not trapped in Meet chat.',how:'Console around Meet/Teams. Teaching still happens in Google or Microsoft.',when:'During the live class.'},
+ 'live-student':{own:'Student in session; faculty hosts.',who:'The student in session.',why:'Join, leave, and later replay must attach to one identity.',how:'Live view / waiting overlay. Stay inside the product.',when:'During the live class.'},
+ 'session-video':{own:'Faculty. Student if the tenant shares replay.',who:'Teacher (student if the tenant shares replay).',why:'Replay lives at Google or Microsoft; we store the pointer, not the file.',how:'Open the Meet/Teams recording. Transcript panel stays empty until STT or an import — do not fake captions.',when:'After class, for replay or notes.'},
+ 'record':{own:'Faculty must write. System fans out to timelines.',who:'The teacher.',why:'This is the ledger write after class. Channels do not replace it.',how:'Write attendance, notes, board photos, and the link. That write fans out to each attendee timeline.',when:'Immediately after class. Do not skip this screen.'},
+ 'library':{own:'Faculty curates. Student consumes.',who:'Student consumes; teacher curates.',why:'Content between sessions needs a place that is not a WhatsApp file dump.',how:'Lessons, files, and links with visibility per cohort. Folders follow the tenant taxonomy.',when:'Between classes, or as drip content in a cohort course.'},
+ 'lesson':{own:'Faculty authors. Student completes.',who:'The student.',why:'Opening or finishing a module must be a timeline event, not a silent file view.',how:'Open one module. Progress writes to the record.',when:'When assigned, or self-paced between sessions.'},
+ 'assign-issue':{own:'Faculty.',who:'The teacher.',why:'Homework is a dated obligation on the record, not a chat reminder.',how:'Issue homework with a due date. WhatsApp may remind parent/teacher — it does not replace the assignment.',when:'After class, or as a standing weekly task.'},
+ 'assign-grade':{own:'Faculty grades. Student submits.',who:'Teacher grades; student submits first.',why:'Returned work must land on the timeline so a parent can see it without a second app.',how:'Submit, mark, return.',when:'After the due date, or as work comes in.'},
+ 'qbank':{own:'Faculty or content assistant.',who:'Teacher or content assistant.',why:'Reusable items tagged by tenant topics — never a hardcoded syllabus in core.',how:'Hand-pick or filter by tag into practice and tests.',when:'Before building a practice set or mock.'},
+ 'practice-build':{own:'Faculty.',who:'The teacher.',why:'Exam-prep needs a same-day practice loop; other templates may leave this off.',how:'Same-day or scheduled set from tags or hand-pick.',when:'After a concept class, or as a weekly drill window.'},
+ 'practice-play':{own:'Student.',who:'The student.',why:'The learner does the work. No fake instant tutor in the player.',how:'Answer on the phone. Honest timer and progress.',when:'Same day as class, or inside the assigned window.'},
+ 'practice-result':{own:'Student sees it. Faculty owns the next action.',who:'Student first; teacher uses Analysis next.',why:'A row cannot close on a percentage alone — tags drive what happens next.',how:'Score plus tagged misses.',when:'Immediately after the set.'},
+ 'test-setup':{own:'Faculty.',who:'The teacher.',why:'A timed paper is a scheduled event, not a casual practice set.',how:'Build the paper from the bank and set the window.',when:'Mock week, or end of a module in a cohort course.'},
+ 'test-runner':{own:'Student.',who:'The student.',why:'An attempt must write even if they leave early.',how:'Timed runner during the window only.',when:'During the scheduled window only.'},
+ 'analysis':{own:'Faculty.',who:'The teacher.',why:'Misses become the next class — this is the exam-prep spine after practise.',how:'Most-missed items, tags, required next action (re-teach, practice, backlog).',when:'After a practice set or mock, before the next class.'},
+ 'doubt-student':{own:'Student asks. Faculty answers.',who:'The student.',why:'Doubts must live in-product so they are not lost in WhatsApp. Honest queue — no fake instant.',how:'Photo or text into the queue.',when:'Stuck after class, practice, or homework.'},
+ 'doubt-teacher':{own:'Faculty. Assistant may triage.',who:'The teacher (assistant may triage).',why:'Unanswered doubts need an SLA. WhatsApp is a ping, not a second inbox.',how:'Triage the queue. Resolve here so the timeline has the answer.',when:'Daily backlog, especially after practice.'},
+ 'messages':{own:'Faculty owns the thread.',who:'Teacher starts; student (and parent if linked) reply.',why:'1:1 coaching must exist as a record, not only as a WhatsApp chat.',how:'In-platform threads. WhatsApp may notify teacher, parent, or admin.',when:'Anything that is not a one-to-cohort announcement.'},
+ 'announce':{own:'Faculty or owner.',who:'Teacher or owner.',why:'One message to a cohort — schedule, dates, policy — not 1:1 coaching.',how:'Broadcast. Parent WhatsApp if opted in. Students are not on WhatsApp unless the owner enabled it.',when:'Schedule changes, exam dates, policy.'},
+ 'timeline':{own:'Student is the subject. System writes. Faculty and parent read.',who:'Student owns the stream; teacher and parent read.',why:'This is the ledger. Channels deliver; they do not replace this screen.',how:'Append-only event log. Automatic writes from session record, practice, payments, doubts.',when:'After every session, assignment, payment, or doubt.'},
+ 'notif-prefs':{own:'Signed-in person. Owner gates student WhatsApp.',who:'The person signed in (student here; staff/parent have the same idea).',why:'Channels are optional; the ledger is not. Student WhatsApp stays off unless the owner enabled it.',how:'Channel + event checklist for teacher, parent, admin (and student if gated on).',when:'First login, and whenever they want quieter notifications.'},
+ 'student-dash':{own:'Student.',who:'The student.',why:'Opening the app should show the next action, not a hunt through menus.',how:'Next session, open practice, open doubts, this week. Few controls, clear next step.',when:'Opening the app, not during a live class.'},
+ 'teacher-dash':{own:'Faculty.',who:'The teacher.',why:'Cohort health in one place — who is behind — instead of a second spreadsheet.',how:'Attendance, practice completion, doubt backlog. Jump to the record.',when:'Morning briefing before class.'},
+ 'owner':{own:'Owner / admin.',who:'Owner / admin.',why:'Running the business (scorecard, quotas, kill switches) is not teaching a class.',how:'Quota bars warn at 80% and can block paid sends at 100%. Caps throttle cost, not always-on core.',when:'Operating the workspace, not during a live session.'},
+ 'reports':{own:'Faculty or owner produce. Parent receives a slice.',who:'Teacher or owner; parent gets a slice.',why:'A term view of the timeline — not a parallel gradebook.',how:'Term reports and CSV. Parent WhatsApp when a report is ready.',when:'Weekly check-in or term-end.'},
+ 'mentor':{own:'Faculty or assigned mentor.',who:'Teacher or assigned mentor.',why:'Catch skipped work in a short slot — not re-teach the whole class.',how:'Backlog items, often auto-created from missed practice.',when:'After a tagged fail or two missed practices.'},
+ 'billing':{own:'Owner or assistant with billing rights.',who:'Owner (or assistant with billing rights).',why:'The tenant collects from learners here. Separate from the platform subscription (F2).',how:'Fee plans and invoices.',when:'Enrolment and renewals.'},
+ 'payments':{own:'Payer (student or parent). Owner configures collection.',who:'Whoever pays — student or parent.',why:'Paying an invoice must write to the timeline; WhatsApp only notifies.',how:'Pay in-app. Admin and parent WhatsApp on captured or failed.',when:'When an invoice is due.'},
+ 'subscription':{own:'Owner.',who:'Owner.',why:'Platform cost (WhatsApp, storage, seats) must be visible and cap-able.',how:'Plan and meters. Warn at 80%. Caps throttle usage; they do not remove identity, timeline, or this screen.',when:'Monthly ops, and whenever a bar approaches the cap.'},
+ 'payouts':{own:'Institute owner.',who:'Institute owner.',why:'Institutes share revenue with teachers after collections. Starter 1-on-1 usually skips this.',how:'Revenue-share runs after a billing cycle.',when:'After collections, institute-scale only.'},
+ 'audit':{own:'Owner.',who:'Owner.',why:'Who changed what, plus export, for disputes and DPDP / GDPR.',how:'Audit log and workspace export. Guardian consent for minors is captured at enrolment.',when:'Staff change, a dispute, or a data request — not daily teaching.'},
+ 'onboard-kind':{own:'Owner.',who:'Owner at signup.',why:'The tutoring shape must be chosen before modules turn on. Everything is a gallery, not the default live tenant.',how:'Pick exam-prep, 1-on-1, K-12, skills, music, or explore Everything.',when:'First setup step, before template and branding.'},
+ 'template-gallery':{own:'Owner.',who:'Owner.',why:'See which modules each template turns on before going live.',how:'Stay on Everything only to explore; ship a focused template, then add modules.',when:'After kind, before branding.'},
+ 'automation':{own:'Owner.',who:'Owner.',why:'When → then rules without code. Opinions as choices, not law.',how:'e.g. session with no same-day practice → warn; two missed practices → backlog.',when:'After the teaching loop is live — not on day 0.'},
+ 'integrations':{own:'Owner.',who:'Owner.',why:'Vendor ports sit at the edge. Logic stays in services. Mock until keys exist.',how:'Meet/Teams, WhatsApp, email, payments.',when:'After branding, before going live with real students.'}
 };
 
 /* ================= shared chrome ================= */
@@ -434,24 +741,70 @@ function setupHead(step){
    '</div></div>';
 }
 function tnav(kind,active){
- var t=[['Dashboard','teacher-dash','spark'],['Schedule','schedule','cal'],['Students','roster','users'],['Practice','practice-build','doc'],['Doubts','doubt-teacher','chat'],['Records','timeline','flag'],['Content','library','book']];
- var o=[['Owner console','owner','spark'],['Cohorts','roster','users'],['Schedule','schedule','cal'],['Doubts','doubt-teacher','chat'],['Records','timeline','flag'],['Branding','branding','gear']];
- var items=kind==='owner'?o:t;
+ var t=[['Dashboard',['teacher-dash','reports'],'spark','faculty'],['Schedule',['schedule'],'cal','faculty'],['Students',['roster','cohort-builder'],'users','faculty'],['Practice',['practice-build','assign-issue','qbank'],'doc','faculty'],['Doubts',['doubt-teacher','messages'],'chat','faculty'],['Records',['record','reports'],'flag','faculty'],['Content',['library'],'book','faculty']];
+ var o=[['Owner console',['owner'],'spark','admin'],['Billing',['billing'],'cash','admin'],['Reports',['reports'],'doc','admin'],['Cohorts',['roster','cohort-builder'],'users','admin'],['Schedule',['schedule'],'cal','admin'],['Records',['audit','reports'],'flag','admin'],['Integrations',['integrations'],'gear','admin']];
+ var rows=kind==='owner'?o:t;
+ var items=[];
+ rows.forEach(function(it){
+  var g=pickGoto(it[1], it[3]);
+  if(g) items.push([it[0],g,it[2],it[3]]);
+ });
  return '<aside class="cons__side">'+items.map(function(it){
-   return '<a data-goto="'+it[1]+'" class="'+(it[0]===active?'on':'')+'">'+ic(it[2])+'<span>'+it[0]+'</span></a>';
+   return '<a data-goto="'+it[1]+'" data-as="'+it[3]+'" class="'+(it[0]===active?'on':'')+'">'+ic(it[2])+'<span>'+it[0]+'</span></a>';
  }).join('')+'</aside>';
 }
 function cons(kind,active,main){return '<div class="cons">'+tnav(kind,active)+'<div class="cons__main">'+main+'</div></div>';}
 function appnav(active){
- var items=[['Home','student-dash','home'],['Classes','library','play'],['Practice','practice-play','spark'],['Doubts','doubt-student','chat'],['You','timeline','flag']];
- return '<nav class="appnav">'+items.map(function(it){return '<a data-goto="'+it[1]+'" class="'+(it[0]===active?'on':'')+'">'+ic(it[2])+'<span>'+it[0]+'</span></a>';}).join('')+'</nav>';
+ var rows=[['Home',['student-dash','join','timeline'],'home'],['Classes',['library','join','lesson'],'play'],['Practice',['practice-play'],'spark'],['Doubts',['doubt-student'],'chat'],['You',['timeline','student-dash'],'flag']];
+ var items=[];
+ rows.forEach(function(it){
+  var g=pickGoto(it[1], 'student');
+  if(g) items.push([it[0],g,it[2]]);
+ });
+ return '<nav class="appnav">'+items.map(function(it){return '<a data-goto="'+it[1]+'" data-as="student" class="'+(it[0]===active?'on':'')+'">'+ic(it[2])+'<span>'+it[0]+'</span></a>';}).join('')+'</nav>';
+}
+function pnav(active){
+ var items=[['Home','parent-home','home'],['Activity','timeline','flag'],['Reports','reports','doc'],['Fees','payments','cash'],['Chat','messages','chat']];
+ return '<nav class="appnav pnav">'+items.map(function(it){return '<a data-goto="'+it[1]+'" data-as="parent" class="'+(it[0]===active?'on':'')+'">'+ic(it[2])+'<span>'+it[0]+'</span></a>';}).join('')+'</nav>';
+}
+function parentView(){return ROLE_ONLY==='parent'||(state&&state.asRole==='parent');}
+function tourHas(id){
+ var T=TById(state&&state.tpl);
+ return !!(T && T.tour.indexOf(id)>=0);
+}
+function stepRoleOnTpl(id, role){
+ var T=TById(state&&state.tpl); if(!T) return S[id]&&S[id].role===role;
+ for(var i=0;i<T.steps.length;i++) if(T.steps[i][0]===id&&T.steps[i][1]===role) return true;
+ return false;
+}
+function pickGoto(cands, role){
+ var i,id;
+ for(i=0;i<cands.length;i++){
+  id=cands[i];
+  if(tourHas(id) && (!role || stepRoleOnTpl(id,role))) return id;
+ }
+ return null;
+}
+function landingAfter(loginId){
+ var staff=['teacher-dash','schedule','cohort-builder','reports'];
+ var stu=['student-dash','join','library','timeline'];
+ var pref=loginId==='staff-login'?staff:stu;
+ var role=loginId==='staff-login'?'faculty':'student';
+ var hit=pickGoto(pref, role);
+ if(hit) return hit;
+ var T=TById(state&&state.tpl);
+ if(T){
+  var idx=T.tour.indexOf(loginId);
+  for(var i=idx+1;i<T.tour.length;i++) if(stepRoleOnTpl(T.tour[i], role)) return T.tour[i];
+ }
+ return loginId;
 }
 function appbar(title,right){return '<div class="appbar"><h2>'+title+'</h2>'+(right||'')+'</div>';}
 
 /* ================= screens ================= */
 var R={};
 
-R['signup']=function(){
+R['wsetup']=function(){
  return setupHead(1)+'<div class="supbody"><div class="grid g2" style="align-items:start">'+
   '<div>'+
    '<h2 style="font-size:1.4rem;margin-bottom:4px">Create your workspace</h2>'+
@@ -461,7 +814,7 @@ R['signup']=function(){
    field('Your role','Owner &amp; teacher &nbsp;·&nbsp; <span class="muted">solo for now, add staff later</span>')+
    field('Time zone','India Standard Time (UTC +5:30)')+
    field('Roughly how many students?','25 – 75')+
-   '<div style="margin-top:6px">'+hotBtn('Continue — choose a template','template')+'</div>'+
+   '<div style="margin-top:6px">'+hotBtn('Continue — choose a template','onboard-kind')+'</div>'+
   '</div>'+
   '<div class="card card--wash"><div class="k" style="margin-bottom:8px">What you get on day one</div>'+
    ['Student &amp; staff logins','One live class with an auto-generated Meet link','A same-day practice set with a real deadline','A record log for every student','A dashboard that reads from that log']
@@ -471,29 +824,34 @@ R['signup']=function(){
  '</div></div>';
 };
 
-R['template']=function(){
- var opts=[
-  ['Exam-prep loop','Concept → same-day practice → tagged analysis → mock. NEET / JEE / board.',1],
-  ['1-on-1 subject tutor','Sessions, homework, a shared record, simple billing.',0],
-  ['K-12 homework help','Short sessions, doubts, light practice, parent visibility.',0],
-  ['Skills / cohort course','Cohorts, projects, assignments, certificates.',0],
-  ['Music / arts','Recurring 1-on-1s, practice logs, recital scheduling.',0],
-  ['Start blank','Turn modules on yourself.',0]
- ];
+R['onboard-kind']=function(){
  return setupHead(2)+'<div class="supbody">'+
   '<h2 style="font-size:1.4rem;margin-bottom:4px">What kind of tutoring do you run?</h2>'+
-  '<p class="muted" style="margin-bottom:16px">This is where the opinion lives — a template sets the modules, the taxonomy and a few automation rules. You can switch or fine-tune any time.</p>'+
-  '<div class="grid g2">'+opts.map(function(o){
-    return '<div class="'+(o[2]?'card card--wash':'card')+'" style="'+(o[2]?'border:1.5px solid var(--tint)':'')+'">'+
-      '<div class="sb"><h3 style="margin:0">'+o[0]+'</h3>'+(o[2]?pill('selected','info'):'<span class="muted">choose</span>')+'</div>'+
-      '<p class="muted" style="margin-top:6px">'+o[1]+'</p>'+
-      (o[2]?'<div class="hr"></div><div class="k" style="margin-bottom:6px">Turns on 26 of 35 modules</div><div class="chips">'+
-        ['Sessions + Meet link','Session record','Question bank','Same-day practice','Auto-grading','Tagged analysis','Doubts queue','Announcements','Student / teacher / owner dashboards','Mentor backlog']
-        .map(function(c){return '<span class="chip">'+c+'</span>';}).join('')+'</div>':'')+
+  '<p class="muted" style="margin-bottom:16px">Your answer sets ~15 module toggles, the taxonomy and a few automation rules. Change it any time.</p>'+
+  '<div class="grid g2">'+TEMPLATES.filter(function(t){return t.id!=='t6';}).map(function(t){
+    var sel=t.id==='t1';
+    return '<div class="'+(sel?'card card--wash':'card')+' tint-'+t.tint+'" style="'+(sel?'border:1.5px solid var(--tint)':'')+'">'+
+     '<div class="sb"><h3 style="margin:0">'+t.name+'</h3>'+(sel?pill('selected','info'):'<span class="hot--link" data-goto="'+t.id+'/flow">see flow</span>')+'</div>'+
+     '<p class="muted" style="margin-top:6px">'+t.blurb+'</p>'+
+     (sel?'<div class="hr"></div><div class="k" style="margin-bottom:6px">Turns on '+t.tour.length+' screens</div><div class="chips">'+t.modules.split(', ').slice(0,8).map(function(c){return '<span class="chip">'+c+'</span>';}).join('')+'</div>':'')+
     '</div>';
   }).join('')+'</div>'+
   '<div style="margin-top:6px">'+hotBtn('Apply “Exam-prep loop” → branding','branding')+'</div>'+
  '</div>';
+};
+
+R['template-gallery']=function(){
+ var main='<h2>Template gallery</h2><span class="k">Each = a toggle-set + automation defaults + starter taxonomy</span>'+
+  '<div class="grid g2">'+TEMPLATES.map(function(t){
+   return '<div class="card tint-'+t.tint+'" style="border-color:color-mix(in srgb,var(--tint) 40%,var(--line))">'+
+    '<div class="sb"><h3 style="margin:0">'+t.name+'</h3><span class="pill" style="background:var(--tint-wash);color:var(--tint);border:0">'+t.tour.length+' screens</span></div>'+
+    '<p class="muted" style="margin:6px 0">'+t.blurb+'</p>'+
+    '<div class="mapmeta" style="margin:0 0 8px">'+t.shape+' · '+t.tier+'</div>'+
+    '<span class="hot hot--btn ghost" data-goto="'+t.id+'/flow">See the flow</span></div>';
+  }).join('')+'</div>'+
+  '<div class="card card--wash"><p class="muted">Templates are a starting point — the tenant edits modules from there in the toggle engine (G1).</p></div>'+
+  '<div style="margin-top:6px">'+hotBtn('Apply Exam-prep loop → branding','branding')+'</div>';
+ return cons('owner','Owner console',main);
 };
 
 R['branding']=function(){
@@ -513,7 +871,7 @@ R['branding']=function(){
      '<div style="font-family:var(--serif);font-size:1.05rem;margin:12px 0 4px">Meridian Biology</div>'+
      '<div class="muted" style="margin-bottom:14px">Your NEET Biology prep, on the record.</div>'+
      '<div style="background:var(--raised);border:1px solid var(--line);border-radius:9px;padding:9px;font-family:var(--mono);font-size:.8rem;color:var(--ink-faint)">+91 ·  ·  ·  ·  ·</div>'+
-     '<div style="background:var(--accent);color:#fff;border-radius:9px;padding:9px;margin-top:8px;font-weight:600;font-size:.85rem">Send code</div>'+
+     '<div style="background:var(--accent);color:var(--on-tint);border-radius:9px;padding:9px;margin-top:8px;font-weight:600;font-size:.85rem">Send code</div>'+
    '</div></div>'+
  '</div></div>';
 };
@@ -530,7 +888,7 @@ R['roster']=function(){
   ['Ananya Rao','80•••• ••654','Weekend','1 Aug','active']
  ];
  var main='<h2>Students</h2><span class="k">42 enrolled · 2 pending invite · 3 cohorts</span>'+
-  '<div class="row" style="margin-bottom:12px"><span class="btn btn--dark btn--sm">+ Add student</span><span class="btn btn--sm">Import CSV</span><span class="btn btn--sm">Invite link</span></div>'+
+  '<div class="row" style="margin-bottom:12px"><span class="btn btn--dark btn--sm">+ Add student</span><span class="btn btn--sm">Import CSV</span><span class="btn btn--sm">Invite link</span><span class="btn btn--sm">Paste WhatsApp list</span></div>'+
   '<div class="tblwrap"><table class="tbl"><thead><tr><th>Student</th><th>Phone</th><th>Cohort</th><th>Joined</th><th>Status</th></tr></thead><tbody>'+
    students.map(function(s){var tone=s[4]==='at risk'?'bad':s[4]==='trial'?'warn':'good';
     return '<tr><td><div class="row" style="gap:8px;flex-wrap:nowrap">'+av(s[0],'av--sm')+'<span>'+s[0]+'</span></div></td><td class="muted">'+s[1]+'</td><td>'+pill(s[2])+'</td><td class="muted">'+s[3]+'</td><td>'+pill(s[4],tone)+'</td></tr>';
@@ -538,26 +896,49 @@ R['roster']=function(){
   '</tbody></table></div>'+
   '<div class="card" style="margin-top:16px"><h3>Cohorts</h3>'+
    [['NEET 2026 — Evening','28 students · Mon/Wed/Fri 6:30 PM'],['NEET 2026 — Weekend','14 students · Sat/Sun 9:00 AM'],['Crash — Class 12','draft · opens Oct']]
-   .map(function(c){return '<div class="list__i"><div class="gr"><div class="t">'+c[0]+'</div><div class="s">'+c[1]+'</div></div><span class="btn btn--sm">Open</span></div>';}).join('')+
+   .map(function(c){return '<div class="list__i"><div class="gr"><div class="t">'+c[0]+'</div><div class="s">'+c[1]+'</div></div><span class="hot--link" data-goto="cohort-builder">Open</span></div>';}).join('')+
   '</div>'+
-  '<div style="margin-top:6px">'+hotBtn('Done → see how people sign in','router')+'</div>';
+  '<div style="margin-top:6px">'+hotBtn('Add a cohort','cohort-builder')+'</div>';
+ return cons('teacher','Students',main);
+};
+
+R['cohort-builder']=function(){
+ var main='<h2>New cohort</h2><span class="k">Group students · set the rhythm</span>'+
+ '<div class="grid g2" style="align-items:start"><div>'+
+  field('Cohort name','NEET 2026 — Evening')+
+  field('Taxonomy label','“Cohort” · rename to Batch / Class / Group in G3')+
+  field('Meeting pattern','Mon / Wed / Fri · 6:30–8:00 PM IST')+
+  field('Capacity','30 · waitlist on')+
+  field('Enrollment','Invite link + approval')+
+  '<div class="field"><span>Add students</span><div class="chips"><span class="chip on">Aditya M</span><span class="chip on">Sneha I</span><span class="chip on">Kabir A</span><span class="chip">+ 25 from CSV</span></div></div>'+
+ '</div><div>'+
+  '<div class="card card--wash"><div class="k" style="margin-bottom:8px">This cohort switches on</div>'+
+   ['Shared schedule','One join link per session','A cohort dashboard','Cohort-scoped practice + analysis'].map(function(x){return '<div class="list__i"><span style="color:var(--tint)">✓</span><div class="gr"><div class="t" style="font-weight:400">'+x+'</div></div></div>';}).join('')+
+  '</div>'+
+  '<div class="card"><h3>Preview</h3><p class="muted">28 students · 3 sessions / week · next: Neural Control, tonight 6:30 PM.</p></div>'+
+ '</div></div>'+
+ '<div style="margin-top:6px">'+hotBtn('Create cohort → schedule','schedule')+'</div>';
  return cons('teacher','Students',main);
 };
 
 R['router']=function(){
+ var doors=[];
+ if(roleHas('student-login')) doors.push(['student-login','student','I’m here to learn','Student sign-in']);
+ if(roleHas('staff-login')) doors.push(['staff-login','faculty','I’m a teacher / staff','Staff sign-in with 2FA']);
+ if(roleHas('parent-link')) doors.push(['parent-link','parent','I’m a parent','Follow my child']);
  return '<div style="min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:34px 24px;text-align:center;background:var(--accent-wash)">'+
   '<span class="av av--lg" style="background:var(--accent);border-radius:14px;width:52px;height:52px;font-size:1rem">M</span>'+
   '<h2 style="font-size:1.3rem;margin:16px 0 4px">Meridian Biology</h2>'+
   '<p class="muted" style="margin-bottom:26px">NEET 2026 · Biology</p>'+
   '<div style="width:100%;max-width:280px">'+
-   '<div class="hot hot--card" data-goto="student-login" style="text-align:left"><div style="font-weight:600">I’m here to learn</div><div class="muted">Student sign-in</div></div>'+
-   '<div class="hot hot--card" data-goto="staff-login" style="text-align:left"><div style="font-weight:600">I’m a teacher / staff</div><div class="muted">Staff sign-in with 2FA</div></div>'+
+   doors.map(function(d){return '<div class="hot hot--card" data-goto="'+d[0]+'" data-as="'+d[1]+'" style="text-align:left"><div style="font-weight:600">'+d[2]+'</div><div class="muted">'+d[3]+'</div></div>';}).join('')+
   '</div>'+
-  '<p class="muted" style="margin-top:28px;font-family:var(--mono);font-size:.68rem">Powered by TutorOS · placeholder name</p>'+
+  '<p class="muted" style="margin-top:24px;font-family:var(--mono);font-size:.68rem">Powered by TutorOS · placeholder name</p>'+
  '</div>';
 };
 
 R['student-login']=function(){
+ var dest=landingAfter('student-login');
  return '<div style="padding:30px 24px;min-height:100%;display:flex;flex-direction:column;justify-content:center">'+
   '<span class="av av--lg" style="background:var(--accent);border-radius:12px">M</span>'+
   '<h2 style="font-size:1.25rem;margin:16px 0 6px">Enter the 6-digit code</h2>'+
@@ -566,25 +947,25 @@ R['student-login']=function(){
    ['4','1','9','2','',''].map(function(d){return '<div style="flex:1;aspect-ratio:1;max-width:46px;border:1.5px solid '+(d?'var(--tint)':'var(--line)')+';border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:1.2rem">'+d+'</div>';}).join('')+
   '</div>'+
   '<p class="muted" style="margin-bottom:18px;font-family:var(--mono);font-size:.72rem">Resend code in 0:24</p>'+
-  hotBtn('Verify → my dashboard','student-dash')+
+  hotBtn('Verify → '+(S[dest]?S[dest].t:'continue'),dest,false,'student')+
   '<div class="card card--wash" style="margin-top:22px"><div class="k" style="margin-bottom:4px">One identity</div><p class="muted">Your sessions, practice, doubts, reports and fees all thread to this number. Log in on any device and the whole record is there.</p></div>'+
  '</div>';
 };
 
 R['staff-login']=function(){
+ var dest=landingAfter('staff-login');
  return '<div class="supbody" style="max-width:440px;margin:0 auto;padding:40px 24px">'+
   '<div class="wm" style="margin-bottom:22px"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 3c3.5 3 3.5 15 0 18M3.2 9.5h17.6M3.2 14.5h17.6"/></svg> Meridian Biology <i>staff</i></div>'+
   '<h2 style="font-size:1.35rem;margin-bottom:16px">Staff sign-in</h2>'+
   field('Work email','anitha@meridianbio.in')+
   field('Password','••••••••••••')+
   field('2FA code','<span style="font-family:var(--mono);letter-spacing:.3em">830 4·· </span>','from your authenticator app')+
-  '<div style="margin-top:6px">'+hotBtn('Sign in → dashboard','teacher-dash')+'</div>'+
+  '<div style="margin-top:6px">'+hotBtn('Sign in → '+(S[dest]?S[dest].t:'continue'),dest,false,'faculty')+'</div>'+
   '<div class="card" style="margin-top:20px"><div class="k" style="margin-bottom:4px">Why the extra step</div><p class="muted">Privileged accounts require 2FA. Every staff action — a grade change, a fee edit, a data export — is written to the audit log.</p></div>'+
  '</div>';
 };
-
 R['schedule']=function(){
- var days=[['Mon 1',[]],['Tue 2',[['6:30','Neural Control','live','session-pre'],['8:00','DPP-14 solve','live',null]]],['Wed 3',[]],['Thu 4',[['6:30','Chemical Coordination','live',null]]],['Fri 5',[['6:30','Revision + doubts','live',null]]],['Sat 6',[['9:00','Mock 6','test',null],['11:00','Mock 6 analysis','live',null]]]];
+ var days=[['Mon 1',[]],['Tue 2',[['6:30','Neural Control','live','session-pre'],['8:00','DPP-14 solve','live',null]]],['Wed 3',[]],['Thu 4',[['6:30','Chemical Coordination','live',null]]],['Fri 5',[['6:30','Revision + doubts','live',null]]],['Sat 6',[['9:00','Mock 6','test','test-setup'],['11:00','Mock 6 analysis','live',null]]]];
  var main='<h2>This week</h2><span class="k">NEET 2026 — Evening batch ▾ &nbsp;·&nbsp; Asia/Kolkata</span>'+
   '<div class="row" style="margin-bottom:14px"><span class="btn btn--dark btn--sm">+ New session</span><span class="btn btn--sm">‹ prev week</span><span class="btn btn--sm">next week ›</span></div>'+
   '<div class="tblwrap"><div style="display:grid;grid-template-columns:repeat(6,minmax(116px,1fr));gap:8px;min-width:560px">'+
@@ -608,11 +989,9 @@ R['session-pre']=function(){
  var main='<h2>Neural Control of Movement</h2><span class="k">Live · NEET 2026 Evening · Tue 2 Sep · 6:30 – 8:00 PM IST</span>'+
   '<div class="grid g2" style="align-items:start">'+
    '<div>'+
-    '<div class="card"><div class="sb"><h3 style="margin:0">Video link</h3>'+pill('auto-created','info')+'</div>'+
-     '<div class="field__in" style="font-family:var(--mono);font-size:.82rem;margin:8px 0">meet.google.com/qvz-abcd-hij</div>'+
-     '<p class="muted">Generated from anitha@meridianbio.in — no cost, joins straight from the student app.</p>'+
-     '<div class="row" style="margin-top:8px"><span class="btn btn--sm">Copy link</span><span class="btn btn--sm">Regenerate</span></div>'+
-    '</div>'+
+    '<div class="hot hot--row" data-goto="session-video"><div class="sb"><b>Video link</b>'+pill('Google Meet · auto','info')+'</div>'+
+     '<div class="muted" style="font-family:var(--mono);font-size:.8rem;margin-top:6px">meet.google.com/qvz-abcd-hij</div>'+
+     '<div class="muted" style="margin-top:4px">Open to set the link, paste your own, or import a transcript →</div></div>'+
     '<div class="card"><h3>Agenda</h3>'+
      ['Recap: reflex arc &amp; synapse types','Saltatory conduction — the misconception to break','Neuromuscular junction','Live poll → DPP-14 released on end']
      .map(function(a){return '<div class="list__i"><span style="color:var(--tint)">▢</span><div class="gr"><div class="t" style="font-weight:400">'+a+'</div></div></div>';}).join('')+
@@ -647,8 +1026,50 @@ R['live-teacher']=function(){
    '<div class="row" style="gap:6px;margin-top:8px"><span class="pill">Push explanation</span><span class="pill">Open doubt</span></div>'+
   '</div>'+
   '<div class="ctrls"><span class="cbtn">🎙</span><span class="cbtn">📷</span><span class="cbtn">🖥</span><span class="cbtn">✋</span>'+
-   '<button class="hot hot--btn" data-goto="record" style="background:#A4384A;color:#fff">End class</button></div>'+
+   '<button class="hot hot--btn" data-goto="record" style="background:#A4384A;color:var(--on-tint)">End class</button></div>'+
  '</div>';
+};
+
+R['live-student']=function(){
+ return '<div class="studio" style="display:flex;flex-direction:column;min-height:100%">'+
+  '<div class="vmain" style="aspect-ratio:3/4;flex:1">Anitha Rao · presenting</div>'+
+  '<div class="dock" style="border-color:#2f5140;background:#15241d">'+
+   '<div style="font-size:.7rem;color:#8fd3ab;letter-spacing:.08em;text-transform:uppercase">Quick check · 20s left</div>'+
+   '<div style="font-size:.86rem;color:#eef4f1;margin:6px 0 10px">Where is the interneuron located?</div>'+
+   ['Grey matter of the spinal cord','Dorsal root ganglion','White matter'].map(function(o,i){return '<div style="border:1px solid #34423c;border-radius:9px;padding:9px 11px;margin-bottom:6px;font-size:.8rem;color:#dfe8e4'+(i===0?';border-color:#5CB57C;background:#1c3327':'')+'">'+o+'</div>';}).join('')+
+  '</div>'+
+  '<div style="background:#161d20;border:1px solid #26302f;border-radius:10px;padding:9px 11px;margin-top:8px;font-size:.76rem;color:#9fb0aa">Ask a doubt…  <span style="float:right">➤</span></div>'+
+  '<div class="ctrls"><span class="cbtn">🎙</span><span class="cbtn">📷</span><span class="cbtn">✋</span>'+
+   '<button class="hot hot--btn" data-goto="student-dash" style="background:#A4384A;color:var(--on-tint)">Leave</button></div>'+
+ '</div>';
+};
+
+R['session-video']=function(){
+ var main='<h2>Session video &amp; transcript</h2><span class="k">Neural Control · Tue 2 Sep · '+pill('Google Meet or Microsoft Teams — never self-hosted','info')+'</span>'+
+  '<div class="row" style="margin-bottom:14px"><span class="chip on">Generated Google Meet</span><span class="chip">Microsoft Teams link</span></div>'+
+  '<div class="grid g2" style="align-items:start"><div>'+
+   '<div class="card"><div class="sb"><h3 style="margin:0">Meet link</h3>'+pill('auto-created · $0','good')+'</div>'+
+    '<div class="field__in" style="font-family:var(--mono);font-size:.82rem;margin:8px 0">meet.google.com/qvz-abcd-hij</div>'+
+    '<p class="muted">Created on anitha@meridianbio.in via the Calendar API. Students join from the app, so attendance comes back automatically.</p>'+
+    '<div class="row" style="margin-top:8px"><span class="btn btn--sm">Copy</span><span class="btn btn--sm">Regenerate</span><span class="btn btn--sm">Add to calendar</span></div>'+
+   '</div>'+
+   '<div class="card"><div class="k" style="margin-bottom:8px">Use Microsoft Teams instead</div>'+
+    '<div class="field__in muted">Paste a Microsoft Teams meeting link…</div>'+
+    '<div class="row" style="margin-top:8px">'+pill('Teams link · paste')+pill('Connect Microsoft 365 · later','mute')+'</div>'+
+    '<p class="muted" style="margin-top:8px">For institutes on M365. A pasted link works, but attendance falls back to platform join-tracking until Microsoft 365 is connected.</p>'+
+   '</div>'+
+  '</div><div>'+
+   '<div class="card"><div class="sb"><h3 style="margin:0">Transcript</h3>'+pill('transcript_segments — empty','mute')+'</div>'+
+    '<p class="muted" style="margin:8px 0">We do not transcribe. Pull the verbatim record from Google or Microsoft after class.</p>'+
+    '<div class="row"><span class="btn btn--sm">Import from Google Drive</span><span class="btn btn--sm">Import from Microsoft 365</span><span class="btn btn--sm">Paste transcript</span></div>'+
+    '<div class="row" style="margin-top:8px"><span class="btn btn--sm" style="opacity:.5">Request speech-to-text · add-on ≈ $0.04 / min</span></div>'+
+   '</div>'+
+   '<div class="card"><div class="k" style="margin-bottom:8px">Where transcripts come from</div><div class="tblwrap"><table class="tbl"><thead><tr><th>Provider</th><th>Pull</th><th>Plan</th></tr></thead><tbody>'+
+    [['Google Meet','Drive API / paste Doc','Workspace Business+'],['Microsoft Teams','Graph getAllTranscripts','M365 Business+']].map(function(r){return '<tr><td>'+r[0]+'</td><td class="muted">'+r[1]+'</td><td class="muted">'+r[2]+'</td></tr>';}).join('')+
+   '</tbody></table></div><p class="muted" style="margin-top:8px">Zoom and others are out of scope. Full note: <code>video-and-transcript-options.md</code></p></div>'+
+  '</div></div>'+
+  '<div style="margin-top:6px">'+hotBtn('After class → session record','record')+'</div>';
+ return cons('teacher','Schedule',main);
 };
 
 R['record']=function(){
@@ -669,43 +1090,6 @@ R['record']=function(){
   '</div>'+
   '<div style="margin-top:6px">'+hotBtn('Open cohort dashboard','teacher-dash')+'</div>';
  return cons('teacher','Schedule',main);
-};
-
-R['student-dash']=function(){
- return appbar('Hi, Aditya','<span class="pill is-warn">🔥 9</span>')+'<div class="appwrap">'+
-  '<div class="hot hot--card" data-goto="join"><div class="k" style="color:var(--tint)">Tonight · 6:30 PM</div><div style="font-weight:600;margin:3px 0">Neural Control of Movement</div><div class="muted">Live · join opens 6:15</div></div>'+
-  '<div class="hot hot--card" data-goto="practice-play"><div class="k" style="color:var(--crimson)">Practice due · 11:00 PM</div><div style="font-weight:600;margin:3px 0">DPP 14 · 16 questions</div><div class="muted">0 / 16 answered</div></div>'+
-  '<div class="card"><div class="k">This week</div><div class="list__i" style="border:0;padding:8px 0"><div class="gr"><div class="t">Mock 6 · Biology</div><div class="s">Sat 9:00 AM · 180 marks</div></div><span class="pill">test</span></div></div>'+
-  '<div class="hot hot--card" data-goto="doubt-student"><div class="k" style="color:var(--tint)">Your doubt was answered</div><div style="font-weight:600;margin:3px 0">“Reflex arc direction”</div><div class="muted">2-min clip attached · tap to view</div></div>'+
-  '<div class="card"><div class="k" style="margin-bottom:8px">Weak tags to drill</div><div class="chips">'+['Photosynthesis','Excretion','Nernst equation'].map(function(c){return '<span class="chip">'+c+'</span>';}).join('')+'</div>'+
-   '<div style="margin-top:10px">'+hotBtn('Practice these','practice-play','ghost')+'</div></div>'+
- '</div>'+appnav('Home');
-};
-
-R['join']=function(){
- return '<div style="padding:24px 20px;min-height:100%;display:flex;flex-direction:column">'+
-  '<h2 style="font-size:1.15rem">Neural Control of Movement</h2>'+
-  '<p class="muted" style="margin-bottom:14px">Starts in 4 minutes · 23 already joined</p>'+
-  '<div style="background:#11171a;border-radius:16px;aspect-ratio:3/4;display:flex;align-items:flex-end;justify-content:center;padding:14px;color:#cdd6d3;font-size:.8rem">Camera preview</div>'+
-  '<div class="row" style="justify-content:center;gap:10px;margin:14px 0">'+['🎙 On','📷 On'].map(function(t){return '<span class="pill">'+t+'</span>';}).join('')+'</div>'+
-  '<div class="avrow" style="justify-content:center;margin-bottom:16px">'+['Sneha Iyer','Kabir Anand','Rohan Pillai','Ananya Rao'].map(function(n){return av(n,'av--sm');}).join('')+'<span class="av av--sm" style="background:var(--ink-faint)">+19</span></div>'+
-  hotBtn('Join now','live-student')+
-  '<p class="muted" style="margin-top:12px;text-align:center;font-size:.74rem">Anitha can admit you if you’re early.</p>'+
- '</div>';
-};
-
-R['live-student']=function(){
- return '<div class="studio" style="display:flex;flex-direction:column;min-height:100%">'+
-  '<div class="vmain" style="aspect-ratio:3/4;flex:1">Anitha Rao · presenting</div>'+
-  '<div class="dock" style="border-color:#2f5140;background:#15241d">'+
-   '<div style="font-size:.7rem;color:#8fd3ab;letter-spacing:.08em;text-transform:uppercase">Quick check · 20s left</div>'+
-   '<div style="font-size:.86rem;color:#eef4f1;margin:6px 0 10px">Where is the interneuron located?</div>'+
-   ['Grey matter of the spinal cord','Dorsal root ganglion','White matter'].map(function(o,i){return '<div style="border:1px solid #34423c;border-radius:9px;padding:9px 11px;margin-bottom:6px;font-size:.8rem;color:#dfe8e4'+(i===0?';border-color:#5CB57C;background:#1c3327':'')+'">'+o+'</div>';}).join('')+
-  '</div>'+
-  '<div style="background:#161d20;border:1px solid #26302f;border-radius:10px;padding:9px 11px;margin-top:8px;font-size:.76rem;color:#9fb0aa">Ask a doubt…  <span style="float:right">➤</span></div>'+
-  '<div class="ctrls"><span class="cbtn">🎙</span><span class="cbtn">📷</span><span class="cbtn">✋</span>'+
-   '<button class="hot hot--btn" data-goto="student-dash" style="background:#A4384A;color:#fff">Leave</button></div>'+
- '</div>';
 };
 
 R['library']=function(){
@@ -741,6 +1125,54 @@ R['lesson']=function(){
  '</div>'+appnav('Classes');
 };
 
+R['assign-issue']=function(){
+ var main='<h2>New assignment</h2><span class="k">Issue · collect · grade · return</span>'+
+ '<div class="grid g2" style="align-items:start"><div>'+
+  field('Title','Label the neuron — worksheet')+
+  field('Instructions','Print the diagram, label every part, photograph and upload.')+
+  field('Attachment','neuron-blank.pdf')+
+  field('Assign to','NEET 2026 Evening · 28 students')+
+  field('Due','Fri 5 Sep · 9:00 PM')+
+  field('Submission','Photo / file upload · resubmission allowed')+
+  '<div class="field"><span>Rubric</span><div class="row">'+['Accuracy /5','Labels /3','Neatness /2'].map(function(x){return pill(x);}).join('')+'</div></div>'+
+ '</div><div>'+
+  '<div class="card card--wash"><p class="muted">Appears on each student’s timeline and dashboard with the deadline. Late submissions are tracked, not blocked.</p></div>'+
+ '</div></div>'+
+ '<div style="margin-top:6px">'+hotBtn('Issue to batch → grade view','assign-grade')+'</div>';
+ return cons('teacher','Practice',main);
+};
+
+R['assign-grade']=function(){
+ var subs=[['Aditya Menon','on time','good'],['Sneha Iyer','on time','good'],['Farhan Qureshi','2 days late','warn'],['Meera Joshi','missing','bad']];
+ var main='<h2>Label the neuron — submissions</h2><span class="k">22 of 28 in · 4 graded</span>'+
+ '<div class="grid g2" style="align-items:start"><div>'+
+  subs.map(function(s,i){return '<div class="'+(i===0?'hot hot--row':'card')+'"><div class="sb"><div class="row" style="gap:8px;flex-wrap:nowrap">'+av(s[0],'av--sm')+'<span class="t" style="font-size:.85rem;font-weight:600">'+s[0]+'</span></div>'+pill(s[1],s[2])+'</div></div>';}).join('')+
+ '</div><div>'+
+  '<div class="card"><div class="sb"><h3 style="margin:0">Aditya Menon</h3>'+pill('on time','good')+'</div>'+
+   '<div style="background:#11171a;border-radius:10px;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;color:#cdd6d3;margin:10px 0">submitted photo</div>'+
+   [['Accuracy','4 / 5'],['Labels','3 / 3'],['Neatness','2 / 2']].map(function(r){return '<div class="sb" style="font-size:.82rem;margin-bottom:4px"><span>'+r[0]+'</span><span class="muted">'+r[1]+'</span></div>';}).join('')+
+   '<div class="field__in muted" style="margin-top:8px">Feedback — “Good, but the node of Ranvier is mislabelled…”</div>'+
+   '<div class="sb" style="margin-top:10px"><span style="font-family:var(--serif);font-size:1.1rem">9 / 10</span>'+hotBtn('Return to student','timeline')+'</div>'+
+  '</div>'+
+ '</div></div>';
+ return cons('teacher','Practice',main);
+};
+R['qbank']=function(){
+ var rows=[['MCQ','Resting membrane potential','Neural Control','Sprint'],['MCQ','Saltatory conduction','Neural Control','Race'],['Numeric','Nernst potential for K⁺','Membrane','Race'],['Assertion','Reflex arc direction','Neural Control','Sprint'],['Multi','Synapse types','Synapse','Sprint']];
+ var main='<h2>Question bank</h2><span class="k">1,240 items · Biology · shared across cohorts</span>'+
+  '<div class="row" style="margin-bottom:10px"><span class="btn btn--dark btn--sm">+ New item</span><span class="btn btn--sm">Import</span><span class="btn btn--sm">Bulk tag</span></div>'+
+  '<div class="chips" style="margin-bottom:12px">'+['All types','MCQ','Numeric','Assertion','Multi-select','By difficulty','Duplicates 3'].map(function(c,i){return '<span class="chip'+(i===0?' on':'')+'">'+c+'</span>';}).join('')+'</div>'+
+  '<div class="tblwrap"><table class="tbl"><thead><tr><th>Type</th><th>Stem</th><th>Tag</th><th>Difficulty</th><th>Usage</th></tr></thead><tbody>'+
+   rows.map(function(r,i){return '<tr><td>'+pill(r[0])+'</td><td>'+r[1]+'</td><td class="muted">'+r[2]+'</td><td>'+pill(r[3],r[3]==='Race'?'bad':'warn')+'</td><td class="muted">used '+(9-i*2)+'×</td></tr>';}).join('')+
+  '</tbody></table></div>'+
+  '<div class="card" style="margin-top:14px"><div class="sb"><h3 style="margin:0">Preview — Saltatory conduction</h3>'+pill('Race','bad')+'</div>'+
+   '<p style="margin:8px 0;font-size:.88rem">Myelination increases conduction velocity mainly because…</p>'+
+   ['it raises membrane resistance and forces the impulse to jump node to node','it speeds ion flow through the axoplasm','it increases Na⁺ channels along the internode','it lowers the threshold potential'].map(function(o,i){return '<div class="qopt'+(i===0?' sel':'')+'"><i>'+'ABCD'[i]+'</i>'+o+'</div>';}).join('')+
+   '<p class="muted" style="margin-top:6px">Solution + 3-min clip attached · pulled into DPP 14 and Mock 6.</p></div>'+
+  '<div style="margin-top:6px">'+hotBtn('Build a practice set from tags','practice-build')+'</div>';
+ return cons('teacher','Practice',main);
+};
+
 R['practice-build']=function(){
  var items=[['Q1','Resting membrane potential','Warm-up'],['Q4','Reflex arc sequence','Warm-up'],['Q7','Nernst potential for K⁺','Sprint'],['Q11','Saltatory conduction','Race'],['Q14','Neuromuscular junction','Sprint']];
  var main='<h2>New practice set</h2><span class="k">Same-day artefact · Evening batch</span>'+
@@ -768,10 +1200,7 @@ R['practice-play']=function(){
   '<div style="font-size:1rem;font-weight:500;line-height:1.45;margin-bottom:16px">Q7. The Nernst equilibrium potential for K⁺ in a typical neuron is closest to:</div>'+
   ['−90 mV','−70 mV','+40 mV','0 mV'].map(function(o,i){return '<div class="qopt'+(i===0?' sel':'')+'"><i>'+'ABCD'[i]+'</i>'+o+'</div>';}).join('')+
   '<div class="sb" style="margin:12px 0"><span class="muted" style="font-family:var(--mono);font-size:.72rem">⏱ 0:41 on this question</span><span class="btn btn--sm">⚑ Flag</span></div>'+
-  '<div style="margin-top:auto">'+
-   '<p class="muted" style="font-size:.74rem;margin-bottom:8px">15 answered · 1 flagged</p>'+
-   hotBtn('Review & submit','practice-result')+
-  '</div>'+
+  '<div style="margin-top:auto"><p class="muted" style="font-size:.74rem;margin-bottom:8px">15 answered · 1 flagged</p>'+hotBtn('Review & submit','practice-result')+'</div>'+
  '</div>';
 };
 
@@ -782,8 +1211,19 @@ R['practice-result']=function(){
   ['Q3 · Synapse types','misconception','bad','Electrical vs chemical synapse mixed up.','Re-read the notes','lesson'],
   ['Q14 · Reflex arc order','time-sink','warn','Correct on the second attempt.','Drill 5 timed','practice-play']
  ];
+ var score='<div class="card" style="text-align:center">'+ring(75)+'<div style="font-family:var(--serif);font-size:1.15rem;margin-top:4px">12 / 16</div><div class="muted">DPP 14 · beat batch average 10.4</div></div>';
+ if(parentView()){
+  return appbar('Test result','<span class="pill">read-only</span>')+'<div class="appwrap">'+
+   score+
+   '<div class="card"><div class="k" style="margin-bottom:8px">Marksheet slice</div>'+
+    [['Correct','12'],['Missed','4'],['Time-sink tags','2'],['Next class','teacher will drill misses']].map(function(r){return '<div class="sb" style="font-size:.83rem;margin-bottom:4px"><span class="muted">'+r[0]+'</span><span>'+r[1]+'</span></div>';}).join('')+
+   '</div>'+
+   '<div class="card card--wash"><p class="muted">You see the outcome, not the live player. The student does the work; this is the same result row on their timeline.</p></div>'+
+   '<div style="margin-top:8px">'+hotBtn('Full term report','reports','ghost')+'</div>'+
+  '</div>'+pnav('Reports');
+ }
  return appbar('DPP 14','<span class="pill">8:04 PM</span>')+'<div class="appwrap">'+
-  '<div class="card" style="text-align:center">'+ring(75)+'<div style="font-family:var(--serif);font-size:1.15rem;margin-top:4px">12 / 16</div><div class="muted">beat the batch average of 10.4</div></div>'+
+  score+
   '<div class="card"><div class="k" style="margin-bottom:8px">By section</div>'+
    [['Warm-up','4 / 4',100],['Sprint','6 / 8',75],['Race','2 / 4',50]].map(function(s){return '<div style="margin-bottom:8px"><div class="sb" style="font-size:.8rem"><span>'+s[0]+'</span><span class="muted">'+s[1]+'</span></div><div style="height:6px;background:var(--sunk);border-radius:3px;margin-top:3px"><b style="display:block;height:100%;width:'+s[2]+'%;background:var(--tint);border-radius:3px"></b></div></div>';}).join('')+
   '</div>'+
@@ -793,24 +1233,27 @@ R['practice-result']=function(){
  '</div>'+appnav('Practice');
 };
 
-R['analysis']=function(){
- var rows=[
-  ['Q11','Saltatory conduction','62%','misconception','bad','3-min clip queued to 15 students','queued','good'],
-  ['Q7','Nernst equation','48%','time-sink','warn','Added to Saturday warm-up','set','good'],
-  ['Q3','Synapse types','33%','misconception','bad','— attach an action','open','bad'],
-  ['Q14','Reflex arc order','29%','time-sink','warn','Pinned for next class','set','good']
- ];
- var main='<h2>DPP 14 — Evening batch analysis</h2><span class="k">24 attempts · '+pill('Cohort view','info')+' &nbsp; <span class="muted">By student</span></span>'+
-  '<div class="tblwrap"><table class="tbl"><thead><tr><th>Item</th><th>Missed</th><th>Tag</th><th>Required action</th><th></th></tr></thead><tbody>'+
-   rows.map(function(r){return '<tr><td><b>'+r[0]+'</b> '+r[1]+'</td><td>'+r[2]+'</td><td>'+pill(r[3],r[4])+'</td><td>'+(r[6]==='open'?'<span class="hot--link" style="color:var(--amber);border-color:var(--amber)">'+r[5]+'</span>':r[5])+'</td><td>'+pill(r[6],r[7])+'</td></tr>';}).join('')+
-  '</tbody></table></div>'+
-  '<div class="card card--wash" style="margin-top:14px"><p class="muted">A row can’t close on a percentage. <b>Q3 still needs an action</b> before this analysis is done.</p></div>'+
-  '<div class="row" style="margin-top:8px"><span class="btn btn--sm">Queue all clips</span><span class="btn btn--sm">Book mentor backlog · 4 students</span></div>'+
-  '<div style="margin-top:12px">'+hotBtn('Operation overview','owner')+'</div>';
- return cons('teacher','Practice',main);
+R['test-setup']=function(){
+ var main='<h2>Mock 6 — setup</h2><span class="k">Timed · scheduled · sectioned</span>'+
+ '<div class="grid g2" style="align-items:start"><div>'+
+  field('Name','Mock 6 — Full Biology')+
+  field('Window','Sat 6 Sep · 9:00 AM – 12:00 PM')+
+  field('Duration','180 min · auto-submit on expiry')+
+  '<div class="field"><span>Sections</span><div class="row">'+['Botany · 45 Q','Zoology · 45 Q'].map(function(x){return pill(x);}).join('')+'</div></div>'+
+  field('Marking','+4 correct · −1 wrong · 0 blank')+
+  field('Options','Palette · mark-for-review · resume on drop · randomise order')+
+  field('Instructions','Standard NEET instruction page shown before start')+
+ '</div><div>'+
+  '<div class="card"><h3>Summary</h3>'+
+   [['Questions','90'],['Total marks','360'],['Assigned to','Evening + Weekend · 42'],['Results','30 min after the window closes → Analysis board']].map(function(r){return '<div class="sb" style="font-size:.83rem;margin-bottom:5px"><span class="muted">'+r[0]+'</span><span>'+r[1]+'</span></div>';}).join('')+
+  '</div>'+
+  '<div class="card card--wash"><p class="muted">On submit, every miss is tagged and flows to the remediation board — a score alone can’t close it.</p></div>'+
+ '</div></div>'+
+ '<div style="margin-top:6px">'+hotBtn('Schedule → student test runner','test-runner')+'</div>';
+ return cons('teacher','Schedule',main);
 };
 
-R['test']=function(){
+R['test-runner']=function(){
  return '<div style="padding:14px 16px;min-height:100%;display:flex;flex-direction:column;background:var(--surface)">'+
   '<div class="sb" style="margin-bottom:10px"><span class="pill">Mock 6 · Zoology</span><span class="pill is-warn">⏱ 1:42:30</span></div>'+
   '<div class="chips" style="margin-bottom:12px">'+['Botany','Zoology'].map(function(c,i){return '<span class="chip'+(i===1?' on':'')+'">'+c+'</span>';}).join('')+'</div>'+
@@ -825,6 +1268,22 @@ R['test']=function(){
  '</div>';
 };
 
+R['analysis']=function(){
+ var rows=[
+  ['Q11','Saltatory conduction','62%','misconception','bad','3-min clip queued to 15 students','queued','good'],
+  ['Q7','Nernst equation','48%','time-sink','warn','Added to Saturday warm-up','set','good'],
+  ['Q3','Synapse types','33%','misconception','bad','— attach an action','open','bad'],
+  ['Q14','Reflex arc order','29%','time-sink','warn','Pinned for next class','set','good']
+ ];
+ var main='<h2>DPP 14 — Evening batch analysis</h2><span class="k">24 attempts · '+pill('Cohort view','info')+' &nbsp; <span class="muted">By student</span></span>'+
+  '<div class="tblwrap"><table class="tbl"><thead><tr><th>Item</th><th>Missed</th><th>Tag</th><th>Required action</th><th></th></tr></thead><tbody>'+
+   rows.map(function(r){return '<tr><td><b>'+r[0]+'</b> '+r[1]+'</td><td>'+r[2]+'</td><td>'+pill(r[3],r[4])+'</td><td>'+(r[6]==='open'?'<span class="hot--link" style="color:var(--amber);border-color:var(--amber)">'+r[5]+'</span>':r[5])+'</td><td>'+pill(r[6],r[7])+'</td></tr>';}).join('')+
+  '</tbody></table></div>'+
+  '<div class="card card--wash" style="margin-top:14px"><p class="muted">A row can’t close on a percentage. <b>Q3 still needs an action</b> before this analysis is done.</p></div>'+
+  '<div class="row" style="margin-top:8px"><span class="btn btn--sm">Queue all clips</span>'+hotBtn('Book mentor backlog · 4 students','mentor','ghost')+'</div>'+
+  '<div style="margin-top:12px">'+hotBtn('Operation overview','owner')+'</div>';
+ return cons('teacher','Practice',main);
+};
 R['doubt-student']=function(){
  return appbar('Ask a doubt','')+'<div class="appwrap">'+
   '<div class="card"><div class="k" style="margin-bottom:8px">Snap the question</div>'+
@@ -845,7 +1304,7 @@ R['doubt-teacher']=function(){
  var q=[['Farhan Qureshi','Excretion','5h 12m','overdue','bad'],['Sneha Iyer','Reflex arc','2h 03m','SLA 4h','warn'],['Aditya Menon','Neural Control','22m','fresh','good']];
  var main='<h2>Doubts</h2><span class="k">3 open · 1 breaching SLA · routed to you</span>'+
   '<div class="grid g2" style="align-items:start"><div>'+
-   q.map(function(d,i){return '<div class="'+(i===1?'hot hot--row':'card')+'"'+(i===1?'':'')+'><div class="sb"><div class="row" style="gap:8px;flex-wrap:nowrap">'+av(d[0],'av--sm')+'<div><div class="t" style="font-size:.85rem;font-weight:600">'+d[0]+'</div><div class="s">'+d[1]+' · '+d[2]+'</div></div></div>'+pill(d[3],d[4])+'</div></div>';}).join('')+
+   q.map(function(d,i){return '<div class="'+(i===1?'hot hot--row':'card')+'"><div class="sb"><div class="row" style="gap:8px;flex-wrap:nowrap">'+av(d[0],'av--sm')+'<div><div class="t" style="font-size:.85rem;font-weight:600">'+d[0]+'</div><div class="s">'+d[1]+' · '+d[2]+'</div></div></div>'+pill(d[3],d[4])+'</div></div>';}).join('')+
   '</div><div>'+
    '<div class="card"><div class="sb"><h3 style="margin:0">Sneha Iyer</h3>'+pill('Reflex arc · 2h','warn')+'</div>'+
     '<div class="row" style="margin:10px 0"><span class="pill">📎 photo</span></div>'+
@@ -859,24 +1318,117 @@ R['doubt-teacher']=function(){
  return cons('teacher','Doubts',main);
 };
 
+R['messages']=function(){
+ if(parentView()){
+  return appbar('Teacher','<span class="pill">Anitha</span>')+'<div class="appwrap">'+
+   '<p class="muted" style="margin-bottom:12px">Thread is on the record. WhatsApp may ping; this screen is the source.</p>'+
+   '<div style="background:var(--sunk);border-radius:12px;padding:10px;font-size:.85rem;margin-bottom:8px">Aditya missed Friday — everything ok?</div>'+
+   '<div style="background:var(--tint-wash);border-radius:12px;padding:10px;font-size:.85rem;margin:0 0 8px 28px">School exams. Back this week.</div>'+
+   '<div style="background:var(--sunk);border-radius:12px;padding:10px;font-size:.85rem;margin-bottom:12px">August report is on Parent home when you want the marksheet.</div>'+
+   '<div class="field__in muted">Message the teacher…</div>'+
+   '<div class="row" style="margin-top:8px"><span class="btn btn--sm">Send</span></div>'+
+   '<div class="card card--wash" style="margin-top:14px"><p class="muted">You only see threads for your linked child. Other students are not visible.</p></div>'+
+  '</div>'+pnav('Chat');
+ }
+ var th=[['Mr. Menon (guardian)','Thanks, I’ll make sure he joins','2h'],['Sneha Iyer','Can I get the recording?','5h'],['Ravi Kulkarni (staff)','Covered your Friday slot','1d']];
+ var main='<h2>Messages</h2><span class="k">On the record · in-platform · 3 threads</span>'+
+ '<div class="grid g2" style="align-items:start"><div>'+
+  th.map(function(t,i){return '<div class="'+(i===0?'hot hot--row':'card')+'"><div class="sb"><div class="row" style="gap:8px;flex-wrap:nowrap">'+av(t[0],'av--sm')+'<div><div class="t" style="font-size:.84rem;font-weight:600">'+t[0]+'</div><div class="s">'+t[1]+'</div></div></div><span class="muted" style="font-size:.7rem">'+t[2]+'</span></div></div>';}).join('')+
+ '</div><div>'+
+  '<div class="card"><div class="sb"><h3 style="margin:0">Mr. Menon (guardian)</h3>'+pill('parent','info')+'</div>'+
+   '<div style="margin:10px 0">'+
+    '<div style="background:var(--sunk);border-radius:10px;padding:9px;font-size:.82rem;margin-bottom:6px">Aditya has missed 2 Friday classes — everything ok?</div>'+
+    '<div style="background:var(--tint-wash);border-radius:10px;padding:9px;font-size:.82rem;margin-left:24px">He had school exams. Back this week.</div>'+
+   '</div>'+
+   '<div class="field__in muted">Reply…</div>'+
+   '<div class="row" style="margin-top:8px"><span class="btn btn--sm">Templates</span><span class="btn btn--sm">Attach report</span></div>'+
+  '</div>'+
+  '<div class="card card--wash"><p class="muted">WhatsApp stays overflow — links shared there are flagged, never stored as the record (automation rule).</p></div>'+
+ '</div></div>';
+ return cons('teacher','Doubts',main);
+};
+
+R['announce']=function(){
+ var main='<h2>Announcements</h2><span class="k">One-to-cohort · pinned · scheduled</span>'+
+ '<div class="grid g2" style="align-items:start"><div>'+
+  field('To','NEET 2026 — Evening · 28')+
+  field('Message','Mock 6 on Saturday 9 AM. Bring a rough sheet. Analysis class at 11.')+
+  field('Channels','In-app · Push · Email')+
+  field('Schedule','Fri 5 Sep · 8:00 PM')+
+  '<div class="field"><span>Options</span><div class="row">'+['Pin for 3 days','Require acknowledgement'].map(function(x){return pill(x);}).join('')+'</div></div>'+
+  '<div style="margin-top:4px">'+hotBtn('Schedule announcement','teacher-dash')+'</div>'+
+ '</div><div>'+
+  '<div class="card"><h3>Recent</h3>'+
+   [['DPP 14 released','2 Sep · read 26 / 28'],['Holiday — no class Monday','30 Aug · read 28 / 28'],['Fee reminder — September','28 Aug · read 24 / 28']].map(function(r){return '<div class="list__i"><div class="gr"><div class="t" style="font-weight:400">'+r[0]+'</div><div class="s">'+r[1]+'</div></div></div>';}).join('')+
+  '</div>'+
+ '</div></div>';
+ return cons('teacher','Schedule',main);
+};
+
 R['timeline']=function(){
  var ev=[
   ['Today · 8:04 PM','DPP 14 submitted — 12 / 16 · 2 misconception, 2 time-sink','practice-result'],
   ['Today · 6:30 PM','Attended “Neural Control” — 89 min · poll 3/3','record'],
   ['Yesterday','Doubt answered — “Reflex arc direction” · clip attached','lesson'],
   ['31 Aug','Mock 5 — 512 / 720 · percentile 88',null],
-  ['28 Aug','Fee paid — September · ₹4,500',null],
-  ['27 Aug','Term report sent to guardian (Mr. Menon)',null]
+  ['28 Aug','Fee paid — September · ₹4,500','payments'],
+  ['27 Aug','Term report sent to guardian (Mr. Menon)','reports']
  ];
- return appbar('Aditya Menon','<span class="pill">record</span>')+'<div class="appwrap">'+
-  '<div class="chips" style="margin-bottom:14px">'+['All','Sessions','Practice','Doubts','Money'].map(function(c,i){return '<span class="chip'+(i===0?' on':'')+'">'+c+'</span>';}).join('')+'</div>'+
+ var log='<div class="chips" style="margin-bottom:14px">'+['All','Sessions','Practice','Doubts','Money'].map(function(c,i){return '<span class="chip'+(i===0?' on':'')+'">'+c+'</span>';}).join('')+'</div>'+
   '<div class="tl">'+ev.map(function(e){
     var inner='<div class="tl__t">'+e[0]+'</div><div class="tl__b">'+e[1]+'</div>';
-    return e[2]?'<div class="tl__i"><div class="hot hot--row" data-goto="'+e[2]+'" style="margin:0">'+inner+'</div></div>':'<div class="tl__i">'+inner+'</div>';
-  }).join('')+'</div>'+
+    var as=parentView()?' data-as="parent"':'';
+    return e[2]?'<div class="tl__i"><div class="hot hot--row" data-goto="'+e[2]+'"'+as+' style="margin:0">'+inner+'</div></div>':'<div class="tl__i">'+inner+'</div>';
+  }).join('')+'</div>';
+ if(parentView()){
+  return appbar('Aditya’s activity','<span class="pill">your child only</span>')+'<div class="appwrap">'+
+   log+
+   '<div class="card card--wash" style="margin-top:14px"><p class="muted">Same ledger the teacher writes. You cannot see other students. Channels (WhatsApp) are not this screen.</p></div>'+
+  '</div>'+pnav('Activity');
+ }
+ return appbar('Aditya Menon','<span class="pill">record</span>')+'<div class="appwrap">'+
+  log+
   '<div class="card card--wash" style="margin-top:14px"><p class="muted">Full log · exportable as PDF / CSV · retention 24 months · the guardian and teacher see read-only views of this same stream.</p></div>'+
   hotBtn('Operation overview','owner','ghost')+
  '</div>'+appnav('You');
+};
+
+R['notif-prefs']=function(){
+ if(parentView()){
+  var prow=[['Class reminder','WhatsApp + push'],['Practice / test result','WhatsApp + email'],['Term report ready','WhatsApp + email'],['Fee due / receipt','WhatsApp + SMS'],['Teacher message','Push']];
+  return appbar('Alerts','')+'<div class="appwrap">'+
+   prow.map(function(r){return '<div class="list__i"><div class="gr"><div class="t">'+r[0]+'</div><div class="s">'+r[1]+'</div></div><span class="pill is-good">on</span></div>';}).join('')+
+   '<div class="card card--wash" style="margin-top:12px"><p class="muted">Parent WhatsApp is on the product. Student WhatsApp stays off unless the owner enabled it. The timeline remains the ledger.</p></div>'+
+  '</div>'+pnav('Home');
+ }
+ var rows=[['Session reminder','Push + SMS'],['Practice due','Push + Email'],['Doubt answered','Push'],['Test result ready','Push + Email'],['Report sent to guardian','Email'],['Fee due','Push + SMS']];
+ return appbar('Notifications','')+'<div class="appwrap">'+
+  rows.map(function(r){return '<div class="list__i"><div class="gr"><div class="t">'+r[0]+'</div><div class="s">'+r[1]+'</div></div><span class="pill is-good">on</span></div>';}).join('')+
+  '<div class="card card--wash" style="margin-top:12px"><p class="muted">Push and email are free and instant. SMS / WhatsApp are <b>overflow</b> — a nudge, never the official record. Quiet hours 10 PM – 7 AM.</p></div>'+
+ '</div>'+appnav('You');
+};
+
+R['student-dash']=function(){
+ return appbar('Hi, Aditya','<span class="pill is-warn">🔥 9</span>')+'<div class="appwrap">'+
+  '<div class="hot hot--card" data-goto="join"><div class="k" style="color:var(--tint)">Tonight · 6:30 PM</div><div style="font-weight:600;margin:3px 0">Neural Control of Movement</div><div class="muted">Live · join opens 6:15</div></div>'+
+  '<div class="hot hot--card" data-goto="practice-play"><div class="k" style="color:var(--crimson)">Practice due · 11:00 PM</div><div style="font-weight:600;margin:3px 0">DPP 14 · 16 questions</div><div class="muted">0 / 16 answered</div></div>'+
+  '<div class="card"><div class="k">This week</div><div class="list__i" style="border:0;padding:8px 0"><div class="gr"><div class="t">Mock 6 · Biology</div><div class="s">Sat 9:00 AM · 180 marks</div></div><span class="pill">test</span></div></div>'+
+  '<div class="hot hot--card" data-goto="doubt-student"><div class="k" style="color:var(--tint)">Your doubt was answered</div><div style="font-weight:600;margin:3px 0">“Reflex arc direction”</div><div class="muted">2-min clip attached · tap to view</div></div>'+
+  '<div class="card"><div class="k" style="margin-bottom:8px">Weak tags to drill</div><div class="chips">'+['Photosynthesis','Excretion','Nernst equation'].map(function(c){return '<span class="chip">'+c+'</span>';}).join('')+'</div>'+
+   '<div style="margin-top:10px">'+hotBtn('Practice these','practice-play','ghost')+'</div></div>'+
+ '</div>'+appnav('Home');
+};
+
+R['join']=function(){
+ return '<div style="padding:24px 20px;min-height:100%;display:flex;flex-direction:column">'+
+  '<h2 style="font-size:1.15rem">Neural Control of Movement</h2>'+
+  '<p class="muted" style="margin-bottom:14px">Starts in 4 minutes · 23 already joined</p>'+
+  '<div style="background:#11171a;border-radius:16px;aspect-ratio:3/4;display:flex;align-items:flex-end;justify-content:center;padding:14px;color:#cdd6d3;font-size:.8rem">Camera preview</div>'+
+  '<div class="row" style="justify-content:center;gap:10px;margin:14px 0">'+['🎙 On','📷 On'].map(function(t){return '<span class="pill">'+t+'</span>';}).join('')+'</div>'+
+  '<div class="avrow" style="justify-content:center;margin-bottom:16px">'+['Sneha Iyer','Kabir Anand','Rohan Pillai','Ananya Rao'].map(function(n){return av(n,'av--sm');}).join('')+'<span class="av av--sm" style="background:var(--ink-faint)">+19</span></div>'+
+  hotBtn('Join now','live-student')+
+  '<p class="muted" style="margin-top:12px;text-align:center;font-size:.74rem">The link is your teacher’s Google Meet — you join straight from the app.</p>'+
+ '</div>';
 };
 
 R['teacher-dash']=function(){
@@ -896,7 +1448,7 @@ R['teacher-dash']=function(){
   '<div class="grid g2" style="align-items:start">'+
    '<div class="card"><h3>Students to chase</h3>'+
     chase.map(function(c){return '<div class="hot hot--row" data-goto="timeline"><div class="sb"><div class="row" style="gap:8px;flex-wrap:nowrap">'+av(c[0],'av--sm')+'<div class="gr"><div class="t" style="font-size:.85rem;font-weight:600">'+c[0]+'</div><div class="s">'+c[1]+'</div></div></div>'+pill('open record','info')+'</div></div>';}).join('')+
-    '<div class="row" style="margin-top:6px"><span class="btn btn--sm">Book mentor backlog · 4</span><span class="btn btn--sm">Message guardians</span></div>'+
+    '<div class="row" style="margin-top:6px">'+hotBtn('Book mentor backlog · 4','mentor','ghost')+'<span class="btn btn--sm">Message guardians</span></div>'+
    '</div>'+
    '<div class="card"><h3>Attendance this week</h3>'+
     bars([['Mon',88],['Tue',86],['Wed',82],['Thu',90],['Fri',79],['Sat',93]])+
@@ -923,6 +1475,7 @@ R['owner']=function(){
    '<div class="card"><h3>Teachers</h3>'+
     [['Anitha Rao','24 sessions · 4.8 ★ · doubt SLA 94%'],['Ravi Kulkarni','14 sessions · 4.6 ★ · doubt SLA 86%']]
     .map(function(t){return '<div class="list__i"><div class="row" style="gap:8px;flex-wrap:nowrap">'+av(t[0],'av--sm')+'<div class="gr"><div class="t">'+t[0]+'</div><div class="s">'+t[1]+'</div></div></div></div>';}).join('')+
+    '<div class="row" style="margin-top:6px">'+hotBtn('Payouts','payouts','ghost')+'</div>'+
    '</div>'+
    '<div class="card"><h3>Cohort P&amp;L</h3><div class="tblwrap"><table class="tbl"><thead><tr><th>Cohort</th><th>In</th><th>Margin</th></tr></thead><tbody>'+
     [['Evening · 28','₹1,26,000','70%'],['Weekend · 14','₹60,400','64%'],['Crash · draft','—','—']].map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>';}).join('')+
@@ -930,175 +1483,522 @@ R['owner']=function(){
   '</div>'+
   '<div class="card" style="border-color:color-mix(in srgb,var(--amber) 40%,var(--line))"><div class="sb"><h3 style="margin:0">⚠ Weekend batch attendance −12%</h3>'+pill('2 weeks','warn')+'</div><p class="muted" style="margin-top:6px">3 students flagged. Drill into the cohort dashboard.</p><div style="margin-top:8px">'+hotBtn('Open Weekend dashboard','teacher-dash','ghost')+'</div></div>'+
   '<div class="card card--wash"><p class="muted">Every number here is derived from the same event log — sessions, attempts, doubts, payments. Nothing is entered twice.</p></div>'+
-  '<div style="margin-top:6px">'+hotBtn('Back to the flow map','map')+'</div>';
+  '<div style="margin-top:6px">'+hotBtn('Your TutorOS plan &amp; usage','subscription','ghost')+'</div>';
+ return cons('owner','Owner console',main);
+};
+R['parent-link']=function(){
+ return '<div style="padding:28px 22px;min-height:100%;display:flex;flex-direction:column;justify-content:center">'+
+  '<span class="av av--lg" style="background:var(--tint);border-radius:12px">M</span>'+
+  '<h2 style="font-size:1.2rem;margin:14px 0 6px">Follow your child’s progress</h2>'+
+  '<p class="muted" style="margin-bottom:16px">Meridian Biology invited you to follow <b>Aditya Menon</b>.</p>'+
+  field('Your phone','+91 90•••• ••731')+
+  field('Invite code','MB-AD-4417')+
+  hotBtn('Link my account','parent-home')+
+  '<div class="card card--wash" style="margin-top:20px"><div class="k" style="margin-bottom:4px">What you’ll see</div><p class="muted">Only <b>your</b> linked child: live activity, progress and marksheet, test results, fee receipts, and a thread with the teacher. You cannot see other students.</p></div>'+
+ '</div>';
+};
+
+R['parent-home']=function(){
+ return appbar('Family','<span class="pill">guardian</span>')+'<div class="appwrap">'+
+  '<div class="card"><div class="k">Your children</div>'+
+   '<div class="list__i" style="border:0;padding:8px 0 0"><div class="row" style="flex-wrap:nowrap;gap:10px">'+av('Aditya Menon')+'<div class="gr"><div class="t">Aditya Menon</div><div class="s">Evening cohort · active today</div></div></div>'+pill('linked','good')+'</div>'+
+   '<p class="muted" style="margin-top:8px;font-size:.74rem">Only students you are linked to. The roster of the rest of the class is hidden.</p>'+
+  '</div>'+
+  '<div class="grid g3" style="margin-bottom:10px">'+stat('5 / 6','Attendance','1 Fri miss','warn')+stat('12 / 16','Latest practice','DPP 14','info')+stat('512','Mock 5 / 720','pc 88','good')+'</div>'+
+  '<div class="hot hot--card" data-goto="timeline" data-as="parent"><div class="k" style="color:var(--tint)">Activity</div><div style="font-weight:600;margin:3px 0">Class attended · DPP submitted tonight</div><div class="muted">Same timeline the teacher writes — tap for the full log</div></div>'+
+  '<div class="hot hot--card" data-goto="reports" data-as="parent"><div class="k" style="color:var(--tint)">Progress &amp; marksheet</div><div style="font-weight:600;margin:3px 0">August term report</div><div class="muted">Attendance, practice, mock, teacher note</div></div>'+
+  '<div class="hot hot--card" data-goto="practice-result" data-as="parent"><div class="k" style="color:var(--tint)">Test result</div><div style="font-weight:600;margin:3px 0">DPP 14 · 12 / 16</div><div class="muted">Outcome only — student does the player</div></div>'+
+  '<div class="hot hot--card" data-goto="payments" data-as="parent"><div class="k" style="color:var(--crimson)">Fees &amp; receipts</div><div style="font-weight:600;margin:3px 0">Sep ₹4,500 due 5 Sep</div><div class="muted">Pay, then history + receipts</div></div>'+
+  '<div class="hot hot--card" data-goto="messages" data-as="parent"><div class="k" style="color:var(--tint)">Message the teacher</div><div class="muted" style="margin-top:3px">On the record · usually within a day</div></div>'+
+  '<div class="card card--wash"><p class="muted">Read-only except chat and pay. No second gradebook — every card opens an existing screen, not a parent-only id.</p></div>'+
+ '</div>'+pnav('Home');
+};
+
+R['reports']=function(){
+ if(parentView()){
+  return appbar('Marksheet','<span class="pill">August</span>')+'<div class="appwrap">'+
+   '<div class="card"><div style="font-family:var(--serif);font-weight:600">Term report — Aditya Menon</div><div class="muted" style="margin-top:4px">Your child only · from the timeline</div>'+
+    '<div class="hr"></div>'+
+    [['Attendance','5 / 6 · 92%'],['Practice completion','78%'],['Latest test (DPP 14)','12 / 16'],['Mock 5','512 / 720 · pc 88'],['Teacher note','Steady term. Timed practice next.']].map(function(r){return '<div class="sb" style="font-size:.82rem;margin-bottom:6px;align-items:flex-start"><span class="muted">'+r[0]+'</span><span style="text-align:right;max-width:55%">'+r[1]+'</span></div>';}).join('')+
+   '</div>'+
+   '<div class="hot hot--card" data-goto="practice-result" data-as="parent"><div class="k">Open latest test result</div><div class="muted">Same practice-result screen, guardian view</div></div>'+
+   '<div class="card card--wash"><p class="muted">Not a second gradebook. Faculty generate the report; you read this slice.</p></div>'+
+  '</div>'+pnav('Reports');
+ }
+ var main='<h2>Reports &amp; exports</h2><span class="k">Term reports · CSV · scheduled guardian sends</span>'+
+ '<div class="grid g2" style="align-items:start"><div>'+
+  field('Report type','Term progress — parent-facing')+
+  field('Scope','NEET 2026 Evening · 28 students')+
+  field('Period','August 2026')+
+  field('Template','Meridian · branded header + teacher note')+
+  field('Delivery','Email to linked guardians · also on parent home')+
+  '<div class="row" style="margin-top:4px"><span class="btn btn--sm">Export CSV</span><span class="btn btn--sm">Download all PDFs</span></div>'+
+ '</div><div>'+
+  '<div class="card"><div class="k" style="margin-bottom:8px">Preview — Aditya Menon</div>'+
+   '<div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--raised)">'+
+    '<div style="font-family:var(--serif);font-weight:600">Meridian Biology — August report</div><div class="hr"></div>'+
+    [['Attendance','92%'],['Practice completion','78%'],['Mock 5','512 / 720 · pc 88'],['Weak tags','Photosynthesis, Excretion']].map(function(r){return '<div class="sb" style="font-size:.8rem;margin-bottom:4px"><span class="muted">'+r[0]+'</span><span>'+r[1]+'</span></div>';}).join('')+
+    '<p class="muted" style="margin-top:8px;font-size:.75rem">Teacher note: steady term. Push timed practice on Race-level items.</p>'+
+   '</div></div>'+
+  '<div class="card card--wash"><p class="muted">Generated from the timeline — nothing re-keyed. Scheduled sends go out on the 1st of each month.</p></div>'+
+ '</div></div>'+
+ '<div style="margin-top:6px">'+hotBtn('Guardian view','parent-home')+'</div>';
+ return cons('owner','Reports',main);
+};
+
+R['mentor']=function(){
+ var items=[['Farhan Qureshi','DPP 12, 13 skipped · Mock 5 missed','3','bad'],['Meera Joshi','DPP 14 skipped','1','warn'],['Divya Suresh','Mock 5 −18% · no analysis viewed','2','warn'],['Kabir Anand','2 lessons incomplete','2','warn']];
+ var main='<h2>Mentor / backlog</h2><span class="k">Booked slots on <b>skipped</b> work — not re-teaching</span>'+
+ '<div class="grid g2" style="align-items:start"><div>'+
+  items.map(function(s,i){return '<div class="'+(i===0?'hot hot--row':'card')+'"><div class="sb"><div class="row" style="gap:8px;flex-wrap:nowrap">'+av(s[0],'av--sm')+'<div class="gr"><div class="t" style="font-size:.85rem;font-weight:600">'+s[0]+'</div><div class="s">'+s[1]+'</div></div></div>'+pill(s[2]+' items',s[3])+'</div></div>';}).join('')+
+ '</div><div>'+
+  '<div class="card"><div class="sb"><h3 style="margin:0">Farhan Qureshi</h3>'+pill('8-min slot','info')+'</div>'+
+   '<div class="k" style="margin:10px 0 6px">Agenda — auto-built from misses</div>'+
+   ['DPP 12 · Reflex arc — 3 items','DPP 13 · Synapse — 4 items','Commit: Mock 6 on Saturday'].map(function(a){return '<div class="list__i"><span style="color:var(--tint)">▢</span><div class="gr"><div class="t" style="font-weight:400">'+a+'</div></div></div>';}).join('')+
+   '<div class="row" style="margin-top:8px"><span class="btn btn--sm">Book Tue 5:45 PM</span><span class="btn btn--sm">Message guardian</span></div>'+
+  '</div>'+
+  '<div class="card card--wash"><p class="muted">The backlog chases skipped work so the live class doesn’t become the homework police. Outcome loops back to the analysis board.</p></div>'+
+ '</div></div>';
+ return cons('teacher','Practice',main);
+};
+
+R['billing']=function(){
+ var rows=[['Aditya Menon','Monthly · ₹4,500','Sep paid','good'],['Sneha Iyer','Monthly · ₹4,500','Sep paid','good'],['Farhan Qureshi','Monthly · ₹4,500','Sep due','warn'],['Rohan Pillai','Trial','converts 12 Sep','info'],['Meera Joshi','Term · ₹24,000','overdue 6d','bad']];
+ var main='<h2>Billing &amp; plans</h2><span class="k">42 students · ₹1.86L booked · 88% collected</span>'+
+  '<div class="row" style="margin-bottom:10px"><span class="btn btn--dark btn--sm">+ Fee plan</span><span class="btn btn--sm">Send reminders · 4</span><span class="btn btn--sm">Export</span></div>'+
+  '<div class="tblwrap"><table class="tbl"><thead><tr><th>Student</th><th>Plan</th><th>Status</th><th></th></tr></thead><tbody>'+
+   rows.map(function(r){return '<tr><td><div class="row" style="gap:8px;flex-wrap:nowrap">'+av(r[0],'av--sm')+'<span>'+r[0]+'</span></div></td><td class="muted">'+r[1]+'</td><td>'+pill(r[2],r[3])+'</td><td><span class="btn btn--sm">Invoice</span></td></tr>';}).join('')+
+  '</tbody></table></div>'+
+  '<div class="grid g3" style="margin-top:14px">'+stat('₹1.64L','Collected','','good')+stat('₹22k','Outstanding','4 students','warn')+stat('2','Paused','on request','mute')+'</div>'+
+  '<div class="card card--wash" style="margin-top:12px"><p class="muted">Plans, invoices and dunning. Payment itself is a pass-through gateway — fees are borne by the tenant or the student, never you.</p></div>'+
+  '<div style="margin-top:6px">'+hotBtn('Student payment view','payments')+'</div>';
+ return cons('owner','Billing',main);
+};
+
+R['payments']=function(){
+ return appbar('Fees &amp; receipts','')+'<div class="appwrap">'+
+  '<div class="card" style="border-color:color-mix(in srgb,var(--crimson) 40%,var(--line))"><div class="k" style="color:var(--crimson)">Due 5 Sep</div>'+
+   '<div class="sb" style="margin:6px 0"><span style="font-family:var(--serif);font-size:1.4rem">₹4,500</span>'+pill('September','warn')+'</div>'+
+   '<div class="muted">Invoice INV-2026-0914 · linked child Aditya Menon</div>'+
+   '<div style="margin-top:10px"><span class="hot hot--btn" data-goto="parent-home" data-as="parent">Pay now · UPI / card</span></div>'+
+   '<p class="muted" style="margin-top:8px;font-size:.72rem">Processed by Razorpay. TutorOS never holds your money. Capture writes to the timeline.</p>'+
+  '</div>'+
+  '<div class="card"><div class="k" style="margin-bottom:8px">Receipts &amp; history</div>'+
+   [['August','₹4,500','paid 28 Aug · RCT-0881'],['July','₹4,500','paid 30 Jul · RCT-0744'],['June','₹4,500','paid 2 Jul · RCT-0612']].map(function(r){return '<div class="list__i"><div class="gr"><div class="t" style="font-weight:400">'+r[0]+' · '+r[1]+'</div><div class="s">'+r[2]+'</div></div><span class="btn btn--sm">Receipt</span></div>';}).join('')+
+  '</div>'+
+ '</div>'+pnav('Fees');
+};
+
+R['subscription']=function(){
+ var main='<h2>Your TutorOS plan</h2><span class="k">What Meridian pays us — metered by F2</span>'+
+  '<div class="grid g3" style="margin-bottom:14px">'+
+   stat('Cohort','Current tier','$79 / mo','info')+
+   stat('42 / 250','Active students','','good')+
+   stat('3 / 5','Staff seats','','good')+
+  '</div>'+
+  '<div class="card"><div class="k" style="margin-bottom:8px">This month’s usage</div>'+
+   [['Storage · recordings','18 GB / 50 GB',36],['SMS / WhatsApp sends','410 / 500',82],['Hosted-room minutes','0 · using Google Meet',0],['Speech-to-text','0 · not enabled',0]].map(function(r){return '<div style="margin-bottom:8px"><div class="sb" style="font-size:.8rem"><span>'+r[0]+'</span><span class="muted">'+r[1]+'</span></div><div style="height:6px;background:var(--sunk);border-radius:3px;margin-top:3px"><b style="display:block;height:100%;width:'+r[2]+'%;background:var(--tint);border-radius:3px"></b></div></div>';}).join('')+
+  '</div>'+
+  '<div class="card"><div class="sb"><h3 style="margin:0">September invoice</h3><span style="font-family:var(--serif);font-size:1.1rem">$79.00</span></div><p class="muted" style="margin-top:6px">Base $79 · storage within allowance · 0 overage. Billed via Stripe on the 1st.</p></div>'+
+  '<div class="card card--wash"><p class="muted">Margin holds because video runs on the tenant’s Google Meet ($0). Hosted rooms and STT are opt-in metered add-ons, never bundled.</p></div>'+
+  '<div style="margin-top:6px">'+hotBtn('Operation scorecard','owner')+'</div>';
  return cons('owner','Owner console',main);
 };
 
-/* ================= map ================= */
-function mapView(){
- var cols=FLOWS.map(function(f,i){
-  var chips=f.screens.map(function(s){return '<div class="mapchip" data-goto="'+s+'"><b>'+S[s].t+'</b><span>'+S[s].sub+'</span></div>';}).join('');
-  return '<div class="mapcol tint-'+f.tint+'"><div class="mapcol__h"><i>'+(i+1)+'</i>'+f.name+' · '+f.screens.length+'</div>'+chips+'</div>';
+R['payouts']=function(){
+ var rows=[['Anitha Rao (owner)','24','—','—'],['Ravi Kulkarni','14','₹1,200 / session','₹16,800'],['Priya Nair (TA)','—','₹8,000 / mo','₹8,000']];
+ var main='<h2>Payouts</h2><span class="k">September · revenue share &amp; per-session pay</span>'+
+  '<div class="tblwrap"><table class="tbl"><thead><tr><th>Staff</th><th>Sessions</th><th>Rate</th><th>Payable</th></tr></thead><tbody>'+
+   rows.map(function(r){return '<tr><td><div class="row" style="gap:8px;flex-wrap:nowrap">'+av(r[0],'av--sm')+'<span>'+r[0]+'</span></div></td><td>'+r[1]+'</td><td class="muted">'+r[2]+'</td><td><b>'+r[3]+'</b></td></tr>';}).join('')+
+  '</tbody></table></div>'+
+  '<div class="grid g3" style="margin-top:14px">'+stat('₹24,800','Total payable','2 staff','info')+stat('₹1.86L','Revenue booked','','')+stat('67%','Blended margin','after payouts','good')+'</div>'+
+  '<div class="row" style="margin-top:12px"><span class="btn btn--sm">Generate statements</span><span class="btn btn--sm">Mark paid</span></div>'+
+  '<div class="card card--wash" style="margin-top:12px"><p class="muted">A statement per teacher, tied to the same session records that drive the dashboards.</p></div>';
+ return cons('owner','Owner console',main);
+};
+
+R['automation']=function(){
+ var rules=[
+  ['Live session needs a same-day practice artefact','B1 · B2 · C2','on','warn when a class is scheduled with no DPP that day'],
+  ['A missed practice / test auto-creates a backlog item','C2 · C3 · E5','on','the mentor slot chases it — not the lecture'],
+  ['Analysis rows can’t close without an action','C5','on','a percentage alone won’t let the row close'],
+  ['External chat links are flagged, not stored as record','D2 · D4','on','WhatsApp / Telegram stays overflow'],
+  ['Doubt open &gt; 24h escalates','D1','off','route to the owner if the SLA breaches'],
+  ['Attendance &lt; 60% over 2 weeks → notify guardian','B3 · A4','off','']
+ ];
+ var main='<h2>Automation rules</h2><span class="k">Opinion as opt-in · enable what fits</span>'+
+  rules.map(function(r){return '<div class="card"><div class="sb"><h3 style="margin:0;font-size:.92rem">'+r[0]+'</h3><span class="pill '+(r[2]==='on'?'is-good':'is-mute')+'">'+r[2]+'</span></div>'+
+   '<p class="muted" style="margin:6px 0">'+(r[3]||'—')+'</p><div class="chips">'+r[1].split(' · ').map(function(m){return '<span class="chip">'+m+'</span>';}).join('')+'</div></div>';}).join('')+
+  '<div class="card card--wash"><p class="muted">Every rule names the modules it needs. Turn one on and its modules light up across the app.</p></div>';
+ return cons('owner','Owner console',main);
+};
+
+R['integrations']=function(){
+ var ints=[['Google Workspace','Calendar · Meet · Drive · default video','connected · anitha@meridianbio.in','good'],['Microsoft 365','Teams meeting links + transcripts','paste links now · Graph connect later','mute'],['Razorpay','Student fee collection','connected','good'],['MSG91','SMS · WhatsApp','connected · 410 sent','good'],['YouTube','Unlisted lesson videos','connected','good'],['Zapier / webhooks','Push events to your own stack','not connected','mute']];
+ var main='<h2>Integrations</h2><span class="k">Connect once · used across modules</span>'+
+  '<div class="grid g2">'+ints.map(function(x){return '<div class="card"><div class="sb"><h3 style="margin:0;font-size:.92rem">'+x[0]+'</h3><span class="pill '+(x[3]==='good'?'is-good':'is-mute')+'">'+(x[3]==='good'?'connected':'off')+'</span></div><p class="muted" style="margin:6px 0 4px">'+x[1]+'</p><div class="s" style="font-size:.74rem;color:var(--ink-faint)">'+x[2]+'</div><div class="row" style="margin-top:8px"><span class="btn btn--sm">'+(x[3]==='good'?'Manage':'Connect')+'</span></div></div>';}).join('')+'</div>'+
+  '<div class="card card--wash"><p class="muted">Google is the one that matters: it makes video free and attendance automatic.</p></div>'+
+  '<div style="margin-top:6px">'+hotBtn('Video &amp; transcript settings','session-video')+'</div>';
+ return cons('owner','Integrations',main);
+};
+
+R['audit']=function(){
+ var rows=[['Anitha Rao','Grade changed','Aditya Menon · DPP 12','Today 09:14'],['Ravi Kulkarni','Fee marked paid','Meera Joshi · ₹24,000','Yesterday 18:40'],['Anitha Rao','Data export','All students · CSV','2 Sep 11:02'],['System','Retention purge','Session records &gt; 24 mo','1 Sep 02:00'],['Anitha Rao','Role granted','Priya Nair → Assistant','28 Aug 16:20']];
+ var main='<h2>Audit log &amp; data</h2><span class="k">Every privileged action · India DPDP profile</span>'+
+  '<div class="tblwrap"><table class="tbl"><thead><tr><th>Actor</th><th>Action</th><th>Target</th><th>When</th></tr></thead><tbody>'+
+   rows.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+pill(r[1])+'</td><td class="muted">'+r[2]+'</td><td class="muted">'+r[3]+'</td></tr>';}).join('')+
+  '</tbody></table></div>'+
+  '<div class="grid g2" style="margin-top:14px"><div class="card"><h3>Retention</h3>'+[['Session records','24 months'],['Practice attempts','24 months'],['Messages','36 months'],['Financial','7 years']].map(function(x){return '<div class="sb" style="font-size:.82rem;margin-bottom:4px"><span class="muted">'+x[0]+'</span><span>'+x[1]+'</span></div>';}).join('')+'</div>'+
+   '<div class="card"><h3>Exports &amp; consent</h3><p class="muted">Full workspace export (JSON + files). Guardian consent captured at enrollment for minors. Configurable per workspace — DPDP / GDPR.</p><div class="row" style="margin-top:8px"><span class="btn btn--sm">Request export</span></div></div>'+
+  '</div>';
+ return cons('owner','Owner console',main);
+};
+
+
+/* ================= home ================= */
+function homeView(){
+ var cards=TEMPLATES.map(function(t){
+  return '<div class="tplcard tint-'+t.tint+'" data-goto="'+t.id+'/flow">'+
+    '<div class="tplcard__h"><h3>'+t.name+'</h3><span class="pill" style="background:var(--tint-wash);color:var(--tint);border:0">'+t.tour.length+' screens · '+t.tier+'</span></div>'+
+    '<p>'+t.blurb+'</p>'+
+    '<div class="tplcard__shape">'+t.shape+'</div>'+
+    '<div class="tplcard__roles">'+(ROLE_ONLY
+      ? '<span class="rl tint-'+ROLE[ROLE_ONLY].tint+'"><i></i>'+ROLE[ROLE_ONLY].label+' only</span>'
+      : t.roles.map(function(r){return '<span class="rl tint-'+ROLE[r].tint+'"><i></i>'+ROLE[r].label+'</span>';}).join(''))+'</div>'+
+  '</div>';
  }).join('');
+ var first=TEMPLATES[0];
  return '<div class="mapwrap">'+
   '<div class="maphero">'+
-   '<p class="k">TutorOS · interactive prototype · '+TOUR.length+' screens</p>'+
-   '<h1>Click straight through the product — <em>login, class, practice, doubts, records</em>.</h1>'+
-   '<p>Every screen is a mock, wired to the next. Move with the outlined buttons, the arrows up top, or this map. Nothing else is interactive — this is for deciding the look and the flow before Figma and the backend.</p>'+
-   '<div class="row"><button class="hot hot--btn" data-goto="signup">Start the walkthrough</button>'+
-     '<button class="hot hot--btn ghost" data-goto="student-dash">Jump to the student app</button>'+
-     '<button class="hot hot--btn ghost" data-goto="owner">Jump to the owner console</button>'+
-     '<span class="btn" id="aboutBtn2" style="cursor:pointer">About this prototype ⓘ</span></div>'+
-   '<div class="mapmeta">Compatible with the web app and the mobile app — use the Phone / Web toggle up top on any screen.</div>'+
+   '<p class="k">TutorOS · '+(ROLE_ONLY?ROLE[ROLE_ONLY].label+' flow':('template prototype · '+ALL.length+' screens · 6 templates'))+'</p>'+
+   '<h1>'+(ROLE_ONLY?ROLE[ROLE_ONLY].label+' · same screens, this role only':'Pick a template. Walk its flow. See <em>who does what</em>.')+'</h1>'+
+   '<p>'+(ROLE_ONLY
+     ? 'Child of the backbone demo — same screen ids and mocks. Only steps this role sits on. Templates that never seat this role are omitted. No extra features.'
+     : 'Every screen is a visual mock. Choose a template to see its whole flow as a horizontal swimlane — Student, Faculty, Admin, Parent and System each get a lane — then click any step to open that screen. Numbered steps are the click-through order. This is for locking the look and the flow before Figma and the backend.')+'</p>'+
+   '<div class="row">'+
+     (first?'<button class="hot hot--btn" data-goto="'+first.id+'/flow">'+(ROLE_ONLY?ROLE[ROLE_ONLY].label+' · '+first.name:first.name+' flow')+'</button>':'')+
+     '<button class="hot hot--btn ghost" data-goto="compare">Compare templates</button>'+
+     (TById('t6')?'<button class="hot hot--btn ghost" data-goto="t6/flow">Everything · '+ALL.length+'</button>':'')+
+     '<span class="btn" id="aboutBtn2" style="cursor:pointer">About this prototype ⓘ</span>'+
+   '</div>'+
+   '<div class="mapmeta">Every screen renders as a phone or web mock — force either with the Phone / Web toggle up top.</div>'+
   '</div>'+
-  '<div class="mapgrid">'+cols+'</div>'+
+  '<div class="tplgrid">'+cards+'</div>'+
+ '</div>';
+}
+
+/* ================= swimlane flow ================= */
+var STEPQ=[];
+function flowView(tid){
+ var T=TById(tid); STEPQ=T.steps;
+ var order=['student','faculty','admin','parent','system'];
+ var lanes=order.filter(function(r){return T.steps.some(function(s){return s[1]===r;});});
+ var sts=STAGES.filter(function(st){return T.steps.some(function(s){return s[2]===st;});});
+ var pos={}; T.tour.forEach(function(s,i){pos[s]=i+1;});
+ var cols='138px repeat('+sts.length+',minmax(146px,1fr))';
+ var g='<div class="swimwrap"><div class="swim" style="grid-template-columns:'+cols+'">';
+ g+='<div></div>'+sts.map(function(st){return '<div class="swim__stage">'+st+'</div>';}).join('');
+ lanes.forEach(function(r){
+  g+='<div class="swim__lane tint-'+ROLE[r].tint+'">'+ROLE[r].label+'</div>';
+  sts.forEach(function(st){
+   var cell=[]; T.steps.forEach(function(s,si){ if(s[1]===r&&s[2]===st) cell.push([s,si]); });
+   g+='<div class="swim__cell">'+cell.map(function(pr){
+     var s=pr[0], si=pr[1], auto=s[3], m=S[s[0]];
+     return '<div class="flownode '+(auto?'flownode--auto':'')+' tint-'+ROLE[r].tint+'" data-fnode="'+si+'" data-goto="'+tid+'/'+s[0]+'">'+
+       '<span class="flownode__n">'+(auto?'⚙':(pos[s[0]]||''))+'</span>'+
+       '<span class="flownode__t">'+m.t+'</span>'+
+       (auto?'<span class="flownode__a">'+auto+'</span>':'')+
+     '</div>';
+   }).join('')+'</div>';
+  });
+ });
+ g+='<svg class="swim__wires"></svg></div></div>';
+ return '<div class="flowpage">'+
+   '<div class="flowhero tint-'+T.tint+'">'+
+     '<p class="k"><span class="prev" data-goto="home">‹ all templates</span> &nbsp;·&nbsp; template '+T.id.slice(1)+' of 6</p>'+
+     '<h1>'+T.name+'</h1><p>'+T.blurb+'</p>'+
+     '<div class="mapmeta">'+T.shape+' &nbsp;·&nbsp; tier: '+T.tier+' &nbsp;·&nbsp; turns on: '+T.modules+'</div>'+
+     (T.reason?'<div class="why why--hero"><p class="k">Why this template</p><div class="why__g">'+
+       '<div><span>Who</span><p>'+T.reason.who+'</p></div>'+
+       '<div><span>How</span><p>'+T.reason.how+'</p></div>'+
+       '<div><span>When</span><p>'+T.reason.when+'</p></div>'+
+     '</div></div>':'')+
+     '<div class="legend">'+order.map(function(r){return '<span class="tint-'+ROLE[r].tint+'"><i style="background:var(--tint)"></i>'+ROLE[r].label+'</span>';}).join('')+'</div>'+
+     '<div class="row" style="margin-top:14px">'+
+       (T.tour[0]?'<button class="hot hot--btn" data-goto="'+tid+'/'+T.tour[0]+'">Walk this flow</button>':'')+
+       '<button class="hot hot--btn ghost" data-goto="compare">Compare templates</button>'+
+     '</div>'+
+   '</div>'+
+   '<p class="muted" style="margin:0 0 9px">Each card is a screen — click it. Numbered cards are the click-through order; the dashed ⚙ cards are automatic steps the platform does for you.</p>'+
+   g+
+ '</div>';
+}
+function drawWires(){
+ var swim=document.querySelector('.swim'); if(!swim)return;
+ var svg=swim.querySelector('.swim__wires'); if(!svg)return;
+ var W=swim.scrollWidth,H=swim.scrollHeight;
+ svg.setAttribute('width',W);svg.setAttribute('height',H);svg.setAttribute('viewBox','0 0 '+W+' '+H);
+ var base=swim.getBoundingClientRect(),nd={};
+ [].forEach.call(swim.querySelectorAll('.flownode'),function(n){var r=n.getBoundingClientRect();nd[n.getAttribute('data-fnode')]={x:r.left-base.left,y:r.top-base.top,w:r.width,h:r.height};});
+ var d='';
+ for(var i=0;i<STEPQ.length-1;i++){
+  var a=nd[i],b=nd[i+1]; if(!a||!b)continue;
+  if(b.x>=a.x+a.w-6){
+   var x1=a.x+a.w,y1=a.y+a.h/2,x2=b.x,y2=b.y+b.h/2,mx=(x1+x2)/2;
+   d+='<path d="M'+x1+' '+y1+' C'+mx+' '+y1+' '+mx+' '+y2+' '+x2+' '+y2+'"/>';
+  }else{
+   var X1=a.x+a.w/2,Y1=a.y+a.h,X2=b.x+b.w/2,Y2=b.y,my=(Y1+Y2)/2;
+   d+='<path d="M'+X1+' '+Y1+' C'+X1+' '+my+' '+X2+' '+my+' '+X2+' '+Y2+'"/>';
+  }
+ }
+ svg.innerHTML=d;
+}
+window.addEventListener('resize',function(){if(state.view==='flow')drawWires();});
+
+/* ================= compare ================= */
+function whyFields(id){
+ var w=WHY[id]; if(!w)return '';
+ return [['Owner',w.own],['Who',w.who],['Why',w.why],['How',w.how],['When',w.when]].map(function(p){
+  return '<div><span>'+p[0]+'</span><p>'+p[1]+'</p></div>';
+ }).join('');
+}
+function compareView(){
+ var inT={}; TEMPLATES.forEach(function(t){t.tour.forEach(function(s){(inT[s]=inT[s]||[]).push(t.id);});});
+ var doms=[['A','Identity & access'],['B','Teaching & sessions'],['C','Practice & assessment'],['D','Doubts & communication'],['E','Progress & analytics'],['F','Business & operations'],['G','Configuration & templates']];
+ var ctx=state.tpl||'t1';
+ var body='';
+ doms.forEach(function(dm){
+  body+='<tr class="grp"><td colspan="'+(TEMPLATES.length+1)+'">'+dm[0]+' · '+dm[1]+'</td></tr>';
+  ALL.filter(function(id){return S[id].dom===dm[0];}).forEach(function(id){
+   var tids=inT[id]||[], spine=tids.length>=4;
+   body+='<tr class="'+(spine?'spine':'')+'"><td><span class="cmpname" data-goto="t6/'+id+'">'+S[id].t+'</span><div class="cmpmeta">'+whyFields(id)+'</div></td>'+
+    TEMPLATES.map(function(t){
+     var on=tids.indexOf(t.id)>=0;
+     return '<td>'+(on?'<span class="dot tint-'+t.tint+'" style="background:var(--tint)" data-goto="'+t.id+'/'+id+'"></span>':'<span class="cmpx">·</span>')+'</td>';
+    }).join('')+'</tr>';
+  });
+ });
+ return '<div class="mapwrap">'+
+  '<div class="maphero"><p class="k"><span class="prev" data-goto="home" style="cursor:pointer;color:var(--accent-ink)">‹ Template home</span> · compare</p>'+
+  '<h1>Which screens each template turns on</h1>'+
+  '<p>Each row is a screen: <b>owner</b> (who is accountable), <b>who</b> sits there, <b>why</b> it exists, <b>how</b> to use it, and <b>when</b> it fires. Dots show which templates turn it on. Rows with a green left edge are the <b>spine</b> (four or more templates). The live practice loop belongs to Exam-prep; the parent portal to K-12 and Music; payouts, metering and audit to Everything. Click a screen name to open it in Everything (full Who / How / When strip).</p></div>'+
+  '<div class="tblwrap"><table class="cmptbl"><thead><tr><th>Screen · owner · who · why · how · when</th>'+TEMPLATES.map(function(t){return '<th class="tint-'+t.tint+'" style="color:var(--tint)">'+t.short+'</th>';}).join('')+'</tr></thead><tbody>'+body+'</tbody></table></div>'+
  '</div>';
 }
 
 /* ================= about ================= */
 function aboutHTML(){
  return '<span class="x" data-close>close ✕</span><h3>About this prototype</h3>'+
-  '<p><b>What it is.</b> A clickable mock of TutorOS — '+TOUR.length+' screens across 6 flows, each wired to the next. It is not functional: buttons navigate, nothing saves. Use it to lock the look and the screen-to-screen flow.</p>'+
-  '<p style="margin-top:10px"><b>Where it comes from.</b> The <code>Exam-prep loop</code> template in <code>tutor-platform-explorer.html</code> (26 of 35 modules on). Full rationale in <code>tutor-platform-blueprint.md</code>.</p>'+
-  '<p style="margin-top:10px"><b>Folded in to keep the walkthrough to 26.</b> Staff &amp; roles settings, question-bank editor, test setup, assignments, announcements, notification preferences, template gallery, mentor-slot booking, and the platform-subscription screen each exist in the blueprint — ask and they get their own screens.</p>'+
-  '<p style="margin-top:10px"><b>How to use it.</b></p><ul>'+
-   '<li>Click the <span style="color:var(--accent-ink)">colour-outlined</span> buttons and cards to move between screens.</li>'+
-   '<li><b>Hotspots</b> (top right) outlines every clickable area — toggle it off for clean screenshots.</li>'+
-   '<li><b>Phone / Web</b> forces either form factor on any screen.</li>'+
-   '<li>The <b>‹ ›</b> arrows and the dashed bar at each screen’s foot step through the story in order.</li>'+
-   '<li>The <b>☰</b> menu lists all 26, grouped by flow.</li>'+
-  '</ul>'+
-  '<p style="margin-top:10px"><b>Next step.</b> Freeze the layout in Figma as the constant, then build the backend and wire it to the flow state.</p>';
+  '<p><b>What it is.</b> A clickable mock of TutorOS — '+ALL.length+' screens, organised by the six shipped templates. Nothing saves; buttons and cards navigate. Use it to lock the look and the flow before Figma and the backend.</p>'+
+  (ROLE_ONLY?'<p style="margin-top:10px"><b>This file.</b> Role child of <code>tutor-platform-demo.html</code>. Same ids and mocks; only the '+ROLE[ROLE_ONLY].label+' lane. Not linked from the backbone demo.</p>':'')+
+  '<p style="margin-top:10px"><b>How it is organised.</b> Start on <b>Template home</b>. Each template opens a <b>horizontal swimlane</b> — Student · Faculty · Admin · Parent · System lanes, left-to-right stages. Click a numbered card to open that screen; the ‹ › bar then walks that template in order. <b>Compare</b> shows which screens each template shares.</p>'+
+  '<p style="margin-top:10px"><b>Everything template.</b> That flow is the master gallery. Open any screen there and you get <b>Owner / Who / Why / How / When</b>. <b>Compare all six</b> repeats the same notes on every row, plus which templates turn the screen on. Focused templates hide the strip on mocks so those screens stay the product UI.</p>'+
+  '<p style="margin-top:10px"><b>Video is never hosted here.</b> The <b>Session video &amp; transcript</b> screen generates a Google Meet link by default, or takes a Microsoft Teams link. Those two providers only — Zoom and the rest are out of scope. Transcripts are pulled from Google or Microsoft afterwards — see <code>video-and-transcript-options.md</code>.</p>'+
+  '<p style="margin-top:10px"><b>Source.</b> Templates, modules and the screen map come from <code>tutor-platform-blueprint.md</code>. The interactive module picker is <code>tutor-platform-explorer.html</code>.</p>'+
+  '<p style="margin-top:10px"><b>Next step.</b> Freeze the layouts in Figma as the constant, then build the tenant spine and wire modules to the flow.</p>';
 }
 
 /* ================= router + render ================= */
-var state={vp:'auto',cur:'map'};
+var state={vp:'auto',view:'home',tpl:'t1',cur:null,asRole:null};
 try{var v=localStorage.getItem('tos_vp');if(v)state.vp=v;}catch(e){}
+try{var tp=localStorage.getItem('tos_tpl');if(tp&&TById(tp))state.tpl=tp;}catch(e){}
 document.querySelectorAll('#vpSeg button').forEach(function(b){b.classList.toggle('on',b.dataset.vp===state.vp);});
 
-function urlFor(id){
- if(['signup','template','branding'].indexOf(id)>=0)return 'meridian-bio.tutoros.app/setup';
- if(id==='staff-login')return 'meridian-bio.tutoros.app/staff';
- if(S[id].tint==='violet')return 'meridian-bio.tutoros.app/owner';
- return 'meridian-bio.tutoros.app/app';
+function urlFor(tid,id){
+ var role=stepFor(tid,id).r;
+ if(S[id].dom==='G'||['wsetup','branding','roster','cohort-builder'].indexOf(id)>=0)return 'meridian-bio.tutoros.app/setup';
+ if(role==='parent')return 'meridian-bio.tutoros.app/family';
+ if(role==='admin')return 'meridian-bio.tutoros.app/owner';
+ if(role==='faculty')return 'meridian-bio.tutoros.app/teach';
+ return 'app.meridian-bio.tutoros.app';
 }
-function flowbar(id){
- var i=TOUR.indexOf(id);
- var pv=i>0?TOUR[i-1]:null, nx=i<TOUR.length-1?TOUR[i+1]:null;
- return '<div class="flowbar">'+
-  '<div>'+(pv?'<span class="prev" data-goto="'+pv+'">‹ '+S[pv].t+'</span>':'<span class="fb__l">start</span>')+'</div>'+
-  '<div class="fb__l">prototype flow · '+(i+1)+' / '+TOUR.length+'</div>'+
-  '<div>'+(nx?next(nx,S[nx].t):next('map','Flow map'))+'</div>'+
- '</div>';
-}
-function frame(id){
- var m=S[id], body=R[id]();
- var vp=state.vp==='auto'?m.frame:state.vp;
- var tint='tint-'+m.tint;
- if(vp==='phone'){
-  return '<div class="dev dev--phone '+tint+'">'+
-    '<div class="pstat"><span>9:41</span><span>5G ▪▪▪ 82%</span></div>'+
-    '<div class="dev__scr"><div class="phonewrap">'+body+'</div></div>'+
-    flowbar(id)+
-  '</div>';
+function stepFor(tid,id){
+ var T=TById(tid);
+ var prefer=ROLE_ONLY||(state&&state.asRole)||null;
+ if(T && prefer){
+  for(var i=0;i<T.steps.length;i++){if(T.steps[i][0]===id&&T.steps[i][1]===prefer)return {r:T.steps[i][1],st:T.steps[i][2]};}
  }
- return '<div class="dev dev--web '+tint+'">'+
-   '<div class="dev__bar"><span class="dev__dots"><i></i><i></i><i></i></span><span class="dev__url">'+urlFor(id)+'</span></div>'+
-   '<div class="dev__scr">'+body+'</div>'+
-   flowbar(id)+
+ if(T){
+  for(var j=0;j<T.steps.length;j++){if(T.steps[j][0]===id&&!T.steps[j][3])return {r:T.steps[j][1],st:T.steps[j][2]};}
+  for(var k=0;k<T.steps.length;k++){if(T.steps[k][0]===id)return {r:T.steps[k][1],st:T.steps[k][2]};}
+ }
+ return {r:S[id].role,st:'—'};
+}
+function seqFor(tid,id){var T=TById(tid);if(T&&T.tour.length)return T.tour;return ALL;}
+function hdrStrip(tid,id){
+ var T=TById(tid),st=stepFor(tid,id),rt=ROLE[st.r];
+ return '<div class="scrn__hdr tint-'+rt.tint+'">'+
+   '<div class="scrn__crumb">'+
+     '<span class="sc__k sc__link" data-goto="home">Template home</span><span class="sc__sep">›</span>'+
+     (T?'<span class="sc__k sc__link" data-goto="'+tid+'/flow">'+T.name+'</span><span class="sc__sep">›</span>':'')+
+     '<span class="sc__k">'+st.st+'</span><span class="sc__sep">›</span>'+
+     '<b>'+S[id].t+'</b>'+
+   '</div>'+
+   '<div class="scrn__metar">'+
+     '<span class="rolebadge">'+rt.label+'</span>'+
+     '<span class="modtag">module '+S[id].mod+'</span>'+
+     '<span class="sc__flow" data-goto="home">Home</span>'+
+     (T?'<span class="sc__flow" data-goto="'+tid+'/flow">↩ flow</span>':'')+
+   '</div>'+
+ '</div>'+whyPanel(tid,id);
+}
+function whyPanel(tid,id){
+ if(tid!=='t6' && !ROLE_ONLY)return '';
+ if(!WHY[id])return '';
+ return '<div class="why tint-'+ROLE[stepFor(tid,id).r].tint+'">'+
+  '<p class="k">Why this screen · '+(ROLE_ONLY?ROLE[ROLE_ONLY].label:'Everything')+'</p>'+
+  '<div class="why__g">'+whyFields(id)+'</div></div>';
+}
+function flowbar(tid,id){
+ var seq=seqFor(tid,id),i=seq.indexOf(id),T=TById(tid);
+ var pv=i>0?seq[i-1]:null, nx=(i>=0&&i<seq.length-1)?seq[i+1]:null;
+ return '<div class="flowbar">'+
+  '<div>'+
+    '<span class="prev" data-goto="home">Template home</span>'+
+    '<span class="sc__sep">·</span>'+
+    (pv?'<span class="prev" data-goto="'+tid+'/'+pv+'">‹ '+S[pv].t+'</span>':'<span class="prev" data-goto="'+tid+'/flow">‹ '+T.name+' flow</span>')+
+  '</div>'+
+  '<div class="fb__l">'+T.short+' · '+(i>=0?(i+1)+' / '+seq.length:'—')+'</div>'+
+  '<div>'+(nx?'<button class="hot hot--btn" data-goto="'+tid+'/'+nx+'">'+S[nx].t+'</button>':'<button class="hot hot--btn" data-goto="'+tid+'/flow">Back to flow</button>')+'</div>'+
  '</div>';
+}
+function frame(tid,id){
+ var m=S[id], body=R[id]?R[id]():'<div style="padding:40px 24px" class="muted">Screen stub — '+id+'</div>';
+ var role=stepFor(tid,id).r;
+ var autoFrame=(role==='parent'&&(id==='reports'||id==='messages'||id==='notif-prefs'))?'phone':m.frame;
+ var vp=state.vp==='auto'?autoFrame:state.vp;
+ var tint='tint-'+ROLE[role].tint;
+ if(vp==='phone'){
+  return '<div class="dev dev--phone '+tint+'"><div class="pstat"><span>9:41</span><span>5G ▪▪▪ 82%</span></div><div class="dev__scr"><div class="phonewrap">'+body+'</div></div>'+flowbar(tid,id)+'</div>';
+ }
+ return '<div class="dev dev--web '+tint+'"><div class="dev__bar"><span class="dev__dots"><i></i><i></i><i></i></span><span class="dev__url">'+urlFor(tid,id)+'</span></div><div class="dev__scr">'+body+'</div>'+flowbar(tid,id)+'</div>';
 }
 function buildDrawer(){
- var h='<div class="draw"><a id="mapItem" data-goto="map">↦ Flow map / overview</a><div class="hr"></div>';
- FLOWS.forEach(function(f,i){
-  h+='<div class="draw__grp tint-'+f.tint+'"><h4><i>'+(i+1)+'</i>'+f.name+'</h4>';
-  f.screens.forEach(function(s){h+='<a data-goto="'+s+'">'+S[s].t+'<small>'+S[s].who+'</small></a>';});
+ var h='<div class="draw">'+
+  '<a data-goto="home">▚ Template home</a>'+
+  '<a data-goto="compare">▤ Compare templates</a>'+
+  '<div class="hr"></div>'+
+  '<div class="draw__grp"><h4>Template flows</h4>'+
+  TEMPLATES.map(function(t){return '<a data-goto="'+t.id+'/flow">'+t.name+'<small>'+t.tour.length+' screens · '+t.tier+'</small></a>';}).join('')+
+  '</div><div class="hr"></div>';
+ [['A','Identity & access'],['B','Teaching & sessions'],['C','Practice & assessment'],['D','Doubts & communication'],['E','Progress & analytics'],['F','Business & operations'],['G','Configuration & templates']].forEach(function(dm){
+  h+='<div class="draw__grp"><h4><i>'+dm[0]+'</i>'+dm[1]+'</h4>';
+  ALL.filter(function(id){return S[id].dom===dm[0];}).forEach(function(id){h+='<a data-goto="'+id+'">'+S[id].t+'<small>'+ROLE[S[id].role].label+' · '+S[id].mod+'</small></a>';});
   h+='</div>';
  });
  h+='</div>';
  document.getElementById('drawerBody').innerHTML=h;
 }
 function syncChrome(){
- var id=state.cur;
- var pv=document.getElementById('pv'), nx=document.getElementById('nx'), lbl=document.getElementById('tlbl');
- if(id==='map'){pv.disabled=true;nx.disabled=false;lbl.textContent=TOUR.length+'-screen walkthrough';}
- else{
-  var i=TOUR.indexOf(id);var f=flowOf(id);
-  pv.disabled=false;nx.disabled=false;
-  lbl.textContent=f.name+' · '+(i+1)+'/'+TOUR.length;
- }
- document.querySelectorAll('#drawer a[data-goto]').forEach(function(a){a.classList.toggle('on',a.dataset.goto===id);});
+ var lbl=document.getElementById('tlbl'),pv=document.getElementById('pv'),nx=document.getElementById('nx'),sel=document.getElementById('tplSel');
+ if(state.view==='home'){lbl.textContent=(ROLE_ONLY?ROLE[ROLE_ONLY].label+' · ':'')+TEMPLATES.length+' templates · '+ALL.length+' screens';pv.disabled=true;nx.disabled=false;sel.value='home';}
+ else if(state.view==='compare'){lbl.textContent='compare templates';pv.disabled=false;nx.disabled=true;sel.value='compare';}
+ else if(state.view==='flow'){var T=TById(state.tpl);lbl.textContent=T.name+' · flow';pv.disabled=false;nx.disabled=false;sel.value=state.tpl;}
+ else{var T2=TById(state.tpl),seq=seqFor(state.tpl,state.cur),i=seq.indexOf(state.cur);lbl.textContent=T2.name+' · '+(i+1)+' / '+seq.length;pv.disabled=false;nx.disabled=false;sel.value=state.tpl;}
+ document.querySelectorAll('#drawer a[data-goto]').forEach(function(a){
+  var g=a.getAttribute('data-goto');
+  var on=(state.view==='home'&&g==='home')||(state.view==='compare'&&g==='compare')||(state.view==='flow'&&g===state.tpl+'/flow')||(state.view==='screen'&&g===state.cur);
+  a.classList.toggle('on',on);
+ });
  document.querySelectorAll('#vpSeg button').forEach(function(b){b.classList.toggle('on',b.dataset.vp===state.vp);});
 }
 function render(){
- var id=(location.hash.replace('#/','')||'map');
- if(id!=='map'&&!S[id])id='map';
- state.cur=id;
+ var h=location.hash.replace(/^#\/?/,''),parts=h.split('/').filter(Boolean);
  var stage=document.getElementById('stage');
- stage.innerHTML=(id==='map')?mapView():frame(id);
- window.scrollTo(0,0);
- var sc=stage.querySelector('.dev__scr');if(sc)sc.scrollTop=0;
+ if(!parts.length||parts[0]==='home'){state.view='home';stage.innerHTML=homeView();}
+ else if(parts[0]==='compare'){state.view='compare';stage.innerHTML=compareView();}
+ else if(/^t[1-6]$/.test(parts[0])&&TById(parts[0])){
+  state.tpl=parts[0];try{localStorage.setItem('tos_tpl',state.tpl);}catch(e){}
+  if(!parts[1]||parts[1]==='flow'){state.view='flow';state.cur=null;stage.innerHTML=flowView(state.tpl);requestAnimationFrame(function(){requestAnimationFrame(drawWires);});}
+  else if(S[parts[1]] && roleHas(parts[1])){state.view='screen';state.cur=parts[1];stage.innerHTML=hdrStrip(state.tpl,parts[1])+frame(state.tpl,parts[1]);}
+  else{location.hash='#/'+state.tpl+'/flow';return;}
+ }
+ else if(S[parts[0]] && roleHas(parts[0])){location.hash='#/'+(TById(state.tpl)?state.tpl:(TEMPLATES[0]&&TEMPLATES[0].id)||'t1')+'/'+parts[0];return;}
+ else{location.hash='#/home';return;}
+ window.scrollTo(0,0);var sc=stage.querySelector('.dev__scr');if(sc)sc.scrollTop=0;
  syncChrome();
 }
-function go(id){location.hash='#/'+id;}
+function go(t){
+ if(t==='home'||t==='compare'){location.hash='#/'+t;return;}
+ if(/^t[1-6]$/.test(t)){location.hash='#/'+t+'/flow';return;}
+ if(t.indexOf('/')>=0){location.hash='#/'+t;return;}
+ location.hash='#/'+(state.tpl||'t1')+'/'+t;
+}
 window.addEventListener('hashchange',render);
 
-/* nav helpers */
 document.getElementById('pv').addEventListener('click',function(){
- if(state.cur==='map')return;
- var i=TOUR.indexOf(state.cur);go(i>0?TOUR[i-1]:'map');
+ if(state.view==='screen'){var seq=seqFor(state.tpl,state.cur),i=seq.indexOf(state.cur);go(state.tpl+'/'+(i>0?seq[i-1]:'flow'));}
+ else if(state.view==='flow')go('home');
+ else if(state.view==='compare')go('home');
 });
 document.getElementById('nx').addEventListener('click',function(){
- if(state.cur==='map'){go(TOUR[0]);return;}
- var i=TOUR.indexOf(state.cur);go(i<TOUR.length-1?TOUR[i+1]:'map');
+ if(state.view==='screen'){var seq=seqFor(state.tpl,state.cur),i=seq.indexOf(state.cur);go(state.tpl+'/'+(i<seq.length-1?seq[i+1]:'flow'));}
+ else if(state.view==='flow'){var T=TById(state.tpl);go(state.tpl+'/'+T.tour[0]);}
+ else if(state.view==='home')go((TEMPLATES[0]?TEMPLATES[0].id:'t1')+'/flow');
 });
-document.getElementById('brandHome').addEventListener('click',function(){go('map');});
+document.getElementById('brandHome').addEventListener('click',function(){go('home');});
+document.getElementById('brandTpl').addEventListener('click',function(e){e.stopPropagation();go('home');});
+document.getElementById('tplSel').addEventListener('change',function(){var v=this.value;if(v==='home'||v==='compare')go(v);else go(v);});
 
-/* delegated clicks for [data-goto] */
 document.addEventListener('click',function(e){
  var g=e.target.closest('[data-goto]');
- if(g){e.preventDefault();closeDrawer();go(g.getAttribute('data-goto'));return;}
+ if(g){
+  e.preventDefault();closeDrawer();
+  if(g.getAttribute('data-as')) state.asRole=g.getAttribute('data-as');
+  else if(g.closest('.pnav')) state.asRole='parent';
+  else if(g.getAttribute('data-fnode')!=null && STEPQ[g.getAttribute('data-fnode')]) state.asRole=STEPQ[g.getAttribute('data-fnode')][1];
+  else {
+   var dest=g.getAttribute('data-goto')||'';
+   var sid=dest.indexOf('/')>=0?dest.split('/').pop():dest;
+   if(S[sid] && !(state.asRole==='parent' && g.closest('.phonewrap'))) state.asRole=stepFor(state.tpl||'t1', sid).r;
+   else if(!(state.asRole==='parent' && g.closest('.phonewrap'))) state.asRole=null;
+  }
+  go(g.getAttribute('data-goto'));return;
+ }
  if(e.target.closest('[data-close]')||e.target.id==='modal'){document.getElementById('modal').classList.remove('open');return;}
  if(e.target.id==='aboutBtn2'||e.target.id==='aboutLink'){openAbout();return;}
 });
 
-/* drawer */
-var drawer=document.getElementById('drawer'), scrim=document.getElementById('scrim');
+var drawer=document.getElementById('drawer'),scrim=document.getElementById('scrim');
 function openDrawer(){drawer.classList.add('open');scrim.classList.add('open');}
 function closeDrawer(){drawer.classList.remove('open');scrim.classList.remove('open');}
 document.getElementById('burger').addEventListener('click',openDrawer);
 scrim.addEventListener('click',closeDrawer);
 
-/* hotspots toggle */
-var hotBtnEl=document.getElementById('hotBtn');
-var showhot=true;
+var hotBtnEl=document.getElementById('hotBtn'),showhot=true;
 try{if(localStorage.getItem('tos_hot')==='0')showhot=false;}catch(e){}
 function applyHot(){document.body.classList.toggle('showhot',showhot);hotBtnEl.classList.toggle('on',showhot);try{localStorage.setItem('tos_hot',showhot?'1':'0');}catch(e){}}
 hotBtnEl.addEventListener('click',function(){showhot=!showhot;applyHot();});
-applyHot();
 
-/* viewport */
 document.getElementById('vpSeg').addEventListener('click',function(e){
  var b=e.target.closest('button');if(!b)return;
  state.vp=b.dataset.vp;try{localStorage.setItem('tos_vp',state.vp);}catch(e){}
  render();
 });
 
-/* modal */
 function openAbout(){document.getElementById('modalC').innerHTML=aboutHTML();document.getElementById('modal').classList.add('open');}
 
-/* first-visit toast */
 try{
- if(!localStorage.getItem('tos_seen')){
+ if(!localStorage.getItem('tos_seen2')){
   var t=document.getElementById('toast');
-  t.textContent='Tip — click the outlined buttons to move between screens. ☰ for all 26.';
+  t.textContent='Tip — pick a template, then click the numbered cards in its swimlane. ☰ for every screen.';
   setTimeout(function(){t.classList.add('show');},700);
-  setTimeout(function(){t.classList.remove('show');},7000);
-  localStorage.setItem('tos_seen','1');
+  setTimeout(function(){t.classList.remove('show');},8000);
+  localStorage.setItem('tos_seen2','1');
  }
 }catch(e){}
 
-buildDrawer();
-render();
+try{
+ var qs=new URLSearchParams(location.search).get('screen');
+ if(qs && roleHas(qs)){history.replaceState(null,'',location.pathname+'#/'+(TById('t6')?'t6':(TEMPLATES[0]&&TEMPLATES[0].id)||'t1')+'/'+qs);}
+}catch(e){}
+if(ROLE_ONLY){
+ document.title='TutorOS — '+ROLE[ROLE_ONLY].label+' flow';
+ var bi=document.querySelector('#top .brand i'); if(bi)bi.textContent=ROLE[ROLE_ONLY].label;
+ [].slice.call(document.getElementById('tplSel').options).forEach(function(o){
+  if(/^t[1-6]$/.test(o.value)&&!TById(o.value))o.remove();
+ });
+}
+applyTheme();applyHot();buildDrawer();render();
 })();
 </script>

@@ -135,19 +135,24 @@ The bundle attaches to the **session** and fans out a summary event to **each at
 > **Speech-to-text is deliberately out of scope for now.** It is a real cost and accuracy commitment
 > (≈ $0.02–0.04 per audio-minute, plus review). Leave a clean seam: the session record has a
 > `transcript_segments` slot that a future STT job fills. Tenants who want it today paste their own
-> Google Meet / Zoom transcript.
+> Google Meet or Microsoft Teams transcript.
 
 ### 3.3 Video link model
 
+**Two providers only: Google Meet and Microsoft Teams.** Zoom, Jitsi, YouTube-Live and the rest are
+out of scope — the platform will not create links for them or import their transcripts. Full
+rationale and API detail in [`video-and-transcript-options.md`](video-and-transcript-options.md).
+
 | Mode | How | Marginal cost | Recording owner |
 |---|---|---|---|
-| **Generated (default)** | Platform creates a Google Meet link via the tenant's connected Google account (Calendar API `conferenceData`) | $0 | Tenant's Google Drive |
-| **Bring-your-own** | Tenant pastes any Zoom / Teams / Jitsi link | $0 | Tenant |
-| **Hosted rooms** *(add-on, later)* | Platform-run rooms (LiveKit / Daily / 100ms) — needed only for tenants with no Google and who want in-app video | ≈ $0.004 / participant-minute | Platform storage |
+| **Generated Meet (default)** | Platform creates a Google Meet link via the tenant's connected Google account (Calendar API `conferenceData`) | $0 | Tenant's Google Drive |
+| **Microsoft Teams** | Tenant connects Microsoft 365 (Graph `onlineMeetings`) or pastes a Teams meeting link | $0 | Tenant's OneDrive / SharePoint |
+| **Hosted rooms** *(add-on, later)* | Platform-run rooms (LiveKit / Daily / 100ms) — only for tenants on neither Google nor Microsoft who want in-app video | ≈ $0.004 / participant-minute | Platform storage |
 
-Default path is Generated: it is free, the tenant already trusts Google, and attendance/events come
-back through the Google account. BYO is the fallback and keeps event transcript limited to what the
-tenant marks plus platform-side join tracking.
+Default path is Generated Meet: it is free, the tenant already trusts Google, and attendance/events
+come back through the Google account. Microsoft Teams is the fallback for institutes standardised on
+M365. A pasted link (either provider) keeps the event transcript limited to what the tenant marks
+plus platform-side join tracking.
 
 ---
 
@@ -209,9 +214,9 @@ of this interactively; this table is the reference.
 - **B2 Live session + video link.** Generates the Meet link (§3.3), a join page / waiting room, and a
   teacher console shell.
   *Screens:* Join page · Live session console (teacher) · Live session view (student).
-  *v1* generated Meet link + join page → *v2* attendance from Meet events, in-app chat → *v3* hosted
-  rooms add-on, screen-record capture, co-host handoff.
-  *Integrations:* Google Meet/Calendar; later LiveKit/Daily/100ms.
+  *v1* generated Meet link + join page → *v2* attendance from Meet events, Microsoft Teams link
+  (paste, then Graph), in-app chat → *v3* hosted rooms add-on, screen-record capture, co-host handoff.
+  *Integrations:* Google Meet/Calendar, Microsoft Teams (Graph); later LiveKit/Daily/100ms.
 - **B3 Session record & event transcript.** §3.2. The bundle + timeline fan-out.
   *Screens:* Session record & event transcript.
   *v1* attendance + notes + link → *v2* chat/poll/doubt capture, board-photo upload → *v3* STT
@@ -416,7 +421,7 @@ Ship a **rule library**; tenants enable what fits. Each rule names the modules i
 
 ## 6. UI screen map
 
-~40 screens. Each screen lights up when any module that needs it is on. Continuity with the
+47 screens (locked to `tutor-platform-demo.html` `S`). Each screen lights up when any module that needs it is on. Continuity with the
 16-screen kit is noted.
 
 | Screen | Needed by | Kit origin |
@@ -594,9 +599,10 @@ sources, and let them keep using WhatsApp as overflow (`D5`) while the record mo
 1. **Configurability vs conversion.** A 35-switch product is intimidating. The templates must be
    genuinely good, not afterthoughts. *Decide:* can a tenant reach "first session logged" without
    ever opening the settings surface? (Target: yes.)
-2. **Google Meet dependency.** Free video is the margin story, but it ties you to Google's API terms
-   and to tenants having a Google account. *Decide:* what is the non-Google fallback for the ~20% who
-   won't connect one — BYO link only, or hosted rooms from day one?
+2. **Video provider scope — decided.** Two providers only: **Google Meet** (default, generated) and
+   **Microsoft Teams** (paste, then Graph API). Zoom, Jitsi, YouTube-Live and the rest are out of
+   scope. Hosted rooms stay a later metered add-on for the minority on neither Google nor Microsoft.
+   Free video is still the margin story; Teams keeps M365 institutes without forcing hosted rooms.
 3. **"Transcript" expectation gap.** Tenants may hear "transcript" and expect verbatim speech. *Decide:*
    name it "session record" in the UI; reserve "transcript" for when STT ships.
 4. **Compliance across geographies.** "Global" + minors' data + payments is a real legal surface

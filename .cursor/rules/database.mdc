@@ -1,0 +1,11 @@
+---
+description: PostgreSQL domain (stub)
+globs: backend/app/models/**/*
+alwaysApply: false
+---
+
+# Database (planned)
+
+PostgreSQL only. `workspace_id` on every business table. `topics` / `taxonomies` — never syllabus tables.
+
+Spine listed in README §5 and `catalog/entities.json`.

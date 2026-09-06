@@ -1,0 +1,1380 @@
+[
+  {
+    "id": "t1",
+    "short": "Exam-prep",
+    "name": "Exam-prep loop",
+    "tint": "accent",
+    "tier": "Cohort",
+    "shape": "Cohort \u00b7 high-frequency \u00b7 practice-heavy",
+    "blurb": "Concept \u2192 same-day practice \u2192 tagged analysis \u2192 mock. NEET / JEE / boards. Faculty starts at cohort/schedule \u2014 this track has no staff sign-in step.",
+    "roles": [
+      "admin",
+      "faculty",
+      "student",
+      "parent",
+      "system"
+    ],
+    "steps": [
+      {
+        "screen": "onboard-kind",
+        "role": "admin",
+        "stage": "Onboard",
+        "auto": null
+      },
+      {
+        "screen": "branding",
+        "role": "admin",
+        "stage": "Onboard",
+        "auto": null
+      },
+      {
+        "screen": "roster",
+        "role": "admin",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "cohort-builder",
+        "role": "faculty",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "student-login",
+        "role": "student",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "parent-link",
+        "role": "parent",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "schedule",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "session-pre",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "join",
+        "role": "student",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "live-teacher",
+        "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "live-student",
+        "role": "student",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "session-video",
+        "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "record",
+        "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "system",
+        "stage": "Teach",
+        "auto": "Record fans out to every attendee timeline"
+      },
+      {
+        "screen": "practice-build",
+        "role": "faculty",
+        "stage": "Practise",
+        "auto": null
+      },
+      {
+        "screen": "practice-play",
+        "role": "student",
+        "stage": "Practise",
+        "auto": null
+      },
+      {
+        "screen": "practice-result",
+        "role": "student",
+        "stage": "Practise",
+        "auto": null
+      },
+      {
+        "screen": "analysis",
+        "role": "faculty",
+        "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "mentor",
+        "role": "system",
+        "stage": "Support",
+        "auto": "A missed practice auto-books a backlog slot"
+      },
+      {
+        "screen": "doubt-student",
+        "role": "student",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "doubt-teacher",
+        "role": "faculty",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "mentor",
+        "role": "faculty",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "test-setup",
+        "role": "faculty",
+        "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "test-runner",
+        "role": "student",
+        "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "student",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "teacher-dash",
+        "role": "faculty",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "reports",
+        "role": "faculty",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "messages",
+        "role": "parent",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "notif-prefs",
+        "role": "parent",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "practice-result",
+        "role": "parent",
+        "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "reports",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "parent-home",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "owner",
+        "role": "admin",
+        "stage": "Operate",
+        "auto": null
+      },
+      {
+        "screen": "billing",
+        "role": "admin",
+        "stage": "Bill",
+        "auto": null
+      },
+      {
+        "screen": "payments",
+        "role": "parent",
+        "stage": "Bill",
+        "auto": null
+      }
+    ],
+    "tour": [
+      "onboard-kind",
+      "branding",
+      "roster",
+      "cohort-builder",
+      "student-login",
+      "parent-link",
+      "schedule",
+      "session-pre",
+      "join",
+      "live-teacher",
+      "live-student",
+      "session-video",
+      "record",
+      "practice-build",
+      "practice-play",
+      "practice-result",
+      "analysis",
+      "doubt-student",
+      "doubt-teacher",
+      "mentor",
+      "test-setup",
+      "test-runner",
+      "timeline",
+      "teacher-dash",
+      "reports",
+      "messages",
+      "notif-prefs",
+      "parent-home",
+      "owner",
+      "billing",
+      "payments"
+    ]
+  },
+  {
+    "id": "t2",
+    "short": "1-on-1",
+    "name": "1-on-1 subject tutor",
+    "tint": "sky",
+    "tier": "Starter",
+    "shape": "Language, maths, science \u00b7 individual",
+    "blurb": "Sessions, homework, a shared record, simple billing. No cohort, no question bank.",
+    "roles": [
+      "admin",
+      "student",
+      "faculty",
+      "system"
+    ],
+    "steps": [
+      {
+        "screen": "onboard-kind",
+        "role": "admin",
+        "stage": "Onboard",
+        "auto": null
+      },
+      {
+        "screen": "branding",
+        "role": "admin",
+        "stage": "Onboard",
+        "auto": null
+      },
+      {
+        "screen": "roster",
+        "role": "admin",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "student-login",
+        "role": "student",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "staff-login",
+        "role": "faculty",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "schedule",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "session-pre",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "join",
+        "role": "student",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "live-teacher",
+        "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "session-video",
+        "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "record",
+        "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "system",
+        "stage": "Teach",
+        "auto": "Session lands on the student timeline"
+      },
+      {
+        "screen": "assign-issue",
+        "role": "faculty",
+        "stage": "Practise",
+        "auto": null
+      },
+      {
+        "screen": "assign-grade",
+        "role": "faculty",
+        "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "messages",
+        "role": "faculty",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "doubt-student",
+        "role": "student",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "student",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "reports",
+        "role": "faculty",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "billing",
+        "role": "admin",
+        "stage": "Bill",
+        "auto": null
+      },
+      {
+        "screen": "payments",
+        "role": "student",
+        "stage": "Bill",
+        "auto": null
+      }
+    ],
+    "tour": [
+      "onboard-kind",
+      "branding",
+      "roster",
+      "student-login",
+      "staff-login",
+      "schedule",
+      "session-pre",
+      "join",
+      "live-teacher",
+      "session-video",
+      "record",
+      "assign-issue",
+      "assign-grade",
+      "messages",
+      "doubt-student",
+      "timeline",
+      "reports",
+      "billing",
+      "payments"
+    ]
+  },
+  {
+    "id": "t3",
+    "short": "K-12",
+    "name": "K-12 homework help",
+    "tint": "amber",
+    "tier": "Cohort",
+    "shape": "After-school \u00b7 parent-facing",
+    "blurb": "Short sessions, doubts, light practice, and a parent who can actually see what is happening.",
+    "roles": [
+      "admin",
+      "parent",
+      "student",
+      "faculty",
+      "system"
+    ],
+    "steps": [
+      {
+        "screen": "onboard-kind",
+        "role": "admin",
+        "stage": "Onboard",
+        "auto": null
+      },
+      {
+        "screen": "branding",
+        "role": "admin",
+        "stage": "Onboard",
+        "auto": null
+      },
+      {
+        "screen": "roster",
+        "role": "admin",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "parent-link",
+        "role": "parent",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "student-login",
+        "role": "student",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "staff-login",
+        "role": "faculty",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "schedule",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "join",
+        "role": "student",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "live-teacher",
+        "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "record",
+        "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "system",
+        "stage": "Teach",
+        "auto": "Attendance + notes \u2192 student timeline"
+      },
+      {
+        "screen": "assign-issue",
+        "role": "faculty",
+        "stage": "Practise",
+        "auto": null
+      },
+      {
+        "screen": "practice-play",
+        "role": "student",
+        "stage": "Practise",
+        "auto": null
+      },
+      {
+        "screen": "doubt-student",
+        "role": "student",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "doubt-teacher",
+        "role": "faculty",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "messages",
+        "role": "faculty",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "announce",
+        "role": "faculty",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "student",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "teacher-dash",
+        "role": "faculty",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "reports",
+        "role": "faculty",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "messages",
+        "role": "parent",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "notif-prefs",
+        "role": "parent",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "practice-result",
+        "role": "parent",
+        "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "reports",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "parent-home",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "billing",
+        "role": "admin",
+        "stage": "Bill",
+        "auto": null
+      },
+      {
+        "screen": "payments",
+        "role": "parent",
+        "stage": "Bill",
+        "auto": null
+      }
+    ],
+    "tour": [
+      "onboard-kind",
+      "branding",
+      "roster",
+      "parent-link",
+      "student-login",
+      "staff-login",
+      "schedule",
+      "join",
+      "live-teacher",
+      "record",
+      "assign-issue",
+      "practice-play",
+      "doubt-student",
+      "doubt-teacher",
+      "messages",
+      "announce",
+      "timeline",
+      "teacher-dash",
+      "reports",
+      "notif-prefs",
+      "practice-result",
+      "parent-home",
+      "billing",
+      "payments"
+    ]
+  },
+  {
+    "id": "t4",
+    "short": "Skills",
+    "name": "Skills / cohort course",
+    "tint": "violet",
+    "tier": "Cohort",
+    "shape": "Bootcamp \u00b7 hobby \u00b7 professional",
+    "blurb": "Cohorts, a content library that drips, projects and a final assessment. No live-practice loop.",
+    "roles": [
+      "admin",
+      "student",
+      "faculty"
+    ],
+    "steps": [
+      {
+        "screen": "onboard-kind",
+        "role": "admin",
+        "stage": "Onboard",
+        "auto": null
+      },
+      {
+        "screen": "branding",
+        "role": "admin",
+        "stage": "Onboard",
+        "auto": null
+      },
+      {
+        "screen": "student-login",
+        "role": "student",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "staff-login",
+        "role": "faculty",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "cohort-builder",
+        "role": "faculty",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "schedule",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "session-pre",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "live-teacher",
+        "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "session-video",
+        "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "record",
+        "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "library",
+        "role": "student",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "lesson",
+        "role": "student",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "assign-issue",
+        "role": "faculty",
+        "stage": "Practise",
+        "auto": null
+      },
+      {
+        "screen": "assign-grade",
+        "role": "faculty",
+        "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "test-setup",
+        "role": "faculty",
+        "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "test-runner",
+        "role": "student",
+        "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "announce",
+        "role": "faculty",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "student",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "teacher-dash",
+        "role": "faculty",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "reports",
+        "role": "faculty",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "billing",
+        "role": "admin",
+        "stage": "Bill",
+        "auto": null
+      },
+      {
+        "screen": "payments",
+        "role": "student",
+        "stage": "Bill",
+        "auto": null
+      }
+    ],
+    "tour": [
+      "onboard-kind",
+      "branding",
+      "student-login",
+      "staff-login",
+      "cohort-builder",
+      "schedule",
+      "session-pre",
+      "live-teacher",
+      "session-video",
+      "record",
+      "library",
+      "lesson",
+      "assign-issue",
+      "assign-grade",
+      "test-setup",
+      "test-runner",
+      "announce",
+      "timeline",
+      "teacher-dash",
+      "reports",
+      "billing",
+      "payments"
+    ]
+  },
+  {
+    "id": "t5",
+    "short": "Music",
+    "name": "Music / arts",
+    "tint": "crimson",
+    "tier": "Starter",
+    "shape": "Recital-oriented \u00b7 guardian-facing",
+    "blurb": "Recurring 1-on-1s, a practice log, guardian visibility and recital scheduling.",
+    "roles": [
+      "admin",
+      "parent",
+      "student",
+      "faculty",
+      "system"
+    ],
+    "steps": [
+      {
+        "screen": "onboard-kind",
+        "role": "admin",
+        "stage": "Onboard",
+        "auto": null
+      },
+      {
+        "screen": "branding",
+        "role": "admin",
+        "stage": "Onboard",
+        "auto": null
+      },
+      {
+        "screen": "roster",
+        "role": "admin",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "parent-link",
+        "role": "parent",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "student-login",
+        "role": "student",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "staff-login",
+        "role": "faculty",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "schedule",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "session-pre",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "join",
+        "role": "student",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "live-teacher",
+        "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "record",
+        "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "system",
+        "stage": "Teach",
+        "auto": "Practice-log note added to the timeline"
+      },
+      {
+        "screen": "assign-issue",
+        "role": "faculty",
+        "stage": "Practise",
+        "auto": null
+      },
+      {
+        "screen": "messages",
+        "role": "faculty",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "announce",
+        "role": "faculty",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "student",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "parent-home",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "reports",
+        "role": "faculty",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "messages",
+        "role": "parent",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "notif-prefs",
+        "role": "parent",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "reports",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "billing",
+        "role": "admin",
+        "stage": "Bill",
+        "auto": null
+      },
+      {
+        "screen": "payments",
+        "role": "parent",
+        "stage": "Bill",
+        "auto": null
+      }
+    ],
+    "tour": [
+      "onboard-kind",
+      "branding",
+      "roster",
+      "parent-link",
+      "student-login",
+      "staff-login",
+      "schedule",
+      "session-pre",
+      "join",
+      "live-teacher",
+      "record",
+      "assign-issue",
+      "messages",
+      "announce",
+      "timeline",
+      "parent-home",
+      "reports",
+      "notif-prefs",
+      "billing",
+      "payments"
+    ]
+  },
+  {
+    "id": "t6",
+    "short": "Everything",
+    "name": "Everything",
+    "tint": "ink",
+    "tier": "Institute",
+    "shape": "Institute exploring the full surface",
+    "blurb": "Every module on \u2014 the master gallery, not a recommended tenant. Each screen states who uses it, how they use it, and when it fires.",
+    "roles": [
+      "admin",
+      "faculty",
+      "student",
+      "parent",
+      "system"
+    ],
+    "steps": [
+      {
+        "screen": "onboard-kind",
+        "role": "admin",
+        "stage": "Onboard",
+        "auto": null
+      },
+      {
+        "screen": "template-gallery",
+        "role": "admin",
+        "stage": "Onboard",
+        "auto": null
+      },
+      {
+        "screen": "wsetup",
+        "role": "admin",
+        "stage": "Onboard",
+        "auto": null
+      },
+      {
+        "screen": "branding",
+        "role": "admin",
+        "stage": "Onboard",
+        "auto": null
+      },
+      {
+        "screen": "roster",
+        "role": "admin",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "cohort-builder",
+        "role": "faculty",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "router",
+        "role": "student",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "student-login",
+        "role": "student",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "staff-login",
+        "role": "faculty",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "parent-link",
+        "role": "parent",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
+        "screen": "schedule",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "session-pre",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "join",
+        "role": "student",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "live-teacher",
+        "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "live-student",
+        "role": "student",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "session-video",
+        "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "record",
+        "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "library",
+        "role": "student",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "lesson",
+        "role": "student",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "system",
+        "stage": "Teach",
+        "auto": "Every module writes to one timeline"
+      },
+      {
+        "screen": "qbank",
+        "role": "faculty",
+        "stage": "Practise",
+        "auto": null
+      },
+      {
+        "screen": "practice-build",
+        "role": "faculty",
+        "stage": "Practise",
+        "auto": null
+      },
+      {
+        "screen": "practice-play",
+        "role": "student",
+        "stage": "Practise",
+        "auto": null
+      },
+      {
+        "screen": "assign-issue",
+        "role": "faculty",
+        "stage": "Practise",
+        "auto": null
+      },
+      {
+        "screen": "test-setup",
+        "role": "faculty",
+        "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "test-runner",
+        "role": "student",
+        "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "practice-result",
+        "role": "student",
+        "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "assign-grade",
+        "role": "faculty",
+        "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "analysis",
+        "role": "faculty",
+        "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "doubt-student",
+        "role": "student",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "doubt-teacher",
+        "role": "faculty",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "messages",
+        "role": "faculty",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "announce",
+        "role": "faculty",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "mentor",
+        "role": "faculty",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "notif-prefs",
+        "role": "student",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "student-dash",
+        "role": "student",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "teacher-dash",
+        "role": "faculty",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "student",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "reports",
+        "role": "faculty",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "messages",
+        "role": "parent",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "notif-prefs",
+        "role": "parent",
+        "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "practice-result",
+        "role": "parent",
+        "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "timeline",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "reports",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "parent-home",
+        "role": "parent",
+        "stage": "Review",
+        "auto": null
+      },
+      {
+        "screen": "owner",
+        "role": "admin",
+        "stage": "Operate",
+        "auto": null
+      },
+      {
+        "screen": "subscription",
+        "role": "admin",
+        "stage": "Operate",
+        "auto": null
+      },
+      {
+        "screen": "payouts",
+        "role": "admin",
+        "stage": "Operate",
+        "auto": null
+      },
+      {
+        "screen": "billing",
+        "role": "admin",
+        "stage": "Bill",
+        "auto": null
+      },
+      {
+        "screen": "payments",
+        "role": "parent",
+        "stage": "Bill",
+        "auto": null
+      },
+      {
+        "screen": "automation",
+        "role": "admin",
+        "stage": "Configure",
+        "auto": null
+      },
+      {
+        "screen": "integrations",
+        "role": "admin",
+        "stage": "Configure",
+        "auto": null
+      },
+      {
+        "screen": "audit",
+        "role": "admin",
+        "stage": "Configure",
+        "auto": null
+      }
+    ],
+    "tour": [
+      "onboard-kind",
+      "template-gallery",
+      "wsetup",
+      "branding",
+      "roster",
+      "cohort-builder",
+      "router",
+      "student-login",
+      "staff-login",
+      "parent-link",
+      "schedule",
+      "session-pre",
+      "join",
+      "live-teacher",
+      "live-student",
+      "session-video",
+      "record",
+      "library",
+      "lesson",
+      "qbank",
+      "practice-build",
+      "practice-play",
+      "assign-issue",
+      "test-setup",
+      "test-runner",
+      "practice-result",
+      "assign-grade",
+      "analysis",
+      "doubt-student",
+      "doubt-teacher",
+      "messages",
+      "announce",
+      "mentor",
+      "notif-prefs",
+      "student-dash",
+      "teacher-dash",
+      "timeline",
+      "reports",
+      "parent-home",
+      "owner",
+      "subscription",
+      "payouts",
+      "billing",
+      "payments",
+      "automation",
+      "integrations",
+      "audit"
+    ]
+  }
+]
