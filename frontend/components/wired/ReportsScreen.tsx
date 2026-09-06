@@ -12,6 +12,10 @@ type Slice = {
   last_max: number | null;
   attendance_present: number;
   attendance_total: number;
+  attendance?: { present: number; total: number };
+  practice_pct?: number;
+  latest_test?: { score: number; max: number; title: string } | null;
+  teacher_note?: string;
 };
 
 type Export = {
@@ -52,25 +56,49 @@ export function ReportsScreen() {
     }
   }
 
+  function marksheet(s: Slice) {
+    const att = s.attendance || { present: s.attendance_present, total: s.attendance_total };
+    const attPct = att.total ? Math.round((att.present / att.total) * 100) : 0;
+    return (
+      <div key={s.student_id} className="card">
+        <div style={{ fontFamily: "var(--serif)", fontWeight: 600 }}>Term report — {s.display_name}</div>
+        <div className="muted" style={{ marginTop: 4 }}>From the timeline · not a second gradebook</div>
+        <div className="hr" />
+        <div className="sb" style={{ fontSize: ".82rem", marginBottom: 6 }}>
+          <span className="muted">Attendance</span>
+          <span>
+            {att.present} / {att.total} · {attPct}%
+          </span>
+        </div>
+        <div className="sb" style={{ fontSize: ".82rem", marginBottom: 6 }}>
+          <span className="muted">Practice completion</span>
+          <span>{s.practice_pct ?? 0}%</span>
+        </div>
+        <div className="sb" style={{ fontSize: ".82rem", marginBottom: 6 }}>
+          <span className="muted">Latest test</span>
+          <span>
+            {s.latest_test
+              ? `${s.latest_test.title} · ${s.latest_test.score} / ${s.latest_test.max}`
+              : s.last_score == null
+                ? "—"
+                : `${s.last_score}/${s.last_max ?? "?"}`}
+          </span>
+        </div>
+        <div className="sb" style={{ fontSize: ".82rem", marginBottom: 6, alignItems: "flex-start" }}>
+          <span className="muted">Teacher note</span>
+          <span style={{ textAlign: "right", maxWidth: "55%" }}>{s.teacher_note || "—"}</span>
+        </div>
+      </div>
+    );
+  }
+
   const body = (
     <>
       <Err message={error} />
       {slice.length === 0 ? (
         <Empty>No report rows in this workspace yet.</Empty>
       ) : (
-        slice.map((s) => (
-          <div key={s.student_id} className="card">
-            <div className="sb">
-              <div className="t">{s.display_name}</div>
-              <span className="pill">
-                {s.last_score == null ? "no score" : `${s.last_score}/${s.last_max ?? "?"}`}
-              </span>
-            </div>
-            <p className="muted">
-              {s.attempts} attempts · attendance {s.attendance_present}/{s.attendance_total}
-            </p>
-          </div>
-        ))
+        slice.map((s) => marksheet(s))
       )}
     </>
   );
@@ -88,11 +116,9 @@ export function ReportsScreen() {
     <>
       <h2>Reports & exports</h2>
       <span className="k">Term slice from this workspace ledger</span>
-      {role !== "parent" ? (
-        <button className="hot hot--btn" type="button" disabled={busy} onClick={() => void exportReport()}>
-          Export
-        </button>
-      ) : null}
+      <button className="hot hot--btn" type="button" disabled={busy} onClick={() => void exportReport()}>
+        Export
+      </button>
       {body}
     </>
   );

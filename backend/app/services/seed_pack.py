@@ -28,6 +28,7 @@ from app.models.tables import (
     Workspace,
 )
 from app.services.seed import _ident_once, _put, _timeline_once, _user, cid
+from app.services.seed_density import seed_density_facts
 
 
 def seed_catalog_pack(
@@ -327,6 +328,17 @@ def seed_catalog_pack(
         f"Practice set scored 0/1 ({topic_name}).",
         student2_user,
         when,
+    )
+    seed_density_facts(
+        db,
+        ws_id=ws_id,
+        slug=slug,
+        topic_name=topic_name,
+        people=people,
+        student_id=student_id,
+        student2_id=student2_id,
+        cohort_id=cohort_id,
+        q1=q1,
     )
     db.flush()
     return {

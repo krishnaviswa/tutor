@@ -33,8 +33,9 @@ def test_join_writes_attendance_in_a_only(client):
     db = session_factory()()
     exam_att = db.query(Attendance).filter(Attendance.workspace_id == WS_EXAM).all()
     lang_att = db.query(Attendance).filter(Attendance.workspace_id == WS_LANG).all()
-    assert exam_att
-    assert all(a.status == "present" for a in exam_att)
+    joined = [a for a in exam_att if a.session_id == session_id]
+    assert joined
+    assert all(a.status == "present" for a in joined)
     assert not any(a.session_id == session_id for a in lang_att)
     db.close()
 

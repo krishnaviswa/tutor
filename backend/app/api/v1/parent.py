@@ -8,6 +8,7 @@ from app.api.v1.deps import require_roles
 from app.db import get_db
 from app.models.tables import ParentLink, Student, new_id
 from app.services.auth import Principal
+from app.services.progress import parent_home as parent_home_payload
 
 router = APIRouter()
 
@@ -59,28 +60,4 @@ def parent_home(
     db: Session = Depends(get_db),
     principal: Principal = Depends(require_roles("parent")),
 ):
-    links = (
-        db.query(ParentLink)
-        .filter(
-            ParentLink.workspace_id == principal.workspace_id,
-            ParentLink.parent_user_id == principal.user_id,
-            ParentLink.accepted_at.isnot(None),
-        )
-        .all()
-    )
-    children = []
-    for link in links:
-        st = db.get(Student, link.student_id)
-        if st and st.workspace_id == principal.workspace_id:
-            children.append({"student_id": st.id, "display_name": st.display_name})
-    return {
-        "children": children,
-        "hub": [
-            "timeline",
-            "reports",
-            "practice-result",
-            "payments",
-            "messages",
-            "notif-prefs",
-        ],
-    }
+    return parent_home_payload(db, principal)

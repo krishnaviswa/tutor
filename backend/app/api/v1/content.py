@@ -7,6 +7,7 @@ from app.db import get_db
 from app.models.tables import ContentItem, Topic
 from app.ports.mocks import MockPorts
 from app.services.auth import Principal
+from app.services.progress import content_out
 
 router = APIRouter()
 
@@ -18,15 +19,8 @@ class ContentIn(BaseModel):
     storage_path: str = ""
 
 
-def _out(row: ContentItem) -> dict:
-    return {
-        "id": row.id,
-        "workspace_id": row.workspace_id,
-        "topic_id": row.topic_id,
-        "title": row.title,
-        "body": row.body,
-        "storage_path": row.storage_path,
-    }
+def _out(row: ContentItem, db: Session | None = None, *, lesson: bool = False) -> dict:
+    return content_out(row, db, lesson=lesson)
 
 
 @router.get("/content")
@@ -35,7 +29,7 @@ def list_content(
     principal: Principal = Depends(require_roles("owner", "teacher", "assistant", "student")),
 ):
     rows = db.query(ContentItem).filter(ContentItem.workspace_id == principal.workspace_id).all()
-    return [_out(r) for r in rows]
+    return [_out(r, db) for r in rows]
 
 
 @router.post("/content")
@@ -65,7 +59,7 @@ def create_content(
     )
     db.add(row)
     db.flush()
-    return _out(row)
+    return _out(row, db)
 
 
 @router.get("/content/{content_id}")
@@ -81,4 +75,4 @@ def get_content(
     )
     if not row:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "content")
-    return _out(row)
+    return _out(row, db, lesson=True)

@@ -1,12 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import { catalogRoute } from "@/lib/screens";
 import { AppBar, Empty, Err } from "./bits";
 
-type Item = { id: string; title: string; body?: string; topic_id?: string | null };
+type Item = {
+  id: string;
+  title: string;
+  body?: string;
+  topic_id?: string | null;
+  kind?: string;
+  duration_label?: string;
+  progress_pct?: number;
+};
 
 export function LibraryScreen() {
   const [rows, setRows] = useState<Item[]>([]);
@@ -15,6 +23,7 @@ export function LibraryScreen() {
   const [error, setError] = useState("");
   const [role, setRole] = useState<string>("student");
   const [busy, setBusy] = useState(false);
+  const [filter, setFilter] = useState("all");
 
   function load() {
     api("/api/v1/content")
@@ -30,6 +39,11 @@ export function LibraryScreen() {
   }, []);
 
   const canWrite = role === "teacher" || role === "owner";
+  const kinds = useMemo(() => {
+    const set = new Set(rows.map((r) => (r.kind || "notes").toLowerCase()));
+    return ["all", ...Array.from(set)];
+  }, [rows]);
+  const shown = rows.filter((r) => filter === "all" || (r.kind || "notes").toLowerCase() === filter);
 
   async function create() {
     setBusy(true);
@@ -67,15 +81,42 @@ export function LibraryScreen() {
           </button>
         </div>
       ) : null}
-      {rows.length === 0 ? (
+      <div className="chips" style={{ marginBottom: 12 }}>
+        {kinds.map((k) => (
+          <button
+            key={k}
+            type="button"
+            className={`chip${filter === k ? " on" : ""}`}
+            onClick={() => setFilter(k)}
+          >
+            {k === "all" ? "All" : k}
+          </button>
+        ))}
+      </div>
+      {shown.length === 0 ? (
         <Empty>No content yet.</Empty>
       ) : (
-        rows.map((it) => (
-          <Link key={it.id} href={`${catalogRoute("lesson")}?id=${it.id}`} className="hot hot--row">
-            <div className="t">{it.title}</div>
-            <div className="s muted">{it.body?.slice(0, 80) || "Open lesson"}</div>
-          </Link>
-        ))
+        shown.map((it) => {
+          const pct = it.progress_pct ?? 0;
+          const kind = it.kind || "notes";
+          const dur = it.duration_label || "Open lesson";
+          return (
+            <Link key={it.id} href={`${catalogRoute("lesson")}?id=${it.id}`} className="hot hot--row">
+              <div className="gr">
+                <div className="t">{it.title}</div>
+                <div className="s muted">
+                  {kind} · {dur}
+                </div>
+                {pct > 0 ? (
+                  <div style={{ height: 4, background: "var(--sunk)", borderRadius: 2, marginTop: 6 }}>
+                    <b style={{ display: "block", height: "100%", width: `${pct}%`, background: "var(--tint)", borderRadius: 2 }} />
+                  </div>
+                ) : null}
+              </div>
+              {pct === 100 ? <span className="pill is-good">done</span> : null}
+            </Link>
+          );
+        })
       )}
     </>
   );

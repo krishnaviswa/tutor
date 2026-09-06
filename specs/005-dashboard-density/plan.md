@@ -1,6 +1,6 @@
 # plan.md — 005-dashboard-density
 
-Status: **Specified**. Implement only after human OK on [tasks.md](tasks.md).
+Status: **In Progress**. Human OK received 2026-09-06. T7.12 Accept still open.
 
 001 architecture pack stays unimplemented. 002 spine stays protected. 003 path list stays. 004 chrome stays. 005 **enriches payloads and UI** on existing ids.
 

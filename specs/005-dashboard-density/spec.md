@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| **Status** | Specified |
+| **Status** | In Progress |
 | **Role** | PM (specify) + Architect (plan) |
 | **Feature directory** | `specs/005-dashboard-density` |
 | **Action items** | [tasks.md](tasks.md) |

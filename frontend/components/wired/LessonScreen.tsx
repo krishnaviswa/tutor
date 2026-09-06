@@ -7,7 +7,15 @@ import { api } from "@/lib/api";
 import { catalogRoute } from "@/lib/screens";
 import { AppBar, Empty, Err } from "./bits";
 
-type Item = { id: string; title: string; body: string };
+type Item = {
+  id: string;
+  title: string;
+  body: string;
+  kind?: string;
+  duration_label?: string;
+  notes?: string[];
+  next_practice?: { id: string; title: string } | null;
+};
 
 export function LessonScreen() {
   const params = useSearchParams();
@@ -32,6 +40,9 @@ export function LessonScreen() {
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }, [params]);
 
+  const notes = item?.notes?.length ? item.notes : item?.body ? [item.body] : [];
+  const next = item?.next_practice;
+
   return (
     <>
       <AppBar title="Lesson" />
@@ -54,15 +65,26 @@ export function LessonScreen() {
                 color: "#cdd6d3",
               }}
             >
-              ▶
+              {item.kind === "video" ? "▶" : item.kind || "notes"}
             </div>
             <h2 style={{ fontSize: "1.1rem", margin: "12px 0 4px" }}>{item.title}</h2>
-            <p className="muted" style={{ marginBottom: 12, whiteSpace: "pre-wrap" }}>
-              {item.body || "No notes yet."}
-            </p>
+            <div className="muted" style={{ marginBottom: 12 }}>
+              {[item.kind, item.duration_label].filter(Boolean).join(" · ") || "Lesson"}
+            </div>
+            {notes.length ? (
+              <div className="card">
+                <ul className="muted" style={{ margin: 0, paddingLeft: 18, lineHeight: 1.7 }}>
+                  {notes.map((n) => (
+                    <li key={n}>{n}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="muted">No notes yet.</p>
+            )}
             <Link href={catalogRoute("practice-play")} className="hot hot--card">
               <div className="k" style={{ color: "var(--tint)" }}>Next</div>
-              <div style={{ fontWeight: 600, marginTop: 3 }}>Practice</div>
+              <div style={{ fontWeight: 600, marginTop: 3 }}>{next?.title || "Practice"}</div>
             </Link>
           </>
         )}

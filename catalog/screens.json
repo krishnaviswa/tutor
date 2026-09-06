@@ -9,7 +9,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 0,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "router",
     "figmaNodeId": null,
     "apis": [
@@ -41,7 +41,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 0,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "student-login",
     "figmaNodeId": null,
     "apis": [
@@ -79,7 +79,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 0,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "staff-login",
     "figmaNodeId": null,
     "apis": [
@@ -118,7 +118,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 0,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "wsetup",
     "figmaNodeId": null,
     "apis": [
@@ -154,7 +154,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 0,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "branding",
     "figmaNodeId": null,
     "apis": [
@@ -188,7 +188,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 1,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "roster",
     "figmaNodeId": null,
     "apis": [
@@ -227,7 +227,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 1,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "cohort-builder",
     "figmaNodeId": null,
     "apis": [
@@ -262,7 +262,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 3,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "parent-link",
     "figmaNodeId": null,
     "apis": [
@@ -301,7 +301,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 3,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "parent-home",
     "figmaNodeId": null,
     "apis": [
@@ -314,11 +314,11 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Guardian hub for linked children only: activity, progress/marksheet, test results, fee receipts, teacher chat.",
+    "shows": "Guardian hub for linked children only: attendance fraction, latest practice, latest test, fee due date, activity, marksheet, receipts, teacher chat.",
     "own": "Parent (read). Owner enables the parent module.",
     "who": "A linked parent.",
     "why": "The parent hub for their own child \u2014 not a second gradebook and not the class roster.",
-    "how": "Open activity (timeline), progress/marksheet (reports), test results (practice-result), fees and receipts (payments), and a thread with the teacher (messages). Read-only except pay and chat.",
+    "how": "Attendance fraction, latest practice, latest test, fee due date, then activity, marksheet, results, receipts, teacher chat \u2014 own child only. Read-only except pay and chat.",
     "when": "After class, a result, a report, or an invoice \u2014 not during live teaching.",
     "roles": [
       "parent"
@@ -334,7 +334,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "schedule",
     "figmaNodeId": null,
     "apis": [
@@ -375,7 +375,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "session-pre",
     "figmaNodeId": null,
     "apis": [
@@ -410,7 +410,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "join",
     "figmaNodeId": null,
     "apis": [
@@ -447,7 +447,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "live-teacher",
     "figmaNodeId": null,
     "apis": [
@@ -482,7 +482,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "live-student",
     "figmaNodeId": null,
     "apis": [
@@ -516,7 +516,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "session-video",
     "figmaNodeId": null,
     "apis": [
@@ -550,7 +550,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "record",
     "figmaNodeId": null,
     "apis": [
@@ -588,7 +588,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 2,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "library",
     "figmaNodeId": null,
     "apis": [
@@ -603,11 +603,11 @@
       "storage"
     ],
     "timelineEvents": [],
-    "shows": "Lessons, files, links. Visibility per cohort.",
+    "shows": "Lessons with kind, duration, and progress. Visibility per cohort.",
     "own": "Faculty curates. Student consumes.",
     "who": "Student consumes; teacher curates.",
     "why": "Content between sessions needs a place that is not a WhatsApp file dump.",
-    "how": "Lessons, files, and links with visibility per cohort. Folders follow the tenant taxonomy.",
+    "how": "Lessons with kind, duration, and progress. Folders follow the tenant taxonomy.",
     "when": "Between classes, or as drip content in a cohort course.",
     "roles": [
       "student"
@@ -623,7 +623,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 2,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "lesson",
     "figmaNodeId": null,
     "apis": [
@@ -639,11 +639,11 @@
     "timelineEvents": [
       "content.viewed"
     ],
-    "shows": "Single lesson / module viewer.",
+    "shows": "Single lesson: notes, duration, next practice. Progress writes to the record.",
     "own": "Faculty authors. Student completes.",
     "who": "The student.",
     "why": "Opening or finishing a module must be a timeline event, not a silent file view.",
-    "how": "Open one module. Progress writes to the record.",
+    "how": "Open one module: notes, duration, next practice. Progress writes to the record.",
     "when": "When assigned, or self-paced between sessions.",
     "roles": [
       "student"
@@ -659,7 +659,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 2,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "assign-issue",
     "figmaNodeId": null,
     "apis": [
@@ -697,7 +697,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 2,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "assign-grade",
     "figmaNodeId": null,
     "apis": [
@@ -734,7 +734,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 2,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "qbank",
     "figmaNodeId": null,
     "apis": [
@@ -769,7 +769,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 2,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "practice-build",
     "figmaNodeId": null,
     "apis": [
@@ -806,7 +806,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 2,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "practice-play",
     "figmaNodeId": null,
     "apis": [
@@ -839,7 +839,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 2,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "practice-result",
     "figmaNodeId": null,
     "apis": [
@@ -874,7 +874,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 3,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "test-setup",
     "figmaNodeId": null,
     "apis": [
@@ -909,7 +909,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 3,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "test-runner",
     "figmaNodeId": null,
     "apis": [
@@ -944,7 +944,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 2,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "analysis",
     "figmaNodeId": null,
     "apis": [
@@ -979,7 +979,7 @@
     "domain": "D",
     "domainName": "Record & communication",
     "phase": 3,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "doubt-student",
     "figmaNodeId": null,
     "apis": [
@@ -1017,7 +1017,7 @@
     "domain": "D",
     "domainName": "Record & communication",
     "phase": 3,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "doubt-teacher",
     "figmaNodeId": null,
     "apis": [
@@ -1053,7 +1053,7 @@
     "domain": "D",
     "domainName": "Record & communication",
     "phase": 3,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "messages",
     "figmaNodeId": null,
     "apis": [
@@ -1090,7 +1090,7 @@
     "domain": "D",
     "domainName": "Record & communication",
     "phase": 3,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "announce",
     "figmaNodeId": null,
     "apis": [
@@ -1129,7 +1129,7 @@
     "domain": "D",
     "domainName": "Record & communication",
     "phase": 0,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "timeline",
     "figmaNodeId": null,
     "apis": [
@@ -1162,7 +1162,7 @@
     "domain": "D",
     "domainName": "Record & communication",
     "phase": 1,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "notif-prefs",
     "figmaNodeId": null,
     "apis": [
@@ -1200,7 +1200,7 @@
     "domain": "E",
     "domainName": "Progress & analytics",
     "phase": 1,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "student-dash",
     "figmaNodeId": null,
     "apis": [
@@ -1214,11 +1214,11 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Next session, open practice, doubts, this week.",
+    "shows": "Named next session (title + time), due practice unanswered/total, this-week test, doubt outcome, weak tags.",
     "own": "Student.",
     "who": "The student.",
     "why": "Opening the app should show the next action, not a hunt through menus.",
-    "how": "Next session, open practice, open doubts, this week. Few controls, clear next step.",
+    "how": "Named next session (title + time), due practice unanswered/total, this-week test, doubt outcome, weak tags.",
     "when": "Opening the app, not during a live class.",
     "roles": [
       "student"
@@ -1234,7 +1234,7 @@
     "domain": "E",
     "domainName": "Progress & analytics",
     "phase": 2,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "teacher-dash",
     "figmaNodeId": null,
     "apis": [
@@ -1248,11 +1248,11 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Cohort health: attendance, practice completion, doubt backlog.",
+    "shows": "Cohort health: attendance %, weekday bars, practice completion by set, doubt backlog, named chase list.",
     "own": "Faculty.",
     "who": "The teacher.",
     "why": "Cohort health in one place \u2014 who is behind \u2014 instead of a second spreadsheet.",
-    "how": "Attendance, practice completion, doubt backlog. Jump to the record.",
+    "how": "Attendance %, weekday bars, practice by set, doubt backlog, named chase list. Jump to the record.",
     "when": "Morning briefing before class.",
     "roles": [
       "faculty"
@@ -1268,7 +1268,7 @@
     "domain": "E",
     "domainName": "Progress & analytics",
     "phase": 3,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "owner",
     "figmaNodeId": null,
     "apis": [
@@ -1282,11 +1282,11 @@
     ],
     "ports": [],
     "timelineEvents": [],
-    "shows": "Operating scorecard plus quota bars (80% / 100%). Feature kill switches.",
+    "shows": "Operating scorecard (sessions, students, practice %, SLA, revenue, churn) plus quota bars (80% / 100%). Feature kill switches.",
     "own": "Owner / admin.",
     "who": "Owner / admin.",
     "why": "Running the business (scorecard, quotas, kill switches) is not teaching a class.",
-    "how": "Quota bars warn at 80% and can block paid sends at 100%. Caps throttle cost, not always-on core.",
+    "how": "Sessions delivered, active students, practice %, doubt SLA, revenue, churn \u2014 plus quota bars at 80%/100%. Caps throttle cost, not always-on core.",
     "when": "Operating the workspace, not during a live session.",
     "roles": [
       "admin"
@@ -1302,7 +1302,7 @@
     "domain": "E",
     "domainName": "Progress & analytics",
     "phase": 3,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "reports",
     "figmaNodeId": null,
     "apis": [
@@ -1319,11 +1319,11 @@
     "timelineEvents": [
       "report.sent"
     ],
-    "shows": "Parent/term reports and CSV. Parent WhatsApp when a report is ready.",
+    "shows": "Term marksheet from the ledger: attendance, practice %, latest test, teacher note. CSV export. Parent WhatsApp when a report is ready.",
     "own": "Faculty or owner produce. Parent receives a slice.",
     "who": "Teacher or owner; parent gets a slice.",
     "why": "A term view of the timeline \u2014 not a parallel gradebook.",
-    "how": "Term reports and CSV. Parent WhatsApp when a report is ready.",
+    "how": "Term marksheet: attendance, practice %, latest test, teacher note. CSV export. Parent WhatsApp when a report is ready.",
     "when": "Weekly check-in or term-end.",
     "roles": [
       "faculty",
@@ -1340,7 +1340,7 @@
     "domain": "E",
     "domainName": "Progress & analytics",
     "phase": 3,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "mentor",
     "figmaNodeId": null,
     "apis": [
@@ -1378,7 +1378,7 @@
     "domain": "F",
     "domainName": "Business & operations",
     "phase": 4,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "billing",
     "figmaNodeId": null,
     "apis": [
@@ -1415,7 +1415,7 @@
     "domain": "F",
     "domainName": "Business & operations",
     "phase": 4,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "payments",
     "figmaNodeId": null,
     "apis": [
@@ -1433,11 +1433,11 @@
       "payment.captured",
       "payment.failed"
     ],
-    "shows": "Pay an invoice. Admin/parent WhatsApp on captured or failed.",
+    "shows": "Due amount + date, receipt history, paid / pending / overdue. Mock checkout.",
     "own": "Payer (student or parent). Owner configures collection.",
     "who": "Whoever pays \u2014 student or parent.",
     "why": "Paying an invoice must write to the timeline; WhatsApp only notifies.",
-    "how": "Pay in-app. Admin and parent WhatsApp on captured or failed.",
+    "how": "Due amount + date, receipt history, paid / pending / overdue. Mock checkout. Admin and parent WhatsApp on captured or failed.",
     "when": "When an invoice is due.",
     "roles": [
       "parent",
@@ -1454,7 +1454,7 @@
     "domain": "F",
     "domainName": "Business & operations",
     "phase": 0,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "subscription",
     "figmaNodeId": null,
     "apis": [
@@ -1493,7 +1493,7 @@
     "domain": "F",
     "domainName": "Business & operations",
     "phase": 4,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "payouts",
     "figmaNodeId": null,
     "apis": [
@@ -1527,7 +1527,7 @@
     "domain": "F",
     "domainName": "Business & operations",
     "phase": 4,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "audit",
     "figmaNodeId": null,
     "apis": [
@@ -1561,7 +1561,7 @@
     "domain": "G",
     "domainName": "Configuration & templates",
     "phase": 0,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "onboard-kind",
     "figmaNodeId": null,
     "apis": [
@@ -1593,7 +1593,7 @@
     "domain": "G",
     "domainName": "Configuration & templates",
     "phase": 0,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "template-gallery",
     "figmaNodeId": null,
     "apis": [
@@ -1625,7 +1625,7 @@
     "domain": "G",
     "domainName": "Configuration & templates",
     "phase": 4,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "automation",
     "figmaNodeId": null,
     "apis": [
@@ -1657,7 +1657,7 @@
     "domain": "G",
     "domainName": "Configuration & templates",
     "phase": 4,
-    "status": "wired",
+    "status": "shell",
     "demoKey": "integrations",
     "figmaNodeId": null,
     "apis": [

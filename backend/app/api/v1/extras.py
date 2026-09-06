@@ -21,6 +21,7 @@ from app.models.tables import (
 )
 from app.ports.mocks import MockPorts
 from app.services.auth import Principal
+from app.services.progress import invoice_out, report_slice, student_dashboard, teacher_dashboard
 from app.services.quota import ALWAYS_ON
 from app.services.scope import linked_student_ids, student_for_principal
 from app.services.templates import TEMPLATES, modules_for_template
@@ -124,21 +125,7 @@ def student_dash(
     db: Session = Depends(get_db),
     principal: Principal = Depends(require_roles("student")),
 ):
-    st = student_for_principal(db, principal)
-    attempts = (
-        db.query(Attempt)
-        .filter(Attempt.workspace_id == principal.workspace_id, Attempt.student_id == st.id)
-        .all()
-    )
-    sessions = db.query(ScheduledSession).filter(ScheduledSession.workspace_id == principal.workspace_id).count()
-    last = attempts[-1] if attempts else None
-    return {
-        "student_id": st.id,
-        "upcoming_sessions": sessions,
-        "attempts": len(attempts),
-        "last_score": last.score if last else None,
-        "last_attempt_id": last.id if last else None,
-    }
+    return student_dashboard(db, principal)
 
 
 @router.get("/teacher/dashboard")
@@ -146,53 +133,7 @@ def teacher_dash(
     db: Session = Depends(get_db),
     principal: Principal = Depends(require_roles("teacher")),
 ):
-    sessions = db.query(ScheduledSession).filter(ScheduledSession.workspace_id == principal.workspace_id).count()
-    students = db.query(Student).filter(Student.workspace_id == principal.workspace_id).count()
-    attempts = db.query(Attempt).filter(Attempt.workspace_id == principal.workspace_id).count()
-    return {"sessions": sessions, "students": students, "attempts": attempts}
-
-
-def _report_slice(db: Session, workspace_id: str, student_ids: set[str] | None) -> list[dict]:
-    q = db.query(Student).filter(Student.workspace_id == workspace_id)
-    if student_ids is not None:
-        q = q.filter(Student.id.in_(student_ids or [""]))
-    students = q.all()
-    ids = [s.id for s in students]
-    attempts = (
-        db.query(Attempt)
-        .filter(Attempt.workspace_id == workspace_id, Attempt.student_id.in_(ids or [""]))
-        .all()
-    )
-    att_rows = (
-        db.query(Attendance)
-        .filter(Attendance.workspace_id == workspace_id, Attendance.student_id.in_(ids or [""]))
-        .all()
-    )
-    by_attempts: dict[str, list[Attempt]] = {}
-    for a in attempts:
-        by_attempts.setdefault(a.student_id, []).append(a)
-    present = {s.id: 0 for s in students}
-    total_att = {s.id: 0 for s in students}
-    for row in att_rows:
-        total_att[row.student_id] = total_att.get(row.student_id, 0) + 1
-        if row.status == "present":
-            present[row.student_id] = present.get(row.student_id, 0) + 1
-    out = []
-    for s in students:
-        atts = by_attempts.get(s.id, [])
-        last = atts[-1] if atts else None
-        out.append(
-            {
-                "student_id": s.id,
-                "display_name": s.display_name,
-                "attempts": len(atts),
-                "last_score": last.score if last else None,
-                "last_max": last.max_score if last else None,
-                "attendance_present": present.get(s.id, 0),
-                "attendance_total": total_att.get(s.id, 0),
-            }
-        )
-    return out
+    return teacher_dashboard(db, principal)
 
 
 @router.get("/reports")
@@ -203,7 +144,7 @@ def reports(
     allowed: set[str] | None = None
     if principal.role == "parent":
         allowed = linked_student_ids(db, principal)
-    return _report_slice(db, principal.workspace_id, allowed)
+    return report_slice(db, principal.workspace_id, allowed)
 
 
 @router.post("/reports/export")
@@ -218,7 +159,7 @@ def reports_export(
         "format": "json",
         "students": [{"id": s.id, "display_name": s.display_name} for s in students],
         "attempts": [{"id": a.id, "student_id": a.student_id, "score": a.score} for a in attempts],
-        "slice": _report_slice(db, principal.workspace_id, None),
+        "slice": report_slice(db, principal.workspace_id, None),
     }
 
 
@@ -312,10 +253,7 @@ def invoices_mine(
         allowed = linked_student_ids(db, principal)
         q = q.filter(Invoice.student_id.in_(allowed or [""]))
     rows = q.all()
-    return [
-        {"id": r.id, "student_id": r.student_id, "amount_cents": r.amount_cents, "status": r.status}
-        for r in rows
-    ]
+    return [invoice_out(r) for r in rows]
 
 
 @router.post("/payments/checkout")

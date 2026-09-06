@@ -117,7 +117,7 @@ h2{font-size:1.35rem;margin:28px 0 8px}
   <button class="theme-btn" type="button" id="themeBtn">Black</button>
 </div></header>
 <div class="wrap">
-<div class="eyebrow">Arm of the snowflake · 005 Specified</div>
+<div class="eyebrow">Arm of the snowflake · 005 In Progress</div>
 <h1>Dashboard density</h1>
 <p class="lede">iSeekAcademy looks rich because every card is a named operating fact. TutorOS demo gold already has that picture. The live Next.js app collapsed it to counts. This page is the action board for lifting demo density onto the same 47 screen ids — open it in a browser, not a canvas.</p>
 <div class="links">
@@ -129,13 +129,13 @@ h2{font-size:1.35rem;margin:28px 0 8px}
   <a href="https://iseekacademy.in/">iseekacademy.in</a>
 </div>
 
-<div class="warn"><strong>Your instinct was right.</strong> 004 wired routes. It did not carry tonight’s class title, due practice 0/16, attendance bars, or fee receipts. No new screen. Backend enriches existing <span class="mono">/api/v1</span> JSON. Frontend matches demo cards.</div>
+<div class="warn"><strong>Implement is on the branch.</strong> Same 47 ids. Named facts now come from <span class="mono">services/progress.py</span>. T7.12 Accept is still open until a human confirms the eight screens match demo gold.</div>
 
 <div class="kpis">
   <div class="kpi ok"><div class="v">9 / 10</div><div class="l">iSeek hero dashboard (marketing mock)</div></div>
   <div class="kpi"><div class="v">8 / 10</div><div class="l">TutorOS demo HTML (UI gold)</div></div>
-  <div class="kpi bad"><div class="v">3 / 10</div><div class="l">Wired Next.js you actually run</div></div>
-  <div class="kpi bad"><div class="v">0</div><div class="l">Charts in the wired app today</div></div>
+  <div class="kpi ok"><div class="v">7 / 10</div><div class="l">Wired Next.js after T7.1–T7.11</div></div>
+  <div class="kpi"><div class="v">5</div><div class="l">CSS bars in teacher-dash (no new chart lib)</div></div>
 </div>
 
 <h2>Richness by surface</h2>
@@ -205,7 +205,7 @@ h2{font-size:1.35rem;margin:28px 0 8px}
 
 <div class="grid3">
   <div class="card"><div class="eyebrow">Keep</div><h3>Ledger rules</h3><p class="lede" style="margin:0">Timeline is the ledger. Join writes attendance. Parent sees linked child only. QuotaGuard stays on owner. WhatsApp is a channel.</p></div>
-  <div class="card"><div class="eyebrow">Largest lag</div><h3>Wired screens are hollow</h3><p class="lede" style="margin:0">StudentDashScreen is three counts. TeacherDashScreen is three counts. OwnerScreen is quota. ParentHomeScreen has no scores.</p></div>
+  <div class="card"><div class="eyebrow">Largest remaining lag</div><h3>Public homepage still out of scope</h3><p class="lede" style="margin:0">Dashboards now carry named facts. A branded academy marketing site is not a catalog screen — it needs its own spec.</p></div>
   <div class="card"><div class="eyebrow">Not this feature</div><h3>Sales landing</h3><p class="lede" style="margin:0">iSeek’s marketing page is a different job from in-app density. Product-viewer stays the hub. Do not invent a public tenant homepage in 005.</p></div>
 </div>
 </div>
@@ -217,13 +217,13 @@ if(window.TutorOSHub) TutorOSHub.boot({trail:[
 
 const SURFACES=[
   {n:'Public brand site', iseek:9, demo:3, wired:0},
-  {n:'Owner console', iseek:8, demo:8, wired:2},
-  {n:'Teacher home', iseek:7, demo:8, wired:3},
-  {n:'Student home', iseek:6, demo:8, wired:3},
-  {n:'Parent portal', iseek:7, demo:7, wired:3},
-  {n:'Fees', iseek:9, demo:7, wired:3},
-  {n:'Library / lessons', iseek:5, demo:7, wired:2},
-  {n:'Charts', iseek:8, demo:6, wired:0}
+  {n:'Owner console', iseek:8, demo:8, wired:7},
+  {n:'Teacher home', iseek:7, demo:8, wired:7},
+  {n:'Student home', iseek:6, demo:8, wired:7},
+  {n:'Parent portal', iseek:7, demo:7, wired:7},
+  {n:'Fees', iseek:9, demo:7, wired:7},
+  {n:'Library / lessons', iseek:5, demo:7, wired:6},
+  {n:'Charts', iseek:8, demo:6, wired:5}
 ];
 const host=document.getElementById('scoreBars');
 SURFACES.forEach(function(s){
@@ -244,24 +244,24 @@ SURFACES.forEach(function(s){
 });
 
 const TASKS=[
-  {id:'T7.1',t:'Seed named operating facts',own:'Backend',cp:1},
-  {id:'T7.2',t:'progress.py aggregates service',own:'Backend',cp:1},
-  {id:'T7.3',t:'Enrich GET /me/dashboard',own:'Backend',cp:1},
-  {id:'T7.4',t:'Enrich GET /teacher/dashboard',own:'Backend',cp:1},
-  {id:'T7.5',t:'Enrich GET /owner/console',own:'Backend',cp:1},
-  {id:'T7.6',t:'Parent, invoices, reports, content',own:'Backend',cp:1},
-  {id:'T7.7',t:'Student home + library + lesson UI',own:'Frontend',cp:1},
-  {id:'T7.8',t:'Teacher dashboard bars + chase list',own:'Frontend',cp:1},
-  {id:'T7.9',t:'Owner, parent, payments, reports UI',own:'Frontend',cp:1},
-  {id:'T7.10',t:'Density tests + 002 gate',own:'QA',cp:1},
-  {id:'T7.11',t:'Catalog shows + product map',own:'Docs',cp:1},
-  {id:'T7.12',t:'Tester converge + PM Accept',own:'QA + PM',cp:1}
+  {id:'T7.1',t:'Seed named operating facts',own:'Backend',cp:1,st:'done'},
+  {id:'T7.2',t:'progress.py aggregates service',own:'Backend',cp:1,st:'done'},
+  {id:'T7.3',t:'Enrich GET /me/dashboard',own:'Backend',cp:1,st:'done'},
+  {id:'T7.4',t:'Enrich GET /teacher/dashboard',own:'Backend',cp:1,st:'done'},
+  {id:'T7.5',t:'Enrich GET /owner/console',own:'Backend',cp:1,st:'done'},
+  {id:'T7.6',t:'Parent, invoices, reports, content',own:'Backend',cp:1,st:'done'},
+  {id:'T7.7',t:'Student home + library + lesson UI',own:'Frontend',cp:1,st:'done'},
+  {id:'T7.8',t:'Teacher dashboard bars + chase list',own:'Frontend',cp:1,st:'done'},
+  {id:'T7.9',t:'Owner, parent, payments, reports UI',own:'Frontend',cp:1,st:'done'},
+  {id:'T7.10',t:'Density tests + 002 gate',own:'QA',cp:1,st:'done'},
+  {id:'T7.11',t:'Catalog shows + product map',own:'Docs',cp:1,st:'done'},
+  {id:'T7.12',t:'Tester converge + PM Accept',own:'QA + PM',cp:1,st:'pending'}
 ];
 const box=document.getElementById('tasks');
 TASKS.forEach(function(t){
   const d=document.createElement('div');
   d.className='tile'+(t.cp?' cp':'');
-  d.innerHTML='<span class="id">'+t.id+'</span> <span class="tag pending">pending</span>'+(t.cp?'<span class="tag cp">cp</span>':'')+'<span class="tag">'+t.own+'</span><span class="tt">'+t.t+'</span>';
+  d.innerHTML='<span class="id">'+t.id+'</span> <span class="tag '+(t.st||'pending')+'">'+(t.st||'pending')+'</span>'+(t.cp?'<span class="tag cp">cp</span>':'')+'<span class="tag">'+t.own+'</span><span class="tt">'+t.t+'</span>';
   box.appendChild(d);
 });
 </script>
