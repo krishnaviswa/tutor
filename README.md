@@ -8,7 +8,7 @@ Example pack (optional, not requirements): [docs/examples/neet-biology/](docs/ex
 
 This file is the single product map for humans and for any LLM (Cursor or Claude Code). In-flight features live under `specs/`. When a feature is Accepted, this README absorbs the delta.
 
-**Local running stack:** FastAPI in `backend/` talks to **Docker Compose PostgreSQL** for every local backend write. Next.js 15 in `frontend/` has one App Router route per catalog screen (status `shell`). Demo HTML remains UI gold until a screen is `wired`. Vendor, AI, and production auth stay **mock** until hosted (or a later feature turns a port live).
+**Local running stack:** FastAPI in `backend/` talks to **Docker Compose PostgreSQL** for every local backend write. Next.js 15 in `frontend/` has one App Router route per catalog screen (status `wired` on 004). Demo HTML remains UI gold. Product home is `/` → `/app/student/router`. Vendor, AI, and production auth stay **mock** until hosted (or a later feature turns a port live).
 
 ---
 
@@ -17,7 +17,7 @@ This file is the single product map for humans and for any LLM (Cursor or Claude
 | You are a… | Read |
 |---|---|
 | **Anyone / LLM** | This disclaimer, [§1](#1-quick-start), [§2](#2-logical-design) |
-| **Product manager** | §2, [§10](#10-spec-kit--role-workflow), `specs/003-catalog-complete/spec.md` |
+| **Product manager** | §2, [§10](#10-spec-kit--role-workflow), `specs/004-wire-demo-ui/spec.md` |
 | **Architect** | [§3](#3-architecture), [§5](#5-domain-model), [§8](#8-auth), [§9](#9-ports-whatsapp-quotas) |
 | **Builder** | Do not implement until spec status is Specified and you are asked. Then §3–§7. |
 | **Tester** | [§10](#10-spec-kit--role-workflow), [§12](#12-feature-backlog) feature→test index |
@@ -70,7 +70,7 @@ python scripts/check_architecture_parity.py
 python scripts/check_agent_config_sync.py --range origin/main...HEAD
 ```
 
-Active Spec Kit directory is `.specify/feature.json` (currently `specs/003-catalog-complete`, **Accepted**), not the git branch. Override with `SPECIFY_FEATURE_DIRECTORY`.
+Active Spec Kit directory is `.specify/feature.json` (currently `specs/004-wire-demo-ui`, **Accepted**), not the git branch. Override with `SPECIFY_FEATURE_DIRECTORY`.
 
 ---
 
@@ -191,13 +191,13 @@ PM  /speckit.specify + /speckit.clarify
 
 Status: `Draft` → `Specified` → `In Progress` → `Testing` → `Accepted`.
 
-Last Accepted feature dir: [specs/003-catalog-complete/](specs/003-catalog-complete/). Spine simulation: [specs/002-sim-spine/](specs/002-sim-spine/) (Accepted, protected). Architecture pack: [specs/001-platform-architecture/](specs/001-platform-architecture/) (Specified; no implement). Cursor rules ↔ Claude Code: see [CLAUDE.md](CLAUDE.md). Sync: `scripts/check_agent_config_sync.py`.
+Last Accepted feature dir: [specs/004-wire-demo-ui/](specs/004-wire-demo-ui/). Catalog-complete APIs: [specs/003-catalog-complete/](specs/003-catalog-complete/) (Accepted, shell/sim then wired by 004). Spine simulation: [specs/002-sim-spine/](specs/002-sim-spine/) (Accepted, protected). Architecture pack: [specs/001-platform-architecture/](specs/001-platform-architecture/) (Specified; no implement). Cursor rules ↔ Claude Code: see [CLAUDE.md](CLAUDE.md). Sync: `scripts/check_agent_config_sync.py`.
 
 ---
 
 ## 11. Known gaps
 
-- Next.js App Router exists in `frontend/` (one route per catalog id, status `shell`). Demo HTML is still UI gold until `wired`.
+- Next.js App Router in `frontend/` (one route per catalog id, status `wired`). `/` opens the role router. Operator jump list is `/operator` (not a catalog screen). Demo HTML remains the visual gold.
 - Docker Compose Postgres **is** the local backend (optional if you only run pytest). Live OTP / Meet / Razorpay / WhatsApp / Meta / AI vendors are **not** connected (mock ports).
 - Do not invent screen ids. Exam-prep faculty is not forced through `staff-login`.
 - Demo **incomplete** vs all six tracks: some spine screens still sit only on Everything. `staff-login` is on 1-on-1, K-12, Skills, Music, and Everything; Exam-prep omits it on purpose (faculty starts at cohort/schedule). Fill remaining gaps later — **same ids**, no new screens.
@@ -212,7 +212,8 @@ Last Accepted feature dir: [specs/003-catalog-complete/](specs/003-catalog-compl
 |---|---|---|
 | 001-platform-architecture | Swim-lane HTML, catalog, README hub, Spec Kit, parity | Specified (no `/speckit.implement`) |
 | 002-sim-spine | Local FastAPI + durable store + seed + auth stub + record→timeline + quotas | Accepted (protected; do not rewrite) |
-| 003-catalog-complete | Remaining catalog APIs + later entities + Next.js one route per existing screen id | Accepted (shell/sim; screens not wired) |
+| 003-catalog-complete | Remaining catalog APIs + later entities + Next.js one route per existing screen id | Accepted (shell/sim; 004 wired the UI) |
+| 004-wire-demo-ui | Wire demo UI gold onto existing `/api/v1`; all 47 catalog screens `wired` | Accepted |
 
 Feature → test index (pytest: `cd backend; python -m pytest`, in-memory SQLite, `live_calls == 0`):
 
@@ -220,6 +221,7 @@ Feature → test index (pytest: `cd backend; python -m pytest`, in-memory SQLite
 |---|---|
 | 002-sim-spine | `backend/tests/test_isolation.py`, `test_record_timeline.py`, `test_quotas_rbac.py`, `test_parent.py` — [test-report](specs/002-sim-spine/test-report.md) |
 | 003-catalog-complete | 002 suite plus `test_isolation_003.py`, `test_003_api.py` (20 passed) — [test-report](specs/003-catalog-complete/test-report.md) |
+| 004-wire-demo-ui | Same 20 pytest green after wiring; `tsc --noEmit`; 47 catalog routes — [test-report](specs/004-wire-demo-ui/test-report.md) |
 
 ---
 

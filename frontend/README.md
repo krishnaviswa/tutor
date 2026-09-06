@@ -1,6 +1,6 @@
 # TutorOS frontend
 
-Next.js 15 App Router. **One route per existing catalog screen id** (`catalog/screens.json`). Demo HTML remains UI gold until a screen is `wired`.
+Next.js 15 App Router. **One route per existing catalog screen id** (`catalog/screens.json`). Screens are `wired` against FastAPI `/api/v1`. Product home (`/`) redirects to `/app/student/router`. Operator jump list: `/operator` (not a catalog id). Demo HTML remains visual gold.
 
 ```bash
 cd frontend

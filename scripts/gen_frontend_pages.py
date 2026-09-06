@@ -19,4 +19,12 @@ for s in screens:
         json.dumps(s["route"]),
     )
     (dest / "page.tsx").write_text(content, encoding="utf-8")
+lite = [{"id": s["id"], "title": s["title"], "route": s["route"], "role": s["role"]} for s in screens]
+catalog_ts = (
+    "/* Generated from catalog/screens.json — do not invent ids. */\n"
+    "export const CATALOG_SCREENS = "
+    + json.dumps(lite, indent=2)
+    + " as const;\n"
+)
+(root / "frontend" / "lib" / "catalog-screens.ts").write_text(catalog_ts, encoding="utf-8")
 print("wrote", len(screens), "pages")

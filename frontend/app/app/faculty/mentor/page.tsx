@@ -1,5 +1,13 @@
-import { ScreenShell } from '@/components/ScreenShell';
+import { AppChrome } from "@/components/AppChrome";
+import { LoginGate } from "@/components/LoginGate";
+import { MentorScreen } from "@/components/wired/MentorScreen";
 
 export default function Page() {
-  return <ScreenShell id="mentor" title="Mentor / backlog workflow" role="faculty" route="/app/faculty/mentor" />;
+  return (
+    <LoginGate role="teacher">
+      <AppChrome kind="faculty" screenId="mentor">
+        <MentorScreen />
+      </AppChrome>
+    </LoginGate>
+  );
 }

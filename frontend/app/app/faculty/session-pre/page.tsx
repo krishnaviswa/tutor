@@ -1,5 +1,16 @@
-import { ScreenShell } from '@/components/ScreenShell';
+import { Suspense } from "react";
+import { AppChrome } from "@/components/AppChrome";
+import { LoginGate } from "@/components/LoginGate";
+import { SessionPreScreen } from "@/components/wired/SessionPreScreen";
 
 export default function Page() {
-  return <ScreenShell id="session-pre" title="Session detail (pre-class)" role="faculty" route="/app/faculty/session-pre" />;
+  return (
+    <LoginGate role="teacher">
+      <AppChrome active="Schedule" kind="faculty">
+        <Suspense fallback={<p className="muted">Loading session…</p>}>
+          <SessionPreScreen />
+        </Suspense>
+      </AppChrome>
+    </LoginGate>
+  );
 }

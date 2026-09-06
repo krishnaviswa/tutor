@@ -1,5 +1,5 @@
-import { ScreenShell } from '@/components/ScreenShell';
+import { ParentLinkScreen } from "@/components/wired/ParentLinkScreen";
 
 export default function Page() {
-  return <ScreenShell id="parent-link" title="Parent link" role="parent" route="/app/parent/parent-link" />;
+  return <ParentLinkScreen />;
 }

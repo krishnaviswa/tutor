@@ -1,5 +1,13 @@
-import { ScreenShell } from '@/components/ScreenShell';
+import { AppChrome } from "@/components/AppChrome";
+import { LoginGate } from "@/components/LoginGate";
+import { DoubtTeacherScreen } from "@/components/wired/DoubtTeacherScreen";
 
 export default function Page() {
-  return <ScreenShell id="doubt-teacher" title="Doubts triage (teacher)" role="faculty" route="/app/faculty/doubt-teacher" />;
+  return (
+    <LoginGate role="teacher">
+      <AppChrome kind="faculty" screenId="doubt-teacher">
+        <DoubtTeacherScreen />
+      </AppChrome>
+    </LoginGate>
+  );
 }

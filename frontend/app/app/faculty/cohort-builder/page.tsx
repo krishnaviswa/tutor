@@ -1,5 +1,13 @@
-import { ScreenShell } from '@/components/ScreenShell';
+import { AppChrome } from "@/components/AppChrome";
+import { LoginGate } from "@/components/LoginGate";
+import { CohortBuilderScreen } from "@/components/wired/CohortBuilderScreen";
 
 export default function Page() {
-  return <ScreenShell id="cohort-builder" title="Cohort builder" role="faculty" route="/app/faculty/cohort-builder" />;
+  return (
+    <LoginGate role="teacher">
+      <AppChrome kind="faculty" screenId="cohort-builder">
+        <CohortBuilderScreen />
+      </AppChrome>
+    </LoginGate>
+  );
 }

@@ -1,5 +1,16 @@
-import { ScreenShell } from '@/components/ScreenShell';
+import { LoginGate } from "@/components/LoginGate";
+import { PhoneChrome } from "@/components/PhoneChrome";
+import { DoubtStudentScreen } from "@/components/wired/DoubtStudentScreen";
+import { MOCK_TENANTS } from "@/lib/mocks";
+
+const exam = MOCK_TENANTS["exam-prep"];
 
 export default function Page() {
-  return <ScreenShell id="doubt-student" title="Doubts queue (student)" role="student" route="/app/student/doubt-student" />;
+  return (
+    <LoginGate role="student" phone={exam.phones.student}>
+      <PhoneChrome screenId="doubt-student">
+        <DoubtStudentScreen />
+      </PhoneChrome>
+    </LoginGate>
+  );
 }

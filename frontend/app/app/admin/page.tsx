@@ -1,5 +1,16 @@
-import { ScreenShell } from '@/components/ScreenShell';
+import { AppChrome } from "@/components/AppChrome";
+import { LoginGate } from "@/components/LoginGate";
+import { OwnerScreen } from "@/components/wired/OwnerScreen";
+import { MOCK_TENANTS } from "@/lib/mocks";
+
+const exam = MOCK_TENANTS["exam-prep"];
 
 export default function Page() {
-  return <ScreenShell id="owner" title="Owner console" role="admin" route="/app/admin" />;
+  return (
+    <LoginGate role="owner" phone={exam.phones.owner}>
+      <AppChrome kind="admin" screenId="owner">
+        <OwnerScreen />
+      </AppChrome>
+    </LoginGate>
+  );
 }

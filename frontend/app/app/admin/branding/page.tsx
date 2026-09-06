@@ -1,5 +1,16 @@
-import { ScreenShell } from '@/components/ScreenShell';
+import { LoginGate } from "@/components/LoginGate";
+import { SetupChrome } from "@/components/SetupChrome";
+import { BrandingScreen } from "@/components/wired/BrandingScreen";
+import { MOCK_TENANTS } from "@/lib/mocks";
+
+const exam = MOCK_TENANTS["exam-prep"];
 
 export default function Page() {
-  return <ScreenShell id="branding" title="Branding & domain" role="admin" route="/app/admin/branding" />;
+  return (
+    <LoginGate role="owner" phone={exam.phones.owner}>
+      <SetupChrome stepId="branding">
+        <BrandingScreen />
+      </SetupChrome>
+    </LoginGate>
+  );
 }
