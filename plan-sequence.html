@@ -108,13 +108,13 @@ ul.clean{margin:8px 0 0;padding-left:18px}
 <body>
 <header class="topbar"><div class="topbar__in">
   <div class="brand">TutorOS <span class="ph">docs not app</span></div>
-  <nav class="tabs"><a href="product-viewer.html">Product</a><a href="plan-functional.html">Functional</a><a href="plan-technical.html">Technical</a><a class="on" href="plan-sequence.html">Sequence</a><a href="work-log.html">Work log</a></nav>
+  <nav class="tabs"><a href="product-viewer.html">Product</a><a href="plan-functional.html">Functional</a><a href="plan-technical.html">Technical</a><a class="on" href="plan-sequence.html">Sequence</a><a href="seed-map.html">Seed map</a><a href="density-map.html">Density</a><a href="work-log.html">Work log</a></nav>
   <button class="theme-btn" type="button" id="themeBtn">Black</button>
 </div></header>
 <div class="layout">
   <aside class="side">
     <div class="eyebrow">On this page</div>
-    <a href="#how">How to read</a><a href="#done">Already built</a><a href="#p0">P0 002 close-out</a><a href="#p1">P1 Environment</a><a href="#p2">P2 Database</a><a href="#p3">P3 Backend</a><a href="#p4">P4 Frontend</a><a href="#p5">P5 Integration</a><a href="#p6">P6 Docs</a>
+    <a href="#how">How to read</a><a href="#done">Already built</a><a href="#p0">P0 002 close-out</a><a href="#p1">P1 Environment</a><a href="#p2">P2 Database</a><a href="#p3">P3 Backend</a><a href="#p4">P4 Frontend</a><a href="#p5">P5 Integration</a><a href="#p6">P6 Docs</a><a href="#p7">P7 005 density</a>
     
     <div class="eyebrow" style="margin-top:18px">Also in repo</div>
     <a href="product-viewer.html">Product book</a>
@@ -123,6 +123,8 @@ ul.clean{margin:8px 0 0;padding-left:18px}
     <a href="tutor-platform-demo.html">Demo UI gold</a>
     <a href="tutor-platform-explorer.html">Module explorer</a>
     <a href="README.md">README.md</a>
+    <a href="density-map.html">005 density board</a>
+    <a href="specs/005-dashboard-density/spec.md">005 spec</a>
     <a href="specs/003-catalog-complete/spec.md">003 spec</a>
     
   </aside>
@@ -198,6 +200,22 @@ ul.clean{margin:8px 0 0;padding-left:18px}
   </div>
 </section>
 
+<section id="p7" style="margin-top:26px">
+  <h2>P7 — 005 dashboard density</h2>
+  <div class="pair">
+    <div class="col"><div class="lbl">Functional</div><p>Student home shows tonight’s class by name, due practice, weak tags. Teacher sees attendance bars and named chase list. Owner sees revenue and churn plus quotas. Parent sees numbers, not five empty links.</p></div>
+    <div class="col"><div class="lbl">Technical</div><p>Same 47 ids. Enrich existing /api/v1 JSON in services/progress.py. Seed named facts. CSS bars from demo. Visual board: <a href="density-map.html">density-map.html</a>.</p><p class="muted" style="margin-top:8px">Tasks: T7.1–T7.12 · Accepted</p></div>
+  </div>
+</section>
+
+<section id="p8" style="margin-top:26px">
+  <h2>P8 — 006 in-app v2</h2>
+  <div class="pair">
+    <div class="col"><div class="lbl">Functional</div><p>Assistants cannot open billing. A second guardian can see the child without fees. Cohorts have invite links. Live chat stays in-app. Homework has due dates. Practice auto-assembles. Automation books missed-practice backlog. Demo tracks pick up missing spine screens (exam-prep still has no staff-login).</p></div>
+    <div class="col"><div class="lbl">Technical</div><p>Same 47 ids. Same /api/v1 path ids. Additive JSON via services/internal_v2.py. Factory still mock-only. No live Meet / SMS / email / WhatsApp / Razorpay / Stripe / FCM / S3.</p><p class="muted" style="margin-top:8px">Tasks: T8.1–T8.12 · Accepted</p></div>
+  </div>
+</section>
+
 <section style="margin-top:28px">
   <h2>Suggested review order for a chief architect</h2>
   <ol>
@@ -205,6 +223,7 @@ ul.clean{margin:8px 0 0;padding-left:18px}
     <li><a href="product-viewer.html">Product book</a> — hub: components + task tiles.</li>
     <li><a href="plan-functional.html">Functional</a> — every screen and journey.</li>
     <li><a href="plan-technical.html">Technical</a> — every API, entity, port, protected test.</li>
+    <li><a href="density-map.html">005 density board</a> — iSeek gap + T7 action items (open in a browser).</li>
     <li><a href="product-viewer.html#tasks">Task plan</a> — tiles T0.1… files on click.</li>
     <li><a href="product-viewer.html">Approve from the product book</a> (chat), not this page.</li>
   </ol>

@@ -8,6 +8,7 @@ from app.models.tables import Announcement, Cohort, Doubt, Message, Student, Wor
 from app.ports.mocks import MockPorts
 from app.services.auth import Principal
 from app.services import notify, timeline
+from app.services.internal_v2 import meta_of, put_meta, sla_hours
 from app.services.scope import can_read_student, linked_student_ids, student_for_principal
 
 router = APIRouter()
@@ -21,17 +22,23 @@ class DoubtIn(BaseModel):
 class DoubtPatch(BaseModel):
     status: str | None = None
     answer: str | None = None
+    canned_id: str | None = None
+    clip: bool | None = None
 
 
 class MessageIn(BaseModel):
     body: str
     student_id: str | None = None
+    attachment: str | None = None
+    template_id: str | None = None
 
 
 class AnnounceIn(BaseModel):
     title: str
     body: str = ""
     cohort_id: str | None = None
+    scheduled_at: str | None = None
+    channels: list[str] | None = None
 
 
 def _wa(db: Session, workspace_id: str) -> bool:
@@ -84,6 +91,9 @@ def doubt_queue(
     principal: Principal = Depends(require_roles("owner", "teacher")),
 ):
     rows = db.query(Doubt).filter(Doubt.workspace_id == principal.workspace_id).all()
+    open_rows = [r for r in rows if r.status == "open"]
+    open_rows.sort(key=lambda r: r.created_at or r.id)
+    positions = {r.id: i + 1 for i, r in enumerate(open_rows)}
     return [
         {
             "id": r.id,
@@ -91,6 +101,10 @@ def doubt_queue(
             "body": r.body,
             "status": r.status,
             "answer": r.answer,
+            "queue_position": positions.get(r.id),
+            "sla_hours": sla_hours(r.created_at),
+            "canned_id": meta_of(r).get("canned_id"),
+            "has_clip": bool(meta_of(r).get("clip") or ("[clip]" in (r.answer or ""))),
         }
         for r in rows
     ]
@@ -111,6 +125,7 @@ def patch_doubt(
         row.status = body.status
     if body.answer is not None:
         row.answer = body.answer
+    put_meta(row, canned_id=body.canned_id, clip=body.clip)
     note = f"Doubt {row.status}"
     timeline.append(db, principal.workspace_id, row.student_id, "doubt_updated", note, principal.user_id)
     notify.dispatch_after_timeline(db, ports, principal.workspace_id, note, _wa(db, principal.workspace_id))
@@ -135,6 +150,8 @@ def list_threads(db: Session = Depends(get_db), principal: Principal = Depends(c
                 "id": m.thread_id,
                 "student_id": m.student_id,
                 "last_body": m.body,
+                "unread": not bool(meta_of(m).get("read")),
+                "attachments": [meta_of(m).get("attachment")] if meta_of(m).get("attachment") else [],
             }
     return list(threads.values())
 
@@ -160,7 +177,8 @@ def post_message(
     )
     db.add(row)
     db.flush()
-    return {"id": row.id, "thread_id": row.thread_id, "body": row.body}
+    put_meta(row, attachment=body.attachment, template_id=body.template_id, read=False)
+    return {"id": row.id, "thread_id": row.thread_id, "body": row.body, "attachment": body.attachment}
 
 
 @router.get("/announcements")
@@ -169,7 +187,17 @@ def list_announcements(
     principal: Principal = Depends(require_roles("owner", "teacher", "assistant", "student")),
 ):
     rows = db.query(Announcement).filter(Announcement.workspace_id == principal.workspace_id).all()
-    return [{"id": r.id, "title": r.title, "body": r.body, "cohort_id": r.cohort_id} for r in rows]
+    return [
+        {
+            "id": r.id,
+            "title": r.title,
+            "body": r.body,
+            "cohort_id": r.cohort_id,
+            "scheduled_at": meta_of(r).get("scheduled_at"),
+            "channels": meta_of(r).get("channels") or [],
+        }
+        for r in rows
+    ]
 
 
 @router.post("/announcements")
@@ -196,9 +224,10 @@ def create_announcement(
     )
     db.add(row)
     db.flush()
+    put_meta(row, scheduled_at=body.scheduled_at, channels=body.channels or ["in_app"])
     note = f"Announcement: {row.title}"
     students = db.query(Student).filter(Student.workspace_id == principal.workspace_id).all()
     for st in students:
         timeline.append(db, principal.workspace_id, st.id, "announcement", note, principal.user_id)
     notify.dispatch_after_timeline(db, ports, principal.workspace_id, note, _wa(db, principal.workspace_id))
-    return {"id": row.id, "title": row.title, "body": row.body}
+    return {"id": row.id, "title": row.title, "body": row.body, "scheduled_at": body.scheduled_at, "channels": body.channels or ["in_app"]}

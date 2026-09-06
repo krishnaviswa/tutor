@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { AppBar, Empty, Err } from "./bits";
 
-type Thread = { id: string; student_id?: string | null; last_body?: string };
+type Thread = { id: string; student_id?: string | null; last_body?: string; unread?: boolean };
 type Role = string;
 
 export function MessagesScreen() {
   const [threads, setThreads] = useState<Thread[]>([]);
   const [sel, setSel] = useState<Thread | null>(null);
   const [body, setBody] = useState("");
+  const [attachment, setAttachment] = useState("");
   const [error, setError] = useState("");
   const [role, setRole] = useState<Role>("teacher");
   const [studentId, setStudentId] = useState("");
@@ -37,7 +38,11 @@ export function MessagesScreen() {
       const threadId = sel?.id || "new";
       await api(`/api/v1/threads/${threadId}/messages`, {
         method: "POST",
-        body: JSON.stringify({ body, student_id: studentId || sel?.student_id || undefined }),
+        body: JSON.stringify({
+          body,
+          student_id: studentId || sel?.student_id || undefined,
+          ...(attachment.trim() ? { attachment: attachment.trim() } : {}),
+        }),
       });
       setBody("");
       load();
@@ -62,6 +67,7 @@ export function MessagesScreen() {
         >
           <div className="t">{t.last_body || t.id}</div>
           <div className="s muted">{t.student_id}</div>
+          {t.unread ? <span className="pill">unread</span> : null}
         </button>
       ))}
       <div className="card">
@@ -74,6 +80,15 @@ export function MessagesScreen() {
         <label className="field">
           <span>Message</span>
           <textarea className="field__in" value={body} onChange={(e) => setBody(e.target.value)} rows={3} />
+        </label>
+        <label className="field">
+          <span>Attachment</span>
+          <input
+            className="field__in"
+            value={attachment}
+            onChange={(e) => setAttachment(e.target.value)}
+            placeholder="local/note.txt"
+          />
         </label>
         <button className="hot hot--btn" type="button" disabled={busy} onClick={() => void send()}>
           Send

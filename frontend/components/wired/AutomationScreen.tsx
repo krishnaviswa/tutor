@@ -13,7 +13,21 @@ export function AutomationScreen() {
 
   function load() {
     api("/api/v1/automation-rules")
-      .then((data) => setRows(data as Rule[]))
+      .then((data) => {
+        const list = Array.isArray(data) ? data : [];
+        setRows(
+          list.map((row) => {
+            const r = row as Rule;
+            return {
+              id: r.id,
+              name: r.name,
+              trigger: r.trigger,
+              action: r.action,
+              enabled: r.enabled,
+            };
+          }),
+        );
+      })
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }
 

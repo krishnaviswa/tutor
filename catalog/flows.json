@@ -94,10 +94,28 @@
         "auto": null
       },
       {
+        "screen": "library",
+        "role": "student",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "lesson",
+        "role": "student",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
         "screen": "timeline",
         "role": "system",
         "stage": "Teach",
         "auto": "Record fans out to every attendee timeline"
+      },
+      {
+        "screen": "qbank",
+        "role": "faculty",
+        "stage": "Practise",
+        "auto": null
       },
       {
         "screen": "practice-build",
@@ -157,6 +175,12 @@
         "screen": "test-runner",
         "role": "student",
         "stage": "Assess",
+        "auto": null
+      },
+      {
+        "screen": "student-dash",
+        "role": "student",
+        "stage": "Review",
         "auto": null
       },
       {
@@ -246,6 +270,9 @@
       "live-student",
       "session-video",
       "record",
+      "library",
+      "lesson",
+      "qbank",
       "practice-build",
       "practice-play",
       "practice-result",
@@ -255,6 +282,7 @@
       "mentor",
       "test-setup",
       "test-runner",
+      "student-dash",
       "timeline",
       "teacher-dash",
       "reports",
@@ -336,6 +364,12 @@
         "auto": null
       },
       {
+        "screen": "live-student",
+        "role": "student",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
         "screen": "session-video",
         "role": "faculty",
         "stage": "Teach",
@@ -378,6 +412,12 @@
         "auto": null
       },
       {
+        "screen": "student-dash",
+        "role": "student",
+        "stage": "Review",
+        "auto": null
+      },
+      {
         "screen": "timeline",
         "role": "student",
         "stage": "Review",
@@ -412,12 +452,14 @@
       "session-pre",
       "join",
       "live-teacher",
+      "live-student",
       "session-video",
       "record",
       "assign-issue",
       "assign-grade",
       "messages",
       "doubt-student",
+      "student-dash",
       "timeline",
       "reports",
       "billing",
@@ -483,6 +525,12 @@
         "auto": null
       },
       {
+        "screen": "session-pre",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
         "screen": "join",
         "role": "student",
         "stage": "Teach",
@@ -495,8 +543,20 @@
         "auto": null
       },
       {
+        "screen": "live-student",
+        "role": "student",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
         "screen": "record",
         "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "library",
+        "role": "student",
         "stage": "Teach",
         "auto": null
       },
@@ -617,9 +677,12 @@
       "student-login",
       "staff-login",
       "schedule",
+      "session-pre",
       "join",
       "live-teacher",
+      "live-student",
       "record",
+      "library",
       "assign-issue",
       "practice-play",
       "doubt-student",
@@ -663,6 +726,12 @@
         "auto": null
       },
       {
+        "screen": "roster",
+        "role": "admin",
+        "stage": "Enrol",
+        "auto": null
+      },
+      {
         "screen": "student-login",
         "role": "student",
         "stage": "Enrol",
@@ -693,8 +762,20 @@
         "auto": null
       },
       {
+        "screen": "join",
+        "role": "student",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
         "screen": "live-teacher",
         "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "live-student",
+        "role": "student",
         "stage": "Teach",
         "auto": null
       },
@@ -786,12 +867,15 @@
     "tour": [
       "onboard-kind",
       "branding",
+      "roster",
       "student-login",
       "staff-login",
       "cohort-builder",
       "schedule",
       "session-pre",
+      "join",
       "live-teacher",
+      "live-student",
       "session-video",
       "record",
       "library",
@@ -885,8 +969,20 @@
         "auto": null
       },
       {
+        "screen": "live-student",
+        "role": "student",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
         "screen": "record",
         "role": "faculty",
+        "stage": "Teach",
+        "auto": null
+      },
+      {
+        "screen": "library",
+        "role": "student",
         "stage": "Teach",
         "auto": null
       },
@@ -912,6 +1008,12 @@
         "screen": "announce",
         "role": "faculty",
         "stage": "Support",
+        "auto": null
+      },
+      {
+        "screen": "student-dash",
+        "role": "student",
+        "stage": "Review",
         "auto": null
       },
       {
@@ -980,10 +1082,13 @@
       "session-pre",
       "join",
       "live-teacher",
+      "live-student",
       "record",
+      "library",
       "assign-issue",
       "messages",
       "announce",
+      "student-dash",
       "timeline",
       "parent-home",
       "reports",

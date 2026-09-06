@@ -8,6 +8,7 @@ from app.db import get_db
 from app.models.tables import OtpChallenge, Workspace
 from app.ports.mocks import MockPorts
 from app.services.auth import Principal, identity_user, issue_session, membership_role
+from app.services.internal_v2 import auth_methods, staff_allowed_modules
 from app.api.v1.deps import ports_dep
 
 router = APIRouter()
@@ -83,5 +84,7 @@ def me(principal: Principal = Depends(current_principal), db: Session = Depends(
         "role": principal.role,
         "workspace_id": principal.workspace_id,
         "display_name": principal.display_name,
+        "auth_methods": auth_methods(ws),
+        "permissions": staff_allowed_modules(db, principal),
         "workspace": {"id": ws.id, "slug": ws.slug, "kind": ws.kind} if ws else None,
     }

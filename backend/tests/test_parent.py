@@ -17,23 +17,27 @@ def test_parent_home_linked_child_only(client):
     assert client.get(f"/api/v1/students/{other}/timeline", headers=auth(parent)).status_code in (403, 404)
 
 
-def test_parent_hub_reads_empty_until_child_rows(client):
+def test_parent_hub_reads_linked_child_rows(client):
     parent = login(client, "+9101p", WS_EXAM, "parent")
     h = auth(parent)
     home = client.get("/api/v1/parent/home", headers=h).json()
     child_id = home["children"][0]["student_id"]
+    invoices = client.get("/api/v1/invoices/mine", headers=h).json()
+    assert invoices
+    assert all(i["student_id"] == child_id for i in invoices)
+    threads = client.get("/api/v1/threads", headers=h).json()
+    assert threads
+    assert all(t.get("student_id") == child_id for t in threads)
     reports = client.get("/api/v1/reports", headers=h).json()
     assert len(reports) == 1
     assert reports[0]["student_id"] == child_id
     lang_parent = login(client, "+9102p", WS_LANG, "parent")
     other_ids = {r["student_id"] for r in client.get("/api/v1/reports", headers=auth(lang_parent)).json()}
     assert child_id not in other_ids
-    assert client.get("/api/v1/invoices/mine", headers=h).json() == []
-    assert client.get("/api/v1/threads", headers=h).json() == []
-    attempt = client.get("/api/v1/attempts/none", headers=h)
-    assert attempt.status_code == 404
     prefs = client.get("/api/v1/notifications/prefs", headers=h).json()
     assert prefs["student"]["whatsapp"] is False
+    other_inv = {i["id"] for i in client.get("/api/v1/invoices/mine", headers=auth(lang_parent)).json()}
+    assert {i["id"] for i in invoices}.isdisjoint(other_inv)
 
 
 def test_catalog_paths_only_no_sim_login(client):

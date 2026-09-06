@@ -7,6 +7,7 @@ from app.db import get_db
 from app.models.tables import QuotaPolicy, UsageMeter, Workspace
 from app.services.auth import Principal
 from app.services import quota as quota_svc
+from app.services.progress import owner_console as owner_density_console
 
 router = APIRouter()
 
@@ -27,13 +28,10 @@ def owner_console(
     db: Session = Depends(get_db),
     principal: Principal = Depends(require_roles("owner")),
 ):
-    ws = db.get(Workspace, principal.workspace_id)
-    meters = quota_svc.snapshot(db, principal.workspace_id)
-    return {
-        "workspace": {"id": ws.id, "name": ws.name, "slug": ws.slug} if ws else None,
-        "usage": meters,
-        "always_on": list(quota_svc.ALWAYS_ON),
-    }
+    body = owner_density_console(db, principal)
+    body["usage"] = quota_svc.snapshot(db, principal.workspace_id)
+    body["always_on"] = list(quota_svc.ALWAYS_ON)
+    return body
 
 
 @router.get("/usage")

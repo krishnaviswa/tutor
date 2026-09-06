@@ -7,11 +7,21 @@ import { AppBar, Empty, Err } from "./bits";
 type Ev = { id: string; event_type: string; body: string; created_at?: string | null };
 type Child = { student_id: string; display_name: string };
 
+function asEvents(data: unknown): Ev[] {
+  if (Array.isArray(data)) return data as Ev[];
+  if (data && typeof data === "object" && Array.isArray((data as { events?: Ev[] }).events)) {
+    return (data as { events: Ev[] }).events;
+  }
+  return [];
+}
+
 export function TimelineScreen() {
   const [events, setEvents] = useState<Ev[]>([]);
   const [title, setTitle] = useState("Activity");
   const [error, setError] = useState("");
   const [role, setRole] = useState("student");
+  const [studentId, setStudentId] = useState("");
+  const [eventType, setEventType] = useState("");
 
   useEffect(() => {
     async function run() {
@@ -19,10 +29,10 @@ export function TimelineScreen() {
         const me = (await api("/api/v1/auth/me")) as { role?: string };
         const r = me.role || "student";
         setRole(r);
-        let studentId = "";
+        let id = "";
         if (r === "student") {
           const dash = (await api("/api/v1/me/dashboard")) as { student_id: string };
-          studentId = dash.student_id;
+          id = dash.student_id;
           setTitle("Your record");
         } else if (r === "parent") {
           const home = (await api("/api/v1/parent/home")) as { children: Child[] };
@@ -31,7 +41,7 @@ export function TimelineScreen() {
             setError("No linked child.");
             return;
           }
-          studentId = child.student_id;
+          id = child.student_id;
           setTitle(`${child.display_name}’s activity`);
         } else {
           const students = (await api("/api/v1/students")) as { id: string; display_name: string }[];
@@ -39,11 +49,10 @@ export function TimelineScreen() {
             setError("No students.");
             return;
           }
-          studentId = students[0].id;
+          id = students[0].id;
           setTitle(students[0].display_name);
         }
-        const rows = (await api(`/api/v1/students/${studentId}/timeline`)) as Ev[];
-        setEvents(rows);
+        setStudentId(id);
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));
       }
@@ -51,9 +60,27 @@ export function TimelineScreen() {
     void run();
   }, []);
 
+  useEffect(() => {
+    if (!studentId) return;
+    const q = eventType.trim()
+      ? `?event_type=${encodeURIComponent(eventType.trim())}`
+      : "";
+    api(`/api/v1/students/${studentId}/timeline${q}`)
+      .then((data) => setEvents(asEvents(data)))
+      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
+  }, [studentId, eventType]);
+
   const body = (
     <>
       <Err message={error} />
+      <label className="field">
+        <span>event_type</span>
+        <input
+          className="field__in"
+          value={eventType}
+          onChange={(e) => setEventType(e.target.value)}
+        />
+      </label>
       {events.length === 0 ? (
         <Empty>Timeline is empty. Record, practice, and join write here first.</Empty>
       ) : (

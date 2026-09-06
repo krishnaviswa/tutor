@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -69,6 +69,8 @@ def import_students(
 @router.get("/students/{student_id}/timeline")
 def student_timeline(
     student_id: str,
+    event_type: str | None = Query(default=None),
+    export: int = Query(default=0),
     db: Session = Depends(get_db),
     principal: Principal = Depends(require_roles("owner", "teacher", "assistant", "student", "parent")),
 ):
@@ -105,12 +107,18 @@ def student_timeline(
         .order_by(TimelineEvent.created_at.desc())
         .all()
     )
-    return [
+    if event_type:
+        events = [e for e in events if e.event_type == event_type]
+    rows = [
         {
             "id": e.id,
             "event_type": e.event_type,
             "body": e.body,
             "created_at": e.created_at.isoformat() if e.created_at else None,
+            "dispute": None,
         }
         for e in events
     ]
+    if export:
+        return {"export": True, "student_id": student_id, "events": rows}
+    return rows

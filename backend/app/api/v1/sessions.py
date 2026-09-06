@@ -11,6 +11,7 @@ from app.ports.mocks import MockPorts
 from app.services.auth import Principal
 from app.services import record as record_svc
 from app.services import timeline
+from app.services.internal_v2 import in_availability, teacher_conflict
 from app.services.scope import enrolled_in_session_cohort
 
 router = APIRouter()
@@ -20,6 +21,7 @@ class SessionIn(BaseModel):
     cohort_id: str
     title: str
     starts_at: datetime
+    book: bool = False
 
 
 class SessionPatch(BaseModel):
@@ -46,6 +48,7 @@ def _session_out(s: ScheduledSession) -> dict:
         "title": s.title,
         "starts_at": s.starts_at.isoformat() if s.starts_at else None,
         "teacher_user_id": s.teacher_user_id,
+        "conflict": False,
     }
 
 
@@ -73,7 +76,7 @@ def list_sessions(
 def create_session(
     body: SessionIn,
     db: Session = Depends(get_db),
-    principal: Principal = Depends(require_roles("owner", "teacher")),
+    principal: Principal = Depends(require_roles("owner", "teacher", "student")),
 ):
     cohort = (
         db.query(Cohort)
@@ -82,10 +85,25 @@ def create_session(
     )
     if not cohort:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "cohort")
+    teacher_id = principal.user_id
+    ws = db.get(Workspace, principal.workspace_id)
+    if principal.role == "student":
+        if not body.book:
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "forbidden")
+        if not in_availability(ws, body.starts_at):
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "outside availability")
+        teacher_id = (
+            db.query(ScheduledSession)
+            .filter(ScheduledSession.workspace_id == principal.workspace_id)
+            .first()
+        )
+        teacher_id = teacher_id.teacher_user_id if teacher_id else principal.user_id
+    if teacher_conflict(db, principal.workspace_id, teacher_id, body.starts_at):
+        raise HTTPException(status.HTTP_409_CONFLICT, "teacher conflict")
     s = ScheduledSession(
         workspace_id=principal.workspace_id,
         cohort_id=body.cohort_id,
-        teacher_user_id=principal.user_id if principal.role == "teacher" else principal.user_id,
+        teacher_user_id=teacher_id,
         title=body.title,
         starts_at=body.starts_at,
     )
@@ -114,6 +132,8 @@ def patch_session(
     if body.title is not None:
         s.title = body.title
     if body.starts_at is not None:
+        if teacher_conflict(db, principal.workspace_id, s.teacher_user_id, body.starts_at, skip_id=s.id):
+            raise HTTPException(status.HTTP_409_CONFLICT, "teacher conflict")
         s.starts_at = body.starts_at
     return _session_out(s)
 
@@ -139,6 +159,7 @@ def get_record(
         "session": _session_out(s),
         "notes": rec.notes if rec else "",
         "attendance": [{"student_id": a.student_id, "status": a.status} for a in att],
+        "capture": s.engagement or [],
     }
 
 
@@ -212,9 +233,11 @@ def engagement(
     body: EngagementIn,
     db: Session = Depends(get_db),
     ports: MockPorts = Depends(ports_dep),
-    principal: Principal = Depends(require_roles("owner", "teacher")),
+    principal: Principal = Depends(require_roles("owner", "teacher", "student")),
 ):
     s = _get(db, principal.workspace_id, session_id)
+    if principal.role == "student" and body.kind not in ("chat",):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "forbidden")
     events = list(s.engagement or [])
     events.append({"kind": body.kind, "payload": body.payload, "actor_user_id": principal.user_id})
     s.engagement = events

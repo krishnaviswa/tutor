@@ -7,21 +7,37 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
 from app.models.tables import (
+    Announcement,
+    Assignment,
+    Attempt,
+    Attendance,
+    AuditLog,
     AutomationRule,
+    BacklogItem,
     Cohort,
     ContentItem,
+    Doubt,
     Enrollment,
     FeatureFlag,
     Identity,
+    Invoice,
+    Message,
+    NotificationDelivery,
+    NotificationPref,
     ParentLink,
     Plan,
     PracticeSet,
+    Payout,
     Question,
     QuotaPolicy,
     ScheduledSession,
+    SessionRecord,
     StaffMembership,
     Student,
+    Submission,
     Taxonomy,
+    Test,
+    TimelineEvent,
     Topic,
     UsageMeter,
     User,
@@ -101,6 +117,60 @@ def _people(prefix: str) -> dict[str, str]:
     }
 
 
+def cid(tag: str, n: int) -> str:
+    """Stable catalog-pack UUID. n is the last 12 hex digits as int."""
+    return f"cccccccc-{tag}-4000-8000-{n:012d}"
+
+
+def _put(db: Session, model, pk: str, **fields):
+    row = db.get(model, pk)
+    if row:
+        return row
+    row = model(id=pk, **fields)
+    db.add(row)
+    db.flush()
+    return row
+
+
+def _ident_once(db: Session, workspace_id: str, user_id: str, kind: str, value: str) -> None:
+    exists = db.query(Identity).filter(Identity.kind == kind, Identity.value == value).first()
+    if exists:
+        return
+    db.add(Identity(workspace_id=workspace_id, user_id=user_id, kind=kind, value=value))
+
+
+def _timeline_once(
+    db: Session,
+    workspace_id: str,
+    student_id: str,
+    event_type: str,
+    body: str,
+    actor_user_id: str,
+    when: datetime,
+) -> None:
+    exists = (
+        db.query(TimelineEvent)
+        .filter(
+            TimelineEvent.workspace_id == workspace_id,
+            TimelineEvent.student_id == student_id,
+            TimelineEvent.event_type == event_type,
+        )
+        .first()
+    )
+    if exists:
+        return
+    db.add(
+        TimelineEvent(
+            workspace_id=workspace_id,
+            student_id=student_id,
+            actor_user_id=actor_user_id,
+            event_type=event_type,
+            body=body,
+            created_at=when,
+        )
+    )
+
+
 def seed_workspace(
     db: Session,
     *,
@@ -162,12 +232,12 @@ def seed_workspace_ids(
     db.flush()
     for role, uid in roles_staff.items():
         db.add(StaffMembership(workspace_id=ws_id, user_id=uid, role=role))
-        _ident(db, ws_id, uid, "phone", f"{phone_prefix}{role[0]}")
-        _ident(db, ws_id, uid, "email", f"{role}@{slug}.sim")
-    _ident(db, ws_id, people["student"], "phone", f"{phone_prefix}s")
-    _ident(db, ws_id, people["student"], "email", f"student@{slug}.sim")
-    _ident(db, ws_id, people["parent"], "phone", f"{phone_prefix}p")
-    _ident(db, ws_id, people["parent"], "email", f"parent@{slug}.sim")
+        _ident_once(db, ws_id, uid, "phone", f"{phone_prefix}{role[0]}")
+        _ident_once(db, ws_id, uid, "email", f"{role}@{slug}.sim")
+    _ident_once(db, ws_id, people["student"], "phone", f"{phone_prefix}s")
+    _ident_once(db, ws_id, people["student"], "email", f"student@{slug}.sim")
+    _ident_once(db, ws_id, people["parent"], "phone", f"{phone_prefix}p")
+    _ident_once(db, ws_id, people["parent"], "email", f"parent@{slug}.sim")
 
     tag = ws_id.split("-")[1]
     student_id = f"cccccccc-{tag}-4000-8000-000000000020"
@@ -190,6 +260,10 @@ def seed_workspace_ids(
             teacher_user_id=people["teacher"],
             title="Seed session",
             starts_at=starts_at,
+            join_token=f"join-{slug}",
+            video_url=f"mock://meet/{session_id}",
+            recording_url=f"mock://rec/{session_id}",
+            engagement=[{"kind": "poll", "payload": {"prompt": "Ready?"}}],
         )
     )
     db.add(
@@ -206,7 +280,7 @@ def seed_workspace_ids(
     db.add(Topic(id=topic_id, workspace_id=ws_id, taxonomy_id=tax_id, name=topic_name))
     db.add(FeatureFlag(workspace_id=ws_id, modules=SLICE_MODULES))
     db.flush()
-    qid = f"cccccccc-{tag}-4000-8000-000000000025"
+    qid = cid(tag, 25)
     db.add(
         Question(
             id=qid,
@@ -220,7 +294,7 @@ def seed_workspace_ids(
     )
     db.add(
         PracticeSet(
-            id=f"cccccccc-{tag}-4000-8000-000000000026",
+            id=cid(tag, 26),
             workspace_id=ws_id,
             title=f"{topic_name} set",
             question_ids=[qid],
@@ -229,16 +303,18 @@ def seed_workspace_ids(
     )
     db.add(
         ContentItem(
+            id=cid(tag, 27),
             workspace_id=ws_id,
             topic_id=topic_id,
             title=f"{topic_name} notes",
-            body="Seed material",
+            body="Seed material for library and lesson.",
             created_by=people["teacher"],
         )
     )
-    db.add(Plan(workspace_id=ws_id, name="Seat", amount_cents=500))
+    db.add(Plan(id=cid(tag, 28), workspace_id=ws_id, name="Seat", amount_cents=500))
     db.add(
         AutomationRule(
+            id=cid(tag, 43),
             workspace_id=ws_id,
             name="After record ping",
             trigger="session_recorded",
@@ -287,51 +363,116 @@ PEOPLE_MUSIC = {
 }
 
 
+def _pack(db: Session, row: dict, *, slug: str, name: str, phone_prefix: str, topic_name: str, people: dict[str, str], when: datetime) -> dict:
+    from app.services.seed_pack import seed_catalog_pack
+
+    extra = seed_catalog_pack(
+        db,
+        ws_id=row["workspace_id"],
+        slug=slug,
+        name=name,
+        phone_prefix=phone_prefix,
+        topic_name=topic_name,
+        people=people,
+        when=when,
+    )
+    row.update(extra)
+    return row
+
+
 def seed_all(db: Session) -> dict:
+    """Identity + catalog pack. If exam workspace exists, skip (use reset_and_seed to wipe)."""
     if db.get(Workspace, WS_EXAM):
         return {"already": True}
     when = datetime(2026, 9, 5, 12, 0, tzinfo=timezone.utc)
-    exam = seed_workspace_ids(
+    exam = _pack(
         db,
-        ws_id=WS_EXAM,
+        seed_workspace_ids(
+            db,
+            ws_id=WS_EXAM,
+            slug="exam-prep",
+            name="Coaching exam-prep",
+            kind="exam-prep",
+            phone_prefix="+9101",
+            topic_name="Unit 1",
+            whatsapp_used=80,
+            whatsapp_cap=100,
+            policy="warn",
+            starts_at=when,
+            people=PEOPLE_EXAM,
+        ),
         slug="exam-prep",
         name="Coaching exam-prep",
-        kind="exam-prep",
         phone_prefix="+9101",
         topic_name="Unit 1",
-        whatsapp_used=80,
-        whatsapp_cap=100,
-        policy="warn",
-        starts_at=when,
         people=PEOPLE_EXAM,
+        when=when,
     )
-    lang = seed_workspace_ids(
+    lang = _pack(
         db,
-        ws_id=WS_LANG,
+        seed_workspace_ids(
+            db,
+            ws_id=WS_LANG,
+            slug="language-1on1",
+            name="Language 1-on-1",
+            kind="one-on-one",
+            phone_prefix="+9102",
+            topic_name="Conversation",
+            whatsapp_used=100,
+            whatsapp_cap=100,
+            policy="block",
+            starts_at=when,
+            people=PEOPLE_LANG,
+        ),
         slug="language-1on1",
         name="Language 1-on-1",
-        kind="one-on-one",
         phone_prefix="+9102",
         topic_name="Conversation",
-        whatsapp_used=100,
-        whatsapp_cap=100,
-        policy="block",
-        starts_at=when,
         people=PEOPLE_LANG,
+        when=when,
     )
-    music = seed_workspace_ids(
+    music = _pack(
         db,
-        ws_id=WS_MUSIC,
+        seed_workspace_ids(
+            db,
+            ws_id=WS_MUSIC,
+            slug="music",
+            name="Music studio",
+            kind="music",
+            phone_prefix="+9103",
+            topic_name="Scales",
+            whatsapp_used=10,
+            whatsapp_cap=100,
+            policy="warn",
+            starts_at=when,
+            people=PEOPLE_MUSIC,
+        ),
         slug="music",
         name="Music studio",
-        kind="music",
         phone_prefix="+9103",
         topic_name="Scales",
-        whatsapp_used=10,
-        whatsapp_cap=100,
-        policy="warn",
-        starts_at=when,
         people=PEOPLE_MUSIC,
+        when=when,
     )
     db.commit()
     return {"exam": exam, "lang": lang, "music": music}
+
+
+def reset_and_seed(db: Session) -> dict:
+    """Drop every table, recreate, seed three tenants + catalog pack. Local Postgres wipe."""
+    from sqlalchemy import text
+
+    from app.models.tables import Base
+
+    bind = db.get_bind()
+    db.commit()
+    if bind.dialect.name == "postgresql":
+        db.execute(text("DROP SCHEMA public CASCADE"))
+        db.execute(text("CREATE SCHEMA public"))
+        db.execute(text("GRANT ALL ON SCHEMA public TO CURRENT_USER"))
+        db.commit()
+    else:
+        Base.metadata.drop_all(bind=bind)
+    Base.metadata.create_all(bind=bind)
+    db.expire_all()
+    return seed_all(db)

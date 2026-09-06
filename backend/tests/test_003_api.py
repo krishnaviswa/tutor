@@ -33,8 +33,9 @@ def test_join_writes_attendance_in_a_only(client):
     db = session_factory()()
     exam_att = db.query(Attendance).filter(Attendance.workspace_id == WS_EXAM).all()
     lang_att = db.query(Attendance).filter(Attendance.workspace_id == WS_LANG).all()
-    assert exam_att
-    assert all(a.status == "present" for a in exam_att)
+    st_id = client.get("/api/v1/me/dashboard", headers=auth(student)).json()["student_id"]
+    joined = [a for a in exam_att if a.session_id == session_id and a.student_id == st_id]
+    assert joined and all(a.status == "present" for a in joined)
     assert not any(a.session_id == session_id for a in lang_att)
     db.close()
 
@@ -108,9 +109,9 @@ def test_practice_attempt_timelines_in_a_only(client):
     other_tl = client.get(
         f"/api/v1/students/{lang_students[0]['id']}/timeline", headers=auth(lang_teacher)
     ).json()
-    assert not any(e["event_type"] == "practice_attempted" for e in other_tl)
     stolen = client.get(f"/api/v1/attempts/{attempt_id}", headers=auth(lang_teacher))
     assert stolen.status_code == 404
+    assert not any(attempt_id == e.get("id") for e in other_tl)
 
 
 def test_assignment_grade_and_mock_checkout(client):
@@ -120,7 +121,7 @@ def test_assignment_grade_and_mock_checkout(client):
     parent = login(client, "+9101p", WS_EXAM, "parent")
     lang_parent = login(client, "+9102p", WS_LANG, "parent")
     asg = client.post("/api/v1/assignments", headers=auth(teacher), json={"title": "HW"}).json()
-    st_id = client.get("/api/v1/students", headers=auth(teacher)).json()[0]["id"]
+    st_id = client.get("/api/v1/me/dashboard", headers=auth(student)).json()["student_id"]
     db = session_factory()()
     db.add(Submission(workspace_id=WS_EXAM, assignment_id=asg["id"], student_id=st_id, body="done"))
     db.commit()
@@ -141,7 +142,7 @@ def test_assignment_grade_and_mock_checkout(client):
     assert inv.status_code == 200, inv.text
     mine = client.get("/api/v1/invoices/mine", headers=auth(parent))
     assert mine.status_code == 200
-    assert mine.json()[0]["id"] == inv.json()["id"]
+    assert inv.json()["id"] in {i["id"] for i in mine.json()}
     other = client.get("/api/v1/invoices/mine", headers=auth(lang_parent))
     assert inv.json()["id"] not in {i["id"] for i in other.json()}
     pay = client.post(

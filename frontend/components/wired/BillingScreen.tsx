@@ -13,6 +13,8 @@ export function BillingScreen() {
   const [studentId, setStudentId] = useState("");
   const [amount, setAmount] = useState("450000");
   const [planId, setPlanId] = useState("");
+  const [auto, setAuto] = useState(false);
+  const [coupon, setCoupon] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
@@ -41,6 +43,9 @@ export function BillingScreen() {
           student_id: studentId,
           amount_cents: Number(amount),
           plan_id: planId || null,
+          auto,
+          coupon: coupon || null,
+          days_used: 10,
         }),
       })) as { id: string };
       setNote(`Invoice ${row.id} created`);
@@ -80,6 +85,14 @@ export function BillingScreen() {
         <label className="field">
           <span>Amount (cents)</span>
           <input className="field__in" value={amount} onChange={(e) => setAmount(e.target.value)} />
+        </label>
+        <label className="list__i" style={{ cursor: "pointer" }}>
+          <input type="checkbox" checked={auto} onChange={(e) => setAuto(e.target.checked)} />
+          <span>auto</span>
+        </label>
+        <label className="field">
+          <span>Coupon</span>
+          <input className="field__in" value={coupon} onChange={(e) => setCoupon(e.target.value)} />
         </label>
         <button className="hot hot--btn" type="submit" disabled={busy || !studentId}>
           Issue invoice

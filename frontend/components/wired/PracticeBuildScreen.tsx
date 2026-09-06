@@ -47,6 +47,22 @@ export function PracticeBuildScreen() {
     }
   }
 
+  async function autoAssemble() {
+    setBusy(true);
+    setError("");
+    try {
+      await api("/api/v1/practice-sets", {
+        method: "POST",
+        body: JSON.stringify({ title, auto_assemble: { difficulty: "core", limit: 5 } }),
+      });
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function toggle(id: string) {
     setPicked((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }
@@ -72,6 +88,15 @@ export function PracticeBuildScreen() {
         ))}
         <button className="hot hot--btn" type="submit" disabled={busy} style={{ marginTop: 10 }}>
           Save set
+        </button>
+        <button
+          className="hot hot--btn"
+          type="button"
+          disabled={busy}
+          style={{ marginTop: 10, marginLeft: 8 }}
+          onClick={() => void autoAssemble()}
+        >
+          Auto-assemble core
         </button>
       </form>
       {sets.length === 0 ? (

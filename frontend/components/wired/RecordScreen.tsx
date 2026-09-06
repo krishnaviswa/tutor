@@ -28,6 +28,7 @@ type RecordPayload = {
   session: SessionRow;
   notes: string;
   attendance: AttendanceIn[];
+  capture?: { kind: string }[];
 };
 
 type PatchResult = {
@@ -101,6 +102,7 @@ function RecordScreenInner() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<PatchResult | null>(null);
+  const [capture, setCapture] = useState<{ kind: string }[]>([]);
 
   const loadLists = useCallback(async () => {
     const [sess, studs] = await Promise.all([
@@ -160,6 +162,7 @@ function RecordScreenInner() {
           next[a.student_id] = a.status || "present";
         }
         setAttendance(next);
+        setCapture(rec.capture ?? []);
         setSaved(null);
         setError(null);
       })
@@ -257,6 +260,7 @@ function RecordScreenInner() {
         {kicker}
         {" · "}
         <span className="pill is-info">event log — not a transcription</span>
+        {capture.length ? ` · Captured: ${capture.length} live events` : ""}
       </span>
       <label className="field">
         <span>Session</span>
