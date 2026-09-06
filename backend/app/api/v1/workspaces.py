@@ -29,6 +29,7 @@ class BrandingIn(BaseModel):
     tagline: str | None = None
 
 
+
 def _out(ws: Workspace) -> dict:
     return {
         "id": ws.id,

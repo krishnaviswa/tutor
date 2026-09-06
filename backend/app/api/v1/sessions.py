@@ -37,6 +37,7 @@ class EngagementIn(BaseModel):
     payload: dict = {}
 
 
+
 def _session_out(s: ScheduledSession) -> dict:
     return {
         "id": s.id,

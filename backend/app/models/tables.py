@@ -241,6 +241,7 @@ class QuotaPolicy(Base):
     policy: Mapped[str] = mapped_column(String(20))  # warn | block | allow_overage
 
 
+
 class ContentItem(Base):
     __tablename__ = "content_items"
 
