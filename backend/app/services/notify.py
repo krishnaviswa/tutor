@@ -2,9 +2,33 @@ from __future__ import annotations
 
 from sqlalchemy.orm import Session
 
-from app.models.tables import AuditLog, NotificationDelivery, Workspace
+from app.models.tables import AuditLog, NotificationDelivery, NotificationPref, Workspace
 from app.ports.mocks import MockPorts
 from app.services import quota as quota_svc
+
+
+DEFAULT_ROLE_CHANNELS = {
+    "teacher": {"whatsapp": True, "email": True, "push": True},
+    "parent": {"whatsapp": True, "email": True, "push": True},
+    "admin": {"whatsapp": True, "email": True, "push": True},
+    "student": {"whatsapp": False, "email": False, "push": True},
+}
+
+
+def _channel_on(db: Session, workspace_id: str, role: str, channel: str, student_whatsapp_on: bool) -> bool:
+    if role == "student" and channel == "whatsapp" and not student_whatsapp_on:
+        return False
+    merged = {k: dict(v) for k, v in DEFAULT_ROLE_CHANNELS.items()}
+    row = (
+        db.query(NotificationPref)
+        .filter(NotificationPref.workspace_id == workspace_id)
+        .first()
+    )
+    if row and isinstance(row.prefs, dict):
+        for who, chans in row.prefs.items():
+            if who in merged and isinstance(chans, dict):
+                merged[who].update({k: bool(v) for k, v in chans.items()})
+    return bool(merged.get(role, {}).get(channel, False))
 
 
 def dispatch_after_timeline(
@@ -23,6 +47,9 @@ def dispatch_after_timeline(
     if student_whatsapp_on:
         roles.append("student")
     for role in roles:
+        if not _channel_on(db, workspace_id, role, "whatsapp", student_whatsapp_on):
+            skipped.append({"channel": "whatsapp", "role": role, "reason": "prefs_off"})
+            continue
         if paused:
             skipped.append({"channel": "whatsapp", "role": role, "reason": "whatsapp_pause"})
             db.add(

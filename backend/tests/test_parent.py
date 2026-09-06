@@ -20,7 +20,14 @@ def test_parent_home_linked_child_only(client):
 def test_parent_hub_reads_empty_until_child_rows(client):
     parent = login(client, "+9101p", WS_EXAM, "parent")
     h = auth(parent)
-    assert client.get("/api/v1/reports", headers=h).json() == []
+    home = client.get("/api/v1/parent/home", headers=h).json()
+    child_id = home["children"][0]["student_id"]
+    reports = client.get("/api/v1/reports", headers=h).json()
+    assert len(reports) == 1
+    assert reports[0]["student_id"] == child_id
+    lang_parent = login(client, "+9102p", WS_LANG, "parent")
+    other_ids = {r["student_id"] for r in client.get("/api/v1/reports", headers=auth(lang_parent)).json()}
+    assert child_id not in other_ids
     assert client.get("/api/v1/invoices/mine", headers=h).json() == []
     assert client.get("/api/v1/threads", headers=h).json() == []
     attempt = client.get("/api/v1/attempts/none", headers=h)

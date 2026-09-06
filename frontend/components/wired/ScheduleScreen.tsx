@@ -75,6 +75,7 @@ export function ScheduleScreen() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [composing, setComposing] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [title, setTitle] = useState("New session");
   const [startsLocal, setStartsLocal] = useState("");
   const [cohortId, setCohortId] = useState("");
@@ -138,21 +139,44 @@ export function ScheduleScreen() {
     setBusy(true);
     setError("");
     try {
-      await api("/api/v1/sessions", {
-        method: "POST",
-        body: JSON.stringify({
-          cohort_id: cid,
-          title: title.trim() || "New session",
-          starts_at: `${when}:00+05:30`,
-        }),
-      });
+      if (editingId) {
+        await api(`/api/v1/sessions/${editingId}`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            title: title.trim() || "Session",
+            starts_at: `${when}:00+05:30`,
+          }),
+        });
+      } else {
+        await api("/api/v1/sessions", {
+          method: "POST",
+          body: JSON.stringify({
+            cohort_id: cid,
+            title: title.trim() || "New session",
+            starts_at: `${when}:00+05:30`,
+          }),
+        });
+      }
       setComposing(false);
+      setEditingId(null);
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setBusy(false);
     }
+  }
+
+  function openReschedule(row: SessionRow) {
+    setEditingId(row.id);
+    setTitle(row.title);
+    if (row.starts_at) {
+      const d = new Date(row.starts_at);
+      const pad = (n: number) => String(n).padStart(2, "0");
+      const local = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      setStartsLocal(local);
+    }
+    setComposing(true);
   }
 
   return (
@@ -168,7 +192,10 @@ export function ScheduleScreen() {
           style={btnStyle()}
           onClick={() => {
             setComposing((open) => {
-              if (!open) setStartsLocal(`${addDays(monday, 1)}T18:30`);
+              if (!open) {
+                setEditingId(null);
+                setStartsLocal(`${addDays(monday, 1)}T18:30`);
+              }
               return !open;
             });
           }}
@@ -184,7 +211,7 @@ export function ScheduleScreen() {
       </div>
       {composing ? (
         <div className="card" style={{ marginBottom: 14 }}>
-          <h3>New session</h3>
+          <h3>{editingId ? "Reschedule" : "New session"}</h3>
           <label className="field">
             <span>Title</span>
             <input className="field__in" value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -210,9 +237,9 @@ export function ScheduleScreen() {
           </label>
           <div className="row">
             <button type="button" className="hot hot--btn" style={btnStyle()} disabled={busy} onClick={() => void createSession()}>
-              {busy ? "Saving…" : "Create session"}
+              {busy ? "Saving…" : editingId ? "Save time" : "Create session"}
             </button>
-            <button type="button" className="btn btn--sm" style={btnStyle()} onClick={() => setComposing(false)}>
+            <button type="button" className="btn btn--sm" style={btnStyle()} onClick={() => { setComposing(false); setEditingId(null); }}>
               Cancel
             </button>
           </div>
@@ -237,17 +264,21 @@ export function ScheduleScreen() {
               </div>
               {byDay[i].length ? (
                 byDay[i].map((s) => (
-                  <Link
-                    key={s.id}
-                    href={`/app/faculty/session-pre?session=${encodeURIComponent(s.id)}`}
-                    className="hot hot--row"
-                    style={{ padding: 8, marginBottom: 6, display: "block" }}
-                  >
-                    <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--ink-faint)" }}>
-                      {s.starts_at ? formatTime(s.starts_at) : "—"}
-                    </div>
-                    <div style={{ fontSize: ".78rem", fontWeight: 500, lineHeight: 1.2, marginTop: 2 }}>{s.title}</div>
-                  </Link>
+                  <div key={s.id} style={{ marginBottom: 6 }}>
+                    <Link
+                      href={`/app/faculty/session-pre?session=${encodeURIComponent(s.id)}`}
+                      className="hot hot--row"
+                      style={{ padding: 8, display: "block" }}
+                    >
+                      <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--ink-faint)" }}>
+                        {s.starts_at ? formatTime(s.starts_at) : "—"}
+                      </div>
+                      <div style={{ fontSize: ".78rem", fontWeight: 500, lineHeight: 1.2, marginTop: 2 }}>{s.title}</div>
+                    </Link>
+                    <button type="button" className="btn btn--sm" style={btnStyle({ marginTop: 4 })} onClick={() => openReschedule(s)}>
+                      Reschedule
+                    </button>
+                  </div>
                 ))
               ) : (
                 <div className="muted" style={{ fontSize: ".72rem" }}>

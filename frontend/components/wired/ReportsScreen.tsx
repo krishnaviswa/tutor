@@ -4,14 +4,25 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { AppBar, Empty, Err } from "./bits";
 
+type Slice = {
+  student_id: string;
+  display_name: string;
+  attempts: number;
+  last_score: number | null;
+  last_max: number | null;
+  attendance_present: number;
+  attendance_total: number;
+};
+
 type Export = {
   students: { id: string; display_name: string }[];
   attempts: { id: string; student_id: string; score: number }[];
+  slice?: Slice[];
 };
 
 export function ReportsScreen() {
   const [role, setRole] = useState("teacher");
-  const [data, setData] = useState<Export | null>(null);
+  const [slice, setSlice] = useState<Slice[]>([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -21,12 +32,19 @@ export function ReportsScreen() {
       .catch(() => undefined);
   }, []);
 
+  useEffect(() => {
+    if (!role) return;
+    api("/api/v1/reports")
+      .then((rows) => setSlice(Array.isArray(rows) ? (rows as Slice[]) : []))
+      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
+  }, [role]);
+
   async function exportReport() {
     setBusy(true);
     setError("");
     try {
       const row = (await api("/api/v1/reports/export", { method: "POST" })) as Export;
-      setData(row);
+      if (row.slice) setSlice(row.slice);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -34,26 +52,34 @@ export function ReportsScreen() {
     }
   }
 
-  useEffect(() => {
-    if (role === "parent") {
-      api("/api/v1/reports")
-        .then(() => undefined)
-        .catch((e) => setError(e instanceof Error ? e.message : String(e)));
-    }
-  }, [role]);
+  const body = (
+    <>
+      <Err message={error} />
+      {slice.length === 0 ? (
+        <Empty>No report rows in this workspace yet.</Empty>
+      ) : (
+        slice.map((s) => (
+          <div key={s.student_id} className="card">
+            <div className="sb">
+              <div className="t">{s.display_name}</div>
+              <span className="pill">
+                {s.last_score == null ? "no score" : `${s.last_score}/${s.last_max ?? "?"}`}
+              </span>
+            </div>
+            <p className="muted">
+              {s.attempts} attempts · attendance {s.attendance_present}/{s.attendance_total}
+            </p>
+          </div>
+        ))
+      )}
+    </>
+  );
 
   if (role === "parent") {
     return (
       <>
         <AppBar title="Marksheet" extra={<span className="pill">your child</span>} />
-        <div className="appwrap">
-          <Err message={error} />
-          <div className="card">
-            <p className="muted">
-              Faculty generate the report from the timeline. You read this slice — not a second gradebook.
-            </p>
-          </div>
-        </div>
+        <div className="appwrap">{body}</div>
       </>
     );
   }
@@ -61,26 +87,13 @@ export function ReportsScreen() {
   return (
     <>
       <h2>Reports & exports</h2>
-      <span className="k">JSON export from this workspace</span>
-      <Err message={error} />
-      <button className="hot hot--btn" type="button" disabled={busy} onClick={() => void exportReport()}>
-        Export
-      </button>
-      {!data ? (
-        <Empty>Run an export.</Empty>
-      ) : (
-        <div className="card" style={{ marginTop: 12 }}>
-          <div className="k">{data.students.length} students · {data.attempts.length} attempts</div>
-          {data.students.map((s) => (
-            <div key={s.id} className="list__i">
-              <div className="gr">
-                <div className="t">{s.display_name}</div>
-                <div className="s">{s.id}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <span className="k">Term slice from this workspace ledger</span>
+      {role !== "parent" ? (
+        <button className="hot hot--btn" type="button" disabled={busy} onClick={() => void exportReport()}>
+          Export
+        </button>
+      ) : null}
+      {body}
     </>
   );
 }
