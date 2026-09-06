@@ -45,7 +45,7 @@ CONTRACTS: dict[str, dict] = {
         "shows": "Staff sign-in (OTP / magic-link + 2FA). Lands on a faculty screen on this template — not the student app.",
     },
     "wsetup": {
-        "apis": ["POST /api/v1/workspaces", "PATCH /api/v1/workspaces/current"],
+        "apis": ["POST /api/v1/workspaces", "GET /api/v1/workspaces/current", "PATCH /api/v1/workspaces/current"],
         "entities": ["workspaces", "feature_flags"],
         "ports": ["email"],
         "timelineEvents": [],
@@ -548,10 +548,11 @@ def entities() -> list[dict]:
         "students", "parent_links", "cohorts", "enrollments", "scheduled_sessions",
         "attendance", "session_records", "transcript_events", "timeline_events",
         "feature_flags", "audit_log", "taxonomies", "topics",
+        "usage_meters", "quota_policies",
     ]
     later = [
-        "questions", "attempts", "doubts", "messages", "invoices", "usage_meters",
-        "quota_policies", "notification_prefs", "notification_deliveries",
+        "questions", "attempts", "doubts", "messages", "invoices",
+        "notification_prefs", "notification_deliveries",
         "content_items", "assignments", "submissions", "practice_sets", "tests",
         "announcements", "plans", "payouts", "automation_rules", "backlog_items",
     ]
@@ -576,7 +577,8 @@ def ports() -> list[dict]:
 
 def env_vars() -> list[dict]:
     return [
-        {"name": "DATABASE_URL", "comment": "PostgreSQL DSN. No SQLite."},
+        {"name": "DATABASE_URL", "comment": "Local Compose Postgres until hosted; pytest uses memory SQLite"},
+        {"name": "JWT_SECRET", "comment": "Sim/dev signing key. Never commit production secrets"},
         {"name": "SMS_PROVIDER", "comment": "mock | msg91"},
         {"name": "EMAIL_PROVIDER", "comment": "mock | ses | postmark"},
         {"name": "VIDEO_PROVIDER", "comment": "mock | google | microsoft"},
@@ -589,13 +591,50 @@ def env_vars() -> list[dict]:
     ]
 
 
+SIM_APIS = {
+    "GET /api/v1/auth/me",
+    "POST /api/v1/auth/otp/start",
+    "POST /api/v1/auth/otp/verify",
+    "POST /api/v1/auth/magic-link",
+    "POST /api/v1/workspaces",
+    "GET /api/v1/workspaces/current",
+    "PATCH /api/v1/workspaces/current",
+    "GET /api/v1/students",
+    "POST /api/v1/students",
+    "POST /api/v1/students/import",
+    "GET /api/v1/cohorts",
+    "POST /api/v1/cohorts",
+    "PATCH /api/v1/cohorts/{id}",
+    "POST /api/v1/parent-links",
+    "POST /api/v1/parent-links/{token}/accept",
+    "GET /api/v1/parent/home",
+    "GET /api/v1/sessions",
+    "POST /api/v1/sessions",
+    "PATCH /api/v1/sessions/{id}",
+    "GET /api/v1/sessions/{id}",
+    "GET /api/v1/sessions/{id}/record",
+    "PATCH /api/v1/sessions/{id}/record",
+    "GET /api/v1/students/{id}/timeline",
+    "GET /api/v1/owner/console",
+    "GET /api/v1/usage",
+    "GET /api/v1/billing/subscription",
+    "PATCH /api/v1/billing/quotas",
+    "GET /api/v1/reports",
+    "GET /api/v1/attempts/{id}",
+    "GET /api/v1/invoices/mine",
+    "GET /api/v1/threads",
+    "GET /api/v1/notifications/prefs",
+    "PUT /api/v1/notifications/prefs",
+}
+
+
 def apis(screens: list[dict]) -> list[str]:
     seen = []
     for s in screens:
         for a in s["apis"]:
             if a not in seen:
                 seen.append(a)
-    return [{"id": a, "status": "planned"} for a in seen]
+    return [{"id": a, "status": "sim" if a in SIM_APIS else "planned"} for a in seen]
 
 
 def main() -> None:

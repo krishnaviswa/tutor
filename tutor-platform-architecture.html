@@ -4,6 +4,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="catalog/hub-chrome.js"></script>
 <style>
 :root{
   --ground:#F3F6F0; --surface:#FBFCF9; --sunk:#EBEFE6; --raised:#FFFFFF;
@@ -68,7 +69,7 @@ button,a.btn{font-family:inherit;cursor:pointer}
 .lane .card{text-align:center}
 .arrow{text-align:center;color:var(--ink-faint);font-size:18px}
 .crumb{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-bottom:10px;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
-.crumblink{background:none;border:none;padding:0;color:var(--accent-ink);cursor:pointer;font-family:var(--mono);font-size:11px;text-decoration:underline;text-underline-offset:2px}
+.crumb a.crumblink,.crumblink{background:none;border:none;padding:0;color:var(--accent-ink);cursor:pointer;font-family:var(--mono);font-size:11px;text-decoration:underline;text-underline-offset:2px}
 .crumb .here{color:var(--ink-faint);text-decoration:none;cursor:default}
 .crumb .sep{color:var(--line);pointer-events:none}
 button.hot:disabled{opacity:.35;cursor:default}
@@ -91,24 +92,24 @@ ul.plain{margin:8px 0 0;padding-left:1.1rem;color:var(--ink-soft)}
     TutorOS <i>architecture</i>
   </button>
   <span class="k" id="tlbl" style="margin:0 auto">system map</span>
-  <button type="button" class="iconbtn" id="homeBtn" data-goto="start">Home</button>
+  <button type="button" class="iconbtn" id="homeBtn" data-goto="start">Architecture home</button>
   <button type="button" class="iconbtn" id="backBtn">Back</button>
   <button type="button" class="iconbtn" id="fwdBtn">Forward</button>
-  <button type="button" class="iconbtn" id="themeBtn">Theme</button>
+  <a class="iconbtn" href="product-viewer.html" style="display:inline-flex;align-items:center;text-decoration:none">Product book</a>
+  <button type="button" class="iconbtn" id="themeBtn">Black</button>
 </header>
 <main id="stage"></main>
 <script src="catalog/embed.js"></script>
 <script>
 (function(){
-var root=document.documentElement, tb=document.getElementById('themeBtn');
-var torder=['system','light','dark'], ti=0;
-try{var sv=localStorage.getItem('tos_arch_theme');if(sv)ti=Math.max(0,torder.indexOf(sv));}catch(e){}
-function applyTheme(){var m=torder[ti];if(m==='system'){root.removeAttribute('data-theme');tb.textContent='Theme · Auto';}else{root.setAttribute('data-theme',m);tb.textContent='Theme · '+m[0].toUpperCase()+m.slice(1);}try{localStorage.setItem('tos_arch_theme',m);}catch(e){}}
-tb.addEventListener('click',function(){ti=(ti+1)%torder.length;applyTheme();});
-applyTheme();
+if(window.TutorOSHub) TutorOSHub.bindTheme(document.getElementById('themeBtn'));
 
 var C=window.TUTOROS_CATALOG;
-if(!C){document.getElementById('stage').innerHTML='<p class="lead">Missing catalog/embed.js. Run <code>python scripts/build_catalog.py</code>.</p>';return;}
+if(!C){
+  document.getElementById('stage').innerHTML='<p class="lead">Missing catalog/embed.js. Run <code>python scripts/build_catalog.py</code>.</p>';
+  if(window.TutorOSHub) TutorOSHub.paintTrail([{label:'Product book',href:'product-viewer.html'},{label:'Architecture home'}]);
+  return;
+}
 
 var LAYERS=[
   {id:'entry',t:'Entry',d:'Role + workspace. Swimlane roles from the demo: student, faculty, admin, parent, system.'},
@@ -225,11 +226,35 @@ function parentGo(){
   if(state.view==='layer'){go('layers');return;}
   go('start');
 }
+function prefixCrumb(items){
+  var out=[{label:'Product book',href:'product-viewer.html'}];
+  var rest=(items||[]).filter(function(it){return !(it.view==='start'||it.label==='Home');});
+  if(state.view==='start') out.push({label:'Architecture home'});
+  else{ out.push({label:'Architecture home',view:'start'}); out=out.concat(rest); }
+  return out;
+}
+function toHubItem(it){
+  if(it.href) return {label:it.label,href:it.href};
+  if(it.view){
+    var x={label:it.label,goto:it.view};
+    if(it.role)x.role=it.role;
+    if(it.domain)x.domain=it.domain;
+    if(it.screen)x.screen=it.screen;
+    if(it.layer)x.layer=it.layer;
+    if(it.flow)x.flow=it.flow;
+    if(it.clearFlow)x.clearFlow=true;
+    return x;
+  }
+  return {label:it.label};
+}
 function crumb(items){
+  var list=prefixCrumb(items);
+  if(window.TutorOSHub) TutorOSHub.paintTrail(list.map(toHubItem));
   var h='<div class="crumb">';
-  items.forEach(function(it,i){
+  list.forEach(function(it,i){
     if(i)h+='<span class="sep">·</span>';
-    if(it.view){
+    if(it.href) h+='<a class="crumblink" href="'+it.href+'">'+it.label+'</a>';
+    else if(it.view){
       var a=' type="button" class="crumblink" data-goto="'+it.view+'"';
       if(it.role)a+=' data-role="'+it.role+'"';
       if(it.domain)a+=' data-domain="'+it.domain+'"';
@@ -244,7 +269,8 @@ function crumb(items){
 }
 function neighborBtns(prev,next){
   var h='<div class="row">';
-  h+='<button type="button" class="hot" data-goto="start">Home</button>';
+  h+='<a class="btn" href="product-viewer.html">Product book</a>';
+  h+='<button type="button" class="hot" data-goto="start">Architecture home</button>';
   if(prev){
     var pa=' type="button" class="hot" data-goto="'+prev.view+'"';
     if(prev.role)pa+=' data-role="'+prev.role+'"';
@@ -303,7 +329,7 @@ function syncHeader(){
 
 function startView(){
   var flows=C.flows||[];
-  return '<p class="k">Start</p><h1>Someone opens TutorOS</h1>'+
+  return crumb([])+'<p class="k">Start</p><h1>Someone opens TutorOS</h1>'+
     '<p class="lead">Subject-neutral remote tutoring OS. Same engine for exam-prep, languages, music, skills. Biology / NEET files in this repo are one exam-prep <b>example tenant</b>, not the product.</p>'+
     '<div class="note"><b>Demo is UI gold and incomplete.</b> Screen ids, template steps, and Owner / Who / Why / How / When live in <code>tutor-platform-demo.html</code>. This map reads <code>catalog/embed.js</code> after <code>python scripts/build_catalog.py</code>. '+staffLoginNote()+' Parent hub (<code>parent-home</code>) is activity, marksheet, results, receipts, and teacher chat — own child only; same ids as the demo. Role HTML files are generated children (one lane, no extra features). If this map disagrees with the demo, the demo wins — rebuild catalog, then this page follows.</div>'+
     '<p class="k" style="margin-bottom:8px">Example workspaces (same engine)</p>'+
@@ -424,8 +450,8 @@ function followView(){
   var s=findScreen(state.screen);
   if(!s)return '<p>Unknown screen</p>';
   var trail=state.flow
-    ?[{label:'Home',view:'start'},{label:(findFlow(state.flow)||{}).name||state.flow,view:'flow',flow:state.flow},{label:s.title,view:'screen',screen:s.id,flow:state.flow},{label:'Call'}]
-    :[{label:'Home',view:'start'},{label:'UI',view:'ui',role:state.role||undefined},{label:s.title,view:'screen',screen:s.id,clearFlow:true,domain:s.domain,role:state.role||undefined},{label:'Call'}];
+    ?[{label:'Home',view:'start'},{label:(findFlow(state.flow)||{}).name||state.flow,view:'flow',flow:state.flow},{label:s.title,view:'screen',screen:s.id,flow:state.flow},{label:'API'}]
+    :[{label:'Home',view:'start'},{label:'UI',view:'ui',role:state.role||undefined},{label:s.domainName,view:'domain',domain:s.domain,role:state.role||undefined,clearFlow:true},{label:s.title,view:'screen',screen:s.id,clearFlow:true,domain:s.domain,role:state.role||undefined},{label:'API'}];
   return crumb(trail)+(state.flow?flowStepNav(s.id):domainStepNav())+'<h1>Follow the call</h1>'+
     '<p class="lead">Teaching writes the ledger first. Paid channels run through QuotaGuard. Why this screen exists is copied from the demo.</p>'+
     whyBlock(s)+

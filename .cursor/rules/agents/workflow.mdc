@@ -24,6 +24,6 @@ Status: Draft → Specified → In Progress → Testing → Accepted.
 Artifacts: `specs/<nnn-name>/spec.md`, `plan.md`, `tasks.md`, `checklists/`, `analyze.md`.
 Active feature: `.specify/feature.json` (not the git branch).
 
-When Accepted, the same PR updates `README.md`, `catalog/`, and `tutor-platform-architecture.html` if screens, APIs, tables, or ports changed.
+When Accepted, the same PR updates `README.md`, `catalog/`, `tutor-platform-architecture.html`, `product-viewer.html` (tile status), and `work-log.html` if screens, APIs, tables, or ports changed.
 
 No `/speckit.implement` on `001-platform-architecture` until architecture HTML + plan are accepted.

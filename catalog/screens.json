@@ -123,6 +123,7 @@
     "figmaNodeId": null,
     "apis": [
       "POST /api/v1/workspaces",
+      "GET /api/v1/workspaces/current",
       "PATCH /api/v1/workspaces/current"
     ],
     "entities": [

@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| **Status** | Specified |
+| **Status** | In Progress (Builder implemented; Tester + Accept open) |
 | **Role** | PM (specify + clarify) |
 | **Feature directory** | `specs/002-sim-spine` |
 
@@ -79,6 +79,6 @@ This feature is the first **runnable local simulation of the spine**: durable ro
 - [x] Clarify closed (folded into this spec)
 - [x] Architect: `plan.md` + checklist + analyze (this pass; implement still blocked)
 - [x] Tasks (`tasks.md`)
-- [ ] Human OK (8-step Spec Kit gate — required before implement)
-- [ ] `/speckit.implement` (unchecked; refused until human OK)
+- [x] Human OK (8-step Spec Kit gate — required before implement)
+- [x] `/speckit.implement` (Builder; 002 sim-spine)
 - [ ] Tester + PM Accept

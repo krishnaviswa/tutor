@@ -1,3 +1,3 @@
-# FastAPI backend (not built)
+# FastAPI backend (002-sim-spine)
 
-Planned: `/api/v1`, thin routers, services for logic. See root README §3. Mirror of `.cursor/rules/backend-fastapi.mdc`.
+`/api/v1`, thin routers, services for logic. Mock ports. See root README §3. Mirror of `.cursor/rules/backend-fastapi.mdc`.

@@ -4,11 +4,11 @@ Unchecked items **block** `/speckit.implement`. Architect may attest design item
 
 ## Blocks implement
 
-- [ ] Human walked `specs/002-sim-spine/spec.md` (13 stories, 16 ACs) and this plan
-- [ ] Tenant isolation test is required in tasks (workspaces A vs B; no cross-tenant read/mutate)
-- [ ] Mock ports only (WhatsApp, email, push, SMS, Meet, storage local, payments) — no live Meta / Google / Razorpay
-- [ ] No new screen ids (closed set in `catalog/screens.json` only)
-- [ ] Human OK before `/speckit.implement` (tasks exist; 8-step gate)
+- [x] Human walked `specs/002-sim-spine/spec.md` (13 stories, 16 ACs) and this plan
+- [x] Tenant isolation test is required in tasks (workspaces A vs B; no cross-tenant read/mutate)
+- [x] Mock ports only (WhatsApp, email, push, SMS, Meet, storage local, payments) — no live Meta / Google / Razorpay
+- [x] No new screen ids (closed set in `catalog/screens.json` only)
+- [x] Human OK before `/speckit.implement` (tasks exist; 8-step gate)
 
 ## Architect attested (this pass)
 

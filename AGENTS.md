@@ -6,6 +6,7 @@
 
 | You need | Read |
 |---|---|
+| **Share the product (hub)** | [product-viewer.html](product-viewer.html) — components + task tiles. Work log: [work-log.html](work-log.html) |
 | Product + architecture | README.md |
 | System map (clickable) | tutor-platform-architecture.html |
 | UI gold (incomplete) | tutor-platform-demo.html |
@@ -21,7 +22,7 @@ Commands: `/speckit.constitution`, `/speckit.specify`, `/speckit.clarify`, `/spe
 
 Sequence: PM specify+clarify → Architect plan+checklist+analyze → tasks → **human OK** → Builder implement → Tester → PM Accept.
 
-**Do not `/speckit.implement` for 001-platform-architecture** until the architecture HTML and plan are accepted.
+**Do not `/speckit.implement` for 001-platform-architecture** (architecture pack). 002 spine is protected (Tester + Accept). Active feature directory: **003-catalog-complete** (no implement until hub HTML OK).
 
 Active feature directory: `.specify/feature.json`. `git checkout` does not change it. Override: `SPECIFY_FEATURE_DIRECTORY`.
 
@@ -35,5 +36,7 @@ Every `.cursor/rules/*.mdc` has a Claude Code mirror. Change both in the same co
 - `specs/` — Spec Kit feature artifacts
 - `docs/examples/` — not requirements
 - `scripts/` — catalog build, role HTML mint, parity
+- `backend/` — FastAPI `/api/v1` against local Compose Postgres; mock ports; pytest in-memory SQLite
+- `docker-compose.yml` — local `postgres` (required for local API work until hosted)
 - `tutor-platform-role-*.html` — generated from demo; do not edit
-- No `frontend/` or `backend/` app yet (stub CLAUDE.md files exist so pairing is valid)
+- No Next.js `frontend/` app yet (stub CLAUDE.md so pairing is valid)

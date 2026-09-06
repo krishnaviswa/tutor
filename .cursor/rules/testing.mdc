@@ -1,11 +1,13 @@
 ---
-description: Testing (stub until app exists)
+description: Testing
 globs: backend/tests/**/*,frontend/**/*.test.*
 alwaysApply: false
 ---
 
-# Testing (planned)
+# Testing
 
-No app tests yet. When they exist: mock providers, AC mapped, no live vendors.
+Backend: mock providers, tenant isolation, record→timeline, quotas. No live vendors, AI, or IdP.
 
-Parity scripts now: `scripts/check_architecture_parity.py`, `scripts/check_agent_config_sync.py`.
+pytest: in-memory SQLite. Local functional checks: Compose Postgres + `/api/v1` (README §1).
+
+Parity scripts: `scripts/check_architecture_parity.py`, `scripts/check_agent_config_sync.py`.

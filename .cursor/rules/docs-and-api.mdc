@@ -8,4 +8,4 @@ alwaysApply: false
 
 README.md is the product map. Catalog JSON is the contract. Specs are in-flight features. docs/examples is not requirements.
 
-If you add a screen, API, entity, or env var, update catalog + architecture HTML + README in the same change.
+If you add a screen, API, entity, or env var, update catalog + architecture HTML + README in the same change. Refresh `product-viewer.html` tile status and append `work-log.html`. Demo, architecture, and explorer remain the owning files for screens, stack walk, and pricing.

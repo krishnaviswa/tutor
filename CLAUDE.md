@@ -1,22 +1,22 @@
 # TutorOS
 
-Subject-neutral remote tutoring workspace. Monorepo (app code not built yet).
+Subject-neutral remote tutoring workspace. Monorepo (`backend/` 002 sim; Next.js not built).
 
 > This file is the Claude Code equivalent of `.cursor/rules/project.mdc`.
 > Keep in sync — see **Cursor ↔ Claude Code parity** below.
 
-## Stack (planned)
+## Stack
 
 - UI: Next.js 15 App Router, TypeScript (`frontend/` later)
-- API: FastAPI, `/api/v1` (`backend/` later)
-- Data: PostgreSQL (`workspace_id` on every business table)
+- API: FastAPI, `/api/v1` (`backend/` 002-sim-spine)
+- Data: PostgreSQL via Docker Compose locally (`workspace_id` on every business table). Hosted: host DSN. pytest: in-memory SQLite only.
 - Auth: OTP + magic link + JWT; roles `owner` | `teacher` | `assistant` | `student` | `parent`
 
 ## Source of truth
 
 `README.md` is the single product document. Biology / NEET / NCERT is an **example tenant**, not the domain.
 
-Also: `tutor-platform-architecture.html`, `catalog/`, `.specify/memory/constitution.md`.
+Share / navigate: `[product-viewer.html](product-viewer.html)` (hub). Arms: demo (UI gold), architecture (stack walk), explorer (modules/pricing), `[work-log.html](work-log.html)`. Also: `tutor-platform-architecture.html`, `catalog/`, `.specify/memory/constitution.md`.
 
 See `[AGENTS.md](AGENTS.md)` for the repo map.
 
@@ -32,6 +32,8 @@ See `[AGENTS.md](AGENTS.md)` for the repo map.
 8. Spec-driven: no `/speckit.implement` before Specified + human OK.
 9. Claude Code subagents use the project roles (product-manager, architect, tester). Spec Kit commands live in `.claude/commands/` and `.cursor/commands/`.
 
+**Product book:** `product-viewer.html` is the hub. Demo / architecture / explorer stay in their HTML and link back. Append `work-log.html` when status or catalog changes. Do not copy those golds into the hub.
+
 ## Multi-agent workflow
 
 Mirrors `.cursor/rules/agents/workflow.mdc`:
@@ -40,6 +42,8 @@ Mirrors `.cursor/rules/agents/workflow.mdc`:
 PM (specify + clarify) → Architect (plan + checklist + analyze) → tasks
  → human OK → Builder (implement) → Tester → PM Accept
 ```
+
+When Accepted, the same PR updates `README.md`, `catalog/`, architecture HTML, `product-viewer.html` (tile status), and `work-log.html` if screens, APIs, tables, or ports changed.
 
 Status: Draft → Specified → In Progress → Testing → Accepted.
 

@@ -1,3 +1,3 @@
-# Backend tests (not built)
+# Backend tests
 
-Mock vendors. Mirror of `.cursor/rules/testing.mdc` (shared with frontend/CLAUDE.md).
+Mock vendors (no live AI/IdP). Isolation, record→timeline, quotas, parent hub. pytest in-memory SQLite; local functional checks use Compose Postgres. Mirror of `.cursor/rules/testing.mdc`.

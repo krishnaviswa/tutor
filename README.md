@@ -8,7 +8,7 @@ Example pack (optional, not requirements): [docs/examples/neet-biology/](docs/ex
 
 This file is the single product map for humans and for any LLM (Cursor or Claude Code). In-flight features live under `specs/`. When a feature is Accepted, this README absorbs the delta.
 
-**No application code yet.** This pass is architecture, catalog, Spec Kit, and parity checkers.
+**Local running stack:** FastAPI in `backend/` talks to **Docker Compose PostgreSQL** for every local backend write (roster, sessions, timeline, quotas, parent hub). Demo HTML remains UI gold and is not yet wired to that API. Next.js is not built. Vendor, AI, and production auth stay **mock** until hosted (or a later feature turns a port live).
 
 ---
 
@@ -17,7 +17,7 @@ This file is the single product map for humans and for any LLM (Cursor or Claude
 | You are a… | Read |
 |---|---|
 | **Anyone / LLM** | This disclaimer, [§1](#1-quick-start), [§2](#2-logical-design) |
-| **Product manager** | §2, [§10](#10-spec-kit--role-workflow), `specs/001-platform-architecture/spec.md` |
+| **Product manager** | §2, [§10](#10-spec-kit--role-workflow), `specs/003-catalog-complete/spec.md` |
 | **Architect** | [§3](#3-architecture), [§5](#5-domain-model), [§8](#8-auth), [§9](#9-ports-whatsapp-quotas) |
 | **Builder** | Do not implement until spec status is Specified and you are asked. Then §3–§7. |
 | **Tester** | [§10](#10-spec-kit--role-workflow) after code exists |
@@ -28,10 +28,35 @@ This file is the single product map for humans and for any LLM (Cursor or Claude
 
 ## 1. Quick start
 
-No Docker yet. Open in a browser:
+**Agents (Cursor, Claude Code, cloud):** until the API is hosted, **Postgres is the local backend**. Do not persist app data in SQLite. Do not treat a stopped container as “no database.” Start Compose, then run FastAPI. Unit tests are the only SQLite path (`sqlite:///:memory:` in `backend/tests/conftest.py`).
+
+**Local vs hosted**
+
+| Where | `DATABASE_URL` | What you mock |
+|---|---|---|
+| This machine (not hosted) | `postgresql+psycopg://tutor:tutor@127.0.0.1:5432/tutoros` — Compose service `postgres` in [docker-compose.yml](docker-compose.yml) | All **ports**: SMS, email, WhatsApp, push, Meet/Teams, payments, object storage-as-S3. **Auth** is the stub (OTP `000000`, magic link, JWT) — not a live IdP. **AI / LLM vendors** are not called. |
+| Hosted | The host’s Postgres DSN | Same mocks until a feature sets a live provider in `.env` |
+
+Local functional testing of product behavior (tenant isolation, record → timeline, quotas, parent home, roster) **goes through `/api/v1` against that Postgres**. Static HTML is the UI map, not the store.
+
+```bash
+docker compose up -d postgres          # container tutoros-postgres; wait until healthy
+cd backend
+pip install -r requirements.txt
+python -m uvicorn app.main:app --reload --port 8000
+```
+
+Default API `DATABASE_URL` matches Compose. Copy [.env.example](.env.example) if you need a file. Seeded workspaces: `exam-prep`, `language-1on1`, `music`. Auth stub: [backend/README.md](backend/README.md).
+
+**Product maps (static HTML, no API required)** — open in a browser:
 
 | Open | What it is |
 |---|---|
+| [product-viewer.html](product-viewer.html) | **Product book (hub)** — key components + task tiles (T0.1…). Not the app. [plan-viewer.html](plan-viewer.html) redirects here. |
+| [work-log.html](work-log.html) | Chronological status. Links back to the hub. |
+| [plan-functional.html](plan-functional.html) | Functional map: seven jobs, roles, 47 screens, templates, journeys |
+| [plan-technical.html](plan-technical.html) | Technical map: layers, entities, 84 APIs, ports, modules, protected tests |
+| [plan-sequence.html](plan-sequence.html) | End-to-end build order: functional + technical paired by phase |
 | [tutor-platform-architecture.html](tutor-platform-architecture.html) | System map: entry → six tracks → layers → 47 screens → follow the call |
 | [tutor-platform-demo.html](tutor-platform-demo.html) | UI gold (47 screens, six templates). **Incomplete** — focused tracks omit some spine screens |
 | [tutor-platform-role-student.html](tutor-platform-role-student.html) | Generated child: student lane only |
@@ -45,7 +70,7 @@ python scripts/check_architecture_parity.py
 python scripts/check_agent_config_sync.py --range origin/main...HEAD
 ```
 
-Active Spec Kit feature is `.specify/feature.json` (`specs/001-platform-architecture`), not the git branch. Override with `SPECIFY_FEATURE_DIRECTORY`.
+Active Spec Kit feature is `.specify/feature.json` (currently `specs/003-catalog-complete`), not the git branch. Override with `SPECIFY_FEATURE_DIRECTORY`.
 
 ---
 
@@ -75,7 +100,7 @@ Entry (role + workspace)
   → PostgreSQL (workspace_id on every business table)
 ```
 
-UI later: Next.js 15. API later: FastAPI. This pass: catalog + HTML only. Screen status: `empty` → `shell` → `wired`. All 47 are `empty`.
+UI later: Next.js 15 (one route per catalog screen id). API now: FastAPI `/api/v1` against local Postgres. Demo HTML is still UI gold; screens remain `empty` until wired. Status: `empty` → `shell` → `wired`. All 47 are `empty`. Do not invent a 48th id.
 
 ---
 
@@ -85,7 +110,7 @@ UI later: Next.js 15. API later: FastAPI. This pass: catalog + HTML only. Screen
 |---|---|
 | Next.js App Router | One route per catalog screen id |
 | FastAPI `/api/v1` | Thin routers, OpenAPI, ports as Protocols |
-| PostgreSQL | UUID + JSONB, no SQLite |
+| PostgreSQL | Product and **local** store (Compose until hosted). UUID + JSONB. SQLite only for pytest memory. |
 | Spec Kit + PM/Architect/Builder/Tester | Cursor and Claude Code share the same files |
 | Mock-default ports | CI never needs vendor keys |
 
@@ -93,11 +118,11 @@ UI later: Next.js 15. API later: FastAPI. This pass: catalog + HTML only. Screen
 
 ## 5. Domain model
 
-Spine: `workspaces`, `users`, `identities`, `sessions_auth`, `staff_memberships`, `students`, `parent_links`, `cohorts`, `enrollments`, `scheduled_sessions`, `attendance`, `session_records`, `transcript_events` (empty until STT), `timeline_events`, `feature_flags`, `audit_log`, **`taxonomies` / `topics`**.
+Spine: `workspaces`, `users`, `identities`, `sessions_auth`, `staff_memberships`, `students`, `parent_links`, `cohorts`, `enrollments`, `scheduled_sessions`, `attendance`, `session_records`, `transcript_events` (empty until STT), `timeline_events`, `feature_flags`, `audit_log`, **`taxonomies` / `topics`**, `usage_meters`, `quota_policies`.
 
 Never `biology_chapters` or exam-board tables. Content hangs off `topic_id`.
 
-Later: questions, attempts, doubts, messages, invoices, `usage_meters`, `quota_policies`.
+Later: questions, attempts, doubts, messages, invoices.
 
 Always-on (cannot flag off): A1, A2, A3, G1, G2, D4, F2. Caps throttle **usage**, not existence.
 
@@ -121,11 +146,13 @@ Catalog: [catalog/entities.json](catalog/entities.json), [catalog/modules.json](
 
 ## 7. API map
 
-All routes **planned**. Full list: [catalog/apis.json](catalog/apis.json). Mount later under `/api/v1`. Groups: `auth`, `workspaces`, `users`, `cohorts`, `sessions`, `content`, `practice`, `doubts`, `timeline`, `billing`, `modules`.
+All routes **planned** unless catalog `status` is `sim` (002 spine). Full list: [catalog/apis.json](catalog/apis.json). Mount under `/api/v1`. Groups: `auth`, `workspaces`, `users`, `cohorts`, `sessions`, `content`, `practice`, `doubts`, `timeline`, `billing`, `modules`.
 
 ---
 
 ## 8. Auth
+
+Local and CI use the **auth stub** (OTP `000000`, magic link, JWT claims). Do not call a live SMS IdP, Google staff login, or institute SSO until a feature turns those ports on.
 
 Four mechanisms, not one library:
 
@@ -159,21 +186,22 @@ PM  /speckit.specify + /speckit.clarify
  → Architect  /speckit.plan + checklist + /speckit.analyze
  → /speckit.tasks
  → human OK
- → Builder  /speckit.implement     (not this pass)
+ → Builder  /speckit.implement     (002 spine built; 003 blocked until hub HTML OK)
  → Tester  report + /speckit.converge
  → PM Accept  (same PR updates this README + catalog + architecture HTML)
 ```
 
 Status: `Draft` → `Specified` → `In Progress` → `Testing` → `Accepted`.
 
-Active feature: [specs/002-sim-spine/](specs/002-sim-spine/) (runnable spine simulation). Architecture pack: [specs/001-platform-architecture/](specs/001-platform-architecture/) (Specified; no implement). Cursor rules ↔ Claude Code: see [CLAUDE.md](CLAUDE.md). Sync: `scripts/check_agent_config_sync.py`.
+Active feature: [specs/003-catalog-complete/](specs/003-catalog-complete/). Spine simulation: [specs/002-sim-spine/](specs/002-sim-spine/) (Builder done; Tester + Accept open). Architecture pack: [specs/001-platform-architecture/](specs/001-platform-architecture/) (Specified; no implement). Cursor rules ↔ Claude Code: see [CLAUDE.md](CLAUDE.md). Sync: `scripts/check_agent_config_sync.py`.
 
 ---
 
 ## 11. Known gaps
 
-- No `frontend/`, no `backend/`, no Docker, no Figma, no live OTP/Meet/Razorpay/WhatsApp.
-- All 47 screens `empty`. Demo mocks do not save input (do not write state into HTML).
+- Next.js UI and Figma are not built. Demo HTML is not wired to FastAPI yet — local product data lives in Postgres via the API, not in the HTML files.
+- Docker Compose Postgres **is** the local backend. Live OTP / Meet / Razorpay / WhatsApp / Meta / AI vendors are **not** connected (mock ports).
+- All 47 screens remain `empty` in the demo. Do not invent ids.
 - Demo **incomplete** vs all six tracks: some spine screens still sit only on Everything. `staff-login` is on 1-on-1, K-12, Skills, Music, and Everything; Exam-prep omits it on purpose (faculty starts at cohort/schedule). Fill remaining gaps later — **same ids**, no new screens.
 - Inbound WhatsApp replies not in v1.
 - Speech-to-text is a slot on session record, not a port.
@@ -185,7 +213,8 @@ Active feature: [specs/002-sim-spine/](specs/002-sim-spine/) (runnable spine sim
 | ID | Title | Status |
 |---|---|---|
 | 001-platform-architecture | Swim-lane HTML, catalog, README hub, Spec Kit, parity | Specified (no `/speckit.implement`) |
-| 002-sim-spine | Local FastAPI + durable store + seed + auth stub + record→timeline + quotas | Specified — waiting human OK before implement |
+| 002-sim-spine | Local FastAPI + durable store + seed + auth stub + record→timeline + quotas | In Progress (Builder done; Tester + Accept open; protected) |
+| 003-catalog-complete | Remaining catalog APIs + later entities + Next.js one route per existing screen id | Specified (`product-viewer.html` hub; no implement until HTML OK) |
 
 ---
 
