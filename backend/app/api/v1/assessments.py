@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.deps import ports_dep, require_roles
 from app.db import get_db
-from app.models.tables import Attempt, BacklogItem, Enrollment, Question, Test, Workspace
+from app.models.tables import Attempt, BacklogItem, Enrollment, Question, Student, Test, Workspace
 from app.ports.mocks import MockPorts
 from app.services.auth import Principal
 from app.services import notify, timeline
@@ -148,9 +148,19 @@ def analysis_action(
     db: Session = Depends(get_db),
     principal: Principal = Depends(require_roles("owner", "teacher")),
 ):
+    student_id = body.student_id
+    if student_id:
+        st = (
+            db.query(Student)
+            .filter(Student.id == student_id, Student.workspace_id == principal.workspace_id)
+            .first()
+        )
+        if not st:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "student")
+        student_id = st.id
     item = BacklogItem(
         workspace_id=principal.workspace_id,
-        student_id=body.student_id,
+        student_id=student_id,
         title=f"Analysis {body.action}",
         kind="analysis",
         status="open",

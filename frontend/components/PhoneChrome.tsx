@@ -16,7 +16,7 @@ type NavItem = {
 /** Demo student `appnav`: Home, Classes, Practice, Doubts, You. */
 const STUDENT_NAV: NavItem[] = [
   { label: "Home", destId: "student-dash", match: ["student-dash"], icon: "home" },
-  { label: "Classes", destId: "library", match: ["library", "lesson"], icon: "play" },
+  { label: "Classes", destId: "library", match: ["library", "lesson", "join", "live-student"], icon: "play" },
   { label: "Practice", destId: "practice-play", match: ["practice-play", "practice-result", "test-runner"], icon: "spark" },
   { label: "Doubts", destId: "doubt-student", match: ["doubt-student"], icon: "chat" },
   { label: "You", destId: "timeline", match: ["timeline", "notif-prefs", "payments"], icon: "flag" },

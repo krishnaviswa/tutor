@@ -4,7 +4,7 @@ import { ScheduleScreen } from "@/components/wired/ScheduleScreen";
 
 export default function Page() {
   return (
-    <LoginGate role="teacher">
+    <LoginGate role="teacher" accept={["teacher", "owner", "assistant"]}>
       <AppChrome active="Schedule" kind="faculty">
         <ScheduleScreen />
       </AppChrome>

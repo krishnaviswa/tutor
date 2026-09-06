@@ -20,12 +20,21 @@ export function PracticeResultScreen() {
 
   useEffect(() => {
     const id = params.get("attempt");
-    if (!id) {
-      setError("Open a result from practice-play or a test.");
+    if (id) {
+      api(`/api/v1/attempts/${id}`)
+        .then((row) => setAttempt(row as Attempt))
+        .catch((e) => setError(e instanceof Error ? e.message : String(e)));
       return;
     }
-    api(`/api/v1/attempts/${id}`)
-      .then((row) => setAttempt(row as Attempt))
+    api("/api/v1/me/dashboard")
+      .then((row) => {
+        const last = (row as { last_attempt_id?: string }).last_attempt_id;
+        if (!last) {
+          setError("Open a result from practice-play or a test.");
+          return;
+        }
+        return api(`/api/v1/attempts/${last}`).then((att) => setAttempt(att as Attempt));
+      })
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }, [params]);
 
