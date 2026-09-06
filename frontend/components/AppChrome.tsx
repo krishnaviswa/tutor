@@ -19,7 +19,7 @@ export type AppChromeProps = {
   children: ReactNode;
 };
 
-type NavIcon = "spark" | "cal" | "users" | "doc" | "chat" | "flag" | "cash" | "gear";
+type NavIcon = "spark" | "cal" | "users" | "doc" | "chat" | "flag" | "cash" | "gear" | "book";
 
 type NavItem = {
   label: string;
@@ -28,14 +28,15 @@ type NavItem = {
   icon: NavIcon;
 };
 
-/** Exam-prep faculty: Dashboard, Schedule, Students, Practice, Doubts, Records. No staff-login. */
+/** Exam-prep faculty: Dashboard, Schedule, Students, Practice, Doubts, Records, Content. No staff-login. */
 const FACULTY_NAV: NavItem[] = [
   { label: "Dashboard", destId: "teacher-dash", match: ["teacher-dash"], icon: "spark" },
   { label: "Schedule", destId: "schedule", match: ["schedule", "session-pre"], icon: "cal" },
-  { label: "Students", destId: "roster", match: ["roster"], icon: "users" },
-  { label: "Practice", destId: "qbank", match: ["qbank"], icon: "doc" },
-  { label: "Doubts", destId: "doubt-teacher", match: ["doubt-teacher"], icon: "chat" },
-  { label: "Records", destId: "record", match: ["record"], icon: "flag" },
+  { label: "Students", destId: "roster", match: ["roster", "cohort-builder"], icon: "users" },
+  { label: "Practice", destId: "qbank", match: ["qbank", "practice-build", "assign-issue", "assign-grade", "test-setup", "analysis"], icon: "doc" },
+  { label: "Doubts", destId: "doubt-teacher", match: ["doubt-teacher", "messages"], icon: "chat" },
+  { label: "Records", destId: "record", match: ["record", "session-video"], icon: "flag" },
+  { label: "Content", destId: "library", match: ["library"], icon: "book" },
 ];
 
 const ADMIN_NAV: NavItem[] = [
@@ -97,6 +98,12 @@ function Icon({ name }: { name: NavIcon }) {
       <>
         <circle cx="12" cy="12" r="3" />
         <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" />
+      </>
+    ),
+    book: (
+      <>
+        <path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 0-3 3z" />
+        <path d="M19 20H8" />
       </>
     ),
   };

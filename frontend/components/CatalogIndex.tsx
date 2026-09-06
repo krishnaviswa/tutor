@@ -14,9 +14,9 @@ export function CatalogIndex() {
       <p className="eyebrow">TutorOS · local shells</p>
       <h1>All 47 catalog screens</h1>
       <p className="lede">
-        This is not a 48th screen. Each link is an existing catalog route with the same mock login
-        strip. Demo HTML remains UI gold until a screen is wired. API: <code>{API_BASE}</code>. OTP{" "}
-        <code>{OTP_CODE}</code>.
+        This is not a 48th screen. Product home is <a href="/app/student/router">/app/student/router</a>.
+        Each link is an existing catalog route. Demo HTML remains UI gold until a screen is wired. API:{" "}
+        <code>{API_BASE}</code>. OTP <code>{OTP_CODE}</code>.
       </p>
       <dl className="mocks">
         <div><dt>Default tenant</dt><dd>{exam.label} ({exam.kind})</dd></div>

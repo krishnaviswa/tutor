@@ -1,5 +1,5 @@
-import { ScreenShell } from '@/components/ScreenShell';
+import { RouterScreen } from "@/components/wired/RouterScreen";
 
 export default function Page() {
-  return <ScreenShell id="router" title="Role router" role="student" route="/app/student/router" />;
+  return <RouterScreen />;
 }

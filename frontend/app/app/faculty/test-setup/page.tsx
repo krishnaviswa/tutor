@@ -1,5 +1,13 @@
-import { ScreenShell } from '@/components/ScreenShell';
+import { AppChrome } from "@/components/AppChrome";
+import { LoginGate } from "@/components/LoginGate";
+import { TestSetupScreen } from "@/components/wired/TestSetupScreen";
 
 export default function Page() {
-  return <ScreenShell id="test-setup" title="Test / mock setup" role="faculty" route="/app/faculty/test-setup" />;
+  return (
+    <LoginGate role="teacher">
+      <AppChrome kind="faculty" screenId="test-setup">
+        <TestSetupScreen />
+      </AppChrome>
+    </LoginGate>
+  );
 }

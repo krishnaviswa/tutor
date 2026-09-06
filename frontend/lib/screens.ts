@@ -11,3 +11,9 @@ export type CatalogScreen = {
 export { CATALOG_SCREENS };
 
 export const EXAM_PREP_HIDE = new Set(["staff-login"]);
+
+export function catalogRoute(id: string): string {
+  const row = CATALOG_SCREENS.find((s) => s.id === id);
+  if (!row) throw new Error(`unknown catalog screen id: ${id}`);
+  return row.route;
+}

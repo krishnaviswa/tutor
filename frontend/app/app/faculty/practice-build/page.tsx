@@ -1,5 +1,13 @@
-import { ScreenShell } from '@/components/ScreenShell';
+import { AppChrome } from "@/components/AppChrome";
+import { LoginGate } from "@/components/LoginGate";
+import { PracticeBuildScreen } from "@/components/wired/PracticeBuildScreen";
 
 export default function Page() {
-  return <ScreenShell id="practice-build" title="Practice set builder" role="faculty" route="/app/faculty/practice-build" />;
+  return (
+    <LoginGate role="teacher">
+      <AppChrome kind="faculty" screenId="practice-build">
+        <PracticeBuildScreen />
+      </AppChrome>
+    </LoginGate>
+  );
 }

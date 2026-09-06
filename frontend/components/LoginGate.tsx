@@ -22,6 +22,8 @@ export type LoginGateProps = {
   workspaceId?: string;
   /** API role sent to /auth/otp/verify. Default teacher. */
   role?: "teacher" | "owner" | "assistant" | "student" | "parent";
+  /** Who may pass with an existing JWT. Defaults to ACCEPT[role]. Dual-role catalog ids. */
+  accept?: string[];
 };
 
 const ACCEPT: Record<NonNullable<LoginGateProps["role"]>, string[]> = {
@@ -37,6 +39,7 @@ export function LoginGate({
   phone = exam.phones.teacher,
   workspaceId = exam.workspaceId,
   role = "teacher",
+  accept,
 }: LoginGateProps) {
   const [ready, setReady] = useState(false);
   const [authed, setAuthed] = useState(false);
@@ -46,6 +49,9 @@ export function LoginGate({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const boxes = useRef<Array<HTMLInputElement | null>>([]);
+
+  const allowedRoles = accept ?? ACCEPT[role];
+  const allowedKey = allowedRoles.join(",");
 
   useEffect(() => {
     let cancelled = false;
@@ -59,7 +65,8 @@ export function LoginGate({
       }
       try {
         const me = (await api("/api/v1/auth/me")) as { role?: string };
-        const ok = Boolean(me.role && ACCEPT[role].includes(me.role));
+        const allowed = allowedKey.split(",");
+        const ok = Boolean(me.role && allowed.includes(me.role));
         if (!ok) clearToken();
         if (!cancelled) setAuthed(ok);
       } catch {
@@ -73,7 +80,7 @@ export function LoginGate({
     return () => {
       cancelled = true;
     };
-  }, [role]);
+  }, [role, allowedKey]);
 
   useEffect(() => {
     setPhoneValue(phone);

@@ -1,5 +1,13 @@
-import { ScreenShell } from '@/components/ScreenShell';
+import { AppChrome } from "@/components/AppChrome";
+import { LoginGate } from "@/components/LoginGate";
+import { AnnounceScreen } from "@/components/wired/AnnounceScreen";
 
 export default function Page() {
-  return <ScreenShell id="announce" title="Announcements" role="faculty" route="/app/faculty/announce" />;
+  return (
+    <LoginGate role="teacher">
+      <AppChrome kind="faculty" screenId="announce">
+        <AnnounceScreen />
+      </AppChrome>
+    </LoginGate>
+  );
 }

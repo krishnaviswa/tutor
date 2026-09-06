@@ -1,5 +1,5 @@
-import { ScreenShell } from '@/components/ScreenShell';
+import { StudentLoginScreen } from "@/components/wired/StudentLoginScreen";
 
 export default function Page() {
-  return <ScreenShell id="student-login" title="Student sign-in" role="student" route="/app/student/student-login" />;
+  return <StudentLoginScreen />;
 }
