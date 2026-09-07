@@ -402,6 +402,29 @@ button { font-family: inherit; }
 .hot--btn:disabled { opacity: .55; cursor: default; filter: none; }
 .hot--link { border-bottom: 2px solid var(--tint); color: var(--tint); cursor: pointer; font-weight: 600; }
 
+.theme-dock {
+  position: fixed;
+  top: 10px;
+  right: 12px;
+  z-index: 90;
+}
+.theme-btn {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  background: var(--surface);
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 11px;
+  cursor: pointer;
+}
+.theme-btn:hover {
+  color: var(--ink);
+  border-color: var(--ink-faint);
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
