@@ -15,6 +15,7 @@ MODULE_FOR_PATH_PREFIX = (
     ("/api/v1/parent", "A4"),
     ("/api/v1/parent-links", "A4"),
     ("/api/v1/sessions", "B1"),
+    ("/api/v1/availability", "B1"),
     ("/api/v1/join", "B2"),
     ("/api/v1/content", "B5"),
     ("/api/v1/assignments", "B6"),

@@ -534,6 +534,8 @@ var S={
  'parent-home':{t:'Parent home',role:'parent',frame:'phone',mod:'A4',dom:'A'},
  'schedule':{t:'Schedule / calendar',role:'faculty',frame:'web',mod:'B1',dom:'B'},
  'session-pre':{t:'Session detail (pre-class)',role:'faculty',frame:'web',mod:'B1',dom:'B'},
+ 'sessions':{t:'Sessions list',role:'faculty',frame:'web',mod:'B1',dom:'B'},
+ 'availability':{t:'Staff availability',role:'faculty',frame:'web',mod:'B1',dom:'B'},
  'join':{t:'Join page / waiting room',role:'student',frame:'phone',mod:'B2',dom:'B'},
  'live-teacher':{t:'Live session console',role:'faculty',frame:'web',mod:'B2',dom:'B'},
  'live-student':{t:'Live session view',role:'student',frame:'phone',mod:'B2',dom:'B'},
@@ -583,7 +585,7 @@ var TEMPLATES=[
   steps:[
    ['onboard-kind','admin','Onboard'],['branding','admin','Onboard'],
    ['roster','admin','Enrol'],['cohort-builder','faculty','Enrol'],['student-login','student','Enrol'],['parent-link','parent','Enrol'],
-   ['schedule','faculty','Schedule'],['session-pre','faculty','Schedule'],
+   ['schedule','faculty','Schedule'],['sessions','faculty','Schedule'],['availability','faculty','Schedule'],['session-pre','faculty','Schedule'],
    ['join','student','Teach'],['live-teacher','faculty','Teach'],['live-student','student','Teach'],
    ['session-video','faculty','Teach'],['record','faculty','Teach'],['library','student','Teach'],['lesson','student','Teach'],
    ['timeline','system','Teach','Record fans out to every attendee timeline'],
@@ -605,7 +607,7 @@ var TEMPLATES=[
   steps:[
    ['onboard-kind','admin','Onboard'],['branding','admin','Onboard'],
    ['roster','admin','Enrol'],['student-login','student','Enrol'],['staff-login','faculty','Enrol'],
-   ['schedule','faculty','Schedule'],['session-pre','faculty','Schedule'],
+   ['schedule','faculty','Schedule'],['sessions','faculty','Schedule'],['availability','faculty','Schedule'],['session-pre','faculty','Schedule'],
    ['join','student','Teach'],['live-teacher','faculty','Teach'],['live-student','student','Teach'],['session-video','faculty','Teach'],['record','faculty','Teach'],
    ['timeline','system','Teach','Session lands on the student timeline'],
    ['assign-issue','faculty','Practise'],['assign-grade','faculty','Assess'],
@@ -621,7 +623,7 @@ var TEMPLATES=[
   steps:[
    ['onboard-kind','admin','Onboard'],['branding','admin','Onboard'],
    ['roster','admin','Enrol'],['parent-link','parent','Enrol'],['student-login','student','Enrol'],['staff-login','faculty','Enrol'],
-   ['schedule','faculty','Schedule'],['session-pre','faculty','Schedule'],
+   ['schedule','faculty','Schedule'],['sessions','faculty','Schedule'],['availability','faculty','Schedule'],['session-pre','faculty','Schedule'],
    ['join','student','Teach'],['live-teacher','faculty','Teach'],['live-student','student','Teach'],['record','faculty','Teach'],['library','student','Teach'],
    ['timeline','system','Teach','Attendance + notes → student timeline'],
    ['assign-issue','faculty','Practise'],['practice-play','student','Practise'],
@@ -638,7 +640,7 @@ var TEMPLATES=[
   steps:[
    ['onboard-kind','admin','Onboard'],['branding','admin','Onboard'],
    ['roster','admin','Enrol'],['student-login','student','Enrol'],['staff-login','faculty','Enrol'],['cohort-builder','faculty','Enrol'],
-   ['schedule','faculty','Schedule'],['session-pre','faculty','Schedule'],
+   ['schedule','faculty','Schedule'],['sessions','faculty','Schedule'],['availability','faculty','Schedule'],['session-pre','faculty','Schedule'],
    ['join','student','Teach'],['live-teacher','faculty','Teach'],['live-student','student','Teach'],['session-video','faculty','Teach'],['record','faculty','Teach'],
    ['library','student','Teach'],['lesson','student','Teach'],
    ['assign-issue','faculty','Practise'],['assign-grade','faculty','Assess'],
@@ -655,7 +657,7 @@ var TEMPLATES=[
   steps:[
    ['onboard-kind','admin','Onboard'],['branding','admin','Onboard'],
    ['roster','admin','Enrol'],['parent-link','parent','Enrol'],['student-login','student','Enrol'],['staff-login','faculty','Enrol'],
-   ['schedule','faculty','Schedule'],['session-pre','faculty','Schedule'],
+   ['schedule','faculty','Schedule'],['sessions','faculty','Schedule'],['availability','faculty','Schedule'],['session-pre','faculty','Schedule'],
    ['join','student','Teach'],['live-teacher','faculty','Teach'],['live-student','student','Teach'],['record','faculty','Teach'],['library','student','Teach'],
    ['timeline','system','Teach','Practice-log note added to the timeline'],
    ['assign-issue','faculty','Practise'],
@@ -677,7 +679,7 @@ var TEMPLATES=[
   steps:[
    ['onboard-kind','admin','Onboard'],['template-gallery','admin','Onboard'],['wsetup','admin','Onboard'],['branding','admin','Onboard'],
    ['roster','admin','Enrol'],['cohort-builder','faculty','Enrol'],['router','student','Enrol'],['student-login','student','Enrol'],['staff-login','faculty','Enrol'],['parent-link','parent','Enrol'],
-   ['schedule','faculty','Schedule'],['session-pre','faculty','Schedule'],
+   ['schedule','faculty','Schedule'],['sessions','faculty','Schedule'],['availability','faculty','Schedule'],['session-pre','faculty','Schedule'],
    ['join','student','Teach'],['live-teacher','faculty','Teach'],['live-student','student','Teach'],['session-video','faculty','Teach'],['record','faculty','Teach'],['library','student','Teach'],['lesson','student','Teach'],
    ['timeline','system','Teach','Every module writes to one timeline'],
    ['qbank','faculty','Practise'],['practice-build','faculty','Practise'],['practice-play','student','Practise'],['assign-issue','faculty','Practise'],
@@ -724,6 +726,8 @@ var WHY={
  'parent-home':{own:'Parent (read). Owner enables the parent module.',who:'A linked parent.',why:'The parent hub for their own child — not a second gradebook and not the class roster.',how:'Attendance fraction, latest practice, latest test, fee due date, then activity, marksheet, results, receipts, teacher chat — own child only. Read-only except pay and chat.',when:'After class, a result, a report, or an invoice — not during live teaching.'},
  'schedule':{own:'Faculty. Owner can view.',who:'Faculty (owner can view).',why:'Sessions must exist on a calendar before anyone can join.',how:'Create or move sessions. Reschedule notifies teacher, parent, and admin via D5 — students only if the owner enabled student WhatsApp.',when:'Weekly planning and same-day changes.'},
  'session-pre':{own:'Faculty.',who:'The teacher about to teach.',why:'Topic and video pointer must be set before the room opens. TutorOS does not host video.',how:'Confirm topic, cohort, Meet or Teams link, and the platform join URL.',when:'Before the session starts.'},
+ 'sessions':{own:'Faculty. Owner can view.',who:'Faculty planning ahead; owner reviewing delivery.',why:'The week grid answers this week; planning needs upcoming, completed, and cancelled in one list, per student.',how:'Switch Upcoming / Completed / Cancelled tabs. Filter by a student the roster already added. Completed is time-driven: a past session reads Auto completed until a record is filed, then Staff completed. Cancelled sessions stay here and struck-through on the calendar.',when:'Weekly planning, and any review of what was delivered.'},
+ 'availability':{own:'Each staff member owns their own. Owner can view or edit anyone.',who:'A teacher or assistant marking when they can teach; owner and office scheduling around it.',why:'Bookings and the calendar need to know when a staff member is free without asking on chat.',how:'Set weekly windows, then add one-off date exceptions for time off or a swapped day. The schedule screen can shade the week outside these windows.',when:'On joining, at term start, and whenever a holiday or a swap comes up.'},
  'join':{own:'Student action; faculty owns the session.',who:'The student.',why:'Attendance is joining through the platform, not opening Meet in another tab.',how:'Waiting room. Stay here until class starts.',when:'Minutes before class.'},
  'live-teacher':{own:'Faculty.',who:'The teacher in session.',why:'Notes, polls, and attendance must stay in TutorOS, not trapped in Meet chat.',how:'Console around Meet/Teams. Teaching still happens in Google or Microsoft.',when:'During the live class.'},
  'live-student':{own:'Student in session; faculty hosts.',who:'The student in session.',why:'Join, leave, and later replay must attach to one identity.',how:'Live view / waiting overlay. Stay inside the product.',when:'During the live class.'},
@@ -996,22 +1000,24 @@ R['staff-login']=function(){
  '</div>';
 };
 R['schedule']=function(){
- var days=[['Mon 1',[]],['Tue 2',[['6:30','Neural Control','live','session-pre'],['8:00','DPP-14 solve','live',null]]],['Wed 3',[]],['Thu 4',[['6:30','Chemical Coordination','live',null]]],['Fri 5',[['6:30','Revision + doubts','live',null]]],['Sat 6',[['9:00','Mock 6','test','test-setup'],['11:00','Mock 6 analysis','live',null]]]];
+ var days=[['Mon 1',[]],['Tue 2',[['6:30','Neural Control','live','session-pre'],['8:00','DPP-14 solve','live',null]]],['Wed 3',[['6:30','Revision + doubts','off',null]]],['Thu 4',[['6:30','Chemical Coordination','live',null]]],['Fri 5',[['5:00','1-on-1 · Aditya','live',null]]],['Sat 6',[['9:00','Mock 6','test','test-setup'],['11:00','Mock 6 analysis','live',null]]]];
  var main='<h2>This week</h2><span class="k">NEET 2026 — Evening batch ▾ &nbsp;·&nbsp; Asia/Kolkata</span>'+
-  '<div class="row" style="margin-bottom:14px"><span class="btn btn--dark btn--sm">+ New session</span><span class="btn btn--sm">‹ prev week</span><span class="btn btn--sm">next week ›</span></div>'+
+  '<div class="row" style="margin-bottom:14px"><span class="btn btn--dark btn--sm">+ New session</span><span class="btn btn--sm">‹ prev week</span><span class="btn btn--sm">next week ›</span><span class="btn btn--sm" data-goto="sessions">Sessions list</span><span class="btn btn--sm" data-goto="availability">Availability</span><span class="pill is-info">Show availability</span></div>'+
   '<div class="tblwrap"><div style="display:grid;grid-template-columns:repeat(6,minmax(116px,1fr));gap:8px;min-width:560px">'+
    days.map(function(d){
     return '<div style="background:var(--surface);border:1px solid var(--line-soft);border-radius:10px;padding:8px;min-height:150px">'+
      '<div class="k" style="margin-bottom:8px">'+d[0]+'</div>'+
      (d[1].length?d[1].map(function(b){
-       var inner='<div style="font-family:var(--mono);font-size:9px;color:var(--ink-faint)">'+b[0]+'</div><div style="font-size:.78rem;font-weight:500;line-height:1.2;margin-top:2px">'+b[1]+'</div>';
+       var cancelled=b[2]==='off';
+       var inner='<div style="font-family:var(--mono);font-size:9px;color:var(--ink-faint)">'+b[0]+'</div><div style="font-size:.78rem;font-weight:500;line-height:1.2;margin-top:2px'+(cancelled?';text-decoration:line-through;color:var(--ink-faint)':'')+'">'+b[1]+(cancelled?' · cancelled':'')+'</div>';
+       if(cancelled)return '<div style="background:var(--sunk);border-radius:8px;padding:8px;margin-bottom:6px;opacity:.6">'+inner+'</div>';
        if(b[3])return '<div class="hot hot--row" data-goto="'+b[3]+'" style="padding:8px;margin-bottom:6px">'+inner+'</div>';
        return '<div style="background:var(--sunk);border-radius:8px;padding:8px;margin-bottom:6px">'+inner+'</div>';
      }).join(''):'<div class="muted" style="font-size:.72rem">—</div>')+
     '</div>';
    }).join('')+
   '</div></div>'+
-  '<p class="muted" style="margin-top:12px">Tonight’s <b>Neural Control</b> block is the live one — open it.</p>'+
+  '<p class="muted" style="margin-top:12px">Cancelled sessions stay struck-through here. <b>Show availability</b> shades hours outside the selected staff windows. Upcoming / completed / cancelled lists are on <span class="hot--link" data-goto="sessions">Sessions</span>.</p>'+
   '<div style="margin-top:8px">'+hotBtn('Open tonight’s session','session-pre')+'</div>';
  return cons('teacher','Schedule',main);
 };
@@ -1039,6 +1045,47 @@ R['session-pre']=function(){
    '</div>'+
   '</div>'+
   '<div style="margin-top:6px">'+hotBtn('Start class','live-teacher')+'</div>';
+ return cons('teacher','Schedule',main);
+};
+
+R['sessions']=function(){
+ var rows=[
+  ['Upcoming','Thu 11 Sep · 6:30 PM','Chemical Coordination','NEET 2026 — Evening','info'],
+  ['Upcoming','Fri 12 Sep · 5:00 PM','1-on-1 · Aditya Menon','1-on-1','info'],
+  ['Auto completed','Mon 8 Sep · 6:30 PM','Last week recap','NEET 2026 — Evening','mute'],
+  ['Staff completed','Tue 2 Sep · 6:30 PM','Neural Control of Movement','NEET 2026 — Evening','good'],
+  ['Cancelled','Wed 3 Sep · 6:30 PM','Revision + doubts — teacher unwell','NEET 2026 — Evening','bad']
+ ];
+ var tabs=['Upcoming','Completed','Cancelled'];
+ var main='<h2>Sessions</h2><span class="k">All sessions · plan ahead and review what is done</span>'+
+  '<div class="row" style="margin:12px 0"><div class="tabs">'+tabs.map(function(t,i){return '<span class="'+(i===0?'on':'')+'">'+t+'</span>';}).join('')+'</div>'+
+   '<label class="field" style="margin:0 0 0 auto;min-width:200px"><span>Student</span><div class="field__in">All students ▾</div></label></div>'+
+  '<div class="card"><div class="k" style="margin-bottom:8px">Once a teacher adds a student on the roster, that student is listed here first for a 1-on-1 call.</div>'+
+   rows.map(function(r){
+    return '<div class="list__i"><div class="gr"><div class="t">'+r[2]+'</div><div class="s">'+r[1]+' · '+r[3]+'</div></div>'+pill(r[0],r[4])+'</div>';
+   }).join('')+
+  '</div>'+
+  '<p class="muted" style="margin-top:10px">Completed is time-driven: a past session shows <b>Auto completed</b> until a record is filed, then <b>Staff completed</b>. Cancelled sessions stay here and struck-through on the calendar. Admin can edit a session time in any state.</p>';
+ return cons('teacher','Schedule',main);
+};
+
+R['availability']=function(){
+ var wk=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+ var win={Mon:'6:30–8:00 PM',Tue:'6:30–8:00 PM',Wed:'6:30–8:00 PM',Thu:'6:30–8:00 PM',Fri:'5:00–7:00 PM',Sat:'9:00 AM–12:00 PM',Sun:'—'};
+ var main='<h2>My availability</h2><span class="k">Anitha Rao ▾ &nbsp;·&nbsp; staff see their own · owner sees everyone</span>'+
+  '<div class="grid g2" style="align-items:start"><div>'+
+   '<div class="card"><h3>Weekly windows</h3>'+
+    wk.map(function(d){return '<div class="list__i"><div class="gr"><div class="t" style="font-weight:400">'+d+'</div></div><span class="'+(win[d]==='—'?'muted':'')+'" style="font-family:var(--mono);font-size:.78rem">'+win[d]+'</span></div>';}).join('')+
+    '<div style="margin-top:8px"><span class="btn btn--sm">+ Add window</span></div>'+
+   '</div></div><div>'+
+   '<div class="card"><h3>Date exceptions</h3>'+
+    [['25 Dec 2026','Holiday — unavailable','bad'],['14 Oct 2026','Extra slot 2:00–4:00 PM','good']]
+    .map(function(x){return '<div class="list__i"><div class="gr"><div class="t" style="font-weight:400">'+x[0]+'</div><div class="s">'+x[1]+'</div></div>'+pill(x[2]==='bad'?'time off':'extra',x[2])+'</div>';}).join('')+
+    '<div style="margin-top:8px"><span class="btn btn--sm">+ Add exception</span></div>'+
+   '</div>'+
+   '<div class="card card--wash"><div class="k" style="margin-bottom:4px">On the calendar</div><p class="muted">The schedule week grid can shade the hours outside these windows so sessions land in open time.</p></div>'+
+  '</div></div>'+
+  '<div style="margin-top:6px">'+hotBtn('Back to schedule','schedule')+'</div>';
  return cons('teacher','Schedule',main);
 };
 

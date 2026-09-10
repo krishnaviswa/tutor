@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session
 
@@ -14,6 +14,8 @@ from app.models.tables import (
     Payout,
     PracticeSet,
     Question,
+    ScheduledSession,
+    StaffAvailability,
     StaffMembership,
     Workspace,
 )
@@ -132,3 +134,76 @@ def seed_internal_v2(
     payout = db.get(Payout, cid(tag, 38))
     if payout:
         put_meta(payout, teacher_name=f"{slug} teacher", period="Sep", sessions=4)
+
+    # 007: per-staff availability for the teacher (weekly windows + one time-off block).
+    teacher_id = people["teacher"]
+    has_avail = (
+        db.query(StaffAvailability)
+        .filter(
+            StaffAvailability.workspace_id == ws_id,
+            StaffAvailability.user_id == teacher_id,
+        )
+        .first()
+    )
+    if not has_avail:
+        for wd in ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat"):
+            db.add(
+                StaffAvailability(
+                    workspace_id=ws_id,
+                    user_id=teacher_id,
+                    kind="window",
+                    weekday=wd,
+                    start_time="06:00",
+                    end_time="21:00",
+                    available=1,
+                )
+            )
+        db.add(
+            StaffAvailability(
+                workspace_id=ws_id,
+                user_id=teacher_id,
+                kind="block",
+                on_date="2026-12-25",
+                start_time="00:00",
+                end_time="23:59",
+                available=0,
+                note="Holiday",
+            )
+        )
+
+    # 007: a completed (time-passed) and a cancelled session so the list tabs have content.
+    _put(
+        db,
+        ScheduledSession,
+        cid(tag, 54),
+        workspace_id=ws_id,
+        cohort_id=cohort_id,
+        teacher_user_id=teacher_id,
+        title="Last week recap",
+        starts_at=now - timedelta(days=3),
+        status="scheduled",
+    )
+    _put(
+        db,
+        ScheduledSession,
+        cid(tag, 55),
+        workspace_id=ws_id,
+        cohort_id=cohort_id,
+        teacher_user_id=teacher_id,
+        title="Cancelled — teacher unwell",
+        starts_at=now + timedelta(days=2),
+        status="cancelled",
+        cancelled_at=now,
+        cancel_reason="teacher unwell",
+    )
+    _put(
+        db,
+        ScheduledSession,
+        cid(tag, 56),
+        workspace_id=ws_id,
+        student_id=student_id,
+        teacher_user_id=teacher_id,
+        title="1-on-1 catch-up",
+        starts_at=now + timedelta(days=1, hours=2),
+        status="scheduled",
+    )

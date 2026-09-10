@@ -340,11 +340,13 @@
     "apis": [
       "GET /api/v1/sessions",
       "POST /api/v1/sessions",
-      "PATCH /api/v1/sessions/{id}"
+      "PATCH /api/v1/sessions/{id}",
+      "GET /api/v1/availability"
     ],
     "entities": [
       "scheduled_sessions",
-      "cohorts"
+      "cohorts",
+      "staff_availability"
     ],
     "ports": [
       "calendar_video",
@@ -355,7 +357,7 @@
       "session.rescheduled",
       "session.cancelled"
     ],
-    "shows": "Calendar of sessions. Conflict detection on overlap. Student booking uses stored availability windows (not Google Calendar).",
+    "shows": "Week calendar of sessions. Conflict detection on overlap. Cancelled sessions stay struck-through. Optional overlay shades hours outside the selected staff member's availability.",
     "own": "Faculty. Owner can view.",
     "who": "Faculty (owner can view).",
     "why": "Sessions must exist on a calendar before anyone can join.",
@@ -396,6 +398,81 @@
     "why": "Topic and video pointer must be set before the room opens. TutorOS does not host video.",
     "how": "Confirm topic, cohort, Meet or Teams link, and the platform join URL.",
     "when": "Before the session starts.",
+    "roles": [
+      "faculty"
+    ]
+  },
+  {
+    "id": "sessions",
+    "title": "Sessions list",
+    "route": "/app/faculty/sessions",
+    "role": "faculty",
+    "frame": "web",
+    "module": "B1",
+    "domain": "B",
+    "domainName": "Teaching & sessions",
+    "phase": 1,
+    "status": "shell",
+    "demoKey": "sessions",
+    "figmaNodeId": null,
+    "apis": [
+      "GET /api/v1/sessions",
+      "POST /api/v1/sessions",
+      "PATCH /api/v1/sessions/{id}",
+      "GET /api/v1/students"
+    ],
+    "entities": [
+      "scheduled_sessions",
+      "students",
+      "cohorts"
+    ],
+    "ports": [
+      "whatsapp"
+    ],
+    "timelineEvents": [
+      "session.scheduled",
+      "session.cancelled"
+    ],
+    "shows": "Upcoming / Completed / Cancelled tabs over every session, filterable by an added student. Completed is time-driven (Auto completed until a record is filed, then Staff completed). 1-on-1 sessions are booked here against a roster student.",
+    "own": "Faculty. Owner can view.",
+    "who": "Faculty planning ahead; owner reviewing delivery.",
+    "why": "The week grid answers this week; planning needs upcoming, completed, and cancelled in one list, per student.",
+    "how": "Switch Upcoming / Completed / Cancelled tabs. Filter by a student the roster already added. Completed is time-driven: a past session reads Auto completed until a record is filed, then Staff completed. Cancelled sessions stay here and struck-through on the calendar.",
+    "when": "Weekly planning, and any review of what was delivered.",
+    "roles": [
+      "faculty"
+    ]
+  },
+  {
+    "id": "availability",
+    "title": "Staff availability",
+    "route": "/app/faculty/availability",
+    "role": "faculty",
+    "frame": "web",
+    "module": "B1",
+    "domain": "B",
+    "domainName": "Teaching & sessions",
+    "phase": 1,
+    "status": "shell",
+    "demoKey": "availability",
+    "figmaNodeId": null,
+    "apis": [
+      "GET /api/v1/availability",
+      "PUT /api/v1/staff/{id}/availability",
+      "GET /api/v1/staff"
+    ],
+    "entities": [
+      "staff_availability",
+      "staff_memberships"
+    ],
+    "ports": [],
+    "timelineEvents": [],
+    "shows": "Per-staff weekly available windows plus one-off date exceptions (time off or an extra slot). Staff edit their own; owner sees and edits anyone. Feeds the schedule overlay and booking checks.",
+    "own": "Each staff member owns their own. Owner can view or edit anyone.",
+    "who": "A teacher or assistant marking when they can teach; owner and office scheduling around it.",
+    "why": "Bookings and the calendar need to know when a staff member is free without asking on chat.",
+    "how": "Set weekly windows, then add one-off date exceptions for time off or a swapped day. The schedule screen can shade the week outside these windows.",
+    "when": "On joining, at term start, and whenever a holiday or a swap comes up.",
     "roles": [
       "faculty"
     ]

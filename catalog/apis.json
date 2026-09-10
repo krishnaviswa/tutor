@@ -80,11 +80,23 @@
     "status": "sim"
   },
   {
+    "id": "GET /api/v1/availability",
+    "status": "sim"
+  },
+  {
     "id": "GET /api/v1/sessions/{id}",
     "status": "sim"
   },
   {
     "id": "POST /api/v1/sessions/{id}/video-link",
+    "status": "sim"
+  },
+  {
+    "id": "PUT /api/v1/staff/{id}/availability",
+    "status": "sim"
+  },
+  {
+    "id": "GET /api/v1/staff",
     "status": "sim"
   },
   {

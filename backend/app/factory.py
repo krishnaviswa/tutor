@@ -5,6 +5,7 @@ from app.api.v1 import (
     assessments,
     assignments,
     auth,
+    availability,
     cohorts,
     comms,
     content,
@@ -69,6 +70,7 @@ def create_app(*, seed: bool = True) -> FastAPI:
     application.include_router(parent.router, prefix=api)
     application.include_router(join.router, prefix=api)
     application.include_router(sessions.router, prefix=api)
+    application.include_router(availability.router, prefix=api)
     application.include_router(content.router, prefix=api)
     application.include_router(assignments.router, prefix=api)
     application.include_router(practice.router, prefix=api)
