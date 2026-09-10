@@ -114,21 +114,41 @@ button{font-family:inherit;}
 /* ---------- stage + device ---------- */
 #stage{padding:22px 20px 64px;max-width:1240px;margin:0 auto;}
 @media(max-width:560px){#stage{padding:14px 9px 48px;}}
-.dev{margin:0 auto;background:var(--raised);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;max-width:100%;}
-.dev--web{max-width:1180px;}
-.dev--phone{max-width:406px;border-radius:42px;padding:10px;background:#0d120f;border-color:#0d120f;}
+/* screen view = full-bleed web app, no showcase card */
+#stage.stage--screen{padding:0;max-width:none;}
+#stage.stage--screen .scrn__hdr,#stage.stage--screen .why{max-width:none;margin:12px 16px 0;}
+
+.dev{margin:0;background:transparent;border:0;border-radius:0;box-shadow:none;overflow:visible;max-width:none;}
+.dev--web{max-width:none;}
+.dev--web .dev__bar{display:none;}
+.dev--web .dev__scr{height:auto;min-height:calc(100vh - 150px);overflow:visible;}
+.dev--web .flowbar{position:sticky;bottom:0;z-index:20;border-top:1px solid var(--line);box-shadow:0 -6px 20px -12px rgba(24,32,25,.25);}
+
+/* mobile preview frame (toggle -> Mobile) */
+.dev--phone{max-width:392px;margin:0 auto;background:#0d120f;border:1px solid #0d120f;border-radius:42px;padding:10px;overflow:hidden;box-shadow:var(--shadow);}
 .dev__bar{height:38px;display:flex;align-items:center;gap:8px;padding:0 14px;background:var(--surface);border-bottom:1px solid var(--line-soft);}
 .dev__dots{display:flex;gap:6px;}
 .dev__dots i{width:9px;height:9px;border-radius:50%;background:var(--line);display:block;}
 .dev__url{flex:1;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);background:var(--ground);border:1px solid var(--line-soft);border-radius:999px;padding:3px 12px;text-align:center;max-width:380px;margin:0 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.dev__scr{background:var(--ground);height:min(660px,82vh);overflow-y:auto;overflow-x:hidden;position:relative;}
-.dev--phone .dev__scr{height:min(620px,80vh);}
-@media(max-width:560px){.dev__scr{height:min(600px,78vh);}}
+.dev__scr{background:var(--ground);position:relative;}
+.dev--phone .dev__scr{height:min(660px,82vh);overflow-y:auto;overflow-x:hidden;}
 .phonewrap{min-height:100%;display:flex;flex-direction:column;}
 .phonewrap>.appwrap{flex:1 0 auto;}
-.pstat{display:flex;align-items:center;justify-content:space-between;padding:9px 22px 8px;font-family:var(--mono);font-size:10px;color:var(--ink-soft);background:var(--surface);}
-.dev--phone .pstat{border-radius:30px 30px 0 0;}
+.pstat{display:none;align-items:center;justify-content:space-between;padding:9px 22px 8px;font-family:var(--mono);font-size:10px;color:var(--ink-soft);background:var(--surface);}
+.dev--phone .pstat{display:flex;border-radius:30px 30px 0 0;}
 .dev--phone .flowbar{border-radius:0 0 30px 30px;}
+
+/* ===== student / parent: web app shell (sidebar + fluid main) ===== */
+@media(min-width:901px){
+  .dev--web .pw--rail{display:grid;grid-template-columns:236px minmax(0,1fr);align-items:start;}
+  .dev--web .pw--rail>.appnav{display:block;grid-column:1;grid-row:1 / 99;border-top:0;border-right:1px solid var(--line-soft);background:var(--surface);padding:16px 12px;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;}
+  .dev--web .pw--rail>.appnav a{flex-direction:row;justify-content:flex-start;gap:10px;margin-bottom:2px;font-size:.85rem;letter-spacing:0;text-transform:none;padding:10px 11px;border-radius:9px;}
+  .dev--web .pw--rail>.appnav a.on{background:var(--tint-wash);}
+  .dev--web .pw--rail>.appnav svg{width:16px;height:16px;}
+  .dev--web .pw--rail>.appbar{grid-column:2;grid-row:1;padding:20px 30px 16px;}
+  .dev--web .pw--rail>.appwrap{grid-column:2;grid-row:2;max-width:1160px;padding:22px 30px 40px;}
+  .dev--web .pw--solo{max-width:560px;margin:0 auto;padding:44px 22px;}
+}
 
 /* tint hooks */
 .tint-amber{--tint:var(--amber);--tint-wash:var(--amber-wash);}
@@ -139,7 +159,7 @@ button{font-family:inherit;}
 .tint-mute{--tint:var(--ink-faint);--tint-wash:var(--sunk);}
 .tint-ink{--tint:var(--ink);--tint-wash:var(--sunk);}
 
-/* ---------- app chrome (phone) ---------- */
+/* ---------- app chrome (student / parent) ---------- */
 .appbar{display:flex;align-items:center;gap:10px;padding:15px 16px 12px;background:var(--tint-wash);}
 .appbar h2{font-size:1.1rem;flex:1;}
 .appwrap{padding:14px 16px 6px;}
@@ -147,21 +167,33 @@ button{font-family:inherit;}
 .appnav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;font-family:var(--mono);font-size:7.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-faint);cursor:pointer;}
 .appnav a.on{color:var(--tint);}
 .appnav svg{width:17px;height:17px;}
+/* narrow viewport (real mobile, not the preview frame): pin nav to the bottom */
+@media(max-width:900px){
+  .dev--web .phonewrap>.appnav{position:sticky;bottom:0;z-index:20;border-top:1px solid var(--line);box-shadow:0 -6px 20px -14px rgba(24,32,25,.3);}
+}
 
-/* ---------- console chrome (web) ---------- */
-.cons{display:grid;grid-template-columns:198px 1fr;min-height:520px;}
-.cons__side{background:var(--surface);border-right:1px solid var(--line-soft);padding:14px 10px;display:flex;flex-direction:column;gap:2px;}
-.cons__side a{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;font-size:.83rem;color:var(--ink-soft);cursor:pointer;}
+/* ---------- console chrome (faculty / admin) ---------- */
+.cons{display:grid;grid-template-columns:236px minmax(0,1fr);min-height:calc(100vh - 150px);}
+.cons__side{background:var(--surface);border-right:1px solid var(--line-soft);padding:16px 12px;display:flex;flex-direction:column;gap:2px;position:sticky;top:56px;align-self:start;height:calc(100vh - 56px);overflow-y:auto;}
+.cons__side a{display:flex;align-items:center;gap:10px;padding:10px 11px;border-radius:9px;font-size:.85rem;color:var(--ink-soft);cursor:pointer;}
 .cons__side a:hover{background:var(--sunk);}
 .cons__side a.on{background:var(--tint-wash);color:var(--tint);font-weight:600;}
-.cons__side svg{width:15px;height:15px;flex:none;}
-.cons__main{padding:20px 22px;min-width:0;}
-.cons__main>h2{font-size:1.3rem;margin-bottom:3px;}
+.cons__side svg{width:16px;height:16px;flex:none;}
+.cons__main{padding:24px 32px 44px;min-width:0;}
+.cons__main>*{max-width:1200px;}
+.cons__main>h2{font-size:1.35rem;margin-bottom:3px;}
 .cons__main>.k{margin-bottom:16px;display:block;}
-.dev--phone .cons{grid-template-columns:1fr;}
-.dev--phone .cons__side{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line-soft);padding:8px;}
+@media(max-width:900px){
+  .cons{grid-template-columns:1fr;min-height:0;}
+  .cons__side{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line-soft);padding:8px;position:static;height:auto;gap:4px;}
+  .cons__side a{flex:none;white-space:nowrap;}
+  .cons__main{padding:16px;}
+}
+.dev--phone .cons{grid-template-columns:1fr;min-height:0;}
+.dev--phone .cons__side{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line-soft);padding:8px;position:static;height:auto;}
 .dev--phone .cons__side a span{display:none;}
 .dev--phone .cons__main{padding:14px;}
+.dev--phone .cons__main>*{max-width:none;}
 
 /* ---------- setup chrome ---------- */
 .suphead{padding:16px 22px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--surface);}
@@ -170,8 +202,9 @@ button{font-family:inherit;}
 .steps{font-family:var(--mono);font-size:10px;color:var(--ink-faint);display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
 .steps .on{color:var(--tint);font-weight:600;}
 .steps .done{color:var(--ink-soft);}
-.supbody{padding:22px;}
-@media(max-width:560px){.supbody{padding:14px;}}
+.supbody{padding:26px 32px 44px;max-width:1180px;}
+.supbody>*{max-width:960px;}
+@media(max-width:560px){.supbody{padding:16px;}}
 
 /* ---------- building blocks ---------- */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:15px;margin-bottom:12px;}
@@ -420,10 +453,9 @@ body.showhot .flownode{box-shadow:0 0 0 3px var(--tint-wash);}
   </nav>
   <div class="right">
     <button class="iconbtn on" id="hotBtn" title="Highlight the clickable areas"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg><span class="lbl">Hotspots</span></button>
-    <div class="seg" id="vpSeg">
-      <button data-vp="auto" class="on">Auto</button>
-      <button data-vp="phone">Phone</button>
-      <button data-vp="web">Web</button>
+    <div class="seg" id="vpSeg" title="Preview at desktop or mobile width">
+      <button data-vp="web" class="on">Desktop</button>
+      <button data-vp="phone">Mobile</button>
     </div>
     <a class="iconbtn" href="product-viewer.html" title="Product book">Book</a>
     <button class="iconbtn" id="themeBtn">Black</button>
@@ -1679,7 +1711,7 @@ function homeView(){
      (TById('t6')?'<button class="hot hot--btn ghost" data-goto="t6/flow">Everything · '+ALL.length+'</button>':'')+
      '<span class="btn" id="aboutBtn2" style="cursor:pointer">About this prototype ⓘ</span>'+
    '</div>'+
-   '<div class="mapmeta">Every screen renders as a phone or web mock — force either with the Phone / Web toggle up top.</div>'+
+   '<div class="mapmeta">Every screen is one responsive web app — full width on a laptop, a sidebar that folds to a bottom bar on a phone. Use the Desktop / Mobile toggle up top to preview the narrow layout.</div>'+
   '</div>'+
   '<div class="tplgrid">'+cards+'</div>'+
  '</div>';
@@ -1791,14 +1823,15 @@ function aboutHTML(){
   (ROLE_ONLY?'<p style="margin-top:10px"><b>This file.</b> Role child of <code>tutor-platform-demo.html</code>. Same ids and mocks; only the '+ROLE[ROLE_ONLY].label+' lane. Not linked from the backbone demo.</p>':'')+
   '<p style="margin-top:10px"><b>How it is organised.</b> Start on <b>Template home</b>. Each template opens a <b>horizontal swimlane</b> — Student · Faculty · Admin · Parent · System lanes, left-to-right stages. Click a numbered card to open that screen; the ‹ › bar then walks that template in order. <b>Compare</b> shows which screens each template shares.</p>'+
   '<p style="margin-top:10px"><b>Everything template.</b> That flow is the master gallery. Open any screen there and you get <b>Owner / Who / Why / How / When</b>. <b>Compare all six</b> repeats the same notes on every row, plus which templates turn the screen on. Focused templates hide the strip on mocks so those screens stay the product UI.</p>'+
+  '<p style="margin-top:10px"><b>One responsive layout.</b> Every screen is a full-width web app — a left rail (console for faculty/admin, app nav for student/parent) beside a fluid content column. Below ~900px the rail folds to a bottom bar or a scrolling strip and the content goes single-column. The <b>Desktop / Mobile</b> toggle up top previews the narrow width; the phone frame is a preview, not a separate design. A dedicated flat / native mobile app, if built later, gets its own mobile-only screens then.</p>'+
   '<p style="margin-top:10px"><b>Video is never hosted here.</b> The <b>Session video &amp; transcript</b> screen generates a Google Meet link by default, or takes a Microsoft Teams link. Those two providers only — Zoom and the rest are out of scope. Transcripts are pulled from Google or Microsoft afterwards — see <code>video-and-transcript-options.md</code>.</p>'+
   '<p style="margin-top:10px"><b>Source.</b> Templates, modules and the screen map come from <code>tutor-platform-blueprint.md</code>. The interactive module picker is <code>tutor-platform-explorer.html</code>.</p>'+
   '<p style="margin-top:10px"><b>Next step.</b> Freeze the layouts in Figma as the constant, then build the tenant spine and wire modules to the flow.</p>';
 }
 
 /* ================= router + render ================= */
-var state={vp:'auto',view:'home',tpl:'t1',cur:null,asRole:null};
-try{var v=localStorage.getItem('tos_vp');if(v)state.vp=v;}catch(e){}
+var state={vp:'web',view:'home',tpl:'t1',cur:null,asRole:null};
+try{var v=localStorage.getItem('tos_vp');if(v==='phone'||v==='web')state.vp=v;}catch(e){}
 try{var tp=localStorage.getItem('tos_tpl');if(tp&&TById(tp))state.tpl=tp;}catch(e){}
 document.querySelectorAll('#vpSeg button').forEach(function(b){b.classList.toggle('on',b.dataset.vp===state.vp);});
 
@@ -1860,16 +1893,25 @@ function flowbar(tid,id){
   '<div>'+(nx?'<button class="hot hot--btn" data-goto="'+tid+'/'+nx+'">'+S[nx].t+'</button>':'<button class="hot hot--btn" data-goto="'+tid+'/flow">Back to flow</button>')+'</div>'+
  '</div>';
 }
+/* One responsive web-app shell for every screen. The Desktop/Mobile toggle only
+   picks a preview width; S[id].frame is advisory metadata (feeds the catalog), not
+   a renderer switch. Student/parent bodies get the app-nav shell (rail >900px,
+   bottom bar below); faculty/admin bodies bring their own cons()/setup chrome. */
 function frame(tid,id){
- var m=S[id], body=R[id]?R[id]():'<div style="padding:40px 24px" class="muted">Screen stub — '+id+'</div>';
+ var body=R[id]?R[id]():'<div style="padding:40px 24px" class="muted">Screen stub — '+id+'</div>';
  var role=stepFor(tid,id).r;
- var autoFrame=(role==='parent'&&(id==='reports'||id==='messages'||id==='notif-prefs'))?'phone':m.frame;
- var vp=state.vp==='auto'?autoFrame:state.vp;
+ var vp=state.vp==='phone'?'phone':'web';
  var tint='tint-'+ROLE[role].tint;
+ var appShell=(role==='student'||role==='parent');
  if(vp==='phone'){
   return '<div class="dev dev--phone '+tint+'"><div class="pstat"><span>9:41</span><span>5G ▪▪▪ 82%</span></div><div class="dev__scr"><div class="phonewrap">'+body+'</div></div>'+flowbar(tid,id)+'</div>';
  }
- return '<div class="dev dev--web '+tint+'"><div class="dev__bar"><span class="dev__dots"><i></i><i></i><i></i></span><span class="dev__url">'+urlFor(tid,id)+'</span></div><div class="dev__scr">'+body+'</div>'+flowbar(tid,id)+'</div>';
+ var inner=body;
+ if(appShell){
+  var rail=/<nav class="appnav/.test(body);
+  inner='<div class="phonewrap '+(rail?'pw--rail':'pw--solo')+'">'+body+'</div>';
+ }
+ return '<div class="dev dev--web '+tint+'"><div class="dev__scr">'+inner+'</div>'+flowbar(tid,id)+'</div>';
 }
 function buildDrawer(){
  var h='<div class="draw">'+
@@ -1932,6 +1974,7 @@ function render(){
  }
  else if(S[parts[0]] && roleHas(parts[0])){location.hash='#/'+(TById(state.tpl)?state.tpl:(TEMPLATES[0]&&TEMPLATES[0].id)||'t1')+'/'+parts[0];return;}
  else{location.hash='#/home';return;}
+ stage.classList.toggle('stage--screen',state.view==='screen');
  window.scrollTo(0,0);var sc=stage.querySelector('.dev__scr');if(sc)sc.scrollTop=0;
  syncChrome();
 }
