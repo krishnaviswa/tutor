@@ -70,7 +70,8 @@
     "phase": 1,
     "alwaysOn": false,
     "entities": [
-      "scheduled_sessions"
+      "scheduled_sessions",
+      "staff_availability"
     ]
   },
   {

@@ -35,6 +35,9 @@ def patch_record(
     if notes is not None:
         rec.notes = notes
         rec.recorded_at = utcnow()
+    if session.status != "cancelled":
+        session.status = "completed"
+        session.completed_at = utcnow()
     student_ids: list[str] = []
     if attendance is not None:
         db.query(Attendance).filter(
@@ -59,7 +62,9 @@ def patch_record(
                 )
             )
             student_ids.append(st.id)
-    else:
+    elif session.student_id:
+        student_ids = [session.student_id]
+    elif session.cohort_id:
         student_ids = [
             e.student_id
             for e in db.query(Enrollment).filter(

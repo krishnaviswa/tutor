@@ -281,5 +281,17 @@ export const CATALOG_SCREENS = [
     "title": "Integrations",
     "route": "/app/admin/integrations",
     "role": "admin"
+  },
+  {
+    "id": "sessions",
+    "title": "Sessions list",
+    "route": "/app/faculty/sessions",
+    "role": "faculty"
+  },
+  {
+    "id": "availability",
+    "title": "Staff availability",
+    "route": "/app/faculty/availability",
+    "role": "faculty"
   }
 ] as const;

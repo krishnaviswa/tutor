@@ -113,7 +113,7 @@ if(!C){
 
 var LAYERS=[
   {id:'entry',t:'Entry',d:'Role + workspace. Swimlane roles from the demo: student, faculty, admin, parent, system.'},
-  {id:'ui',t:'UI',d:'Closed set of 47 screens (demo S). Demo is UI gold and incomplete. Architecture does not invent ids.'},
+  {id:'ui',t:'UI',d:'Closed set of 49 screens (demo S). Demo is UI gold and incomplete. Architecture does not invent ids.'},
   {id:'api',t:'API',d:'FastAPI /api/v1 routers by domain. Planned contracts, not live handlers.'},
   {id:'mw',t:'Middleware',d:'CORS → request id → tenant → authn → authz + flags → QuotaGuard → idempotency → audit.'},
   {id:'svc',t:'Services',d:'No HTTP. TimelinePort, ModuleFlags, SessionRecord.fanout, Notify.dispatch.'},
@@ -373,7 +373,7 @@ function flowTrackView(){
 }
 
 function layersView(){
-  var h=crumb([{label:'Home',view:'start'},{label:'Layers'}])+'<h1>Request path</h1><p class="lead">Click a layer. From UI you drill into 47 screens. Home returns to Start. Back is one step up. Previous / Next walks a track, a domain, or these layers.</p><div class="lane">';
+  var h=crumb([{label:'Home',view:'start'},{label:'Layers'}])+'<h1>Request path</h1><p class="lead">Click a layer. From UI you drill into 49 screens. Home returns to Start. Back is one step up. Previous / Next walks a track, a domain, or these layers.</p><div class="lane">';
   LAYERS.forEach(function(L,i){
     h+='<button type="button" class="card" data-goto="layer" data-layer="'+L.id+'"><span class="k">'+String(i+1).padStart(2,'0')+'</span><h3>'+L.t+'</h3><p>'+L.d+'</p></button>';
     if(i<LAYERS.length-1)h+='<div class="arrow">↓</div>';
@@ -385,7 +385,7 @@ function layerView(){
   var L=LAYERS.filter(function(x){return x.id===state.layer;})[0];
   if(!L)return '<p>Unknown layer</p>'+neighborBtns(null,null);
   var extra='';
-  if(state.layer==='ui') extra='<div class="row"><button type="button" class="hot primary" data-goto="ui">Open 47 screens by domain</button></div>';
+  if(state.layer==='ui') extra='<div class="row"><button type="button" class="hot primary" data-goto="ui">Open 49 screens by domain</button></div>';
   if(state.layer==='mw') extra='<ul class="plain">'+MW.map(function(m){return '<li>'+m+'</li>';}).join('')+'</ul>';
   if(state.layer==='ports') extra='<ul class="plain">'+C.ports.map(function(p){return '<li><code>'+p.id+'</code> · '+p.env+' default <code>'+p.default+'</code>'+(p.roles?' · WhatsApp roles: '+p.roles.join(', ')+'; student default '+p.studentDefault:'')+'</li>';}).join('')+'</ul>';
   var laterEnt=C.entities.filter(function(e){return e.tier==='later';});
@@ -399,7 +399,7 @@ function layerView(){
 function uiView(){
   var filter=state.role?' · role '+state.role:'';
   return crumb([{label:'Home',view:'start'},{label:'UI'+filter}])+'<h1>UI · seven domains</h1>'+
-    '<p class="lead">47 screens from demo <code>S</code>. Role filter uses swimlane steps (a screen can appear as student and as system). Chrome (appnav, sidebars) is not extra screens.</p>'+
+    '<p class="lead">49 screens from demo <code>S</code>. Role filter uses swimlane steps (a screen can appear as student and as system). Chrome (appnav, sidebars) is not extra screens.</p>'+
     '<div class="grid g2">'+domains().map(function(d){
       var n=byDomain(d.id).length;
       return '<button type="button" class="card" data-goto="domain" data-domain="'+d.id+'"'+(state.role?' data-role="'+state.role+'"':'')+' data-clear-flow="1"><span class="count">'+d.id+' · '+n+' screens</span><h3>'+d.name+'</h3></button>';

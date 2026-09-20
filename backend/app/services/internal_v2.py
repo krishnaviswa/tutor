@@ -17,6 +17,7 @@ from app.models.tables import (
     PracticeSet,
     Question,
     ScheduledSession,
+    StaffAvailability,
     StaffMembership,
     Workspace,
 )
@@ -112,6 +113,8 @@ def teacher_conflict(db: Session, workspace_id: str, teacher_user_id: str, start
             continue
         if s.starts_at is None:
             continue
+        if getattr(s, "status", "scheduled") == "cancelled":
+            continue
         delta = abs((_aware(s.starts_at) - start).total_seconds())
         if delta < window.total_seconds():
             return True
@@ -128,6 +131,42 @@ def in_availability(ws: Workspace | None, starts_at: datetime) -> bool:
         if w.get("weekday") == weekday and w.get("start") <= hhmm < w.get("end"):
             return True
     return False
+
+
+def staff_available(
+    db: Session,
+    workspace_id: str,
+    user_id: str,
+    starts_at: datetime,
+    ws: Workspace | None = None,
+) -> bool:
+    """Per-staff availability. Date `block` rows override weekly `window` rows. No rows for this
+    user falls back to the workspace-wide 006 window, then to always-available."""
+    rows = (
+        db.query(StaffAvailability)
+        .filter(
+            StaffAvailability.workspace_id == workspace_id,
+            StaffAvailability.user_id == user_id,
+        )
+        .all()
+    )
+    if not rows:
+        if ws is None:
+            ws = db.get(Workspace, workspace_id)
+        return in_availability(ws, starts_at)
+    weekday = starts_at.strftime("%a")
+    on_date = starts_at.strftime("%Y-%m-%d")
+    hhmm = starts_at.strftime("%H:%M")
+
+    def _covers(r: StaffAvailability) -> bool:
+        return (r.start_time or "00:00") <= hhmm < (r.end_time or "23:59")
+
+    blocks = [r for r in rows if r.kind == "block" and r.on_date == on_date and _covers(r)]
+    if blocks:
+        # An explicit block for the day decides it (time off wins if any block says unavailable).
+        return all(int(b.available or 0) == 1 for b in blocks)
+    windows = [r for r in rows if r.kind == "window" and r.weekday == weekday and _covers(r)]
+    return bool(windows)
 
 
 def auto_assemble(db: Session, workspace_id: str, spec: dict) -> list[str]:

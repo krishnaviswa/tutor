@@ -40,6 +40,10 @@
     "tier": "spine"
   },
   {
+    "id": "staff_availability",
+    "tier": "spine"
+  },
+  {
     "id": "attendance",
     "tier": "spine"
   },

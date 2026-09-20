@@ -135,14 +135,39 @@ class ScheduledSession(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     workspace_id: Mapped[str] = mapped_column(String(36), index=True)
-    cohort_id: Mapped[str] = mapped_column(ForeignKey("cohorts.id"))
+    cohort_id: Mapped[str | None] = mapped_column(ForeignKey("cohorts.id"), nullable=True)
+    student_id: Mapped[str | None] = mapped_column(ForeignKey("students.id"), nullable=True)
     teacher_user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
     title: Mapped[str] = mapped_column(String(200))
     starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="scheduled")  # scheduled | completed | cancelled
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    cancelled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    cancel_reason: Mapped[str] = mapped_column(String(200), default="")
     join_token: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
     video_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     recording_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     engagement: Mapped[list] = mapped_column(JSON, default=list)
+
+
+class StaffAvailability(Base):
+    """Per-staff calendar marking. `window` rows repeat weekly; `block` rows pin one date
+    (available=0 is time off, available=1 is extra availability). Empty for a user = fall back
+    to the workspace availability blob (006), then always-available."""
+
+    __tablename__ = "staff_availability"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    kind: Mapped[str] = mapped_column(String(10))  # window | block
+    weekday: Mapped[str | None] = mapped_column(String(3), nullable=True)  # Mon..Sun (window)
+    on_date: Mapped[str | None] = mapped_column(String(10), nullable=True)  # YYYY-MM-DD (block)
+    start_time: Mapped[str] = mapped_column(String(5), default="00:00")  # HH:MM
+    end_time: Mapped[str] = mapped_column(String(5), default="23:59")
+    available: Mapped[int] = mapped_column(Integer, default=1)
+    note: Mapped[str] = mapped_column(String(200), default="")
 
 
 class Attendance(Base):

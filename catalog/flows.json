@@ -58,6 +58,18 @@
         "auto": null
       },
       {
+        "screen": "sessions",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "availability",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
         "screen": "session-pre",
         "role": "faculty",
         "stage": "Schedule",
@@ -264,6 +276,8 @@
       "student-login",
       "parent-link",
       "schedule",
+      "sessions",
+      "availability",
       "session-pre",
       "join",
       "live-teacher",
@@ -341,6 +355,18 @@
       },
       {
         "screen": "schedule",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "sessions",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "availability",
         "role": "faculty",
         "stage": "Schedule",
         "auto": null
@@ -449,6 +475,8 @@
       "student-login",
       "staff-login",
       "schedule",
+      "sessions",
+      "availability",
       "session-pre",
       "join",
       "live-teacher",
@@ -520,6 +548,18 @@
       },
       {
         "screen": "schedule",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "sessions",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "availability",
         "role": "faculty",
         "stage": "Schedule",
         "auto": null
@@ -677,6 +717,8 @@
       "student-login",
       "staff-login",
       "schedule",
+      "sessions",
+      "availability",
       "session-pre",
       "join",
       "live-teacher",
@@ -751,6 +793,18 @@
       },
       {
         "screen": "schedule",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "sessions",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "availability",
         "role": "faculty",
         "stage": "Schedule",
         "auto": null
@@ -872,6 +926,8 @@
       "staff-login",
       "cohort-builder",
       "schedule",
+      "sessions",
+      "availability",
       "session-pre",
       "join",
       "live-teacher",
@@ -946,6 +1002,18 @@
       },
       {
         "screen": "schedule",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "sessions",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "availability",
         "role": "faculty",
         "stage": "Schedule",
         "auto": null
@@ -1079,6 +1147,8 @@
       "student-login",
       "staff-login",
       "schedule",
+      "sessions",
+      "availability",
       "session-pre",
       "join",
       "live-teacher",
@@ -1175,6 +1245,18 @@
       },
       {
         "screen": "schedule",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "sessions",
+        "role": "faculty",
+        "stage": "Schedule",
+        "auto": null
+      },
+      {
+        "screen": "availability",
         "role": "faculty",
         "stage": "Schedule",
         "auto": null
@@ -1444,6 +1526,8 @@
       "staff-login",
       "parent-link",
       "schedule",
+      "sessions",
+      "availability",
       "session-pre",
       "join",
       "live-teacher",

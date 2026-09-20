@@ -19,7 +19,7 @@ export type AppChromeProps = {
   children: ReactNode;
 };
 
-type NavIcon = "spark" | "cal" | "users" | "doc" | "chat" | "flag" | "cash" | "gear" | "book";
+type NavIcon = "spark" | "cal" | "users" | "doc" | "chat" | "flag" | "cash" | "gear" | "book" | "clock";
 
 type NavItem = {
   label: string;
@@ -31,7 +31,8 @@ type NavItem = {
 /** Exam-prep faculty: Dashboard, Schedule, Students, Practice, Doubts, Records, Content. No staff-login. */
 const FACULTY_NAV: NavItem[] = [
   { label: "Dashboard", destId: "teacher-dash", match: ["teacher-dash"], icon: "spark" },
-  { label: "Schedule", destId: "schedule", match: ["schedule", "session-pre"], icon: "cal" },
+  { label: "Schedule", destId: "schedule", match: ["schedule", "session-pre", "sessions"], icon: "cal" },
+  { label: "Availability", destId: "availability", match: ["availability"], icon: "clock" },
   { label: "Students", destId: "roster", match: ["roster", "cohort-builder"], icon: "users" },
   { label: "Practice", destId: "qbank", match: ["qbank", "practice-build", "assign-issue", "assign-grade", "test-setup", "analysis"], icon: "doc" },
   { label: "Doubts", destId: "doubt-teacher", match: ["doubt-teacher", "messages"], icon: "chat" },
@@ -44,7 +45,7 @@ const ADMIN_NAV: NavItem[] = [
   { label: "Billing", destId: "billing", match: ["billing"], icon: "cash" },
   { label: "Reports", destId: "reports", match: ["reports"], icon: "doc" },
   { label: "Cohorts", destId: "roster", match: ["roster"], icon: "users" },
-  { label: "Schedule", destId: "schedule", match: ["schedule"], icon: "cal" },
+  { label: "Schedule", destId: "schedule", match: ["schedule", "sessions", "availability"], icon: "cal" },
   { label: "Records", destId: "audit", match: ["audit"], icon: "flag" },
   { label: "Integrations", destId: "integrations", match: ["integrations"], icon: "gear" },
 ];
@@ -104,6 +105,12 @@ function Icon({ name }: { name: NavIcon }) {
       <>
         <path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 0-3 3z" />
         <path d="M19 20H8" />
+      </>
+    ),
+    clock: (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v5l3 2" />
       </>
     ),
   };

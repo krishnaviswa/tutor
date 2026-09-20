@@ -58,8 +58,8 @@ Default API `DATABASE_URL` matches Compose. Copy [.env.example](.env.example) if
 | [plan-technical.html](plan-technical.html) | Technical map: layers, entities, 84 APIs, ports, modules, protected tests |
 | [plan-sequence.html](plan-sequence.html) | End-to-end build order: functional + technical paired by phase |
 | [density-map.html](density-map.html) | **005 density board** — iSeek gap, backend workflow, T7.1–T7.12. Open in a browser. |
-| [tutor-platform-architecture.html](tutor-platform-architecture.html) | System map: entry → six tracks → layers → 47 screens → follow the call |
-| [tutor-platform-demo.html](tutor-platform-demo.html) | UI gold (47 screens, six templates). **Incomplete** — focused tracks omit some spine screens |
+| [tutor-platform-architecture.html](tutor-platform-architecture.html) | System map: entry → six tracks → layers → 49 screens → follow the call |
+| [tutor-platform-demo.html](tutor-platform-demo.html) | UI gold (49 screens, six templates). **Incomplete** — focused tracks omit some spine screens |
 | [tutor-platform-role-student.html](tutor-platform-role-student.html) | Generated child: student lane only |
 | [tutor-platform-explorer.html](tutor-platform-explorer.html) | Module toggles and build sequence |
 | [tutor-loop-ui-kit.html](tutor-loop-ui-kit.html) | Exam-prep *template* visuals — not a Biology app |
@@ -71,7 +71,7 @@ python scripts/check_architecture_parity.py
 python scripts/check_agent_config_sync.py --range origin/main...HEAD
 ```
 
-Active Spec Kit directory is `.specify/feature.json` (currently `specs/006-internal-v2`, Accepted). 005-dashboard-density is Accepted. 004-wire-demo-ui is Accepted. Override with `SPECIFY_FEATURE_DIRECTORY`.
+Active Spec Kit directory is `.specify/feature.json` (currently `specs/007-sessions-timetable`, In Progress). 006-internal-v2, 005-dashboard-density, 004-wire-demo-ui are Accepted. Override with `SPECIFY_FEATURE_DIRECTORY`.
 
 ---
 
@@ -93,7 +93,7 @@ Walk it: [tutor-platform-architecture.html](tutor-platform-architecture.html).
 
 ```
 Entry (role + workspace)
-  → UI (47 screens, domains A–G)
+  → UI (49 screens, domains A–G)
   → API /api/v1
   → Middleware (tenant, authn, authz + flags, QuotaGuard, audit)
   → Services (TimelinePort, Notify.dispatch, …)
@@ -101,7 +101,7 @@ Entry (role + workspace)
   → PostgreSQL (workspace_id on every business table)
 ```
 
-UI: Next.js 15 (one route per catalog screen id) in `frontend/`. API: FastAPI `/api/v1` against local Postgres. Demo HTML is still UI gold; screens are `shell` until `wired`. Status: `empty` → `shell` → `wired`. Do not invent a 48th id.
+UI: Next.js 15 (one route per catalog screen id) in `frontend/`. API: FastAPI `/api/v1` against local Postgres. Demo HTML is still UI gold; screens are `shell` until `wired`. Status: `empty` → `shell` → `wired`. The screen set is closed (49 ids after 007); a new id needs a spec that adds it to demo `S` + rebuilds the catalog.
 
 ---
 
@@ -119,7 +119,7 @@ UI: Next.js 15 (one route per catalog screen id) in `frontend/`. API: FastAPI `/
 
 ## 5. Domain model
 
-Spine: `workspaces`, `users`, `identities`, `sessions_auth`, `staff_memberships`, `students`, `parent_links`, `cohorts`, `enrollments`, `scheduled_sessions`, `attendance`, `session_records`, `transcript_events` (empty until STT), `timeline_events`, `feature_flags`, `audit_log`, **`taxonomies` / `topics`**, `usage_meters`, `quota_policies`, plus 003 workspace-scoped tables: `questions`, `attempts`, `doubts`, `messages`, `invoices`, `notification_prefs`, `notification_deliveries`, `content_items`, `assignments`, `submissions`, `practice_sets`, `tests`, `announcements`, `plans`, `payouts`, `automation_rules`, `backlog_items`.
+Spine: `workspaces`, `users`, `identities`, `sessions_auth`, `staff_memberships`, `students`, `parent_links`, `cohorts`, `enrollments`, `scheduled_sessions` (status `scheduled` \| `completed` \| `cancelled`; `student_id` set for 1-on-1), `staff_availability` (per-staff weekly windows + date exceptions), `attendance`, `session_records`, `transcript_events` (empty until STT), `timeline_events`, `feature_flags`, `audit_log`, **`taxonomies` / `topics`**, `usage_meters`, `quota_policies`, plus 003 workspace-scoped tables: `questions`, `attempts`, `doubts`, `messages`, `invoices`, `notification_prefs`, `notification_deliveries`, `content_items`, `assignments`, `submissions`, `practice_sets`, `tests`, `announcements`, `plans`, `payouts`, `automation_rules`, `backlog_items`.
 
 Never `biology_chapters` or exam-board tables. Content hangs off `topic_id`.
 
@@ -131,10 +131,10 @@ Catalog: [catalog/entities.json](catalog/entities.json), [catalog/modules.json](
 
 ## 6. Screen map
 
-47 ids locked to `tutor-platform-demo.html` `S`. Source: [catalog/screens.json](catalog/screens.json). Each catalog row also carries Owner / Who / Why / How / When from demo `WHY`. The architecture HTML (`tutor-platform-architecture.html`) loads [catalog/embed.js](catalog/embed.js) — after demo edits run `python scripts/build_catalog.py` then `python scripts/build_role_html.py`. Architecture Start lists the six demo tracks from that catalog. Role HTML files are generated from the demo; they are not a second product. Parent hub is `parent-home` (activity, marksheet, results, receipts, teacher chat). `staff-login` is on 1-on-1, K-12, Skills, Music, Everything; Exam-prep omits it.
+49 ids locked to `tutor-platform-demo.html` `S`. Source: [catalog/screens.json](catalog/screens.json). Each catalog row also carries Owner / Who / Why / How / When from demo `WHY`. The architecture HTML (`tutor-platform-architecture.html`) loads [catalog/embed.js](catalog/embed.js) — after demo edits run `python scripts/build_catalog.py` then `python scripts/build_role_html.py`. Architecture Start lists the six demo tracks from that catalog. Role HTML files are generated from the demo; they are not a second product. Parent hub is `parent-home` (activity, marksheet, results, receipts, teacher chat). `staff-login` is on 1-on-1, K-12, Skills, Music, Everything; Exam-prep omits it.
 
 - **A Identity (9):** `router`, `student-login`, `staff-login`, `wsetup`, `branding`, `roster`, `cohort-builder`, `parent-link`, `parent-home`
-- **B Teaching (11):** `schedule`, `session-pre`, `join`, `live-teacher`, `live-student`, `session-video`, `record`, `library`, `lesson`, `assign-issue`, `assign-grade`
+- **B Teaching (13):** `schedule`, `session-pre`, `sessions`, `availability`, `join`, `live-teacher`, `live-student`, `session-video`, `record`, `library`, `lesson`, `assign-issue`, `assign-grade`
 - **C Practice (7):** `qbank`, `practice-build`, `practice-play`, `practice-result`, `test-setup`, `test-runner`, `analysis`
 - **D Record and comms (6):** `doubt-student`, `doubt-teacher`, `messages`, `announce`, `timeline`, `notif-prefs`
 - **E Progress (5):** `student-dash`, `teacher-dash`, `owner`, `reports`, `mentor`
@@ -145,7 +145,7 @@ Catalog: [catalog/entities.json](catalog/entities.json), [catalog/modules.json](
 
 ## 7. API map
 
-All routes under `/api/v1`. 002 spine + 003 remaining catalog paths are `sim`. Full list: [catalog/apis.json](catalog/apis.json). Groups: `auth`, `workspaces`, `users`, `cohorts`, `sessions`, `content`, `practice`, `doubts`, `timeline`, `billing`, `modules`.
+All routes under `/api/v1`. 002 spine + 003 remaining catalog paths are `sim`. Full list: [catalog/apis.json](catalog/apis.json). Groups: `auth`, `workspaces`, `users`, `cohorts`, `sessions`, `availability` (`GET /availability`, `PUT /staff/{id}/availability`, `GET /staff`), `content`, `practice`, `doubts`, `timeline`, `billing`, `modules`.
 
 ---
 
@@ -204,6 +204,7 @@ Last Accepted feature dir: [specs/006-internal-v2/](specs/006-internal-v2/). Cat
 - Demo **incomplete** vs all six tracks: some spine screens still sit only on Everything. `staff-login` is on 1-on-1, K-12, Skills, Music, and Everything; Exam-prep omits it on purpose (faculty starts at cohort/schedule). Fill remaining gaps later — **same ids**, no new screens.
 - **005 dashboard density (Accepted):** named next session, due practice, attendance bars, chase list, scorecard, receipts, content kind/progress on the same 47 ids. Aggregates in `backend/app/services/progress.py`. Action board: [density-map.html](density-map.html). Spec: [specs/005-dashboard-density/](specs/005-dashboard-density/).
 - **006 internal v2 (Accepted):** remaining blueprint depth that does not call a vendor (permissions, waitlists, in-app live chat, rubrics, practice depth, SLA, auto-invoice). Ports stay mock. Spec: [specs/006-internal-v2/](specs/006-internal-v2/).
+- **007 sessions & timetable (In Progress):** session state is time-driven (`Upcoming` → `Auto completed`, or `Staff completed` once a record is filed) with owner free to re-time in any state; cancelled sessions stay on the calendar; 1-on-1 sessions book against a roster student; `staff_availability` holds per-staff weekly windows + date exceptions and feeds the schedule overlay and booking checks. Adds screen ids `sessions`, `availability`. Spec: [specs/007-sessions-timetable/](specs/007-sessions-timetable/).
 - Inbound WhatsApp replies not in v1.
 - Speech-to-text is a slot on session record, not a port.
 
@@ -219,6 +220,7 @@ Last Accepted feature dir: [specs/006-internal-v2/](specs/006-internal-v2/). Cat
 | 004-wire-demo-ui | Wire demo UI gold onto existing `/api/v1`; all 47 catalog screens `wired` | Accepted |
 | 005-dashboard-density | Lift demo named facts onto wired dashboards (same ids, richer `/api/v1` JSON) | Accepted |
 | 006-internal-v2 | In-app blueprint v2 (same 47 ids); vendor ports stay mock | Accepted |
+| 007-sessions-timetable | Session states (upcoming / auto-completed / staff-completed / cancelled), 1-on-1 booking, per-staff availability; adds `sessions` + `availability` (→ 49) and `staff_availability` | In Progress |
 
 Feature → test index (pytest: `cd backend; python -m pytest`, in-memory SQLite, `live_calls == 0`):
 
@@ -229,6 +231,7 @@ Feature → test index (pytest: `cd backend; python -m pytest`, in-memory SQLite
 | 004-wire-demo-ui | Same 20 pytest green after wiring; `tsc --noEmit`; 47 catalog routes — [test-report](specs/004-wire-demo-ui/test-report.md) |
 | 005-dashboard-density | `backend/tests/test_005_density.py` plus 002/003/004 still green (33 passed) — [test-report](specs/005-dashboard-density/test-report.md) |
 | 006-internal-v2 | `backend/tests/test_006_internal_v2.py` plus 002–005 still green (42 passed) — [test-report](specs/006-internal-v2/test-report.md) |
+| 007-sessions-timetable | `backend/tests/test_007_sessions_timetable.py` plus 002–006 still green (52 passed); `tsc --noEmit`; 49 catalog routes — [test-report](specs/007-sessions-timetable/test-report.md) |
 
 ---
 
