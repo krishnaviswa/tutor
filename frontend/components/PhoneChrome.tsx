@@ -3,24 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { NavIcon, type NavIconName } from "@/components/NavIcon";
-import { catalogRoute, CATALOG_SCREENS } from "@/lib/screens";
-
-type NavItem = {
-  label: string;
-  destId: string;
-  match: string[];
-  icon: NavIconName;
-};
-
-/** Demo student `appnav`: Home, Classes, Practice, Doubts, You. */
-const STUDENT_NAV: NavItem[] = [
-  { label: "Home", destId: "student-dash", match: ["student-dash"], icon: "home" },
-  { label: "Classes", destId: "library", match: ["library", "lesson", "join", "live-student"], icon: "play" },
-  { label: "Practice", destId: "practice-play", match: ["practice-play", "practice-result", "test-runner"], icon: "spark" },
-  { label: "Doubts", destId: "doubt-student", match: ["doubt-student"], icon: "chat" },
-  { label: "You", destId: "timeline", match: ["timeline", "notif-prefs", "payments"], icon: "flag" },
-];
+import { NavIcon } from "@/components/NavIcon";
+import { SignOutButton } from "@/components/SignOutButton";
+import { STUDENT_NAV, resolveBreadcrumb } from "@/lib/nav";
+import { CATALOG_SCREENS, catalogRoute } from "@/lib/screens";
 
 export type PhoneChromeProps = {
   screenId?: string;
@@ -35,10 +21,25 @@ function screenIdFromPath(pathname: string): string | undefined {
 export function PhoneChrome({ screenId, active, children }: PhoneChromeProps) {
   const pathname = usePathname();
   const currentId = screenId ?? screenIdFromPath(pathname);
+  const breadcrumb = resolveBreadcrumb(STUDENT_NAV, currentId);
+  const currentTitle = CATALOG_SCREENS.find((s) => s.id === currentId)?.title ?? currentId;
 
   return (
     <div className="phone tint-accent">
       <div className="phonewrap">
+        <header className="crumbstrip">
+          <Link href={catalogRoute("student-dash")} className="wm wm--sm">
+            TutorOS
+          </Link>
+          {breadcrumb ? (
+            <nav className="crumb" aria-label="Breadcrumb">
+              <Link href={catalogRoute(breadcrumb.parent.destId)}>{breadcrumb.parent.label}</Link>
+              <span aria-hidden="true">›</span>
+              <span className="crumb__here">{currentTitle}</span>
+            </nav>
+          ) : null}
+          <SignOutButton className="signout signout--sm" />
+        </header>
         <div className="phonewrap__body">{children}</div>
         <nav className="appnav" aria-label="Student app">
           {STUDENT_NAV.map((it) => {

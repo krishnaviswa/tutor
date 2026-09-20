@@ -3,24 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { NavIcon, type NavIconName } from "@/components/NavIcon";
-import { catalogRoute, CATALOG_SCREENS } from "@/lib/screens";
-
-type NavItem = {
-  label: string;
-  destId: string;
-  match: string[];
-  icon: NavIconName;
-};
-
-/** Demo parent `pnav`: Home, Activity, Reports, Fees, Chat. */
-const PARENT_NAV: NavItem[] = [
-  { label: "Home", destId: "parent-home", match: ["parent-home", "notif-prefs"], icon: "home" },
-  { label: "Activity", destId: "timeline", match: ["timeline"], icon: "flag" },
-  { label: "Reports", destId: "reports", match: ["reports", "practice-result"], icon: "doc" },
-  { label: "Fees", destId: "payments", match: ["payments"], icon: "cash" },
-  { label: "Chat", destId: "messages", match: ["messages"], icon: "chat" },
-];
+import { NavIcon } from "@/components/NavIcon";
+import { SignOutButton } from "@/components/SignOutButton";
+import { PARENT_NAV, resolveBreadcrumb } from "@/lib/nav";
+import { CATALOG_SCREENS, catalogRoute } from "@/lib/screens";
 
 export type ParentChromeProps = {
   screenId?: string;
@@ -35,10 +21,25 @@ function screenIdFromPath(pathname: string): string | undefined {
 export function ParentChrome({ screenId, active, children }: ParentChromeProps) {
   const pathname = usePathname();
   const currentId = screenId ?? screenIdFromPath(pathname);
+  const breadcrumb = resolveBreadcrumb(PARENT_NAV, currentId);
+  const currentTitle = CATALOG_SCREENS.find((s) => s.id === currentId)?.title ?? currentId;
 
   return (
     <div className="phone tint-violet">
       <div className="phonewrap">
+        <header className="crumbstrip">
+          <Link href={catalogRoute("parent-home")} className="wm wm--sm">
+            TutorOS
+          </Link>
+          {breadcrumb ? (
+            <nav className="crumb" aria-label="Breadcrumb">
+              <Link href={catalogRoute(breadcrumb.parent.destId)}>{breadcrumb.parent.label}</Link>
+              <span aria-hidden="true">›</span>
+              <span className="crumb__here">{currentTitle}</span>
+            </nav>
+          ) : null}
+          <SignOutButton className="signout signout--sm" />
+        </header>
         <div className="phonewrap__body">{children}</div>
         <nav className="appnav pnav" aria-label="Parent app">
           {PARENT_NAV.map((it) => {

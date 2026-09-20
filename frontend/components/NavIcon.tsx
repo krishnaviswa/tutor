@@ -11,7 +11,8 @@ export type NavIconName =
   | "cal"
   | "users"
   | "book"
-  | "gear";
+  | "gear"
+  | "clock";
 
 const PATHS: Record<NavIconName, ReactNode> = {
   home: (
@@ -69,6 +70,12 @@ const PATHS: Record<NavIconName, ReactNode> = {
     <>
       <circle cx="12" cy="12" r="3" />
       <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" />
+    </>
+  ),
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
     </>
   ),
 };

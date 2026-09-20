@@ -163,6 +163,20 @@ button { font-family: inherit; }
   flex-direction: column;
   gap: 2px;
 }
+.cons__brand {
+  font-size: .95rem;
+  padding: 4px 10px 14px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--line-soft);
+  text-decoration: none;
+  color: var(--ink);
+}
+.cons__side-foot {
+  margin-top: auto;
+  border-top: 1px solid var(--line-soft);
+  padding: 10px 10px 2px;
+}
+.cons__side-foot .signout { font-size: .8rem; }
 .cons__side a {
   display: flex;
   align-items: center;
@@ -180,16 +194,49 @@ button { font-family: inherit; }
 .cons__main { padding: 20px 22px; min-width: 0; }
 .cons__main > h2 { font-size: 1.3rem; margin-bottom: 3px; }
 .cons__main > .k { margin-bottom: 16px; display: block; }
+.crumb {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-faint);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.crumb a { color: var(--tint); text-decoration: none; }
+.crumb a:hover { text-decoration: underline; }
+.crumb__here { color: var(--ink-soft); }
 @media (max-width: 720px) {
   .cons { grid-template-columns: 1fr; }
   .cons__side {
     flex-direction: row;
+    align-items: center;
     overflow-x: auto;
     border-right: 0;
     border-bottom: 1px solid var(--line-soft);
     padding: 8px;
+    /* Trailing clearance so the last item (sign-out) can scroll clear of
+       the fixed .theme-dock toggle, which floats at top-right regardless
+       of this row's scroll position. */
+    padding-right: 74px;
   }
+  .cons__brand {
+    flex: none;
+    padding: 4px 10px;
+    margin-bottom: 0;
+    border-bottom: 0;
+    border-right: 1px solid var(--line-soft);
+  }
+  .cons__brand i { display: none; }
   .cons__side a span { display: none; }
+  .cons__side-foot {
+    margin-top: 0;
+    margin-left: auto;
+    border-top: 0;
+    border-left: 1px solid var(--line-soft);
+    padding: 4px 8px;
+    flex: none;
+  }
   .cons__main { padding: 14px; }
 }
 
@@ -529,6 +576,21 @@ button { font-family: inherit; }
   flex-direction: column;
 }
 .phonewrap__body { flex: 1 0 auto; }
+.crumbstrip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 16px;
+  /* .phone is flush (or near-flush) with the viewport below ~950px wide,
+     which is where the fixed .theme-dock toggle (top:10px; right:12px)
+     would otherwise sit on top of the sign-out button. */
+  padding-right: 74px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line-soft);
+}
+.crumbstrip .crumb { margin-bottom: 0; min-width: 0; overflow: hidden; }
+.crumbstrip .crumb__here { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .appbar {
   display: flex;
   align-items: center;
@@ -591,6 +653,19 @@ button { font-family: inherit; }
   padding: 2px 6px;
   font-style: normal;
 }
+.wm--sm { font-size: .82rem; text-decoration: none; color: var(--ink); flex: none; }
+
+.signout {
+  background: none;
+  border: none;
+  border-bottom: 2px solid var(--tint);
+  color: var(--tint);
+  font-weight: 600;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+.signout--sm { font-size: .74rem; flex: none; }
 .steps {
   font-family: var(--mono);
   font-size: 10px;
