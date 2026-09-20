@@ -220,7 +220,11 @@ export function SessionPreScreen() {
         </div>
       </div>
       <div style={{ marginTop: 6 }}>
-        <Link href="/app/faculty/live-teacher" className="hot hot--btn" style={btnStyle({ textDecoration: "none" })}>
+        <Link
+          href={`/app/faculty/live-teacher?session=${sessionId}`}
+          className="hot hot--btn"
+          style={btnStyle({ textDecoration: "none" })}
+        >
           Start class
         </Link>
       </div>

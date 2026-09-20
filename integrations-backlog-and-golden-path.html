@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Integrations backlog &amp; golden path — TutorOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;600&family=Hanken+Grotesk:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#F3F6F0; --surface:#FBFCF9; --sunk:#EBEFE6; --raised:#FFFFFF;
+  --ink:#182019; --ink-soft:#4C574F; --ink-faint:#7E8A81;
+  --line:#D6DCCF; --line-soft:#E4E9DD;
+  --accent:#2E7D4F; --accent-ink:#1E5738; --accent-wash:#E4EFE5;
+  --amber:#AF6C22; --amber-wash:#F5E9D8;
+  --crimson:#A4384A; --crimson-wash:#F3E0E1;
+  --sky:#2C6C88; --sky-wash:#DDEAEE;
+  --violet:#6A4C93; --violet-wash:#EDE6F5;
+  --serif:"Spectral",Georgia,"Times New Roman",serif;
+  --sans:"Hanken Grotesk",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --shadow:0 1px 2px rgba(24,32,25,.04), 0 12px 34px -12px rgba(24,32,25,.18);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0C110E; --surface:#171E19; --sunk:#10150F; --raised:#1E251F;
+    --ink:#E6ECE3; --ink-soft:#A4AEA4; --ink-faint:#6C776E;
+    --line:#26302A; --line-soft:#1D251F;
+    --accent:#5CB57C; --accent-ink:#8CD3A5; --accent-wash:#173224;
+    --amber:#D3944F; --amber-wash:#332413;
+    --crimson:#D06E7A; --crimson-wash:#331A1E;
+    --sky:#6BA7C2; --sky-wash:#122831;
+    --violet:#B39DDB; --violet-wash:#241C33;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 40px -14px rgba(0,0,0,.6);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+h1,h2,h3{font-family:var(--serif);font-weight:600;margin:0}
+p{margin:0}
+a{color:var(--accent-ink)}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint)}
+.topbar{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--ground) 90%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft)}
+.topbar__in{max-width:1180px;margin:0 auto;padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{font-family:var(--serif);font-weight:600}
+.brand .ph{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:2px 7px;margin-left:8px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tabs a{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;background:var(--surface);color:var(--ink-soft);border:1px solid var(--line);border-radius:999px;padding:6px 11px;text-decoration:none}
+.tabs a:hover{border-color:var(--ink-faint)}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 90px}
+.lede{color:var(--ink-soft);max-width:76ch;margin:8px 0 4px}
+section{margin:40px 0}
+section h2{font-size:1.4rem;display:flex;align-items:center;gap:10px}
+.n{font-family:var(--mono);font-size:12px;color:var(--accent-ink);background:var(--accent-wash);border-radius:999px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.sub{color:var(--ink-soft);max-width:78ch;margin:6px 0 18px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin:16px 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:var(--shadow)}
+.card h3{font-size:1rem;margin-bottom:6px}
+.card .k{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-bottom:8px}
+.card ul{margin:6px 0 0;padding-left:18px;font-size:.88rem;color:var(--ink-soft)}
+.card li{margin:4px 0}
+.tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:2px 8px;margin:0 6px 6px 0}
+.tag.have{background:var(--accent-wash);color:var(--accent-ink);border-color:var(--accent)}
+.tag.gap{background:var(--crimson-wash);color:var(--crimson);border-color:var(--crimson)}
+.tag.new{background:var(--sky-wash);color:var(--sky);border-color:var(--sky)}
+.tag.tier2{background:var(--violet-wash);color:var(--violet);border-color:var(--violet)}
+.tag.block{background:var(--crimson-wash);color:var(--crimson);border-color:var(--crimson)}
+.tag.cosmetic{background:var(--amber-wash);color:var(--amber);border-color:var(--amber)}
+.tag.risk{background:var(--sky-wash);color:var(--sky);border-color:var(--sky)}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.85rem;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+th{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);background:var(--sunk)}
+tr:last-child td{border-bottom:none}
+td code, li code, p code{font-family:var(--mono);font-size:.82em;background:var(--sunk);border:1px solid var(--line-soft);border-radius:5px;padding:1px 5px}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:16px 0}
+.flow .step{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-size:.84rem;box-shadow:var(--shadow)}
+.flow .arr{color:var(--ink-faint);font-family:var(--mono)}
+.flow .step b{display:block;font-size:.72rem;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.callout{border:1px solid var(--amber);background:var(--amber-wash);border-radius:12px;padding:14px 16px;font-size:.9rem;margin:16px 0}
+.callout.ok{border-color:var(--accent);background:var(--accent-wash)}
+.callout b{color:var(--amber)}
+.callout.ok b{color:var(--accent-ink)}
+ol.punch{padding-left:20px;font-size:.92rem}
+ol.punch li{margin:10px 0}
+footer{color:var(--ink-faint);font-size:.8rem;margin-top:60px;border-top:1px solid var(--line-soft);padding-top:16px}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topbar__in">
+  <div class="brand">TutorOS <span class="ph">integrations &amp; golden path</span></div>
+  <nav class="tabs">
+    <a href="product-viewer.html">Product hub</a>
+    <a href="billing-subscription-plan.html">Billing plan</a>
+    <a href="work-log.html">Work log</a>
+    <a href="README.md">README</a>
+  </nav>
+</div></header>
+
+<div class="wrap">
+  <p class="eyebrow">Next-steps plan · not a catalog screen · drafted 2026-09-20</p>
+  <h1>External interfaces backlog, and the one flow that has to work on mocks alone</h1>
+  <p class="lede">Two different questions, answered separately on purpose. §1 is everything that eventually needs a real vendor behind it — a backlog for Spec Kit to pick up one integration at a time. §2 assumes you never flip a single one of those on, and asks: what's missing to make <b>one continuous walkthrough</b> — admin → tutor → student → parent — actually click together today, fully mocked. The short answer to §2 turned out better than expected: most of it already works. The gaps are specific and small.</p>
+
+  <div class="callout"><b>Numbering correction:</b> <code>specs/007-sessions-timetable</code> already exists (status <b>Testing</b>, not yet Accepted) — it added `sessions` + `availability` screens, taking the closed catalog from 47 to 49 ids, and gave every session a computed <code>display_status</code> (Upcoming / Auto completed / Staff completed / Cancelled). That's exactly the "was this class actually delivered" signal the earlier hourly-billing plan needed and assumed was missing. Next open spec slot is <b>008</b>, not 007.</div>
+
+  <section>
+    <h2><span class="n">1</span> External interfaces backlog</h2>
+    <p class="sub">TutorOS already names 8 vendor ports in <code>catalog/ports.json</code> — all default to <code>mock</code>, each with one env var and a named live provider. That's <b>Tier 1</b>: the seam exists, flipping it on is a scoped spec. <b>Tier 2</b> is integrations the product will need that don't have a port yet at all — no env var, no mock, nothing in the catalog.</p>
+
+    <h3 style="font-size:.95rem;margin:18px 0 4px">Tier 1 — port already scaffolded, mock today, flip-to-real is the whole spec</h3>
+    <table>
+      <tr><th>Interface</th><th>Env var</th><th>Live candidate</th><th>Touches</th><th>Why it matters</th></tr>
+      <tr><td>Video / calendar</td><td><code>VIDEO_PROVIDER</code></td><td>google | microsoft</td><td><code>schedule</code>, <code>session-pre</code>, <code>join</code>, <code>live-teacher</code>, <code>live-student</code></td><td>Real Meet/Teams link generation — the actual class happens here</td></tr>
+      <tr><td>SMS (OTP)</td><td><code>SMS_PROVIDER</code></td><td>msg91</td><td><code>student-login</code>, <code>staff-login</code></td><td>Phone OTP is the default identity mechanism (README §8)</td></tr>
+      <tr><td>Email</td><td><code>EMAIL_PROVIDER</code></td><td>ses | postmark</td><td><code>staff-login</code>, <code>notif-prefs</code></td><td>Magic-link login + transactional mail</td></tr>
+      <tr><td>Object storage</td><td><code>STORAGE_PROVIDER</code></td><td>s3 | r2</td><td><code>record</code>, <code>library</code></td><td>Recordings/attachments currently local disk only</td></tr>
+      <tr><td>Payments (student-facing)</td><td><code>PAYMENTS_STUDENT_PROVIDER</code></td><td>razorpay</td><td><code>billing</code>, <code>payments</code></td><td>Tenant collects real money from families — see billing-subscription-plan.html §1/§2</td></tr>
+      <tr><td>Payments (platform-facing)</td><td><code>PAYMENTS_PLATFORM_PROVIDER</code></td><td>stripe</td><td><code>subscription</code>, <code>owner</code></td><td>TutorOS collects from the tenant — Axis A, currently the thinnest of all</td></tr>
+      <tr><td>Push</td><td><code>PUSH_PROVIDER</code></td><td>fcm</td><td><code>notif-prefs</code></td><td>Mobile/browser push channel</td></tr>
+      <tr><td>WhatsApp</td><td><code>WHATSAPP_PROVIDER</code></td><td>meta_cloud</td><td><code>notif-prefs</code>, <code>announce</code>, <code>messages</code></td><td>Non-negotiable #3 — teacher/parent/admin outbound; needs Meta template approval before going live</td></tr>
+    </table>
+
+    <h3 style="font-size:.95rem;margin:18px 0 4px">Tier 2 — no port yet; each needs a small spec before it can even be a mock</h3>
+    <table>
+      <tr><th>Interface</th><th>Status today</th><th>Live candidate</th><th>Touches</th><th>Note</th></tr>
+      <tr><td>TOTP / authenticator 2FA</td><td><span class="tag gap">absent</span> — no MFA of any kind</td><td>none needed — TOTP (RFC 6238) is self-hosted crypto, not a vendor call</td><td><code>staff-login</code>, owner/staff accounts</td><td>The one item on this list you can build fully real, mock-free, in-repo — worth doing early since it needs no vendor key at all</td></tr>
+      <tr><td>Staff SSO (Google Workspace / institute SSO)</td><td><span class="tag gap">absent</span> — README §8 flags as "later"</td><td>Google OAuth, SAML/OIDC for institutes</td><td><code>staff-login</code></td><td>Real vendor + real security review before enabling</td></tr>
+      <tr><td>Speech-to-text</td><td><span class="tag gap">table exists, empty</span> — <code>transcript_events</code></td><td>Whisper API / Google STT / Azure Speech</td><td><code>record</code>, <code>lesson</code>, <code>library</code></td><td>README §11: "a slot on session record, not a port" — needs to become one</td></tr>
+      <tr><td>AI / LLM assist</td><td><span class="tag gap">absent</span> — README: "AI/LLM vendors are not called"</td><td>Anthropic / OpenAI</td><td><code>qbank</code>, <code>doubt-teacher</code>, <code>analysis</code>, <code>mentor</code></td><td>Question generation, doubt triage, progress narrative — genuinely new port class, not a swap-in</td></tr>
+      <tr><td>Observability (errors/metrics)</td><td><span class="tag gap">absent</span></td><td>Sentry, Datadog/Grafana</td><td>all — infra, not a screen</td><td>Not a "port" in the vendor-edge sense (no business data flows through it) — still required pre-launch</td></tr>
+      <tr><td>Personal calendar sync</td><td><span class="tag gap">absent</span></td><td>Google Calendar / Outlook</td><td><code>availability</code> (new in 007)</td><td>Optional nice-to-have once <code>staff_availability</code> (007) is Accepted — two-way sync is its own spec</td></tr>
+    </table>
+    <p class="sub">Suggested backlog grouping for PM intake (numbers assigned at <code>/speckit.specify</code> time, next open is 008): <b>auth-hardening</b> (TOTP, then SSO), <b>payments-live</b> (both payment ports — the highest-risk one, do last, after §2 below and after the hourly-billing spec), <b>comms-live</b> (SMS + email + WhatsApp — bundle, they share the "real OTP/notify" risk surface), <b>media-live</b> (video + storage — bundle, both gate the actual class experience), <b>ai-and-stt</b> (new capability, not a swap — do independently, no urgency). One integration per spec, mock stays the default until its spec is Accepted, per non-negotiable #6.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">2</span> One coherent mocked flow across admin, tutor, student, parent</h2>
+    <p class="sub">Audited by reading the actual wired screens and routers (not assumed): <code>frontend/components/wired/{Join,LiveTeacher,LiveStudent,SessionVideo,Record,Billing,Payments}Screen.tsx</code> and the endpoints they call.</p>
+
+    <div class="callout ok"><b>What already works, verified:</b> Join → live-teacher/live-student → record → timeline write is real, not placeholder — each screen calls a real endpoint and changes real state (<code>/join/{token}</code>, <code>/join/{token}/enter</code>, <code>/sessions/{id}/live</code>, <code>/sessions/{id}/engagement</code>, <code>/sessions/{id}/record</code>). Billing has a real "Issue invoice" form (owner-only, <code>POST /invoices</code>) with a plan-driven <code>auto</code> path through <code>auto_invoice()</code>. Payments has a real "Pay (mock)" button wired to <code>POST /payments/checkout</code>, ownership-checked. Parent fee visibility defaults to visible once a link is accepted — it does not silently hide invoices. Role gating is more permissive than the catalog's single `role` field suggests: parent already reaches payments/timeline/reports/messages through the student/faculty routes via multi-role `LoginGate`. "Faculty" is confirmed a display label only — the real RBAC role is `teacher`.</div>
+
+    <table>
+      <tr><th>Gap</th><th>Kind</th><th>Severity</th><th>Fix</th></tr>
+      <tr><td>No automated test chains the whole journey (onboard → enrol → schedule → teach → bill) — every test is single-feature/single-endpoint across 12 test files, 52 tests</td><td>test coverage</td><td><span class="tag risk">unverified</span></td><td>Add one <code>test_walkthrough.py</code> integration test that chains the full sequence and asserts the end state at each hop</td></tr>
+      <tr><td><code>Enrollment</code> has no <code>plan_id</code> — enrolling a student never suggests/creates an invoice; staff does Billing as a disconnected manual step</td><td>functional</td><td><span class="tag cosmetic">cosmetic</span></td><td>Already scoped in billing-subscription-plan.html §1 — add the FK there</td></tr>
+      <tr><td><code>BillingScreen.tsx</code> amount field defaults to a hardcoded <code>450000</code> cents; picking a plan doesn't auto-fill it unless "auto" is ticked</td><td>UI</td><td><span class="tag cosmetic">cosmetic</span></td><td>Default <code>auto=true</code> when a plan is selected, or auto-fill the amount from <code>Plan.amount_cents</code></td></tr>
+      <tr><td>Session id propagation through Join → Live → Record relies on query params with a <code>sessions[0]</code> fallback — plausible from source, never click-tested live</td><td>functional (unverified)</td><td><span class="tag risk">unverified</span></td><td>Click through once in a real browser against the dev stack; a wrong fallback would silently show the wrong session's data, not error</td></tr>
+      <tr><td>Parent-link hand-off is manual copy/paste of a token between the staff and parent sessions</td><td>by design</td><td><span class="tag cosmetic">expected</span></td><td>Nothing to build — WhatsApp is mock so there's no auto-delivery; just script this step when demoing</td></tr>
+    </table>
+
+    <h3 style="font-size:.95rem;margin:18px 0 4px">Punch list — minimal, 100% mock, no vendor work</h3>
+    <ol class="punch">
+      <li><b>Run the walkthrough live, once, in a browser.</b> Everything above was verified by reading source, not by clicking. This is the single highest-value next step and the only way to catch the <code>sessions[0]</code> fallback risk. I can drive this myself in the built-in browser pane against your local dev stack (Compose Postgres + <code>uvicorn</code> + <code>npm run dev</code>) if you want it done now, as admin → teacher → student → parent, back to back.</li>
+      <li><b>Add <code>backend/tests/test_walkthrough.py</code></b> — one integration test chaining workspace → roster → cohort → schedule → join/enter → record → timeline assertion → invoice(auto) → checkout → <code>invoices/mine</code> paid for both student and accepted parent. Turns "should work" into "proven to work," and catches the next regression before a live demo does.</li>
+      <li><b>Default <code>auto=true</code> in <code>BillingScreen.tsx</code> when a plan is picked</b> so the first click in any demo is plan-accurate, not a placeholder number.</li>
+      <li><b>Write down the parent-link hand-off as an explicit demo step</b> (mint token as staff, paste as parent) — no code change, just avoids a confused pause mid-walkthrough.</li>
+    </ol>
+    <p class="sub">None of this needs a spec-kit feature on its own — items 2–4 are small enough to fold into whichever spec picks up the billing work (see billing-subscription-plan.html §5), and item 1 is just running what already exists.</p>
+  </section>
+
+  <footer>TutorOS · integrations-backlog-and-golden-path.html · grounded in <code>catalog/ports.json</code>, <code>catalog/env.json</code>, <code>.env.example</code>, <code>catalog/flows.json</code>, <code>specs/007-sessions-timetable/</code>, and a source-level read of the wired Join/Live/Record/Billing/Payments screens and their endpoints. Companion to billing-subscription-plan.html.</footer>
+</div>
+</body>
+</html>

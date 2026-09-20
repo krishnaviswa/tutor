@@ -13,7 +13,7 @@ export function BillingScreen() {
   const [studentId, setStudentId] = useState("");
   const [amount, setAmount] = useState("450000");
   const [planId, setPlanId] = useState("");
-  const [auto, setAuto] = useState(false);
+  const [auto, setAuto] = useState(true);
   const [coupon, setCoupon] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -83,13 +83,25 @@ export function BillingScreen() {
           </select>
         </label>
         <label className="field">
-          <span>Amount (cents)</span>
-          <input className="field__in" value={amount} onChange={(e) => setAmount(e.target.value)} />
+          <span>Plan</span>
+          <select className="field__in" value={planId} onChange={(e) => setPlanId(e.target.value)}>
+            {plans.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name} · {rupees(p.amount_cents)}/{p.interval}
+              </option>
+            ))}
+          </select>
         </label>
         <label className="list__i" style={{ cursor: "pointer" }}>
           <input type="checkbox" checked={auto} onChange={(e) => setAuto(e.target.checked)} />
-          <span>auto</span>
+          <span>auto (prorate from plan)</span>
         </label>
+        {!auto ? (
+          <label className="field">
+            <span>Amount (cents)</span>
+            <input className="field__in" value={amount} onChange={(e) => setAmount(e.target.value)} />
+          </label>
+        ) : null}
         <label className="field">
           <span>Coupon</span>
           <input className="field__in" value={coupon} onChange={(e) => setCoupon(e.target.value)} />

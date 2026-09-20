@@ -109,7 +109,11 @@ export function LiveTeacherScreen() {
       </div>
       <Err message={error} />
       <div className="ctrls">
-        <Link href={catalogRoute("record")} className="hot hot--btn" style={{ background: "#A4384A" }}>
+        <Link
+          href={`${catalogRoute("record")}?session=${encodeURIComponent(sessionId)}`}
+          className="hot hot--btn"
+          style={{ background: "#A4384A" }}
+        >
           End class
         </Link>
       </div>
