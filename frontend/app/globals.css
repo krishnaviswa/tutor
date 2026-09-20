@@ -512,12 +512,16 @@ button { font-family: inherit; }
   font-size: 12px;
 }
 
-/* ---------- phone chrome (student + parent) ---------- */
+/* ---------- app chrome (student + parent) ---------- */
 .phone {
   min-height: 100vh;
-  max-width: 430px;
+  max-width: 900px;
   margin: 0 auto;
   background: var(--ground);
+}
+@media (min-width: 720px) {
+  .phone { padding: 0 24px; }
+  .appwrap { padding-left: 0; padding-right: 0; }
 }
 .phonewrap {
   min-height: 100vh;
