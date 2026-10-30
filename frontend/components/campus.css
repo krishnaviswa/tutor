@@ -1,0 +1,89 @@
+/* Decorative only. pointer-events stays on the artwork, never on controls. */
+.campus-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  color: color-mix(in srgb, var(--ink-faint) 72%, var(--secondary));
+  opacity: 0.42;
+}
+
+.campus-atmosphere,
+.campus-atmosphere * {
+  pointer-events: none;
+}
+
+.campus-sketch {
+  position: fixed;
+  display: block;
+  overflow: visible;
+  stroke: currentColor;
+  stroke-width: 1.15;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.campus-sketch .wash {
+  fill: currentColor;
+  fill-opacity: 0.045;
+  stroke: none;
+}
+
+/* Radcliffe Camera — left margin, or the empty stretch of the staff sidebar. */
+.campus-sketch--oxford {
+  left: 18px;
+  bottom: 92px;
+  width: 168px;
+  height: 148px;
+}
+
+/* King's College Chapel — right gutter beside a centered column. */
+.campus-sketch--kings {
+  right: 20px;
+  bottom: 36px;
+  width: min(280px, calc(50vw - 500px));
+  height: auto;
+}
+
+/* MIT Great Dome — upper right gutter, clear of the theme control. */
+.campus-sketch--dome {
+  top: 76px;
+  right: 28px;
+  width: min(168px, calc(50vw - 520px));
+  height: auto;
+}
+
+body:has(.cons) .campus-sketch--kings,
+body:has(.cons) .campus-sketch--dome {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .campus-sketch--oxford { display: none; }
+  body:has(.cons) .campus-sketch--oxford { display: block; }
+}
+
+@media (max-width: 900px) {
+  .campus-sketch--oxford { display: none; }
+}
+
+@media (max-height: 800px) {
+  body:has(.cons) .campus-sketch--oxford { display: none; }
+}
+
+@media (max-width: 1280px) {
+  .campus-sketch--kings,
+  .campus-sketch--dome { display: none; }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .campus-atmosphere { opacity: 0.38; }
+}
+
+:root[data-theme="dark"] .campus-atmosphere { opacity: 0.38; }
+
+@media print {
+  .campus-atmosphere { display: none; }
+}
