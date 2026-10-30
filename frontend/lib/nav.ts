@@ -5,12 +5,15 @@ export type NavItem = {
   destId: string;
   match: string[];
   icon: NavIconName;
+  /** Short name for the current place. Same catalog id, clearer than the screen title. */
+  hint?: string;
 };
 
 /** Exam-prep faculty: Dashboard, Schedule, Students, Practice, Doubts, Records, Content. No staff-login. */
 export const FACULTY_NAV: NavItem[] = [
   { label: "Dashboard", destId: "teacher-dash", match: ["teacher-dash"], icon: "spark" },
   { label: "Schedule", destId: "schedule", match: ["schedule", "session-pre", "sessions"], icon: "cal" },
+  { label: "Whiteboard", destId: "live-teacher", match: ["live-teacher"], icon: "board", hint: "Shared class canvas" },
   { label: "Availability", destId: "availability", match: ["availability"], icon: "clock" },
   { label: "Students", destId: "roster", match: ["roster", "cohort-builder"], icon: "users" },
   { label: "Practice", destId: "qbank", match: ["qbank", "practice-build", "assign-issue", "assign-grade", "test-setup", "analysis"], icon: "doc" },
@@ -38,7 +41,8 @@ export const ADMIN_NAV: NavItem[] = [
 /** Demo student `appnav`: Home, Classes, Practice, Doubts, You. */
 export const STUDENT_NAV: NavItem[] = [
   { label: "Home", destId: "student-dash", match: ["student-dash"], icon: "home" },
-  { label: "Classes", destId: "library", match: ["library", "lesson", "join", "live-student"], icon: "play" },
+  { label: "Classes", destId: "library", match: ["library", "lesson", "join"], icon: "play" },
+  { label: "Whiteboard", destId: "live-student", match: ["live-student"], icon: "board", hint: "Shared class canvas" },
   { label: "Practice", destId: "practice-play", match: ["practice-play", "practice-result", "test-runner"], icon: "spark" },
   { label: "Doubts", destId: "doubt-student", match: ["doubt-student"], icon: "chat" },
   { label: "You", destId: "timeline", match: ["timeline", "notif-prefs", "payments"], icon: "flag" },

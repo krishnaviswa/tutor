@@ -55,6 +55,11 @@ export function StudentDashScreen() {
         <ClassNotices />
         {data ? (
           <>
+            <Link href={catalogRoute("live-student")} className="hot hot--card">
+              <div className="k">Whiteboard</div>
+              <div style={{ fontWeight: 600, margin: "3px 0" }}>Open the class canvas</div>
+              <div className="muted">Draw with your teacher. It stays with this session.</div>
+            </Link>
             <Link href={catalogRoute("join")} className="hot hot--card">
               <div className="k">
                 {next ? whenLabel(next.starts_at) || "Next session" : "Sessions"}

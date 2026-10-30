@@ -247,7 +247,7 @@ button, input, textarea, select { font-family: inherit; color: inherit; }
     border-right: 1px solid var(--line);
   }
   .cons__brand i { display: none; }
-  .cons__side a span { display: none; }
+  .cons__side a span { display: inline; }
   .cons__side-foot {
     margin-top: 0;
     margin-left: auto;
@@ -655,7 +655,7 @@ button:disabled {
 /* ---------- app chrome (student + parent) ---------- */
 .phone {
   min-height: 100vh;
-  max-width: 720px;
+  max-width: 1040px;
   margin: 0 auto;
   background: var(--ground);
 }

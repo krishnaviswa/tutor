@@ -73,23 +73,45 @@ export function TimelineScreen() {
   const body = (
     <>
       <Err message={error} />
-      <label className="field">
-        <span>event_type</span>
-        <input
-          className="field__in"
-          value={eventType}
-          onChange={(e) => setEventType(e.target.value)}
-        />
-      </label>
+      <div className="chips" style={{ marginBottom: 12 }}>
+        {["", "session", "practice", "doubt", "attendance"].map((kind) => (
+          <button
+            key={kind || "all"}
+            type="button"
+            className={`chip${eventType === kind ? " on" : ""}`}
+            onClick={() => setEventType(kind)}
+          >
+            {kind || "All"}
+          </button>
+        ))}
+      </div>
       {events.length === 0 ? (
-        <Empty>Timeline is empty. Record, practice, and join write here first.</Empty>
-      ) : (
-        <div className="tl">
-          {events.map((e) => (
-            <div key={e.id} className="tl__i">
-              <div className="tl__t">{e.created_at || e.event_type}</div>
-              <div className="tl__b">{e.body || e.event_type}</div>
+        <div className="history">
+          <article className="history__item">
+            <div className="history__when">Example</div>
+            <div>
+              <strong>Session note</strong>
+              <p className="muted">Joined class, then a short note and the recording link land here.</p>
             </div>
+          </article>
+          <article className="history__item">
+            <div className="history__when">Example</div>
+            <div>
+              <strong>Practice</strong>
+              <p className="muted">A finished set shows the score beside the session it belongs to.</p>
+            </div>
+          </article>
+        </div>
+      ) : (
+        <div className="history">
+          {events.map((e) => (
+            <article key={e.id} className="history__item">
+              <div className="history__when">{e.created_at ? new Date(e.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : e.event_type}</div>
+              <div>
+                <strong>{e.event_type.replaceAll("_", " ")}</strong>
+                <p className="muted">{e.body || "Recorded on the timeline."}</p>
+              </div>
+            </article>
           ))}
         </div>
       )}

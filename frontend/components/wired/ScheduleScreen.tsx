@@ -414,9 +414,7 @@ export function ScheduleScreen() {
                     );
                   })
                 ) : (
-                  <div className="muted">
-                    —
-                  </div>
+                  <div className="muted">Open</div>
                 )}
               </div>
             );

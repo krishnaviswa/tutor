@@ -3,6 +3,7 @@ import Script from "next/script";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { THEME_BOOT } from "@/lib/theme";
 import "./globals.css";
+import "@/components/experience.css";
 
 export const metadata = {
   title: "TutorOS",

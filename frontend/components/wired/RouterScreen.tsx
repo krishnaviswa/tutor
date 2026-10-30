@@ -32,54 +32,69 @@ export function RouterScreen() {
 
   const hideStaff = kind === "exam-prep";
   const staffHref = hideStaff ? catalogRoute("teacher-dash") : catalogRoute("staff-login");
-  const staffLabel = hideStaff ? "I’m a teacher / staff" : "I’m a teacher / staff";
-  const staffHint = hideStaff
-    ? "Faculty console — exam-prep signs in on the destination, not staff-login"
-    : "Staff sign-in with OTP";
 
   return (
-    <div
-      className="tint-accent"
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "34px 24px",
-        textAlign: "center",
-        background: "var(--accent-wash)",
-      }}
-    >
-      <span className="av av--lg" style={{ background: "var(--accent)", borderRadius: 14, width: 52, height: 52, fontSize: "1rem" }}>
-        T
-      </span>
-      <h2 style={{ fontSize: "1.3rem", margin: "16px 0 4px" }}>{wsName}</h2>
-      <p className="muted" style={{ marginBottom: 26 }}>
-        One URL · three doors · one timeline
-      </p>
-      <div style={{ width: "100%", maxWidth: 280, textAlign: "left" }}>
+    <div className="role-doors">
+      <section className="role-doors__copy">
+        <p className="k" style={{ color: "rgba(255,255,255,.8)" }}>
+          Europe · India · United States · China
+        </p>
+        <h1 style={{ color: "#fff", fontSize: "2.4rem", maxWidth: 460, marginTop: 12 }}>{wsName}</h1>
+      </section>
+      <section className="role-doors__panel">
+        <h2 style={{ marginBottom: 6 }}>Choose a door</h2>
+        <p className="muted" style={{ marginBottom: 18 }}>
+          One workspace. Student, teacher, or parent.
+        </p>
         <Link href={catalogRoute("student-login")} className="hot hot--card">
           <div style={{ fontWeight: 600 }}>I’m here to learn</div>
-          <div className="muted">Student sign-in</div>
+          <div className="muted">Classes, practice, doubts, and your record</div>
         </Link>
         <Link href={staffHref} className="hot hot--card">
-          <div style={{ fontWeight: 600 }}>{staffLabel}</div>
-          <div className="muted">{staffHint}</div>
+          <div style={{ fontWeight: 600 }}>I’m a teacher</div>
+          <div className="muted">Schedule, whiteboard, students, and the doubt queue</div>
         </Link>
         <Link href={catalogRoute("parent-link")} className="hot hot--card">
           <div style={{ fontWeight: 600 }}>I’m a parent</div>
-          <div className="muted">Follow my child</div>
+          <div className="muted">Activity, reports, and fees for your child</div>
         </Link>
-      </div>
-      {!hideStaff ? null : (
-        <p className="muted" style={{ marginTop: 16, fontSize: ".72rem" }}>
-          Other templates: <Link href={catalogRoute("staff-login")}>staff-login</Link>
+        <p className="muted" style={{ marginTop: 16, fontSize: 13 }}>
+          Mock code 000000
+          {hideStaff ? (
+            <>
+              {" "}
+              · <Link href={catalogRoute("staff-login")}>other staff sign-in</Link>
+            </>
+          ) : null}
         </p>
-      )}
-      <p className="muted" style={{ marginTop: 24, fontFamily: "var(--mono)", fontSize: ".68rem" }}>
-        Powered by TutorOS · mock OTP 000000
-      </p>
+      </section>
+      <style>{`
+        .role-doors {
+          min-height: 100vh;
+          display: grid;
+          grid-template-columns: 1.1fr minmax(300px, 420px);
+        }
+        .role-doors__copy {
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          padding: 48px 40px 180px;
+        }
+        .role-doors__panel {
+          margin: 28px;
+          padding: 28px 24px;
+          background: color-mix(in srgb, var(--surface) 94%, transparent);
+          backdrop-filter: blur(16px);
+          border-radius: 24px;
+          border: 1px solid var(--line);
+          align-self: center;
+        }
+        @media (max-width: 800px) {
+          .role-doors { grid-template-columns: 1fr; }
+          .role-doors__copy { min-height: 42vh; padding: 28px 20px 24px; }
+          .role-doors__panel { margin: 0 16px 24px; }
+        }
+      `}</style>
     </div>
   );
 }

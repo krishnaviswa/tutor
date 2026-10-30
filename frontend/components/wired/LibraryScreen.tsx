@@ -97,32 +97,25 @@ export function LibraryScreen() {
         ))}
       </div>
       {shown.length === 0 ? (
-        <Empty>No content yet.</Empty>
+        <Empty>No lessons yet. A teacher can add one above.</Empty>
       ) : (
-        shown.map((it) => {
-          const pct = it.progress_pct ?? 0;
-          const kind = it.kind || "notes";
-          const dur = it.duration_label || "Open lesson";
-          return (
-            <Link key={it.id} href={`${catalogRoute("lesson")}?id=${it.id}`} className="hot hot--row">
-              <div className="gr">
-                <div className="t">{it.title}</div>
-                <div className="s muted">
-                  {kind} · {dur}
-                  {(it.playlist_ids || []).length ? ` · playlist ${it.playlist_ids?.length}` : ""}
-                  {it.drip_at ? ` · drip ${it.drip_at}` : ""}
-                  {it.views ? ` · ${it.views} views` : ""}
-                </div>
-                {pct > 0 ? (
-                  <div style={{ height: 4, background: "var(--sunk)", borderRadius: 2, marginTop: 6 }}>
-                    <b style={{ display: "block", height: "100%", width: `${pct}%`, background: "var(--tint)", borderRadius: 2 }} />
-                  </div>
-                ) : null}
-              </div>
-              {pct === 100 ? <span className="pill is-good">done</span> : null}
-            </Link>
-          );
-        })
+        <div className="lesson-grid">
+          {shown.map((it) => {
+            const pct = it.progress_pct ?? 0;
+            const kind = it.kind || "notes";
+            const dur = it.duration_label || "Open";
+            return (
+              <Link key={it.id} href={`${catalogRoute("lesson")}?id=${it.id}`} className="lesson-card">
+                <span className="k">{kind}</span>
+                <strong>{it.title}</strong>
+                <span className="muted">{dur}</span>
+                <span className="bar" aria-hidden="true">
+                  <b style={{ width: `${Math.min(pct, 100)}%` }} />
+                </span>
+              </Link>
+            );
+          })}
+        </div>
       )}
     </>
   );

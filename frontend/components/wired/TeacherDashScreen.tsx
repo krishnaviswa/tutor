@@ -58,6 +58,16 @@ export function TeacherDashScreen() {
       <ClassNotices />
       {data ? (
         <>
+          <div className="next-action">
+            <div>
+              <div className="k">Next</div>
+              <strong>{chase.length ? `Check in with ${chase[0].display_name}` : "Open the class canvas"}</strong>
+              <p>{chase.length ? chase[0].reason : "Whiteboard, schedule, and the people in this cohort."}</p>
+            </div>
+            <Link href={catalogRoute(chase.length ? "roster" : "live-teacher")} className="hot hot--btn">
+              {chase.length ? "Open students" : "Whiteboard"}
+            </Link>
+          </div>
           <div className="grid g4" style={{ marginBottom: 14 }}>
             <div className="stat">
               <div className="stat__v">{data.attendance_pct ?? 0}%</div>
@@ -129,6 +139,9 @@ export function TeacherDashScreen() {
         </p>
       </div>
       <div className="row" style={{ marginTop: 12 }}>
+        <Link href={catalogRoute("live-teacher")} className="hot hot--btn">
+          Open whiteboard
+        </Link>
         <Link href={catalogRoute("schedule")} className="hot hot--btn">
           Open schedule
         </Link>

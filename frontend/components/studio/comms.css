@@ -54,8 +54,16 @@
 }
 
 .studio-msg {
-  padding: 8px 0;
-  border-bottom: 1px solid var(--line);
+  padding: 8px 10px;
+  margin: 6px 0;
+  border: 0;
+  border-radius: 14px;
+  background: var(--sunk);
+  max-width: 85%;
+}
+
+.studio-chat__list {
+  scroll-behavior: smooth;
 }
 
 .studio-msg:last-child {

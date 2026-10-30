@@ -31,6 +31,9 @@ export function PhoneChrome({ screenId, active, children }: PhoneChromeProps) {
           <Link href={catalogRoute("student-dash")} className="wm wm--sm">
             TutorOS
           </Link>
+          <span className="place" style={{ margin: 0 }}>
+            <strong>{currentTitle || "Home"}</strong>
+          </span>
           {breadcrumb ? (
             <nav className="crumb" aria-label="Breadcrumb">
               <Link href={catalogRoute(breadcrumb.parent.destId)}>{breadcrumb.parent.label}</Link>

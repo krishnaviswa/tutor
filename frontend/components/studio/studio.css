@@ -130,6 +130,50 @@
   cursor: crosshair;
 }
 
+.board-room {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: calc(100vh - 120px);
+}
+
+.board-room__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.board-room__bar h2 {
+  font-size: 1.35rem;
+  margin: 0;
+}
+
+.board-room__bar p {
+  margin: 2px 0 0;
+}
+
+.board-room__pick {
+  margin: 0;
+  min-width: min(280px, 100%);
+}
+
+.board-room .studio-board {
+  flex: 1 1 auto;
+}
+
+.board-room .studio-surface {
+  aspect-ratio: auto;
+  min-height: min(68vh, 760px);
+  background: #fff;
+}
+
+.board-room__foot {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .studio-hint {
   position: absolute;
   inset: 0;

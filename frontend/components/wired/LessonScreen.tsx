@@ -71,12 +71,10 @@ export function LessonScreen() {
         ) : !item ? (
           error ? null : <Empty>No lessons in the library yet.</Empty>
         ) : (
-          <>
-            <div className="stage" style={{ aspectRatio: "16/9" }}>
-              {item.kind === "video" ? "▶" : item.kind || "notes"}
-            </div>
-            <h2 style={{ margin: "16px 0 4px" }}>{item.title}</h2>
-            <div className="muted" style={{ marginBottom: 12 }}>
+          <article className="lesson-read">
+            <div className="stage">{item.kind === "video" ? "Play lesson" : item.kind || "Notes"}</div>
+            <h2 style={{ margin: "18px 0 4px" }}>{item.title}</h2>
+            <div className="muted" style={{ marginBottom: 16 }}>
               {[item.kind, item.duration_label].filter(Boolean).join(" · ") || "Lesson"}
             </div>
             {notes.length ? (
@@ -88,13 +86,13 @@ export function LessonScreen() {
                 </ul>
               </div>
             ) : (
-              <p className="muted">No notes yet.</p>
+              <p className="muted">Notes for this lesson will show here.</p>
             )}
             <Link href={catalogRoute("practice-play")} className="hot hot--card">
               <div className="k">Next</div>
-              <div style={{ fontWeight: 600, marginTop: 3 }}>{next?.title || "Practice"}</div>
+              <div style={{ fontWeight: 600, marginTop: 3 }}>{next?.title || "Practice this"}</div>
             </Link>
-          </>
+          </article>
         )}
       </div>
     </>

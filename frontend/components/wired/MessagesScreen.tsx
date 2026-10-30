@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CohortChat } from "@/components/studio/CohortChat";
 import { api } from "@/lib/api";
-import { AppBar, Empty, Err, Loading } from "./bits";
+import { AppBar, Err, Loading } from "./bits";
 
 type Thread = { id: string; student_id?: string | null; last_body?: string; unread?: boolean };
 type Role = string;
@@ -20,6 +20,13 @@ export function MessagesScreen() {
   const [ready, setReady] = useState(false);
   const [cohorts, setCohorts] = useState<{ id: string; name: string }[]>([]);
   const [cohortId, setCohortId] = useState("");
+  const [delivery, setDelivery] = useState("");
+  const logRef = useRef<HTMLDivElement>(null);
+
+  const samples: Thread[] = [
+    { id: "ex-1", last_body: "Could we revisit the last example before Thursday?", student_id: "Example · after class" },
+    { id: "ex-2", last_body: "I sent the notes from today’s session.", student_id: "Example · class notes" },
+  ];
 
   function load() {
     api("/api/v1/threads")
@@ -47,71 +54,124 @@ export function MessagesScreen() {
     setBusy(true);
     setError("");
     try {
-      const threadId = sel?.id || "new";
+      const real = sel && threads.some((t) => t.id === sel.id) ? sel : null;
+      const threadId = real?.id || "new";
       await api(`/api/v1/threads/${threadId}/messages`, {
         method: "POST",
         body: JSON.stringify({
           body,
-          student_id: studentId || sel?.student_id || undefined,
+          student_id: studentId || real?.student_id || undefined,
           ...(attachment.trim() ? { attachment: attachment.trim() } : {}),
         }),
       });
       setBody("");
+      setDelivery("Sent");
       load();
     } catch (err) {
+      setDelivery("");
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setBusy(false);
     }
   }
 
+  const shown = threads.length ? threads : samples;
+  const active = sel && threads.some((t) => t.id === sel.id) ? sel : shown[0];
+  const example = active ? !threads.some((t) => t.id === active.id) : false;
+
+  useEffect(() => {
+    const log = logRef.current;
+    if (!log) return;
+    log.scrollTop = log.scrollHeight;
+  }, [active?.id, active?.last_body, delivery, body]);
+
   const list = (
     <>
       <Err message={error} />
-      {!ready ? (
-        <Loading>Loading messages…</Loading>
-      ) : threads.length === 0 && !error ? (
-        <Empty>No threads yet. Send the first message.</Empty>
-      ) : null}
-      {threads.map((t) => (
-        <button
-          key={t.id}
-          type="button"
-          className={sel?.id === t.id ? "hot hot--row" : "card"}
-          style={{ width: "100%", textAlign: "left" }}
-          onClick={() => setSel(t)}
-        >
-          <div className="t">{t.last_body || t.id}</div>
-          <div className="s muted">{t.student_id}</div>
-          {t.unread ? <span className="pill">unread</span> : null}
-        </button>
-      ))}
-      <div className="card">
-        {role !== "student" && role !== "parent" ? (
-          <label className="field">
-            <span>Student id (new thread)</span>
-            <input className="field__in" value={studentId} onChange={(e) => setStudentId(e.target.value)} />
-          </label>
-        ) : null}
-        <label className="field">
-          <span>Message</span>
-          <textarea className="field__in" value={body} onChange={(e) => setBody(e.target.value)} rows={3} />
-        </label>
-        <label className="field">
-          <span>Attachment</span>
-          <input
-            className="field__in"
-            value={attachment}
-            onChange={(e) => setAttachment(e.target.value)}
-            placeholder="local/note.txt"
-          />
-        </label>
-        <button className="hot hot--btn" type="button" disabled={busy} aria-busy={busy} onClick={() => void send()}>
-          {busy ? "Sending" : "Send"}
-        </button>
+      {!ready ? <Loading>Loading messages…</Loading> : null}
+      <div className="chat">
+        <div className="chat__list" aria-label="Threads">
+          {shown.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              className={active?.id === t.id ? "chat__person on" : "chat__person"}
+              onClick={() => setSel(t)}
+            >
+              <b>{t.student_id || "Conversation"}</b>
+              <span>{t.last_body || "No messages yet"}</span>
+            </button>
+          ))}
+        </div>
+        <section className="chat__thread" aria-label="Conversation">
+          <div className="chat__log" ref={logRef}>
+            {example ? (
+              <p className="muted" style={{ margin: "0 0 8px" }}>
+                Example thread, so the inbox isn’t an empty page. A message you send is saved.
+              </p>
+            ) : null}
+            {active?.last_body ? (
+              <div className="bubble">
+                {active.last_body}
+                <small>{active.unread ? "Unread" : "On the record"}</small>
+              </div>
+            ) : (
+              <p className="muted">Write the first note in this thread.</p>
+            )}
+            {body.trim() && busy ? (
+              <div className="bubble bubble--mine">
+                {body}
+                <small>Sending…</small>
+              </div>
+            ) : null}
+          </div>
+          <form
+            className="chat__compose"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void send();
+            }}
+          >
+            <textarea
+              rows={2}
+              value={body}
+              placeholder="Write a message"
+              onChange={(event) => {
+                setBody(event.target.value);
+                if (delivery) setDelivery("");
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  void send();
+                }
+              }}
+            />
+            <button className="hot hot--btn" type="submit" disabled={busy || !body.trim()} aria-busy={busy}>
+              {busy ? "Sending" : delivery || "Send"}
+            </button>
+          </form>
+          {role !== "student" && role !== "parent" ? (
+            <label className="field" style={{ margin: "0 12px 12px" }}>
+              <span>Student id for a new thread</span>
+              <input className="field__in" value={studentId} onChange={(e) => setStudentId(e.target.value)} />
+            </label>
+          ) : null}
+          {attachment !== undefined ? (
+            <label className="field" style={{ margin: "0 12px 8px" }}>
+              <span>Attachment</span>
+              <input
+                className="field__in"
+                value={attachment}
+                onChange={(e) => setAttachment(e.target.value)}
+                placeholder="Optional path"
+              />
+            </label>
+          ) : null}
+        </section>
       </div>
       {role !== "parent" && cohorts.length > 0 ? (
-        <div className="card">
+        <div className="card" style={{ marginTop: 14 }}>
           <label className="field">
             <span>Class chat</span>
             <select className="field__in" value={cohortId} onChange={(e) => setCohortId(e.target.value)}>

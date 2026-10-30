@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { SessionBoard } from "@/components/studio/SessionBoard";
 import { CohortChat } from "@/components/studio/CohortChat";
 import { api } from "@/lib/api";
+import { MOCK_TENANTS } from "@/lib/mocks";
 import { catalogRoute } from "@/lib/screens";
 import { Err } from "./bits";
 
@@ -26,7 +27,31 @@ export function LiveStudentScreen() {
 
   useEffect(() => {
     const id = params.get("session");
-    if (id) setSessionId(id);
+    if (id) {
+      setSessionId(id);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const row = (await api("/api/v1/me/dashboard")) as { next_session?: { id?: string } | null };
+        if (cancelled) return;
+        if (row.next_session?.id) {
+          setSessionId(row.next_session.id);
+          return;
+        }
+        // The demo class is already on the calendar, even when it is no longer "upcoming".
+        const join = (await api(`/api/v1/join/${encodeURIComponent(MOCK_TENANTS["exam-prep"].joinToken)}`)) as {
+          session_id?: string;
+        };
+        if (!cancelled && join.session_id) setSessionId(join.session_id);
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : String(e));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [params]);
 
   function loadLive(id: string) {
@@ -59,24 +84,22 @@ export function LiveStudentScreen() {
   }
 
   return (
-    <div className="studio" style={{ display: "flex", flexDirection: "column", minHeight: "70vh" }}>
-      {!sessionId ? (
-        <div style={{ padding: 16 }}>
-          <p className="muted">Join from the waiting room so attendance is recorded.</p>
-          <Link href={catalogRoute("join")} className="hot hot--btn">
-            Open join
-          </Link>
+    <div className="board-room">
+      <header className="board-room__bar">
+        <div>
+          <h2>Whiteboard</h2>
+          <p className="muted">{live?.session.title || "Shared class canvas"}</p>
         </div>
-      ) : null}
-      <div className="vmain" style={{ aspectRatio: "3/4", flex: 1 }}>
-        {live?.session.title || "Waiting"} · {live?.view || "student"}
-        <div style={{ width: "100%" }}>{live?.video_url || "Join from the waiting room first"}</div>
-      </div>
+        <Link href={catalogRoute("join")} className="btn btn--sm">
+          Join for attendance
+        </Link>
+      </header>
+      <Err message={error} />
       {sessionId ? (
-        <div className="card">
-          <SessionBoard sessionId={sessionId} />
-        </div>
-      ) : null}
+        <SessionBoard sessionId={sessionId} />
+      ) : (
+        <p className="muted">No upcoming class yet. Join from the waiting room when one is on the calendar.</p>
+      )}
       {live?.session.cohort_id ? (
         <div className="card">
           <CohortChat cohortId={live.session.cohort_id} title="Class chat" />
@@ -105,9 +128,8 @@ export function LiveStudentScreen() {
           </>
         ) : null}
       </div>
-      <Err message={error} />
-      <div className="ctrls">
-        <Link href={catalogRoute("student-dash")} className="hot hot--btn danger">
+      <div className="board-room__foot">
+        <Link href={catalogRoute("student-dash")} className="btn btn--sm">
           Leave
         </Link>
       </div>

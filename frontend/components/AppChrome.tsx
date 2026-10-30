@@ -72,6 +72,10 @@ export function AppChrome({ kind, role, active, screenId, children }: AppChromeP
         </div>
       </aside>
       <div className="cons__main">
+        <p className="place">
+          <span>{resolvedKind === "admin" ? "Owner" : "Faculty"}</span>
+          <strong>{currentTitle}</strong>
+        </p>
         {breadcrumb ? (
           <nav className="crumb" aria-label="Breadcrumb">
             <Link href={catalogRoute(breadcrumb.parent.destId)}>{breadcrumb.parent.label}</Link>

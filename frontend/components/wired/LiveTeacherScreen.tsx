@@ -66,54 +66,53 @@ export function LiveTeacherScreen() {
   }
 
   return (
-    <div className="studio">
-      <div className="sb">
-        <h2 style={{ fontSize: "1.1rem" }}>{live?.session.title || "Live"} · {live?.view || "teacher"}</h2>
-        <span className="pill is-bad">REC mock</span>
-      </div>
-      <label className="field" style={{ marginTop: 10 }}>
-        <span>Session</span>
-        <select className="field__in" value={sessionId} onChange={(e) => setSessionId(e.target.value)}>
-          {sessions.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.title}
-            </option>
-          ))}
-        </select>
-      </label>
-      <div className="vmain" style={{ marginTop: 10 }}>
-        {live?.video_url || "Attach a mock video link on session-pre"}
-      </div>
-      {sessionId ? (
-        <div className="card" style={{ marginTop: 12 }}>
-          <div className="row" style={{ marginBottom: 8 }}>
-            <button
-              className="hot hot--btn"
-              type="button"
-              disabled={busy}
-              onClick={() => {
-                setBusy(true);
-                setError("");
-                api(`/api/v1/sessions/${sessionId}/start`, { method: "POST" })
-                  .then(() => setStarted("Class started. People in this class can see the notice."))
-                  .catch((err) => setError(err instanceof Error ? err.message : String(err)))
-                  .finally(() => setBusy(false));
-              }}
-            >
-              {busy ? "Starting" : "Start class"}
-            </button>
-            {started ? <span className="muted">{started}</span> : null}
-          </div>
-          <SessionBoard sessionId={sessionId} />
+    <div className="board-room">
+      <header className="board-room__bar">
+        <div>
+          <h2>Whiteboard</h2>
+          <p className="muted">{live?.session.title || "Shared class canvas"}</p>
         </div>
-      ) : null}
+        <label className="field board-room__pick">
+          <span>Session</span>
+          <select className="field__in" value={sessionId} onChange={(e) => setSessionId(e.target.value)}>
+            {sessions.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.title}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button
+          className="btn btn--sm"
+          type="button"
+          disabled={busy || !sessionId}
+          onClick={() => {
+            setBusy(true);
+            setError("");
+            api(`/api/v1/sessions/${sessionId}/start`, { method: "POST" })
+              .then(() => setStarted("Class started. People in this class can see the notice."))
+              .catch((err) => setError(err instanceof Error ? err.message : String(err)))
+              .finally(() => setBusy(false));
+          }}
+        >
+          {busy ? "Starting" : "Start class"}
+        </button>
+      </header>
+      {started ? <p className="muted">{started}</p> : null}
+      <Err message={error} />
+      {sessionId ? (
+        <SessionBoard sessionId={sessionId} />
+      ) : (
+        <p className="muted">No session on the calendar yet. Add one from Schedule, then the canvas opens here.</p>
+      )}
       {live?.session.cohort_id ? (
         <div className="card" style={{ marginTop: 12 }}>
           <CohortChat cohortId={live.session.cohort_id} title="Class chat" />
         </div>
       ) : null}
-      <div className="dock">
-        <div style={{ fontSize: ".82rem", marginBottom: 6 }}>Engagement ({live?.engagement?.length ?? 0})</div>
+      <details className="card">
+        <summary>Polls and check-ins ({live?.engagement?.length ?? 0})</summary>
+        <div style={{ marginTop: 10 }}>
         {(live?.engagement || []).slice(-3).map((e, i) => (
           <div key={i} className="muted">
             {e.kind}
@@ -139,12 +138,12 @@ export function LiveTeacherScreen() {
             {busy ? "Sending" : "Chat"}
           </button>
         </div>
-      </div>
-      <Err message={error} />
-      <div className="ctrls">
+        </div>
+      </details>
+      <div className="board-room__foot">
         <Link
           href={`${catalogRoute("record")}?session=${encodeURIComponent(sessionId)}`}
-          className="hot hot--btn danger"
+          className="btn btn--sm"
         >
           End class
         </Link>

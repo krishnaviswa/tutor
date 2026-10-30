@@ -31,6 +31,9 @@ export function ParentChrome({ screenId, active, children }: ParentChromeProps) 
           <Link href={catalogRoute("parent-home")} className="wm wm--sm">
             TutorOS
           </Link>
+          <span className="place" style={{ margin: 0 }}>
+            <strong>{currentTitle || "Home"}</strong>
+          </span>
           {breadcrumb ? (
             <nav className="crumb" aria-label="Breadcrumb">
               <Link href={catalogRoute(breadcrumb.parent.destId)}>{breadcrumb.parent.label}</Link>
