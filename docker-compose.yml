@@ -1,6 +1,7 @@
-# Local Postgres is the TutorOS backend until hosted (README §1).
-# Start: docker compose up -d postgres
-# App default: DATABASE_URL=postgresql+psycopg://tutor:tutor@127.0.0.1:5432/tutoros
+# Local stack: Postgres, FastAPI, and the Next.js site.
+# Start: docker compose up -d --build
+# Browser: http://127.0.0.1:3000  API: http://127.0.0.1:8000
+# Inside Compose the API uses hostname postgres, not 127.0.0.1.
 services:
   postgres:
     image: postgres:16-alpine
@@ -19,6 +20,40 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  api:
+    build:
+      context: ./backend
+    container_name: tutoros-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://tutor:tutor@postgres:5432/tutoros
+      JWT_SECRET: dev-only-sim-secret
+      SMS_PROVIDER: mock
+      EMAIL_PROVIDER: mock
+      VIDEO_PROVIDER: mock
+      STORAGE_PROVIDER: local
+      PAYMENTS_STUDENT_PROVIDER: mock
+      PAYMENTS_PLATFORM_PROVIDER: mock
+      PUSH_PROVIDER: mock
+      WHATSAPP_PROVIDER: mock
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_BASE: http://127.0.0.1:8000
+    container_name: tutoros-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
 
 volumes:
   tutoros_pg:
