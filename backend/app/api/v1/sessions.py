@@ -45,6 +45,11 @@ class EngagementIn(BaseModel):
     payload: dict = {}
 
 
+class BoardIn(BaseModel):
+    strokes: list = []
+    updated_at: str | None = None
+
+
 
 def _session_out(db: Session, s: ScheduledSession) -> dict:
     return sessions_svc.session_out(db, s)
@@ -180,6 +185,39 @@ def patch_session(
             bool(ws.student_whatsapp) if ws else False,
         )
     return _session_out(db, s)
+
+
+@router.get("/sessions/{session_id}/board")
+def get_board(
+    session_id: str,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner", "teacher", "assistant", "student")),
+):
+    s = _get(db, principal.workspace_id, session_id)
+    sessions_svc.assert_board_access(db, principal, s, write=False)
+    return sessions_svc.board_out(s)
+
+
+@router.put("/sessions/{session_id}/board")
+def put_board(
+    session_id: str,
+    body: BoardIn,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner", "teacher", "assistant", "student")),
+):
+    s = _get(db, principal.workspace_id, session_id)
+    sessions_svc.assert_board_access(db, principal, s, write=True)
+    return sessions_svc.board_put(s, body.strokes, body.updated_at)
+
+
+@router.post("/sessions/{session_id}/start")
+def start_session(
+    session_id: str,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner", "teacher")),
+):
+    s = _get(db, principal.workspace_id, session_id)
+    return sessions_svc.start_session(db, principal.workspace_id, s, principal.user_id)
 
 
 @router.get("/sessions/{session_id}/record")

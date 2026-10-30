@@ -17,7 +17,7 @@ export function SetupChrome({
 }) {
   const idx = STEPS.findIndex((s) => s.id === stepId);
   return (
-    <div className="setup tint-accent">
+    <div className="setup">
       <header className="suphead">
         <div className="wm">
           TutorOS <i>setup</i>

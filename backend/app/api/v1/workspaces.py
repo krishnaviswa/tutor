@@ -66,6 +66,9 @@ def create_workspace(
     db.add(ws)
     db.flush()
     db.add(FeatureFlag(workspace_id=ws.id, modules=list(SLICE_MODULES)))
+    from app.services.billing import ensure_subscription
+
+    ensure_subscription(db, ws.id)
     return _out(ws)
 
 

@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { SessionBoard } from "@/components/studio/SessionBoard";
+import { CohortChat } from "@/components/studio/CohortChat";
 import { api } from "@/lib/api";
 import { catalogRoute } from "@/lib/screens";
 import { Err } from "./bits";
 
 type Live = {
-  session: { id: string; title: string };
+  session: { id: string; title: string; cohort_id?: string | null };
   view: string;
   video_url?: string | null;
   engagement: { kind: string }[];
@@ -70,15 +72,23 @@ export function LiveStudentScreen() {
         {live?.session.title || "Waiting"} · {live?.view || "student"}
         <div style={{ width: "100%" }}>{live?.video_url || "Join from the waiting room first"}</div>
       </div>
-      <div className="dock" style={{ borderColor: "#2f5140", background: "#15241d" }}>
-        <div style={{ fontSize: ".7rem", color: "#8fd3ab", letterSpacing: ".08em", textTransform: "uppercase" }}>
-          Live · mock
+      {sessionId ? (
+        <div className="card">
+          <SessionBoard sessionId={sessionId} />
         </div>
+      ) : null}
+      {live?.session.cohort_id ? (
+        <div className="card">
+          <CohortChat cohortId={live.session.cohort_id} title="Class chat" />
+        </div>
+      ) : null}
+      <div className="dock">
+        <div className="k">Live · mock</div>
         {(live?.engagement || []).length === 0 ? (
-          <div style={{ fontSize: ".86rem", color: "#eef4f1", margin: "6px 0 10px" }}>No poll yet</div>
+          <div className="t" style={{ margin: "6px 0 10px" }}>No poll yet</div>
         ) : (
           (live?.engagement || []).map((e, i) => (
-            <div key={i} className="muted" style={{ color: "#aeb8b5" }}>
+            <div key={i} className="muted">
               {e.kind}
             </div>
           ))
@@ -86,18 +96,18 @@ export function LiveStudentScreen() {
         {sessionId ? (
           <>
             <label className="field" style={{ marginTop: 8 }}>
-              <span style={{ color: "#9fb0aa" }}>Chat</span>
+              <span>Chat</span>
               <input className="field__in" value={text} onChange={(e) => setText(e.target.value)} />
             </label>
-            <button className="hot hot--btn" type="button" disabled={busy} onClick={() => void sendChat()}>
-              Send
+            <button className="hot hot--btn" type="button" disabled={busy} aria-busy={busy} onClick={() => void sendChat()}>
+              {busy ? "Sending" : "Send"}
             </button>
           </>
         ) : null}
       </div>
       <Err message={error} />
       <div className="ctrls">
-        <Link href={catalogRoute("student-dash")} className="hot hot--btn" style={{ background: "#A4384A" }}>
+        <Link href={catalogRoute("student-dash")} className="hot hot--btn danger">
           Leave
         </Link>
       </div>

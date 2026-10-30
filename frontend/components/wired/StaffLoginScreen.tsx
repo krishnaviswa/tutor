@@ -69,11 +69,11 @@ export function StaffLoginScreen() {
   }
 
   return (
-    <form className="supbody tint-sky" style={{ maxWidth: 440, margin: "0 auto", padding: "40px 24px" }} onSubmit={onSubmit}>
-      <div className="wm" style={{ marginBottom: 22 }}>
+    <form className="login-gate" onSubmit={onSubmit}>
+      <div className="wm" style={{ marginBottom: 8 }}>
         TutorOS <i>staff</i>
       </div>
-      <h2 style={{ fontSize: "1.35rem", marginBottom: 16 }}>Staff sign-in</h2>
+      <h2>Staff sign-in</h2>
       <p className="muted" style={{ marginBottom: 16 }}>
         OTP {OTP_CODE} or magic link. Exam-prep faculty can skip this screen and OTP on the console.
       </p>
@@ -115,7 +115,7 @@ export function StaffLoginScreen() {
         <input className="field__in" value={ws} onChange={(e) => setWs(e.target.value)} style={{ fontFamily: "var(--mono)", fontSize: ".78rem" }} />
       </label>
       <Err message={error} />
-      <button className="hot hot--btn" type="submit" disabled={busy}>
+      <button className="hot hot--btn" type="submit" disabled={busy} aria-busy={busy}>
         {busy ? "Signing in" : "Sign in"}
       </button>
       <div className="card" style={{ marginTop: 20 }}>

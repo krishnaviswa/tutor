@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.api.v1.deps import require_roles
 from app.db import get_db
 from app.models.tables import QuotaPolicy, UsageMeter, Workspace
+from app.services import billing
 from app.services.auth import Principal
 from app.services import quota as quota_svc
 from app.services.progress import owner_console as owner_density_console
@@ -20,6 +21,10 @@ class QuotaPatch(BaseModel):
 
 class PauseIn(BaseModel):
     paused: bool = True
+
+
+class TierIn(BaseModel):
+    tier: str
 
 
 
@@ -50,7 +55,53 @@ def subscription(
     meters = quota_svc.snapshot(db, principal.workspace_id)
     blocked = [m for m in meters if m["block"]]
     warned = [m for m in meters if m["warn"]]
-    return {"meters": meters, "warn": warned, "block": blocked}
+    sub = billing.ensure_subscription(db, principal.workspace_id)
+    return {"meters": meters, "warn": warned, "block": blocked, **billing.subscription_public(db, sub)}
+
+
+@router.post("/billing/subscription/tier")
+def change_tier(
+    body: TierIn,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner")),
+):
+    row = billing.change_tier(db, principal.workspace_id, principal.user_id, body.tier)
+    return billing.subscription_public(db, row)
+
+
+@router.post("/billing/subscription/cancel")
+def cancel_subscription(
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner")),
+):
+    row = billing.cancel_subscription(db, principal.workspace_id, principal.user_id)
+    return billing.subscription_public(db, row)
+
+
+@router.post("/billing/subscription/pause")
+def pause_subscription(
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner")),
+):
+    row = billing.pause_subscription(db, principal.workspace_id, principal.user_id)
+    return billing.subscription_public(db, row)
+
+
+@router.post("/billing/subscription/resume")
+def resume_subscription(
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner")),
+):
+    row = billing.resume_subscription(db, principal.workspace_id, principal.user_id)
+    return billing.subscription_public(db, row)
+
+
+@router.post("/billing/renewals")
+def run_renewals(
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner")),
+):
+    return billing.run_renewals(db, principal.workspace_id, principal.user_id)
 
 
 @router.patch("/billing/quotas")

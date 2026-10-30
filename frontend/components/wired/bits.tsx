@@ -10,17 +10,30 @@ export function AppBar({ title, extra }: { title: string; extra?: ReactNode }) {
   );
 }
 
-export function Err({ message }: { message: string }) {
+export function Loading({ children = "Loading…" }: { children?: ReactNode }) {
+  return (
+    <div className="state state--loading" role="status" aria-live="polite" aria-busy="true">
+      <span className="state__spin" aria-hidden="true" />
+      <p>{children}</p>
+    </div>
+  );
+}
+
+export function Err({ message }: { message?: string | null }) {
   if (!message) return null;
   return (
-    <p className="muted" style={{ color: "var(--crimson)", marginBottom: 12 }}>
-      {message}
-    </p>
+    <div className="state state--error" role="alert">
+      <p>{message}</p>
+    </div>
   );
 }
 
 export function Empty({ children }: { children: ReactNode }) {
-  return <p className="muted">{children}</p>;
+  return (
+    <div className="state state--empty" role="status">
+      <p>{children}</p>
+    </div>
+  );
 }
 
 export function rupees(cents: number) {

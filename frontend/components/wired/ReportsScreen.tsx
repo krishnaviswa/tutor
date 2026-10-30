@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { AppBar, Empty, Err } from "./bits";
+import { AppBar, Empty, Err, rupees } from "./bits";
 
 type Slice = {
   student_id: string;
@@ -29,12 +29,20 @@ export function ReportsScreen() {
   const [slice, setSlice] = useState<Slice[]>([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [revenue, setRevenue] = useState<{ platform_cents: number; student_cents: number } | null>(null);
 
   useEffect(() => {
     api("/api/v1/auth/me")
       .then((me) => setRole((me as { role?: string }).role || "teacher"))
       .catch(() => undefined);
   }, []);
+
+  useEffect(() => {
+    if (role !== "owner") return;
+    api("/api/v1/reports/revenue")
+      .then((row) => setRevenue(row as { platform_cents: number; student_cents: number }))
+      .catch(() => undefined);
+  }, [role]);
 
   useEffect(() => {
     if (!role) return;
@@ -61,7 +69,7 @@ export function ReportsScreen() {
     const attPct = att.total ? Math.round((att.present / att.total) * 100) : 0;
     return (
       <div key={s.student_id} className="card">
-        <div style={{ fontFamily: "var(--serif)", fontWeight: 600 }}>Term report — {s.display_name}</div>
+        <div className="t">Term report — {s.display_name}</div>
         <div className="muted" style={{ marginTop: 4 }}>From the timeline · not a second gradebook</div>
         <div className="hr" />
         <div className="sb" style={{ fontSize: ".82rem", marginBottom: 6 }}>
@@ -119,6 +127,18 @@ export function ReportsScreen() {
       <button className="hot hot--btn" type="button" disabled={busy} onClick={() => void exportReport()}>
         Export
       </button>
+      {revenue ? (
+        <div className="grid g2" style={{ margin: "12px 0" }}>
+          <div className="stat">
+            <div className="stat__v">{rupees(revenue.platform_cents)}</div>
+            <div className="stat__l">Platform subscription</div>
+          </div>
+          <div className="stat">
+            <div className="stat__v">{rupees(revenue.student_cents)}</div>
+            <div className="stat__l">Student fees collected</div>
+          </div>
+        </div>
+      ) : null}
       {body}
     </>
   );

@@ -327,4 +327,7 @@ def auto_invoice(
     db.add(row)
     db.flush()
     reminder_delivery(db, workspace_id, row.id, amount)
+    from app.services.billing import note_invoice_created
+
+    note_invoice_created(db, row, None)
     return row

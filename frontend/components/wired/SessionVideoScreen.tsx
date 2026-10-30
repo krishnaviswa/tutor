@@ -54,17 +54,7 @@ export function SessionVideoScreen() {
         <Empty>Pick a session.</Empty>
       ) : (
         <>
-          <div
-            style={{
-              background: "#11171a",
-              borderRadius: 12,
-              aspectRatio: "16/9",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#cdd6d3",
-            }}
-          >
+          <div className="stage" style={{ aspectRatio: "16/9" }}>
             {video.recording_url || video.video_url || "No recording yet"}
           </div>
           <div className="card" style={{ marginTop: 12 }}>

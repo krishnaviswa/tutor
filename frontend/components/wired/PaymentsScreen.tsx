@@ -41,6 +41,7 @@ export function PaymentsScreen() {
     try {
       await api("/api/v1/payments/checkout", {
         method: "POST",
+        headers: { "Idempotency-Key": id },
         body: JSON.stringify({ invoice_id: id }),
       });
       load();
@@ -51,7 +52,7 @@ export function PaymentsScreen() {
     }
   }
 
-  const unpaid = rows.filter((r) => r.status !== "paid");
+  const unpaid = rows.filter((r) => r.status !== "paid" && r.status !== "refunded");
   const paid = rows.filter((r) => r.status === "paid");
   const due = unpaid[0];
 
@@ -70,16 +71,20 @@ export function PaymentsScreen() {
                   Due {due.due_on || ""}
                 </div>
                 <div className="sb" style={{ margin: "6px 0" }}>
-                  <span style={{ fontFamily: "var(--serif)", fontSize: "1.4rem" }}>{rupees(due.amount_cents)}</span>
+                  <span className="stat__v">{rupees(due.amount_cents)}</span>
                   <span className={`pill ${pillFor(due.state)}`}>{due.state || due.status}</span>
                 </div>
                 <div className="muted">
                   {due.label || "Invoice"} · {due.id.slice(-8)}
                 </div>
                 <div style={{ marginTop: 10 }}>
-                  <button className="hot hot--btn" type="button" disabled={busy} onClick={() => void pay(due.id)}>
-                    Pay (mock)
-                  </button>
+                  {due.status === "pending_review" ? (
+                    <p className="muted">Waiting for the academy to approve this hourly invoice.</p>
+                  ) : (
+                    <button className="hot hot--btn" type="button" disabled={busy} onClick={() => void pay(due.id)}>
+                      Pay (mock)
+                    </button>
+                  )}
                 </div>
                 <p className="muted" style={{ marginTop: 8, fontSize: ".72rem" }}>
                   Checkout hits the mock payments port. No live Razorpay.
@@ -114,9 +119,13 @@ export function PaymentsScreen() {
                     </div>
                     <div className="s">{r.due_on}</div>
                   </div>
-                  <button className="btn btn--sm" type="button" disabled={busy} onClick={() => void pay(r.id)}>
-                    Pay
-                  </button>
+                  {r.status === "pending_review" ? (
+                    <span className="pill">review</span>
+                  ) : (
+                    <button className="btn btn--sm" type="button" disabled={busy} onClick={() => void pay(r.id)}>
+                      Pay
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

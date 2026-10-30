@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { catalogRoute } from "@/lib/screens";
-import { Av, Empty, Err, rupees } from "./bits";
+import { Av, Err, Loading, rupees } from "./bits";
 
 type Meter = { meter_key: string; used: number; cap: number; warn: boolean; block: boolean };
 type Console = {
@@ -53,10 +53,9 @@ export function OwnerScreen() {
     <>
       <h2>{data?.workspace?.name || "Owner console"}</h2>
       <span className="k">Operating scorecard · same event log</span>
+      {!data && !error ? <Loading>Loading the scorecard…</Loading> : null}
       <Err message={error} />
-      {!data ? (
-        <Empty>Loading…</Empty>
-      ) : (
+      {data ? (
         <>
           {sc ? (
             <div className="grid g3" style={{ marginBottom: 14 }}>
@@ -161,7 +160,7 @@ export function OwnerScreen() {
             ))}
           </div>
         </>
-      )}
+      ) : null}
       <div className="card card--wash">
         <p className="muted">Every number here is derived from the same event log — sessions, attempts, doubts, payments. Quotas still throttle metered send, not always-on core.</p>
       </div>

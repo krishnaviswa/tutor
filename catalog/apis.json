@@ -346,5 +346,81 @@
   {
     "id": "POST /api/v1/integrations/{name}/connect",
     "status": "sim"
+  },
+  {
+    "id": "GET /api/v1/sessions/{id}/board",
+    "status": "sim"
+  },
+  {
+    "id": "PUT /api/v1/sessions/{id}/board",
+    "status": "sim"
+  },
+  {
+    "id": "POST /api/v1/sessions/{id}/start",
+    "status": "sim"
+  },
+  {
+    "id": "GET /api/v1/cohorts/{id}/messages",
+    "status": "sim"
+  },
+  {
+    "id": "POST /api/v1/cohorts/{id}/messages",
+    "status": "sim"
+  },
+  {
+    "id": "POST /api/v1/cohorts/{id}/enrollments/{student_id}/plan",
+    "status": "sim"
+  },
+  {
+    "id": "POST /api/v1/cohorts/{id}/enrollments/{student_id}/cancel",
+    "status": "sim"
+  },
+  {
+    "id": "GET /api/v1/notifications/inbox",
+    "status": "sim"
+  },
+  {
+    "id": "POST /api/v1/billing/subscription/tier",
+    "status": "sim"
+  },
+  {
+    "id": "POST /api/v1/billing/subscription/cancel",
+    "status": "sim"
+  },
+  {
+    "id": "POST /api/v1/billing/subscription/pause",
+    "status": "sim"
+  },
+  {
+    "id": "POST /api/v1/billing/subscription/resume",
+    "status": "sim"
+  },
+  {
+    "id": "POST /api/v1/billing/renewals",
+    "status": "sim"
+  },
+  {
+    "id": "GET /api/v1/invoices/{id}",
+    "status": "sim"
+  },
+  {
+    "id": "POST /api/v1/invoices/hourly",
+    "status": "sim"
+  },
+  {
+    "id": "POST /api/v1/invoices/{id}/approve",
+    "status": "sim"
+  },
+  {
+    "id": "POST /api/v1/invoices/{id}/refund",
+    "status": "sim"
+  },
+  {
+    "id": "POST /api/v1/payouts/{id}/advance",
+    "status": "sim"
+  },
+  {
+    "id": "GET /api/v1/reports/revenue",
+    "status": "sim"
   }
 ]

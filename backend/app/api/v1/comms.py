@@ -135,7 +135,10 @@ def patch_doubt(
 
 @router.get("/threads")
 def list_threads(db: Session = Depends(get_db), principal: Principal = Depends(current_principal)):
-    q = db.query(Message).filter(Message.workspace_id == principal.workspace_id)
+    q = db.query(Message).filter(
+        Message.workspace_id == principal.workspace_id,
+        Message.cohort_id.is_(None),
+    )
     if principal.role == "parent":
         allowed = linked_student_ids(db, principal)
         q = q.filter(Message.student_id.in_(allowed or [""]))

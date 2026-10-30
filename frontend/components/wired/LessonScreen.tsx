@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { catalogRoute } from "@/lib/screens";
-import { AppBar, Empty, Err } from "./bits";
+import { AppBar, Empty, Err, Loading } from "./bits";
 
 type Item = {
   id: string;
@@ -20,24 +20,42 @@ type Item = {
 export function LessonScreen() {
   const params = useSearchParams();
   const [item, setItem] = useState<Item | null>(null);
-  const [list, setList] = useState<Item[]>([]);
   const [error, setError] = useState("");
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+    setReady(false);
+    const done = () => {
+      if (!cancelled) setReady(true);
+    };
     const id = params.get("id");
     if (id) {
       api(`/api/v1/content/${id}`)
-        .then((row) => setItem(row as Item))
-        .catch((e) => setError(e instanceof Error ? e.message : String(e)));
-      return;
+        .then((row) => {
+          if (!cancelled) setItem(row as Item);
+        })
+        .catch((e) => {
+          if (!cancelled) setError(e instanceof Error ? e.message : String(e));
+        })
+        .finally(done);
+      return () => {
+        cancelled = true;
+      };
     }
     api("/api/v1/content")
       .then((rows) => {
+        if (cancelled) return;
         const all = rows as Item[];
-        setList(all);
         if (all[0]) setItem(all[0]);
       })
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof Error ? e.message : String(e));
+      })
+      .finally(done);
+    return () => {
+      cancelled = true;
+    };
   }, [params]);
 
   const notes = item?.notes?.length ? item.notes : item?.body ? [item.body] : [];
@@ -48,26 +66,16 @@ export function LessonScreen() {
       <AppBar title="Lesson" />
       <div className="appwrap">
         <Err message={error} />
-        {!item ? (
-          list.length === 0 ? (
-            <Empty>No lessons in the library yet.</Empty>
-          ) : null
+        {!ready ? (
+          <Loading>Loading the lesson…</Loading>
+        ) : !item ? (
+          error ? null : <Empty>No lessons in the library yet.</Empty>
         ) : (
           <>
-            <div
-              style={{
-                background: "#11171a",
-                borderRadius: 12,
-                aspectRatio: "16/9",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#cdd6d3",
-              }}
-            >
+            <div className="stage" style={{ aspectRatio: "16/9" }}>
               {item.kind === "video" ? "▶" : item.kind || "notes"}
             </div>
-            <h2 style={{ fontSize: "1.1rem", margin: "12px 0 4px" }}>{item.title}</h2>
+            <h2 style={{ margin: "16px 0 4px" }}>{item.title}</h2>
             <div className="muted" style={{ marginBottom: 12 }}>
               {[item.kind, item.duration_label].filter(Boolean).join(" · ") || "Lesson"}
             </div>
@@ -83,7 +91,7 @@ export function LessonScreen() {
               <p className="muted">No notes yet.</p>
             )}
             <Link href={catalogRoute("practice-play")} className="hot hot--card">
-              <div className="k" style={{ color: "var(--tint)" }}>Next</div>
+              <div className="k">Next</div>
               <div style={{ fontWeight: 600, marginTop: 3 }}>{next?.title || "Practice"}</div>
             </Link>
           </>

@@ -11,17 +11,43 @@ type Row = {
   teacher_name?: string;
   period?: string;
   sessions?: number;
+  explanation?: string;
 };
+
+const NEXT: Record<string, string> = { pending: "approved", approved: "paid" };
 
 export function PayoutsScreen() {
   const [rows, setRows] = useState<Row[]>([]);
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState("");
 
-  useEffect(() => {
+  function load() {
     api("/api/v1/payouts")
       .then((data) => setRows(data as Row[]))
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
+  }
+
+  useEffect(() => {
+    load();
   }, []);
+
+  async function advance(row: Row) {
+    const next = NEXT[row.status];
+    if (!next) return;
+    setBusy(row.id);
+    setError("");
+    try {
+      await api(`/api/v1/payouts/${row.id}/advance`, {
+        method: "POST",
+        body: JSON.stringify({ status: next }),
+      });
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy("");
+    }
+  }
 
   return (
     <>
@@ -45,7 +71,13 @@ export function PayoutsScreen() {
                   .filter(Boolean)
                   .join(" · ")}
               </div>
+              {r.explanation ? <div className="s muted">{r.explanation}</div> : null}
             </div>
+            {NEXT[r.status] ? (
+              <button className="btn btn--sm" type="button" disabled={busy === r.id} onClick={() => void advance(r)}>
+                {busy === r.id ? "Saving…" : `Mark ${NEXT[r.status]}`}
+              </button>
+            ) : null}
           </div>
         ))
       )}

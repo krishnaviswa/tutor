@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { SubscriptionPanel } from "@/components/studio/SubscriptionPanel";
 import { api } from "@/lib/api";
-import { Empty, Err } from "./bits";
+import { Err, Loading } from "./bits";
 
 type Sub = {
   meters: { meter_key: string; used: number; cap: number; warn: boolean; block: boolean }[];
@@ -65,10 +66,10 @@ export function SubscriptionScreen() {
     <>
       <h2>Subscription & quotas</h2>
       <span className="k">Caps throttle paid sends · always-on core stays on</span>
+      <SubscriptionPanel />
       <Err message={error} />
-      {!data ? (
-        <Empty>Loading…</Empty>
-      ) : (
+      {!data && !error ? <Loading>Loading quotas…</Loading> : null}
+      {data ? (
         data.meters.map((m) => (
           <div key={m.meter_key} className="card">
             <div className="sb">
@@ -97,7 +98,7 @@ export function SubscriptionScreen() {
             </button>
           </div>
         ))
-      )}
+      ) : null}
       <button className="hot hot--btn" type="button" onClick={() => void pause()}>
         {paused ? "Resume WhatsApp" : "Pause WhatsApp"}
       </button>

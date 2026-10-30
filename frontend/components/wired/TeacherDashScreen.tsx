@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ClassNotices } from "@/components/studio/ClassNotices";
 import { api } from "@/lib/api";
 import { catalogRoute } from "@/lib/screens";
-import { Av, Empty, Err } from "./bits";
+import { Av, Err, Loading } from "./bits";
 
 type Bar = { day?: string; title?: string; pct: number };
 type Dash = {
@@ -52,10 +53,10 @@ export function TeacherDashScreen() {
       <span className="k">
         {data?.cohort ? `${data.cohort.size} students · live aggregates` : "Live aggregates · same ledger as record"}
       </span>
+      {!data && !error ? <Loading>Loading dashboard…</Loading> : null}
       <Err message={error} />
-      {!data ? (
-        <Empty>Loading dashboard…</Empty>
-      ) : (
+      <ClassNotices />
+      {data ? (
         <>
           <div className="grid g4" style={{ marginBottom: 14 }}>
             <div className="stat">
@@ -120,7 +121,7 @@ export function TeacherDashScreen() {
             </div>
           </div>
         </>
-      )}
+      ) : null}
       <div className="card card--wash" style={{ marginTop: 12 }}>
         <p className="muted">
           Same numbers the owner sees, scoped to this workspace — attendance from join, completion from attempts, backlog

@@ -42,13 +42,12 @@ export function AppChrome({ kind, role, active, screenId, children }: AppChromeP
   const resolvedKind: AppChromeKind = kind ?? role ?? "faculty";
   const items = resolvedKind === "admin" ? ADMIN_NAV : FACULTY_NAV;
   const currentId = screenId ?? screenIdFromPath(pathname);
-  const tint = resolvedKind === "admin" ? "tint-violet" : "tint-sky";
   const homeId = resolvedKind === "admin" ? "owner" : "teacher-dash";
   const breadcrumb = resolveBreadcrumb(items, currentId);
   const currentTitle = CATALOG_SCREENS.find((s) => s.id === currentId)?.title ?? currentId;
 
   return (
-    <div className={`cons ${tint}`}>
+    <div className="cons">
       <aside className="cons__side" aria-label={resolvedKind === "admin" ? "Owner console" : "Faculty console"}>
         <Link href={catalogRoute(homeId)} className="cons__brand wm">
           TutorOS <i>{resolvedKind === "admin" ? "owner" : "faculty"}</i>

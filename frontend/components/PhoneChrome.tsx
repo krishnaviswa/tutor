@@ -25,7 +25,7 @@ export function PhoneChrome({ screenId, active, children }: PhoneChromeProps) {
   const currentTitle = CATALOG_SCREENS.find((s) => s.id === currentId)?.title ?? currentId;
 
   return (
-    <div className="phone tint-accent">
+    <div className="phone">
       <div className="phonewrap">
         <header className="crumbstrip">
           <Link href={catalogRoute("student-dash")} className="wm wm--sm">
