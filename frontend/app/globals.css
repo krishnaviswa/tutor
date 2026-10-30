@@ -655,8 +655,8 @@ button:disabled {
 /* ---------- app chrome (student + parent) ---------- */
 .phone {
   min-height: 100vh;
-  max-width: 1040px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
   background: var(--ground);
 }
 @media (min-width: 720px) {
