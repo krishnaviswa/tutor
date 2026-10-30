@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
 import { api } from "@/lib/api";
+import { Err, Loading } from "./bits";
 
 const TZ = "Asia/Kolkata";
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
@@ -91,6 +92,7 @@ export function ScheduleScreen() {
   const [studentId, setStudentId] = useState("");
   const [showAvail, setShowAvail] = useState(false);
   const [avail, setAvail] = useState<Availability | null>(null);
+  const [ready, setReady] = useState(false);
 
   const monday = useMemo(() => addDays(mondayOf(istYmd(new Date())), weekOffset * 7), [weekOffset]);
   const weekDays = useMemo(
@@ -112,6 +114,8 @@ export function ScheduleScreen() {
       setCohortId((current) => current || (Array.isArray(coh) && coh[0] ? coh[0].id : ""));
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setReady(true);
     }
   }, []);
 
@@ -319,7 +323,7 @@ export function ScheduleScreen() {
               {mode === "cohort" ? (
                 <label className="field">
                   <span>Cohort</span>
-                  <select value={cohortId} onChange={(e) => setCohortId(e.target.value)}>
+                  <select className="field__in" value={cohortId} onChange={(e) => setCohortId(e.target.value)}>
                     {cohorts.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name}
@@ -330,7 +334,7 @@ export function ScheduleScreen() {
               ) : (
                 <label className="field">
                   <span>Student</span>
-                  <select value={studentId} onChange={(e) => setStudentId(e.target.value)}>
+                  <select className="field__in" value={studentId} onChange={(e) => setStudentId(e.target.value)}>
                     <option value="">Pick a student…</option>
                     {students.map((s) => (
                       <option key={s.id} value={s.id}>
@@ -343,7 +347,7 @@ export function ScheduleScreen() {
             </>
           )}
           <div className="row">
-            <button type="button" className="hot hot--btn" style={btnStyle()} disabled={busy} onClick={() => void createSession()}>
+            <button type="button" className="hot hot--btn" style={btnStyle()} disabled={busy} aria-busy={busy} onClick={() => void createSession()}>
               {busy ? "Saving…" : editingId ? "Save time" : "Create session"}
             </button>
             <button type="button" className="btn btn--sm" style={btnStyle()} onClick={() => { setComposing(false); setEditingId(null); }}>
@@ -352,27 +356,18 @@ export function ScheduleScreen() {
           </div>
         </div>
       ) : null}
-      {error ? <p className="muted">{error}</p> : null}
+      {!ready ? <Loading>Loading this week…</Loading> : null}
+      <Err message={error} />
       <div className="tblwrap">
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, minmax(116px, 1fr))", gap: 8, minWidth: 560 }}>
+        <div className="week">
           {weekDays.map((day, i) => {
             const dim = showAvail && !availByWeekday[day.label];
             return (
-              <div
-                key={day.ymd}
-                style={{
-                  background: dim ? "var(--sunk)" : "var(--surface)",
-                  border: "1px solid var(--line-soft)",
-                  borderRadius: 10,
-                  padding: 8,
-                  minHeight: 150,
-                  opacity: dim ? 0.72 : 1,
-                }}
-              >
+              <div key={day.ymd} className={dim ? "week__day is-off" : "week__day"}>
                 <div className="k" style={{ marginBottom: 8 }}>
                   {day.label} {dayNum(day.ymd)}
                   {showAvail && (
-                    <span className="muted" style={{ fontSize: ".64rem", marginLeft: 4 }}>
+                    <span className="muted" style={{ marginLeft: 4 }}>
                       {availByWeekday[day.label] ? "· free" : "· off"}
                     </span>
                   )}
@@ -386,19 +381,17 @@ export function ScheduleScreen() {
                           href={`/app/faculty/session-pre?session=${encodeURIComponent(s.id)}`}
                           className="hot hot--row"
                           style={{
-                            padding: 8,
                             display: "block",
                             opacity: cancelled ? 0.55 : 1,
+                            marginBottom: 0,
                           }}
                         >
-                          <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--ink-faint)" }}>
+                          <div className="k">
                             {s.starts_at ? formatTime(s.starts_at) : "—"}
                           </div>
                           <div
+                            className="t"
                             style={{
-                              fontSize: ".78rem",
-                              fontWeight: 500,
-                              lineHeight: 1.2,
                               marginTop: 2,
                               textDecoration: cancelled ? "line-through" : "none",
                             }}
@@ -421,7 +414,7 @@ export function ScheduleScreen() {
                     );
                   })
                 ) : (
-                  <div className="muted" style={{ fontSize: ".72rem" }}>
+                  <div className="muted">
                     —
                   </div>
                 )}
@@ -446,11 +439,11 @@ export function ScheduleScreen() {
             </Link>
           </div>
         </>
-      ) : (
+      ) : ready ? (
         <p className="muted" style={{ marginTop: 12 }}>
           No sessions this week. Use + New session to add one.
         </p>
-      )}
+      ) : null}
     </>
   );
 }

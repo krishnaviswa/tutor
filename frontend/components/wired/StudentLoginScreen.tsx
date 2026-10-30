@@ -101,11 +101,11 @@ export function StudentLoginScreen() {
     : phone;
 
   return (
-    <form className="login-gate tint-accent" onSubmit={onSubmit}>
-      <span className="av av--lg" style={{ background: "var(--accent)", borderRadius: 12 }}>
+    <form className="login-gate" onSubmit={onSubmit}>
+      <span className="av av--lg" style={{ background: "var(--accent)", borderRadius: 16 }}>
         T
       </span>
-      <h2 style={{ fontSize: "1.25rem", margin: "16px 0 6px" }}>
+      <h2>
         {mode === "magic" ? "Magic link" : "Enter the 6-digit code"}
       </h2>
       <p className="muted" style={{ marginBottom: 18 }}>
@@ -161,7 +161,7 @@ export function StudentLoginScreen() {
         />
       </label>
       <Err message={error} />
-      <button className="hot hot--btn" type="submit" disabled={busy}>
+      <button className="hot hot--btn" type="submit" disabled={busy} aria-busy={busy}>
         {busy ? "Verifying" : mode === "magic" ? "Send magic link" : "Verify"}
       </button>
       <div className="card card--wash" style={{ marginTop: 22 }}>

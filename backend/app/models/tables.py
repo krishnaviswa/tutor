@@ -117,6 +117,8 @@ class Cohort(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     workspace_id: Mapped[str] = mapped_column(String(36), index=True)
     name: Mapped[str] = mapped_column(String(200))
+    billing_mode: Mapped[str] = mapped_column(String(20), default="static")  # static | hourly
+    hourly_rate_cents: Mapped[int] = mapped_column(Integer, default=0)
     meta: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
@@ -128,6 +130,8 @@ class Enrollment(Base):
     workspace_id: Mapped[str] = mapped_column(String(36), index=True)
     cohort_id: Mapped[str] = mapped_column(ForeignKey("cohorts.id"))
     student_id: Mapped[str] = mapped_column(ForeignKey("students.id"))
+    plan_id: Mapped[str | None] = mapped_column(ForeignKey("plans.id"), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="active")  # active | canceled
 
 
 class ScheduledSession(Base):
@@ -149,6 +153,8 @@ class ScheduledSession(Base):
     video_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     recording_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     engagement: Mapped[list] = mapped_column(JSON, default=list)
+    board: Mapped[dict] = mapped_column(JSON, default=dict)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class StaffAvailability(Base):
@@ -385,6 +391,7 @@ class Message(Base):
     workspace_id: Mapped[str] = mapped_column(String(36), index=True)
     thread_id: Mapped[str] = mapped_column(String(36), index=True)
     student_id: Mapped[str | None] = mapped_column(ForeignKey("students.id"), nullable=True)
+    cohort_id: Mapped[str | None] = mapped_column(ForeignKey("cohorts.id"), nullable=True)
     sender_user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
     body: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
@@ -423,6 +430,7 @@ class NotificationDelivery(Base):
     workspace_id: Mapped[str] = mapped_column(String(36), index=True)
     channel: Mapped[str] = mapped_column(String(20))
     to_role: Mapped[str] = mapped_column(String(20))
+    student_id: Mapped[str | None] = mapped_column(ForeignKey("students.id"), nullable=True)
     body: Mapped[str] = mapped_column(Text, default="")
     status: Mapped[str] = mapped_column(String(20), default="sent")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
@@ -447,9 +455,63 @@ class Invoice(Base):
     student_id: Mapped[str] = mapped_column(ForeignKey("students.id"))
     plan_id: Mapped[str | None] = mapped_column(ForeignKey("plans.id"), nullable=True)
     amount_cents: Mapped[int] = mapped_column(Integer, default=0)
+    refunded_cents: Mapped[int] = mapped_column(Integer, default=0)
+    kind: Mapped[str] = mapped_column(String(20), default="static")  # static | hourly
     status: Mapped[str] = mapped_column(String(20), default="open")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     meta: Mapped[dict] = mapped_column(JSON, default=dict)
+
+
+class InvoiceEvent(Base):
+    """Permanent invoice trail. Status on the invoice is the latest view, not the history."""
+
+    __tablename__ = "invoice_events"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    invoice_id: Mapped[str] = mapped_column(ForeignKey("invoices.id"), index=True)
+    student_id: Mapped[str | None] = mapped_column(ForeignKey("students.id"), nullable=True)
+    event_type: Mapped[str] = mapped_column(String(40))
+    amount_cents: Mapped[int] = mapped_column(Integer, default=0)
+    reason: Mapped[str] = mapped_column(String(400), default="")
+    idempotency_key: Mapped[str | None] = mapped_column(String(200), nullable=True, index=True)
+    payload: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Receipt(Base):
+    __tablename__ = "receipts"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    invoice_id: Mapped[str] = mapped_column(ForeignKey("invoices.id"), unique=True)
+    student_id: Mapped[str | None] = mapped_column(ForeignKey("students.id"), nullable=True)
+    code: Mapped[str] = mapped_column(String(40))
+    body: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class PlatformSubscription(Base):
+    __tablename__ = "platform_subscriptions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), unique=True, index=True)
+    tier: Mapped[str] = mapped_column(String(20), default="starter")
+    status: Mapped[str] = mapped_column(String(32), default="trial")
+    period_end: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    trial_ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class PlatformInvoice(Base):
+    __tablename__ = "platform_invoices"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    tier: Mapped[str] = mapped_column(String(20))
+    amount_cents: Mapped[int] = mapped_column(Integer, default=0)
+    action: Mapped[str] = mapped_column(String(40), default="change")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
 class Payout(Base):
@@ -457,6 +519,7 @@ class Payout(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    teacher_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     amount_cents: Mapped[int] = mapped_column(Integer, default=0)
     status: Mapped[str] = mapped_column(String(20), default="pending")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

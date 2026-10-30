@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { SessionBoard } from "@/components/studio/SessionBoard";
+import { CohortChat } from "@/components/studio/CohortChat";
 import { api } from "@/lib/api";
 import { catalogRoute } from "@/lib/screens";
 import { Err } from "./bits";
 
 type Live = {
-  session: { id: string; title: string };
+  session: { id: string; title: string; cohort_id?: string | null };
   view: string;
   video_url?: string | null;
   engagement: { kind: string; payload?: Record<string, unknown> }[];
@@ -23,6 +25,7 @@ export function LiveTeacherScreen() {
   const [live, setLive] = useState<Live | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [started, setStarted] = useState("");
 
   useEffect(() => {
     api("/api/v1/sessions")
@@ -69,7 +72,7 @@ export function LiveTeacherScreen() {
         <span className="pill is-bad">REC mock</span>
       </div>
       <label className="field" style={{ marginTop: 10 }}>
-        <span style={{ color: "#9fb0aa" }}>Session</span>
+        <span>Session</span>
         <select className="field__in" value={sessionId} onChange={(e) => setSessionId(e.target.value)}>
           {sessions.map((s) => (
             <option key={s.id} value={s.id}>
@@ -81,10 +84,38 @@ export function LiveTeacherScreen() {
       <div className="vmain" style={{ marginTop: 10 }}>
         {live?.video_url || "Attach a mock video link on session-pre"}
       </div>
+      {sessionId ? (
+        <div className="card" style={{ marginTop: 12 }}>
+          <div className="row" style={{ marginBottom: 8 }}>
+            <button
+              className="hot hot--btn"
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                setBusy(true);
+                setError("");
+                api(`/api/v1/sessions/${sessionId}/start`, { method: "POST" })
+                  .then(() => setStarted("Class started. People in this class can see the notice."))
+                  .catch((err) => setError(err instanceof Error ? err.message : String(err)))
+                  .finally(() => setBusy(false));
+              }}
+            >
+              {busy ? "Starting" : "Start class"}
+            </button>
+            {started ? <span className="muted">{started}</span> : null}
+          </div>
+          <SessionBoard sessionId={sessionId} />
+        </div>
+      ) : null}
+      {live?.session.cohort_id ? (
+        <div className="card" style={{ marginTop: 12 }}>
+          <CohortChat cohortId={live.session.cohort_id} title="Class chat" />
+        </div>
+      ) : null}
       <div className="dock">
         <div style={{ fontSize: ".82rem", marginBottom: 6 }}>Engagement ({live?.engagement?.length ?? 0})</div>
         {(live?.engagement || []).slice(-3).map((e, i) => (
-          <div key={i} className="muted" style={{ color: "#aeb8b5" }}>
+          <div key={i} className="muted">
             {e.kind}
           </div>
         ))}
@@ -93,17 +124,19 @@ export function LiveTeacherScreen() {
             className="hot hot--btn"
             type="button"
             disabled={busy}
+            aria-busy={busy}
             onClick={() => void postEngagement("poll", { prompt: "Quick check" })}
           >
-            Push poll
+            {busy ? "Sending" : "Push poll"}
           </button>
           <button
             className="hot hot--btn"
             type="button"
             disabled={busy}
+            aria-busy={busy}
             onClick={() => void postEngagement("chat", { text: "Check in" })}
           >
-            Chat
+            {busy ? "Sending" : "Chat"}
           </button>
         </div>
       </div>
@@ -111,8 +144,7 @@ export function LiveTeacherScreen() {
       <div className="ctrls">
         <Link
           href={`${catalogRoute("record")}?session=${encodeURIComponent(sessionId)}`}
-          className="hot hot--btn"
-          style={{ background: "#A4384A" }}
+          className="hot hot--btn danger"
         >
           End class
         </Link>

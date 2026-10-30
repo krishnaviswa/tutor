@@ -4,11 +4,14 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models.tables import Enrollment, ScheduledSession, Student, utcnow
 from app.ports.mocks import MockPorts
 from app.services import notify, timeline
+from app.services.auth import Principal
+from app.services.scope import student_for_principal
 
 DEFAULT_DURATION = timedelta(minutes=90)
 
@@ -110,6 +113,10 @@ def list_sessions(
     return out
 
 
+def _enrollment_active(status_value: str | None) -> bool:
+    return (status_value or "active") != "canceled"
+
+
 def affected_students(db: Session, s: ScheduledSession) -> list[str]:
     if s.student_id:
         return [s.student_id]
@@ -121,7 +128,59 @@ def affected_students(db: Session, s: ScheduledSession) -> list[str]:
             Enrollment.workspace_id == s.workspace_id,
             Enrollment.cohort_id == s.cohort_id,
         )
+        if _enrollment_active(e.status)
     ]
+
+
+def student_belongs(db: Session, principal: Principal, s: ScheduledSession) -> bool:
+    try:
+        st = student_for_principal(db, principal)
+    except HTTPException:
+        return False
+    if s.student_id:
+        return st.id == s.student_id
+    if not s.cohort_id:
+        return False
+    row = (
+        db.query(Enrollment)
+        .filter(
+            Enrollment.workspace_id == s.workspace_id,
+            Enrollment.cohort_id == s.cohort_id,
+            Enrollment.student_id == st.id,
+        )
+        .first()
+    )
+    return bool(row and _enrollment_active(row.status))
+
+
+def assert_board_access(db: Session, principal: Principal, s: ScheduledSession, *, write: bool) -> None:
+    """Owner and teacher read and write. Assistant reads (session GET includes assistant; PATCH does not).
+    A student who belongs to the session reads and writes. Parents do not."""
+    if principal.role == "parent":
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "forbidden")
+    if principal.role in ("owner", "teacher"):
+        return
+    if principal.role == "assistant":
+        if write:
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "forbidden")
+        return
+    if principal.role == "student":
+        if student_belongs(db, principal, s):
+            return
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "session")
+    raise HTTPException(status.HTTP_403_FORBIDDEN, "forbidden")
+
+
+def board_out(s: ScheduledSession) -> dict:
+    data = s.board or {}
+    strokes = data.get("strokes") if isinstance(data, dict) else None
+    updated = data.get("updated_at") if isinstance(data, dict) else None
+    return {"strokes": strokes or [], "updated_at": updated}
+
+
+def board_put(s: ScheduledSession, strokes: list, updated_at: str | None = None) -> dict:
+    s.board = {"strokes": list(strokes or []), "updated_at": updated_at or utcnow().isoformat()}
+    return board_out(s)
 
 
 def cancel(
@@ -138,10 +197,43 @@ def cancel(
     if reason:
         s.cancel_reason = reason
     body = f"Session cancelled: {s.title}"
+    students = affected_students(db, s)
     event_ids = []
-    for sid in affected_students(db, s):
+    for sid in students:
         ev = timeline.append(db, workspace_id, sid, "session.cancelled", body, actor_user_id)
         event_ids.append(ev.id)
+    notify.deliver_in_app(db, workspace_id, body, students)
     notify_result = notify.dispatch_after_timeline(db, ports, workspace_id, body, student_whatsapp_on)
     db.flush()
     return {"timeline_event_ids": event_ids, "notify": notify_result}
+
+
+def start_session(
+    db: Session,
+    workspace_id: str,
+    s: ScheduledSession,
+    actor_user_id: str,
+) -> dict:
+    """Idempotent. Timeline + in-app only. Does not call a provider."""
+    if s.started_at is not None:
+        return {
+            "session_id": s.id,
+            "started_at": _aware(s.started_at).isoformat() if _aware(s.started_at) else None,
+            "idempotent": True,
+            "timeline_event_ids": [],
+        }
+    s.started_at = utcnow()
+    body = f"Class started: {s.title}"
+    students = affected_students(db, s)
+    event_ids = []
+    for sid in students:
+        ev = timeline.append(db, workspace_id, sid, "session.started", body, actor_user_id)
+        event_ids.append(ev.id)
+    notify.deliver_in_app(db, workspace_id, body, students)
+    db.flush()
+    return {
+        "session_id": s.id,
+        "started_at": _aware(s.started_at).isoformat() if s.started_at else None,
+        "idempotent": False,
+        "timeline_event_ids": event_ids,
+    }

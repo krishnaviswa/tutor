@@ -25,7 +25,7 @@ export function ParentChrome({ screenId, active, children }: ParentChromeProps) 
   const currentTitle = CATALOG_SCREENS.find((s) => s.id === currentId)?.title ?? currentId;
 
   return (
-    <div className="phone tint-violet">
+    <div className="phone">
       <div className="phonewrap">
         <header className="crumbstrip">
           <Link href={catalogRoute("parent-home")} className="wm wm--sm">

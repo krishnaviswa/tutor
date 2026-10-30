@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense, useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
+import { Err } from "./bits";
 
 const TZ = "Asia/Kolkata";
 
@@ -38,7 +39,7 @@ type PatchResult = {
   timeline_event_ids: string[];
 };
 
-const AV_PALETTE = ["#2E7D4F", "#2C6C88", "#6A4C93", "#AF6C22", "#A4384A", "#3f7d63", "#4b6b8a"];
+const AV_PALETTE = ["#0071E3", "#5E5CE6", "#FF9F0A", "#FF375F", "#64D2FF", "#30B0C7", "#8E8E93"];
 
 function initials(name: string) {
   const parts = name.trim().split(/\s+/);
@@ -278,7 +279,7 @@ function RecordScreenInner() {
           ))}
         </select>
       </label>
-      {error ? <p className="muted">{error}</p> : null}
+      <Err message={error} />
       <div className="grid g2" style={{ alignItems: "start" }}>
         <div className="card">
           <h3>Event transcript</h3>

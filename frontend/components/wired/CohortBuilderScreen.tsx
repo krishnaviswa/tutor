@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
+import { CohortChat } from "@/components/studio/CohortChat";
+import { HourlyBillingPanel } from "@/components/studio/HourlyBillingPanel";
 import { api } from "@/lib/api";
 import { catalogRoute } from "@/lib/screens";
 import { Empty, Err } from "./bits";
@@ -16,6 +18,7 @@ export function CohortBuilderScreen() {
   const [picked, setPicked] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [openId, setOpenId] = useState("");
 
   function load() {
     Promise.all([api("/api/v1/cohorts"), api("/api/v1/students")])
@@ -106,12 +109,25 @@ export function CohortBuilderScreen() {
           ) : (
             cohorts.map((c) => (
               <div key={c.id} className="card">
-                <div className="t">{c.name}</div>
-                <div className="s muted">
-                  {(c.student_ids || []).length} students
-                  {c.invite_token ? ` · ${c.invite_token}` : ""}
-                  {` · waitlist ${(c.waitlist || []).length}`}
+                <div className="sb">
+                  <div>
+                    <div className="t">{c.name}</div>
+                    <div className="s muted">
+                      {(c.student_ids || []).length} students
+                      {c.invite_token ? ` · ${c.invite_token}` : ""}
+                      {` · waitlist ${(c.waitlist || []).length}`}
+                    </div>
+                  </div>
+                  <button className="btn btn--sm" type="button" onClick={() => setOpenId(openId === c.id ? "" : c.id)}>
+                    {openId === c.id ? "Hide" : "Billing & chat"}
+                  </button>
                 </div>
+                {openId === c.id ? (
+                  <>
+                    <HourlyBillingPanel cohortId={c.id} />
+                    <CohortChat cohortId={c.id} title="Class chat" />
+                  </>
+                ) : null}
               </div>
             ))
           )}

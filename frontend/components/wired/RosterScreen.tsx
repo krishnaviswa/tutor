@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/lib/api";
+import { Err } from "./bits";
 
 type StudentRow = {
   id: string;
@@ -19,7 +20,7 @@ type CohortRow = {
   student_ids: string[];
 };
 
-const AV_PALETTE = ["#2E7D4F", "#2C6C88", "#6A4C93", "#AF6C22", "#A4384A", "#3f7d63", "#4b6b8a"];
+const AV_PALETTE = ["#0071E3", "#5E5CE6", "#FF9F0A", "#FF375F", "#64D2FF", "#30B0C7", "#8E8E93"];
 
 function initials(name: string) {
   const parts = name.trim().split(/\s+/);
@@ -314,7 +315,7 @@ export function RosterScreen() {
           </div>
         </form>
       ) : null}
-      {error ? <p className="muted">{error}</p> : null}
+      <Err message={error} />
       <div className="tblwrap">
         <table className="tbl">
           <thead>

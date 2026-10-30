@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ClassNotices } from "@/components/studio/ClassNotices";
 import { api } from "@/lib/api";
 import { catalogRoute } from "@/lib/screens";
-import { AppBar, Av, Empty, Err, rupees } from "./bits";
+import { AppBar, Av, Empty, Err, Loading, rupees } from "./bits";
 
 type Child = {
   student_id: string;
@@ -42,7 +43,10 @@ export function ParentHomeScreen() {
     <>
       <AppBar title="Family" extra={<span className="pill">guardian</span>} />
       <div className="appwrap">
+        {!data && !error ? <Loading>Loading your family…</Loading> : null}
         <Err message={error} />
+        <ClassNotices />
+        {data ? (
         <div className="card">
           <div className="k">Your children</div>
           {!child ? (
@@ -60,6 +64,7 @@ export function ParentHomeScreen() {
             </div>
           )}
         </div>
+        ) : null}
         {child ? (
           <div className="grid g3" style={{ marginBottom: 10 }}>
             <div className="stat">
@@ -83,24 +88,24 @@ export function ParentHomeScreen() {
           </div>
         ) : null}
         <Link href={catalogRoute("timeline")} className="hot hot--card">
-          <div className="k" style={{ color: "var(--tint)" }}>Activity</div>
+          <div className="k">Activity</div>
           <div style={{ fontWeight: 600, margin: "3px 0" }}>{child?.activity_summary || "Same timeline the teacher writes"}</div>
           <div className="muted">Tap for the full log</div>
         </Link>
         <Link href={catalogRoute("reports")} className="hot hot--card">
-          <div className="k" style={{ color: "var(--tint)" }}>Progress & marksheet</div>
+          <div className="k">Progress & marksheet</div>
           <div style={{ fontWeight: 600, margin: "3px 0" }}>Term report</div>
           <div className="muted">Attendance, practice, mock, teacher note</div>
         </Link>
         <Link href={catalogRoute("practice-result")} className="hot hot--card">
-          <div className="k" style={{ color: "var(--tint)" }}>Test result</div>
+          <div className="k">Test result</div>
           <div style={{ fontWeight: 600, margin: "3px 0" }}>
             {practice ? `${practice.title} · ${practice.score} / ${practice.total}` : "Outcome only"}
           </div>
           <div className="muted">Same practice-result screen</div>
         </Link>
         <Link href={catalogRoute("payments")} className="hot hot--card">
-          <div className="k" style={{ color: "var(--crimson)" }}>Fees & receipts</div>
+          <div className="k">Fees & receipts</div>
           <div style={{ fontWeight: 600, margin: "3px 0" }}>
             {child?.fee_visible === false
               ? "Fees hidden for this guardian"
@@ -113,7 +118,7 @@ export function ParentHomeScreen() {
           </div>
         </Link>
         <Link href={catalogRoute("messages")} className="hot hot--card">
-          <div className="k" style={{ color: "var(--tint)" }}>Message the teacher</div>
+          <div className="k">Message the teacher</div>
           <div className="muted" style={{ marginTop: 3 }}>On the record · usually within a day</div>
         </Link>
       </div>

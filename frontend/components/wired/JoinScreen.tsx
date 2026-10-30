@@ -81,20 +81,7 @@ export function JoinScreen() {
           <div className="muted">{preview.video_url || "no mock link yet"}</div>
         </div>
       ) : null}
-      <div
-        style={{
-          background: "#11171a",
-          borderRadius: 16,
-          aspectRatio: "3/4",
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "center",
-          padding: 14,
-          color: "#cdd6d3",
-          fontSize: ".8rem",
-          marginTop: 12,
-        }}
-      >
+      <div className="stage stage--end" style={{ aspectRatio: "3/4", marginTop: 12 }}>
         Camera preview
       </div>
       <Err message={error} />

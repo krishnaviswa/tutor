@@ -150,5 +150,21 @@
   {
     "id": "backlog_items",
     "tier": "spine"
+  },
+  {
+    "id": "invoice_events",
+    "tier": "spine"
+  },
+  {
+    "id": "receipts",
+    "tier": "spine"
+  },
+  {
+    "id": "platform_subscriptions",
+    "tier": "spine"
+  },
+  {
+    "id": "platform_invoices",
+    "tier": "spine"
   }
 ]

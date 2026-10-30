@@ -6,7 +6,7 @@ import { LoginGate } from "@/components/LoginGate";
 import { api } from "@/lib/api";
 import { MOCK_TENANTS } from "@/lib/mocks";
 import { catalogRoute } from "@/lib/screens";
-import { Err } from "./bits";
+import { Err, Loading } from "./bits";
 
 const exam = MOCK_TENANTS["exam-prep"];
 
@@ -114,7 +114,13 @@ function ParentLinkBody() {
       .then((me) => setRole((me as { role?: string }).role || "parent"))
       .catch(() => setRole("parent"));
   }, []);
-  if (!role) return <div className="login-gate" aria-busy="true" />;
+  if (!role) {
+    return (
+      <div className="login-gate">
+        <Loading>Checking your account…</Loading>
+      </div>
+    );
+  }
   if (role === "parent") return <AcceptForm />;
   return <MintForm />;
 }

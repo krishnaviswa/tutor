@@ -118,13 +118,33 @@ def content_out(row: ContentItem, db: Session | None = None, *, lesson: bool = F
     return out
 
 
-def invoice_out(row: Invoice) -> dict:
+def invoice_out(row: Invoice, db: Session | None = None) -> dict:
     created = _aware(row.created_at) or _now()
     due = created.date()
     today = _now().date()
-    paid = row.status == "paid"
-    if paid:
+    meta = row.meta if isinstance(row.meta, dict) else {}
+    snap = meta.get("snapshot") if isinstance(meta.get("snapshot"), dict) else {}
+    receipt_body = None
+    receipt_id = None
+    if db is not None:
+        from app.models.tables import Receipt
+
+        rec = (
+            db.query(Receipt)
+            .filter(Receipt.workspace_id == row.workspace_id, Receipt.invoice_id == row.id)
+            .first()
+        )
+        if rec:
+            receipt_body = rec.body
+            receipt_id = rec.code
+    if row.status in ("paid", "refunded") and not receipt_id:
+        receipt_id = f"RCT-{row.id[-4:].upper()}"
+    if row.status == "paid":
         state = "paid"
+    elif row.status == "refunded":
+        state = "refunded"
+    elif row.status == "pending_review":
+        state = "pending_review"
     elif due < today:
         state = "overdue"
     else:
@@ -133,11 +153,17 @@ def invoice_out(row: Invoice) -> dict:
         "id": row.id,
         "student_id": row.student_id,
         "amount_cents": row.amount_cents,
+        "refunded_cents": row.refunded_cents or 0,
+        "kind": getattr(row, "kind", None) or "static",
         "status": row.status,
         "due_on": due.isoformat(),
         "label": created.strftime("%B"),
         "state": state,
-        "receipt_id": f"RCT-{row.id[-4:].upper()}" if paid else None,
+        "receipt_id": receipt_id,
+        "receipt": receipt_body,
+        "hours": snap.get("hours"),
+        "sessions": snap.get("sessions") or [],
+        "frozen": bool(snap.get("frozen")),
     }
 
 
@@ -465,9 +491,12 @@ def owner_density(db: Session, workspace_id: str) -> dict:
 def owner_console(db: Session, principal: Principal) -> dict:
     ws = db.get(Workspace, principal.workspace_id)
     density = owner_density(db, principal.workspace_id)
+    from app.services.billing import revenue_rollup
+
     return {
         "workspace": {"id": ws.id, "name": ws.name, "slug": ws.slug} if ws else None,
         **density,
+        "revenue": revenue_rollup(db, principal.workspace_id),
     }
 
 
@@ -484,7 +513,7 @@ def _latest_timeline(db: Session, workspace_id: str, student_id: str) -> Timelin
 
 
 def _fee_due(invoices: list[Invoice]) -> dict | None:
-    unpaid = [i for i in invoices if i.status != "paid"]
+    unpaid = [i for i in invoices if i.status not in ("paid", "refunded", "pending_review")]
     if not unpaid:
         return None
     unpaid.sort(key=lambda i: _aware(i.created_at) or _now())

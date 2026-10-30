@@ -82,11 +82,11 @@ export function BrandingScreen() {
       </form>
       <div className="card">
         <div className="k" style={{ marginBottom: 10 }}>Live preview — student login</div>
-        <div style={{ background: "var(--accent-wash)", borderRadius: 14, padding: 22, textAlign: "center" }}>
-          <span className="av av--lg" style={{ background: accent, borderRadius: 12, margin: "0 auto" }}>
+        <div style={{ background: "var(--sunk)", borderRadius: 16, padding: 22, textAlign: "center" }}>
+          <span className="av av--lg" style={{ background: accent, borderRadius: 16, margin: "0 auto" }}>
             T
           </span>
-          <div style={{ fontFamily: "var(--serif)", fontSize: "1.05rem", margin: "12px 0 4px" }}>{ws?.name}</div>
+          <div className="t" style={{ margin: "12px 0 4px" }}>{ws?.name}</div>
           <div className="muted">{tagline || "Your workspace, on the record."}</div>
         </div>
       </div>

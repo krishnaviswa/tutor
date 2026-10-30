@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -14,12 +16,12 @@ from app.models.tables import (
     Invoice,
     NotificationPref,
     Plan,
-    Payout,
     ScheduledSession,
     Student,
     Workspace,
 )
 from app.ports.mocks import MockPorts
+from app.services import billing, notify
 from app.services.auth import Principal
 from app.services.internal_v2 import auto_invoice, fee_visible_for, meta_of, run_miss_automation
 from app.services.progress import invoice_out, report_slice, student_dashboard, teacher_dashboard
@@ -63,6 +65,21 @@ class InvoiceIn(BaseModel):
 
 class CheckoutIn(BaseModel):
     invoice_id: str
+
+
+class RefundIn(BaseModel):
+    amount_cents: int
+    reason: str
+
+
+class HourlyInvoiceIn(BaseModel):
+    cohort_id: str
+    period_start: datetime
+    period_end: datetime
+
+
+class PayoutAdvanceIn(BaseModel):
+    status: str
 
 
 class BookIn(BaseModel):
@@ -124,6 +141,14 @@ def put_prefs(
     return merged
 
 
+@router.get("/notifications/inbox")
+def notifications_inbox(
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(current_principal),
+):
+    return notify.inbox_for(db, principal)
+
+
 @router.get("/me/dashboard")
 def student_dash(
     db: Session = Depends(get_db),
@@ -149,6 +174,14 @@ def reports(
     if principal.role == "parent":
         allowed = linked_student_ids(db, principal)
     return report_slice(db, principal.workspace_id, allowed)
+
+
+@router.get("/reports/revenue")
+def reports_revenue(
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner")),
+):
+    return billing.revenue_rollup(db, principal.workspace_id)
 
 
 @router.post("/reports/export")
@@ -275,6 +308,7 @@ def create_invoice(
     )
     db.add(row)
     db.flush()
+    billing.note_invoice_created(db, row, principal.user_id)
     return {"id": row.id, "student_id": row.student_id, "amount_cents": row.amount_cents, "status": row.status}
 
 
@@ -292,12 +326,66 @@ def invoices_mine(
         visible = [sid for sid in allowed if fee_visible_for(db, principal, sid)]
         q = q.filter(Invoice.student_id.in_(visible or [""]))
     rows = q.all()
-    return [invoice_out(r) for r in rows]
+    return [invoice_out(r, db) for r in rows]
+
+
+@router.get("/invoices/{invoice_id}")
+def get_invoice(
+    invoice_id: str,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner", "parent", "student")),
+):
+    row = billing.get_invoice(db, principal.workspace_id, invoice_id)
+    billing.assert_student_visible(db, principal, row.student_id)
+    body = invoice_out(row, db)
+    body["events"] = billing.invoice_events(db, row)
+    return body
+
+
+@router.post("/invoices/hourly")
+def create_hourly_invoice(
+    body: HourlyInvoiceIn,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner")),
+):
+    rows = billing.hourly_invoice(
+        db,
+        principal.workspace_id,
+        principal.user_id,
+        body.cohort_id,
+        body.period_start,
+        body.period_end,
+    )
+    return [invoice_out(r, db) for r in rows]
+
+
+@router.post("/invoices/{invoice_id}/approve")
+def approve_invoice(
+    invoice_id: str,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner")),
+):
+    row = billing.get_invoice(db, principal.workspace_id, invoice_id)
+    billing.approve_invoice(db, row, principal.user_id)
+    return invoice_out(row, db)
+
+
+@router.post("/invoices/{invoice_id}/refund")
+def refund_invoice(
+    invoice_id: str,
+    body: RefundIn,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner")),
+):
+    row = billing.get_invoice(db, principal.workspace_id, invoice_id)
+    billing.refund_invoice(db, row, principal.user_id, body.amount_cents, body.reason)
+    return invoice_out(row, db)
 
 
 @router.post("/payments/checkout")
 def checkout(
     body: CheckoutIn,
+    request: Request,
     db: Session = Depends(get_db),
     ports: MockPorts = Depends(ports_dep),
     principal: Principal = Depends(require_roles("student", "parent")),
@@ -315,10 +403,8 @@ def checkout(
             raise HTTPException(status.HTTP_403_FORBIDDEN, "not your invoice")
     elif inv.student_id not in linked_student_ids(db, principal):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "not linked")
-    result = ports.checkout_invoice(inv.id, inv.amount_cents)
-    inv.status = "paid"
-    db.flush()
-    return {"invoice_id": inv.id, "status": inv.status, "mock": result}
+    key = getattr(request.state, "idempotency_key", None) or request.headers.get("idempotency-key")
+    return billing.pay_invoice(db, ports, inv, principal.user_id, key)
 
 
 @router.get("/payouts")
@@ -326,18 +412,19 @@ def list_payouts(
     db: Session = Depends(get_db),
     principal: Principal = Depends(require_roles("owner")),
 ):
-    rows = db.query(Payout).filter(Payout.workspace_id == principal.workspace_id).all()
-    return [
-        {
-            "id": r.id,
-            "amount_cents": r.amount_cents,
-            "status": r.status,
-            "teacher_name": meta_of(r).get("teacher_name"),
-            "period": meta_of(r).get("period"),
-            "sessions": meta_of(r).get("sessions"),
-        }
-        for r in rows
-    ]
+    rows = billing.sync_payouts(db, principal.workspace_id)
+    return [billing.payout_out(r) for r in rows]
+
+
+@router.post("/payouts/{payout_id}/advance")
+def advance_payout(
+    payout_id: str,
+    body: PayoutAdvanceIn,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner")),
+):
+    row = billing.advance_payout(db, principal.workspace_id, principal.user_id, payout_id, body.status)
+    return billing.payout_out(row)
 
 
 @router.get("/audit")

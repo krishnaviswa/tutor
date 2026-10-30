@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ClassNotices } from "@/components/studio/ClassNotices";
 import { api } from "@/lib/api";
 import { catalogRoute } from "@/lib/screens";
-import { AppBar, Empty, Err } from "./bits";
+import { AppBar, Err, Loading } from "./bits";
 
 type Dash = {
   student_id: string;
@@ -49,13 +50,13 @@ export function StudentDashScreen() {
     <>
       <AppBar title={`Hi, ${name}`} extra={<span className="pill">student</span>} />
       <div className="appwrap">
+        {!data && !error ? <Loading>Loading your day…</Loading> : null}
         <Err message={error} />
-        {!data ? (
-          <Empty>Loading…</Empty>
-        ) : (
+        <ClassNotices />
+        {data ? (
           <>
             <Link href={catalogRoute("join")} className="hot hot--card">
-              <div className="k" style={{ color: "var(--tint)" }}>
+              <div className="k">
                 {next ? whenLabel(next.starts_at) || "Next session" : "Sessions"}
               </div>
               <div style={{ fontWeight: 600, margin: "3px 0" }}>{next?.title || `${data.upcoming_sessions} on the calendar`}</div>
@@ -66,7 +67,7 @@ export function StudentDashScreen() {
               </div>
             </Link>
             <Link href={catalogRoute("practice-play")} className="hot hot--card">
-              <div className="k" style={{ color: "var(--crimson)" }}>
+              <div className="k">
                 {due?.due_at ? `Practice due · ${whenLabel(due.due_at)}` : "Practice"}
               </div>
               <div style={{ fontWeight: 600, margin: "3px 0" }}>{due?.title || `${data.attempts} attempts`}</div>
@@ -87,7 +88,7 @@ export function StudentDashScreen() {
               </div>
             ) : null}
             <Link href={catalogRoute("doubt-student")} className="hot hot--card">
-              <div className="k" style={{ color: "var(--tint)" }}>
+              <div className="k">
                 {doubt?.status === "answered" ? "Your doubt was answered" : "Doubts"}
               </div>
               <div style={{ fontWeight: 600, margin: "3px 0" }}>{doubt?.title || "Ask after class"}</div>
@@ -117,7 +118,7 @@ export function StudentDashScreen() {
               </div>
             </div>
           </>
-        )}
+        ) : null}
       </div>
     </>
   );

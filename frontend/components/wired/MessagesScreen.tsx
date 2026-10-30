@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CohortChat } from "@/components/studio/CohortChat";
 import { api } from "@/lib/api";
-import { AppBar, Empty, Err } from "./bits";
+import { AppBar, Empty, Err, Loading } from "./bits";
 
 type Thread = { id: string; student_id?: string | null; last_body?: string; unread?: boolean };
 type Role = string;
@@ -16,16 +17,27 @@ export function MessagesScreen() {
   const [role, setRole] = useState<Role>("teacher");
   const [studentId, setStudentId] = useState("");
   const [busy, setBusy] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [cohorts, setCohorts] = useState<{ id: string; name: string }[]>([]);
+  const [cohortId, setCohortId] = useState("");
 
   function load() {
     api("/api/v1/threads")
       .then((data) => setThreads(data as Thread[]))
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
+      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
+      .finally(() => setReady(true));
   }
 
   useEffect(() => {
     api("/api/v1/auth/me")
       .then((me) => setRole((me as { role?: string }).role ?? "teacher"))
+      .catch(() => undefined);
+    api("/api/v1/cohorts")
+      .then((rows) => {
+        const list = rows as { id: string; name: string }[];
+        setCohorts(list);
+        if (list[0]) setCohortId(list[0].id);
+      })
       .catch(() => undefined);
     load();
   }, []);
@@ -56,7 +68,11 @@ export function MessagesScreen() {
   const list = (
     <>
       <Err message={error} />
-      {threads.length === 0 ? <Empty>No threads yet. Send the first message.</Empty> : null}
+      {!ready ? (
+        <Loading>Loading messages…</Loading>
+      ) : threads.length === 0 && !error ? (
+        <Empty>No threads yet. Send the first message.</Empty>
+      ) : null}
       {threads.map((t) => (
         <button
           key={t.id}
@@ -90,10 +106,25 @@ export function MessagesScreen() {
             placeholder="local/note.txt"
           />
         </label>
-        <button className="hot hot--btn" type="button" disabled={busy} onClick={() => void send()}>
-          Send
+        <button className="hot hot--btn" type="button" disabled={busy} aria-busy={busy} onClick={() => void send()}>
+          {busy ? "Sending" : "Send"}
         </button>
       </div>
+      {role !== "parent" && cohorts.length > 0 ? (
+        <div className="card">
+          <label className="field">
+            <span>Class chat</span>
+            <select className="field__in" value={cohortId} onChange={(e) => setCohortId(e.target.value)}>
+              {cohorts.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          {cohortId ? <CohortChat cohortId={cohortId} /> : null}
+        </div>
+      ) : null}
     </>
   );
 

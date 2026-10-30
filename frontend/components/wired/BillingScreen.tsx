@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { InvoiceTrail } from "@/components/studio/InvoiceTrail";
 import { api } from "@/lib/api";
-import { Empty, Err, rupees } from "./bits";
+import { Empty, Err, Loading, rupees } from "./bits";
 
 type Plan = { id: string; name: string; amount_cents: number; interval: string };
 type Student = { id: string; display_name: string };
@@ -18,6 +19,8 @@ export function BillingScreen() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
+  const [invoiceId, setInvoiceId] = useState("");
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     Promise.all([api("/api/v1/plans"), api("/api/v1/students")])
@@ -29,7 +32,8 @@ export function BillingScreen() {
         if (plans[0]) setPlanId(plans[0].id);
         if (students[0]) setStudentId(students[0].id);
       })
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
+      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
+      .finally(() => setReady(true));
   }, []);
 
   async function onCreate(e: FormEvent) {
@@ -48,6 +52,7 @@ export function BillingScreen() {
           days_used: 10,
         }),
       })) as { id: string };
+      setInvoiceId(row.id);
       setNote(`Invoice ${row.id} created`);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -61,7 +66,11 @@ export function BillingScreen() {
       <h2>Billing</h2>
       <span className="k">Plans and invoices for this workspace</span>
       <Err message={error} />
-      {plans.length === 0 ? <Empty>No plans seeded.</Empty> : (
+      {!ready ? (
+        <Loading>Loading plans…</Loading>
+      ) : plans.length === 0 ? (
+        error ? null : <Empty>No plans seeded.</Empty>
+      ) : (
         <div className="grid g2">
           {plans.map((p) => (
             <div key={p.id} className="card">
@@ -106,11 +115,30 @@ export function BillingScreen() {
           <span>Coupon</span>
           <input className="field__in" value={coupon} onChange={(e) => setCoupon(e.target.value)} />
         </label>
-        <button className="hot hot--btn" type="submit" disabled={busy || !studentId}>
-          Issue invoice
+        <button className="hot hot--btn" type="submit" disabled={busy || !studentId} aria-busy={busy}>
+          {busy ? "Issuing" : "Issue invoice"}
         </button>
         {note ? <p className="muted" style={{ marginTop: 8 }}>{note}</p> : null}
+        {invoiceId ? <InvoiceTrail invoiceId={invoiceId} /> : null}
       </form>
+      <button
+        className="btn btn--sm"
+        type="button"
+        disabled={busy}
+        onClick={() => {
+          setBusy(true);
+          setError("");
+          api("/api/v1/billing/renewals", { method: "POST" })
+            .then((row) => {
+              const created = (row as { created?: unknown[] }).created;
+              setNote(Array.isArray(created) ? `Renewal run created ${created.length} invoice(s).` : "Renewal run finished.");
+            })
+            .catch((err) => setError(err instanceof Error ? err.message : String(err)))
+            .finally(() => setBusy(false));
+        }}
+      >
+        Run renewals
+      </button>
     </>
   );
 }

@@ -1,0 +1,146 @@
+.studio-board {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  color: var(--ink);
+}
+
+.studio-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.studio-pens {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.studio-pen {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--raised);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.studio-pen--ink {
+  background: var(--ink);
+}
+
+.studio-pen--blue {
+  background: #0071e3;
+}
+
+.studio-pen--red {
+  background: #ff3b30;
+}
+
+.studio-pen[aria-pressed="true"] {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.studio-pen:focus-visible,
+.studio-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.studio-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.studio-btn {
+  appearance: none;
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: var(--raised);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.studio-btn:hover {
+  border-color: var(--ink-soft);
+}
+
+.studio-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.studio-btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--ground);
+}
+
+.studio-btn--primary:hover {
+  border-color: var(--accent);
+}
+
+.studio-status {
+  flex: 1 1 140px;
+  min-width: 0;
+  min-height: 1.2em;
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+
+.studio-status--ok {
+  color: var(--accent);
+}
+
+.studio-surface {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+}
+
+.studio-surface__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.studio-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0 16px;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.4;
+  pointer-events: none;
+}
