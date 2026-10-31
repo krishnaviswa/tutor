@@ -21,12 +21,27 @@ type InvoiceView = {
 
 const KNOWN = ["created", "payment_attempted", "paid", "refunded"];
 
+const REFUND_AMOUNT_PRESETS = [
+  { value: "2500", label: "₹2,500" },
+  { value: "4500", label: "₹4,500" },
+  { value: "9000", label: "₹9,000" },
+  { value: "18000", label: "₹18,000" },
+] as const;
+
+const REFUND_REASONS = [
+  "Schedule conflict",
+  "Duplicate payment",
+  "Course withdrawal",
+  "Service credit",
+] as const;
+
 export function InvoiceTrail({ invoiceId }: { invoiceId: string }) {
   const [invoice, setInvoice] = useState<InvoiceView | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [amount, setAmount] = useState("");
-  const [reason, setReason] = useState("");
+  const [amountPreset, setAmountPreset] = useState<string>("2500");
+  const [customRupees, setCustomRupees] = useState("");
+  const [reason, setReason] = useState<string>(REFUND_REASONS[0]);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
   const [reload, setReload] = useState(0);
@@ -37,7 +52,14 @@ export function InvoiceTrail({ invoiceId }: { invoiceId: string }) {
     api(`/api/v1/invoices/${invoiceId}`)
       .then((body) => {
         if (!live) return;
-        setInvoice(parseInvoice(body, invoiceId));
+        const parsed = parseInvoice(body, invoiceId);
+        setInvoice(parsed);
+        if (parsed.amountCents && parsed.amountCents > 0) {
+          const invRupees = String(Math.round(parsed.amountCents / 100));
+          if (REFUND_AMOUNT_PRESETS.some((p) => p.value === invRupees)) {
+            setAmountPreset(invRupees);
+          }
+        }
         setError("");
       })
       .catch((err) => {
@@ -56,14 +78,15 @@ export function InvoiceTrail({ invoiceId }: { invoiceId: string }) {
 
   async function onRefund(e: FormEvent) {
     e.preventDefault();
-    const cents = Number(amount);
+    const rupeesVal = amountPreset === "custom" ? Number(customRupees) : Number(amountPreset);
+    const cents = Number.isFinite(rupeesVal) ? Math.round(rupeesVal * 100) : 0;
     if (!Number.isInteger(cents) || cents <= 0) {
-      setError("Refund amount must be a whole number of cents greater than 0.");
+      setError("Refund amount must be greater than ₹0.");
       setNote("");
       return;
     }
     if (!reason.trim()) {
-      setError("Enter a reason for the refund.");
+      setError("Select a reason for the refund.");
       setNote("");
       return;
     }
@@ -75,8 +98,8 @@ export function InvoiceTrail({ invoiceId }: { invoiceId: string }) {
         method: "POST",
         body: JSON.stringify({ amount_cents: cents, reason: reason.trim() }),
       });
-      setAmount("");
-      setReason("");
+      setCustomRupees("");
+      setReason(REFUND_REASONS[0]);
       setNote("Refund submitted.");
       setReload((n) => n + 1);
     } catch (err) {
@@ -90,7 +113,9 @@ export function InvoiceTrail({ invoiceId }: { invoiceId: string }) {
     <section className="studio-panel">
       <div>
         <h2 className="studio-title">Invoice trail</h2>
-        <p className="studio-muted">{invoice?.id || invoiceId}</p>
+        <p className="studio-muted">
+          {invoice?.amountCents != null ? `Invoice · ${formatUnits(invoice.amountCents)}` : "Invoice record"}
+        </p>
       </div>
       {error ? (
         <p className="studio-error" role="alert">
@@ -143,22 +168,52 @@ export function InvoiceTrail({ invoiceId }: { invoiceId: string }) {
       <form onSubmit={onRefund}>
         <h3 className="studio-card__title">Refund</h3>
         <p className="studio-muted">Owners can refund. Other roles are rejected by the API.</p>
-        <label className="studio-field">
-          Amount (cents)
-          <input
-            className="studio-input"
-            type="number"
-            min={1}
-            step={1}
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            required
-          />
-        </label>
-        <label className="studio-field">
-          Reason
-          <input className="studio-input" value={reason} onChange={(e) => setReason(e.target.value)} required />
-        </label>
+        <div className="studio-split">
+          <label className="studio-field">
+            Refund amount (₹)
+            <select
+              className="studio-input"
+              value={amountPreset}
+              onChange={(e) => setAmountPreset(e.target.value)}
+            >
+              {REFUND_AMOUNT_PRESETS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+              <option value="custom">Custom amount (₹)…</option>
+            </select>
+          </label>
+          <label className="studio-field">
+            Reason
+            <select
+              className="studio-input"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+            >
+              {REFUND_REASONS.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        {amountPreset === "custom" ? (
+          <label className="studio-field">
+            Custom refund amount (₹)
+            <input
+              className="studio-input"
+              type="number"
+              min={1}
+              step={1}
+              value={customRupees}
+              onChange={(e) => setCustomRupees(e.target.value)}
+              placeholder="Enter refund in ₹"
+              required
+            />
+          </label>
+        ) : null}
         <div className="studio-actions">
           <button type="submit" className="studio-btn" disabled={busy}>
             {busy ? "Submitting…" : "Refund"}
@@ -170,11 +225,11 @@ export function InvoiceTrail({ invoiceId }: { invoiceId: string }) {
 }
 
 function formatUnits(cents: number) {
-  return (cents / 100).toFixed(2);
+  return `₹${(cents / 100).toLocaleString("en-IN")}`;
 }
 
 function labelFor(kind: string) {
-  return KNOWN.includes(kind) ? kind : kind || "event";
+  return KNOWN.includes(kind) ? kind.replace(/_/g, " ") : kind || "event";
 }
 
 function parseInvoice(body: unknown, fallbackId: string): InvoiceView {

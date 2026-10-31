@@ -3,7 +3,7 @@
 from datetime import datetime, timedelta, timezone
 
 from app.db import session_factory
-from app.models.tables import Identity, PersonProfile, StaffMembership, User
+from app.models.tables import FacultyAdminGrant, Identity, PersonProfile, StaffMembership, User
 from app.services.seed import PEOPLE_EXAM, WS_EXAM, cid
 from tests.helpers import auth, login
 
@@ -53,6 +53,7 @@ def test_own_profile_and_step_up(client):
     assert own["address"] == "12 Lane"
 
     tstep = _step(client, teacher)
+    assert tstep["email_challenge_id"]
     teacher_saved = client.put(
         "/api/v1/profile",
         headers=teacher,
@@ -63,6 +64,8 @@ def test_own_profile_and_step_up(client):
             "subjects": "language",
             "challenge_id": tstep["challenge_id"],
             "code": "000000",
+            "email_challenge_id": tstep["email_challenge_id"],
+            "email_code": "000000",
         },
     )
     assert teacher_saved.status_code == 200, teacher_saved.text
@@ -88,7 +91,8 @@ def test_reduced_cards_hide_phone_and_address(client):
         },
     )
     tstep = _step(client, teacher)
-    client.put(
+    assert tstep["email_challenge_id"]
+    saved_teacher = client.put(
         "/api/v1/profile",
         headers=teacher,
         json={
@@ -98,8 +102,11 @@ def test_reduced_cards_hide_phone_and_address(client):
             "address": "hidden house",
             "challenge_id": tstep["challenge_id"],
             "code": "000000",
+            "email_challenge_id": tstep["email_challenge_id"],
+            "email_code": "000000",
         },
     )
+    assert saved_teacher.status_code == 200, saved_teacher.text
     card = client.get(f"/api/v1/profiles/{TEACHER}/card", headers=student).json()
     assert card["name"]
     assert card["subjects"] == "language"
@@ -219,6 +226,15 @@ def test_faculty_admin_edit_succession_contact_and_attendance(client):
 
 
 def test_teacher_without_contact_cannot_message(client):
+    # The demo teacher is seeded as faculty admin, who may message without a contact grant.
+    # This case is a teacher who holds neither grant.
+    db = session_factory()()
+    db.query(FacultyAdminGrant).filter(
+        FacultyAdminGrant.workspace_id == WS_EXAM,
+        FacultyAdminGrant.user_id == TEACHER,
+    ).delete()
+    db.commit()
+    db.close()
     teacher = auth(login(client, "+9101t", WS_EXAM, "teacher"))
     denied = client.post(
         "/api/v1/threads/t-010b/messages",
@@ -250,7 +266,7 @@ def test_teacher_without_contact_cannot_message(client):
 def test_student_reschedule_and_decline(client):
     student = auth(login(client, "+9101s", WS_EXAM, "student"))
     teacher = auth(login(client, "+9101t", WS_EXAM, "teacher"))
-    when = (datetime.now(timezone.utc) + timedelta(days=3)).replace(minute=0, second=0, microsecond=0)
+    when = datetime(2026, 11, 10, 16, 15, tzinfo=timezone.utc)
     moved = client.post(
         f"/api/v1/sessions/{ONE_ON_ONE}/student-change",
         headers=student,
@@ -375,8 +391,9 @@ def test_handoff_and_revert(client):
 
 def test_directory_hides_private_and_withhold_contact(client):
     teacher = auth(login(client, "+9101t", WS_EXAM, "teacher"))
-    refused = client.get("/api/v1/faculty-admin/directory", headers=teacher)
-    assert refused.status_code == 403
+    # Seed grants faculty admin to the demo teacher, so the directory is already open.
+    opened = client.get("/api/v1/faculty-admin/directory", headers=teacher)
+    assert opened.status_code == 200, opened.text
     owner = auth(login(client, "+9101o", WS_EXAM, "owner"))
     granted = client.post("/api/v1/faculty-admin/grants", headers=owner, json={"user_id": TEACHER})
     assert granted.status_code == 200, granted.text
@@ -417,6 +434,8 @@ def test_directory_hides_private_and_withhold_contact(client):
     )
     assert opened.status_code == 200, opened.text
     colleague = auth(login(client, "+9101c", WS_EXAM, "teacher"))
+    denied_dir = client.get("/api/v1/faculty-admin/directory", headers=colleague)
+    assert denied_dir.status_code == 403
     allowed = client.post(
         "/api/v1/threads/t-010c/messages",
         headers=colleague,
@@ -434,6 +453,29 @@ def test_directory_hides_private_and_withhold_contact(client):
     assert denied.status_code == 403
     still = client.delete(f"/api/v1/profiles/{STUDENT_USER}", headers=teacher)
     assert still.status_code == 403
+
+
+def test_unmarked_attendance_is_not_stored_as_present(client):
+    teacher = auth(login(client, "+9101t", WS_EXAM, "teacher"))
+    other = cid("0001", 40)
+    saved = client.patch(
+        f"/api/v1/sessions/{ONE_ON_ONE}/record",
+        headers=teacher,
+        json={
+            "notes": "roll",
+            "attendance": [
+                {"student_id": STUDENT_ID, "status": "absent"},
+                {"student_id": other, "status": ""},
+            ],
+            "teacher_status": "",
+        },
+    )
+    assert saved.status_code == 200, saved.text
+    assert saved.json()["teacher_status"] is None
+    got = client.get(f"/api/v1/sessions/{ONE_ON_ONE}/record", headers=teacher).json()
+    statuses = {row["student_id"]: row["status"] for row in got["attendance"]}
+    assert statuses == {STUDENT_ID: "absent"}
+    assert got["teacher_status"] is None
 
 
 def test_feedback_is_not_an_assignment_comment(client):

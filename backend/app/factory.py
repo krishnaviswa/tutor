@@ -14,6 +14,7 @@ from app.api.v1 import (
     feedback,
     handoff,
     join,
+    lesson_packs,
     owner,
     parent,
     practice,
@@ -21,6 +22,7 @@ from app.api.v1 import (
     sessions,
     students,
     stubs,
+    terms,
     workspaces,
 )
 from app.config import DATA_DIR, get_settings
@@ -72,6 +74,7 @@ def create_app(*, seed: bool = True) -> FastAPI:
     application.include_router(students.router, prefix=api)
     application.include_router(cohorts.router, prefix=api)
     application.include_router(parent.router, prefix=api)
+    application.include_router(lesson_packs.router, prefix=api)
     application.include_router(join.router, prefix=api)
     application.include_router(sessions.router, prefix=api)
     application.include_router(handoff.router, prefix=api)
@@ -86,5 +89,6 @@ def create_app(*, seed: bool = True) -> FastAPI:
     application.include_router(comms.router, prefix=api)
     application.include_router(extras.router, prefix=api)
     application.include_router(owner.router, prefix=api)
+    application.include_router(terms.router, prefix=api)
     application.include_router(stubs.router, prefix=api)
     return application

@@ -32,10 +32,19 @@ type HourlyInvoice = {
   lines: LineItem[];
 };
 
+const HOURLY_RATE_PRESETS = [
+  { value: "350", label: "₹350/hr — Foundation" },
+  { value: "500", label: "₹500/hr — Standard" },
+  { value: "750", label: "₹750/hr — Senior Faculty" },
+  { value: "1000", label: "₹1,000/hr — 1-on-1 Specialist" },
+  { value: "1500", label: "₹1,500/hr — Intensive" },
+] as const;
+
 export function HourlyBillingPanel({ cohortId }: { cohortId: string }) {
   const [cohort, setCohort] = useState<Cohort | null>(null);
   const [mode, setMode] = useState<BillingMode>("static");
-  const [rate, setRate] = useState("");
+  const [ratePreset, setRatePreset] = useState("500");
+  const [customRupees, setCustomRupees] = useState("500");
   const [startsOn, setStartsOn] = useState("");
   const [endsOn, setEndsOn] = useState("");
   const [invoice, setInvoice] = useState<HourlyInvoice | null>(null);
@@ -53,7 +62,15 @@ export function HourlyBillingPanel({ cohortId }: { cohortId: string }) {
         if (!row) return;
         setCohort(row);
         if (row.billing_mode === "static" || row.billing_mode === "hourly") setMode(row.billing_mode);
-        if (typeof row.hourly_rate_cents === "number") setRate(String(row.hourly_rate_cents));
+        if (typeof row.hourly_rate_cents === "number" && row.hourly_rate_cents > 0) {
+          const inRupees = String(Math.round(row.hourly_rate_cents / 100));
+          if (HOURLY_RATE_PRESETS.some((p) => p.value === inRupees)) {
+            setRatePreset(inRupees);
+          } else {
+            setRatePreset("custom");
+            setCustomRupees(inRupees);
+          }
+        }
       })
       .catch((err) => {
         if (!live) return;
@@ -64,12 +81,13 @@ export function HourlyBillingPanel({ cohortId }: { cohortId: string }) {
     };
   }, [cohortId]);
 
-  const parsedRate = Number(rate);
-  const rateOk = Number.isInteger(parsedRate) && parsedRate > 0;
+  const resolvedRupees = ratePreset === "custom" ? Number(customRupees) : Number(ratePreset);
+  const parsedRateCents = Number.isFinite(resolvedRupees) && resolvedRupees > 0 ? Math.round(resolvedRupees * 100) : 0;
+  const rateOk = parsedRateCents > 0;
 
   async function saveMode() {
     if (mode === "hourly" && !rateOk) {
-      setError("Enter an hourly rate in cents greater than 0.");
+      setError("Select or enter an hourly rate in Rupees greater than ₹0.");
       setNote("");
       return;
     }
@@ -78,7 +96,7 @@ export function HourlyBillingPanel({ cohortId }: { cohortId: string }) {
     setNote("");
     try {
       const payload: { billing_mode: BillingMode; hourly_rate_cents?: number } = { billing_mode: mode };
-      if (mode === "hourly") payload.hourly_rate_cents = parsedRate;
+      if (mode === "hourly") payload.hourly_rate_cents = parsedRateCents;
       const saved = (await api(`/api/v1/cohorts/${cohortId}`, {
         method: "PATCH",
         body: JSON.stringify(payload),
@@ -86,7 +104,15 @@ export function HourlyBillingPanel({ cohortId }: { cohortId: string }) {
       if (saved && typeof saved === "object") {
         setCohort((prev) => ({ ...(prev || { id: cohortId, name: "", student_ids: [] }), ...saved }));
         if (saved.billing_mode === "static" || saved.billing_mode === "hourly") setMode(saved.billing_mode);
-        if (typeof saved.hourly_rate_cents === "number") setRate(String(saved.hourly_rate_cents));
+        if (typeof saved.hourly_rate_cents === "number" && saved.hourly_rate_cents > 0) {
+          const inRupees = String(Math.round(saved.hourly_rate_cents / 100));
+          if (HOURLY_RATE_PRESETS.some((p) => p.value === inRupees)) {
+            setRatePreset(inRupees);
+          } else {
+            setRatePreset("custom");
+            setCustomRupees(inRupees);
+          }
+        }
       }
       setNote("Billing mode saved.");
     } catch (err) {
@@ -179,7 +205,7 @@ export function HourlyBillingPanel({ cohortId }: { cohortId: string }) {
               checked={mode === "static"}
               onChange={() => setMode("static")}
             />
-            static
+            Fixed plan (Static)
           </label>
           <label>
             <input
@@ -188,27 +214,51 @@ export function HourlyBillingPanel({ cohortId }: { cohortId: string }) {
               checked={mode === "hourly"}
               onChange={() => setMode("hourly")}
             />
-            hourly
+            Hourly billing
           </label>
         </div>
       </fieldset>
       {mode === "hourly" ? (
-        <label className="studio-field">
-          Hourly rate (cents)
-          <input
-            className="studio-input"
-            type="number"
-            min={1}
-            step={1}
-            value={rate}
-            onChange={(e) => setRate(e.target.value)}
-            required
-          />
-          <span>{rateOk ? `${formatUnits(parsedRate)} per hour` : "Rate must be greater than 0."}</span>
-        </label>
+        <div className="studio-split">
+          <label className="studio-field">
+            Hourly rate (₹/hr)
+            <select
+              className="studio-input"
+              value={ratePreset}
+              onChange={(e) => setRatePreset(e.target.value)}
+            >
+              {HOURLY_RATE_PRESETS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+              <option value="custom">Custom rate (₹/hr)…</option>
+            </select>
+            <span>{rateOk ? `${formatUnits(parsedRateCents)} per hour` : "Rate must be greater than ₹0."}</span>
+          </label>
+          {ratePreset === "custom" ? (
+            <label className="studio-field">
+              Custom hourly rate (₹)
+              <input
+                className="studio-input"
+                type="number"
+                min={1}
+                step={1}
+                value={customRupees}
+                onChange={(e) => setCustomRupees(e.target.value)}
+                required
+              />
+            </label>
+          ) : null}
+        </div>
       ) : null}
       <div className="studio-actions">
-        <button type="button" className="studio-btn" disabled={busy !== "" || (mode === "hourly" && !rateOk)} onClick={() => void saveMode()}>
+        <button
+          type="button"
+          className="studio-btn"
+          disabled={busy !== "" || (mode === "hourly" && !rateOk)}
+          onClick={() => void saveMode()}
+        >
           {busy === "save" ? "Saving…" : "Save billing mode"}
         </button>
       </div>
@@ -227,7 +277,12 @@ export function HourlyBillingPanel({ cohortId }: { cohortId: string }) {
           {busy === "invoice" ? "Creating…" : "Create hourly invoice"}
         </button>
         {showApprove ? (
-          <button type="button" className="studio-btn studio-btn--quiet" disabled={busy !== ""} onClick={() => void approve()}>
+          <button
+            type="button"
+            className="studio-btn studio-btn--quiet"
+            disabled={busy !== ""}
+            onClick={() => void approve()}
+          >
             {busy === "approve" ? "Approving…" : "Approve"}
           </button>
         ) : null}
@@ -268,7 +323,7 @@ export function HourlyBillingPanel({ cohortId }: { cohortId: string }) {
 }
 
 function formatUnits(cents: number) {
-  return (cents / 100).toFixed(2);
+  return `₹${(cents / 100).toLocaleString("en-IN")}`;
 }
 
 function unwrap(body: unknown): Record<string, unknown> {

@@ -220,12 +220,13 @@ def seed_workspace_ids(
 ) -> dict:
     db.add(Workspace(id=ws_id, slug=slug, name=name, kind=kind, student_whatsapp=0))
     roles_staff = {"owner": people["owner"], "teacher": people["teacher"], "assistant": people["assistant"]}
+    human = TENANT_HUMAN.get(slug, {})
     labels = {
-        people["owner"]: f"{slug} owner",
-        people["teacher"]: f"{slug} teacher",
-        people["assistant"]: f"{slug} assistant",
-        people["student"]: f"{slug} student",
-        people["parent"]: f"{slug} parent",
+        people["owner"]: human.get("owner", f"{slug} owner"),
+        people["teacher"]: human.get("teacher", f"{slug} teacher"),
+        people["assistant"]: human.get("assistant", f"{slug} assistant"),
+        people["student"]: human.get("student", f"{slug} student"),
+        people["parent"]: human.get("parent", f"{slug} parent"),
     }
     for uid, label in labels.items():
         _user(db, uid, label)
@@ -248,7 +249,7 @@ def seed_workspace_ids(
     link_token = f"link-{slug}"
 
     db.add(Student(id=student_id, workspace_id=ws_id, user_id=people["student"], display_name=labels[people["student"]]))
-    db.add(Cohort(id=cohort_id, workspace_id=ws_id, name=f"{name} cohort"))
+    db.add(Cohort(id=cohort_id, workspace_id=ws_id, name=human.get("cohort", "Grade 11 Evening Batch (Mon–Fri)")))
     db.flush()
     db.add(Enrollment(workspace_id=ws_id, cohort_id=cohort_id, student_id=student_id))
     db.flush()
@@ -258,12 +259,12 @@ def seed_workspace_ids(
             workspace_id=ws_id,
             cohort_id=cohort_id,
             teacher_user_id=people["teacher"],
-            title="Seed session",
+            title="Vectors & Relative Motion — Live Class",
             starts_at=starts_at,
             join_token=f"join-{slug}",
             video_url=f"mock://meet/{session_id}",
             recording_url=f"mock://rec/{session_id}",
-            engagement=[{"kind": "poll", "payload": {"prompt": "Ready?"}}],
+            engagement=[{"kind": "poll", "payload": {"prompt": "Have you completed the pre-class vector warm-up?"}}],
         )
     )
     db.add(
@@ -275,7 +276,7 @@ def seed_workspace_ids(
             accepted_at=starts_at,
         )
     )
-    db.add(Taxonomy(id=tax_id, workspace_id=ws_id, name="Course outline"))
+    db.add(Taxonomy(id=tax_id, workspace_id=ws_id, name="Curriculum & Topic Map"))
     db.flush()
     db.add(Topic(id=topic_id, workspace_id=ws_id, taxonomy_id=tax_id, name=topic_name))
     db.add(FeatureFlag(workspace_id=ws_id, modules=SLICE_MODULES))
@@ -286,9 +287,9 @@ def seed_workspace_ids(
             id=qid,
             workspace_id=ws_id,
             topic_id=topic_id,
-            stem=f"{topic_name} check",
-            choices=["A", "B"],
-            answer="A",
+            stem="Unit 1 check: At maximum height of a projectile launched at 45°, kinetic energy is:",
+            choices=["Half of initial KE", "Zero", "Equal to initial KE", "Twice initial KE"],
+            answer="Half of initial KE",
             created_by=people["teacher"],
         )
     )
@@ -296,7 +297,7 @@ def seed_workspace_ids(
         PracticeSet(
             id=cid(tag, 26),
             workspace_id=ws_id,
-            title=f"{topic_name} set",
+            title="Practice Set 1: Projectile & Relative Motion",
             question_ids=[qid],
             created_by=people["teacher"],
         )
@@ -306,17 +307,17 @@ def seed_workspace_ids(
             id=cid(tag, 27),
             workspace_id=ws_id,
             topic_id=topic_id,
-            title=f"{topic_name} notes",
-            body="Seed material for library and lesson.",
+            title=f"{topic_name} — Lecture Notes",
+            body="Annotated derivations, vector diagrams, and step-by-step worked examples.",
             created_by=people["teacher"],
         )
     )
-    db.add(Plan(id=cid(tag, 28), workspace_id=ws_id, name="Seat", amount_cents=500))
+    db.add(Plan(id=cid(tag, 28), workspace_id=ws_id, name="Monthly Tuition Plan", amount_cents=500))
     db.add(
         AutomationRule(
             id=cid(tag, 43),
             workspace_id=ws_id,
-            name="After record ping",
+            name="Post-class summary notification",
             trigger="session_recorded",
             action="timeline",
             enabled=1,
@@ -362,6 +363,45 @@ PEOPLE_MUSIC = {
     "parent": "bbbbbbbb-0003-4000-8000-000000000014",
 }
 
+TENANT_HUMAN: dict[str, dict[str, str]] = {
+    "exam-prep": {
+        "owner": "Vikram Nair",
+        "teacher": "Dr. Meera Krishnan",
+        "assistant": "Rohan Deshmukh",
+        "student": "Aarav Sharma",
+        "student2": "Diya Patel",
+        "student3": "Kabir Verma",
+        "parent": "Rajesh Sharma",
+        "parent2": "Sunita Patel",
+        "cohort": "Grade 11 Evening Batch (Mon–Fri)",
+        "overflow_cohort": "Weekend Fast-Track Batch",
+    },
+    "language-1on1": {
+        "owner": "Elena Rostova",
+        "teacher": "Claire Dubois",
+        "assistant": "Liam O'Connor",
+        "student": "Maya Lin",
+        "student2": "Lucas Morales",
+        "student3": "Sofia Rossi",
+        "parent": "David Lin",
+        "parent2": "Carlos Morales",
+        "cohort": "Grade 11 Evening Batch (Mon–Fri)",
+        "overflow_cohort": "Weekend Fast-Track Batch",
+    },
+    "music": {
+        "owner": "Pandit Ravi Kulkarni",
+        "teacher": "Ananya Sen",
+        "assistant": "Karthik Iyer",
+        "student": "Zoya Khan",
+        "student2": "Ishaan Chatterjee",
+        "student3": "Meera Menon",
+        "parent": "Farhan Khan",
+        "parent2": "Neha Chatterjee",
+        "cohort": "Grade 11 Evening Batch (Mon–Fri)",
+        "overflow_cohort": "Weekend Fast-Track Batch",
+    },
+}
+
 
 def _pack(db: Session, row: dict, *, slug: str, name: str, phone_prefix: str, topic_name: str, people: dict[str, str], when: datetime) -> dict:
     from app.services.seed_pack import seed_catalog_pack
@@ -391,10 +431,10 @@ def seed_all(db: Session) -> dict:
             db,
             ws_id=WS_EXAM,
             slug="exam-prep",
-            name="Coaching exam-prep",
+            name="Apex Science Academy",
             kind="exam-prep",
             phone_prefix="+9101",
-            topic_name="Unit 1",
+            topic_name="Unit 1: Kinematics & Vectors",
             whatsapp_used=80,
             whatsapp_cap=100,
             policy="warn",
@@ -402,9 +442,9 @@ def seed_all(db: Session) -> dict:
             people=PEOPLE_EXAM,
         ),
         slug="exam-prep",
-        name="Coaching exam-prep",
+        name="Apex Science Academy",
         phone_prefix="+9101",
-        topic_name="Unit 1",
+        topic_name="Unit 1: Kinematics & Vectors",
         people=PEOPLE_EXAM,
         when=when,
     )
@@ -414,10 +454,10 @@ def seed_all(db: Session) -> dict:
             db,
             ws_id=WS_LANG,
             slug="language-1on1",
-            name="Language 1-on-1",
+            name="Polyglot Language Studio",
             kind="one-on-one",
             phone_prefix="+9102",
-            topic_name="Conversation",
+            topic_name="Conversational Fluency & Idioms",
             whatsapp_used=100,
             whatsapp_cap=100,
             policy="block",
@@ -425,9 +465,9 @@ def seed_all(db: Session) -> dict:
             people=PEOPLE_LANG,
         ),
         slug="language-1on1",
-        name="Language 1-on-1",
+        name="Polyglot Language Studio",
         phone_prefix="+9102",
-        topic_name="Conversation",
+        topic_name="Conversational Fluency & Idioms",
         people=PEOPLE_LANG,
         when=when,
     )
@@ -437,10 +477,10 @@ def seed_all(db: Session) -> dict:
             db,
             ws_id=WS_MUSIC,
             slug="music",
-            name="Music studio",
+            name="Swar Sangam Music Academy",
             kind="music",
             phone_prefix="+9103",
-            topic_name="Scales",
+            topic_name="Scales & Rhythm Foundations",
             whatsapp_used=10,
             whatsapp_cap=100,
             policy="warn",
@@ -448,9 +488,9 @@ def seed_all(db: Session) -> dict:
             people=PEOPLE_MUSIC,
         ),
         slug="music",
-        name="Music studio",
+        name="Swar Sangam Music Academy",
         phone_prefix="+9103",
-        topic_name="Scales",
+        topic_name="Scales & Rhythm Foundations",
         people=PEOPLE_MUSIC,
         when=when,
     )

@@ -129,6 +129,11 @@ def test_faculty_admin_reverts_handoff_and_leaves_other_edits(client):
     assistant = _headers(client, "+9101a", "assistant")
     db = session_factory()()
     _colleague(db)
+    # Demo seed grants faculty admin. Handoff is the assigned teacher, who does not hold that grant.
+    db.query(FacultyAdminGrant).filter(
+        FacultyAdminGrant.workspace_id == WS_EXAM,
+        FacultyAdminGrant.user_id == TEACHER,
+    ).delete()
     content_id = _attach(db, subject="language", title="Handoff notes", body="original body")
     session = db.get(ScheduledSession, ONE_ON_ONE)
     original_start = session.starts_at.isoformat()

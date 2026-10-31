@@ -300,8 +300,30 @@ def cancel(
         event_ids.append(ev.id)
     notify.deliver_in_app(db, workspace_id, body, students)
     notify_result = notify.dispatch_after_timeline(db, ports, workspace_id, body, student_whatsapp_on)
+    from app.services.lesson_packs import note_teacher_cancel
+
+    note_teacher_cancel(db, s)
     db.flush()
     return {"timeline_event_ids": event_ids, "notify": notify_result}
+
+
+def move_start(
+    db: Session,
+    s: ScheduledSession,
+    new_start: datetime,
+    *,
+    actor_role: str,
+    waive: bool = False,
+) -> str | None:
+    """Move a session and apply the hour-pack notice rule. Returns stays, used, or None."""
+    from app.services.internal_v2 import teacher_conflict
+    from app.services.lesson_packs import apply_reschedule
+
+    if teacher_conflict(db, s.workspace_id, s.teacher_user_id, new_start, skip_id=s.id):
+        raise HTTPException(status.HTTP_409_CONFLICT, "teacher conflict")
+    hour = apply_reschedule(db, s, actor_role=actor_role, new_start=new_start, waive=waive)
+    s.starts_at = new_start
+    return hour
 
 
 def start_session(
@@ -345,20 +367,24 @@ def student_change(
     reason: str,
     starts_at: datetime | None,
     student_whatsapp_on: bool,
-) -> ScheduledSession:
+    waive: bool = False,
+) -> tuple[ScheduledSession, str | None]:
     """Student declines or moves a 1-on-1 they belong to. The other person reads the session."""
     from app.services.internal_v2 import staff_available, teacher_conflict
+    from app.services.lesson_packs import apply_reschedule, note_student_cancel
 
     if principal.role != "student" or not student_belongs(db, principal, s):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "not your session")
     if s.student_id is None:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "not a 1-on-1")
+    hour: str | None = None
     if action == "decline":
         if reason not in ("unavailable", "unwell"):
             raise HTTPException(status.HTTP_400_BAD_REQUEST, "reason")
         s.status = "declined"
         s.cancel_reason = reason
         s.cancelled_at = utcnow()
+        note_student_cancel(db, s, actor_role=principal.role, waive=waive)
         body = f"Session declined ({reason}): {s.title}"
     elif action == "reschedule":
         if starts_at is None:
@@ -367,6 +393,9 @@ def student_change(
             raise HTTPException(status.HTTP_400_BAD_REQUEST, "outside availability")
         if teacher_conflict(db, s.workspace_id, s.teacher_user_id, starts_at, skip_id=s.id):
             raise HTTPException(status.HTTP_409_CONFLICT, "teacher conflict")
+        hour = apply_reschedule(
+            db, s, actor_role=principal.role, new_start=starts_at, waive=waive
+        )
         s.starts_at = starts_at
         s.status = "scheduled"
         s.cancel_reason = reason or ""
@@ -378,7 +407,7 @@ def student_change(
     notify.deliver_in_app(db, s.workspace_id, body, affected_students(db, s))
     notify.dispatch_after_timeline(db, ports, s.workspace_id, body, student_whatsapp_on)
     db.flush()
-    return s
+    return s, hour
 
 
 def handoff(

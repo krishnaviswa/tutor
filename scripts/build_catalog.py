@@ -655,6 +655,10 @@ def apis(screens: list[dict]) -> list[str]:
         for a in s["apis"]:
             if a not in seen:
                 seen.append(a)
+    # Shell document, read from disk. Not a catalog screen.
+    extra = "GET /api/v1/terms"
+    if extra not in seen:
+        seen.append(extra)
     return [{"id": a, "status": "sim"} for a in seen]
 
 

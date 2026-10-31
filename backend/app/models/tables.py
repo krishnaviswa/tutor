@@ -187,7 +187,7 @@ class Attendance(Base):
     workspace_id: Mapped[str] = mapped_column(String(36), index=True)
     session_id: Mapped[str] = mapped_column(ForeignKey("scheduled_sessions.id"))
     student_id: Mapped[str] = mapped_column(ForeignKey("students.id"))
-    status: Mapped[str] = mapped_column(String(20))  # present | absent
+    status: Mapped[str] = mapped_column(String(20))  # attended | no_show | student_cancel | teacher_cancel; present reads as attended, absent as no_show
 
 
 class SessionRecord(Base):
@@ -638,3 +638,30 @@ class EmailChallenge(Base):
     email: Mapped[str] = mapped_column(String(320))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     consumed: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class LessonPack(Base):
+    """Prepaid minutes for one student. Balance is the ledger sum, not a second attendance store."""
+
+    __tablename__ = "lesson_packs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    student_id: Mapped[str] = mapped_column(ForeignKey("students.id"))
+    purchased_minutes: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class LessonPackLedger(Base):
+    """Signed minutes. kind is purchase, attendance, or move. reason says why the line exists."""
+
+    __tablename__ = "lesson_pack_ledger"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    student_id: Mapped[str] = mapped_column(ForeignKey("students.id"))
+    session_id: Mapped[str | None] = mapped_column(ForeignKey("scheduled_sessions.id"), nullable=True)
+    kind: Mapped[str] = mapped_column(String(20))  # purchase | attendance | move
+    reason: Mapped[str] = mapped_column(String(40))
+    minutes: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

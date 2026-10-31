@@ -2,10 +2,62 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { AppBar, Empty, Err } from "./bits";
+import { AppBar, Err } from "./bits";
 
 type Ev = { id: string; event_type: string; body: string; created_at?: string | null };
 type Child = { student_id: string; display_name: string };
+
+const EVENT_BADGE_LABELS: Record<string, string> = {
+  "session.scheduled": "Session Scheduled",
+  session_scheduled: "Session Scheduled",
+  "session.started": "Class Started",
+  session_started: "Class Started",
+  "session.cancelled": "Session Cancelled",
+  session_cancelled: "Session Cancelled",
+  "session.student_change": "Session Rescheduled",
+  session_joined: "Attendance Marked",
+  "session.joined": "Attendance Marked",
+  "attendance.marked": "Attendance Marked",
+  attendance_marked: "Attendance Marked",
+  "record.saved": "Class Summary Filed",
+  session_recorded: "Class Summary Filed",
+  "session.recorded": "Class Summary Filed",
+  assignment_graded: "Homework Graded",
+  "assignment.graded": "Homework Graded",
+  practice_attempted: "Practice Completed",
+  "practice.attempted": "Practice Completed",
+  test_submitted: "Test Submitted",
+  "test.submitted": "Test Submitted",
+  doubt_opened: "Doubt Asked",
+  "doubt.opened": "Doubt Asked",
+  "doubt.answered": "Doubt Clarified",
+  doubt_answered: "Doubt Clarified",
+  announcement: "Class Announcement",
+  "invoice.created": "Invoice Issued",
+  "invoice.payment_attempted": "Payment Initiated",
+  "invoice.paid": "Tuition Paid",
+  "invoice.refunded": "Payment Refunded",
+  automation: "Follow-Up Scheduled",
+  engagement: "Live Poll / Activity",
+};
+
+function formatEventKind(eventType: string): string {
+  const clean = (eventType || "").trim();
+  if (EVENT_BADGE_LABELS[clean]) return EVENT_BADGE_LABELS[clean];
+  return clean
+    .split(/[._-]+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+const FILTER_CHIPS: { value: string; label: string }[] = [
+  { value: "", label: "All Activity" },
+  { value: "session", label: "Classes" },
+  { value: "practice", label: "Practice" },
+  { value: "doubt", label: "Doubts" },
+  { value: "attendance", label: "Attendance" },
+];
 
 function asEvents(data: unknown): Ev[] {
   if (Array.isArray(data)) return data as Ev[];
@@ -33,7 +85,7 @@ export function TimelineScreen() {
         if (r === "student") {
           const dash = (await api("/api/v1/me/dashboard")) as { student_id: string };
           id = dash.student_id;
-          setTitle("Your record");
+          setTitle("Your Activity & Progress");
         } else if (r === "parent") {
           const home = (await api("/api/v1/parent/home")) as { children: Child[] };
           const child = home.children?.[0];
@@ -42,7 +94,7 @@ export function TimelineScreen() {
             return;
           }
           id = child.student_id;
-          setTitle(`${child.display_name}’s activity`);
+          setTitle(`${child.display_name}’s Activity`);
         } else {
           const students = (await api("/api/v1/students")) as { id: string; display_name: string }[];
           if (!students[0]) {
@@ -74,14 +126,14 @@ export function TimelineScreen() {
     <>
       <Err message={error} />
       <div className="chips" style={{ marginBottom: 12 }}>
-        {["", "session", "practice", "doubt", "attendance"].map((kind) => (
+        {FILTER_CHIPS.map((chip) => (
           <button
-            key={kind || "all"}
+            key={chip.value || "all"}
             type="button"
-            className={`chip${eventType === kind ? " on" : ""}`}
-            onClick={() => setEventType(kind)}
+            className={`chip${eventType === chip.value ? " on" : ""}`}
+            onClick={() => setEventType(chip.value)}
           >
-            {kind || "All"}
+            {chip.label}
           </button>
         ))}
       </div>
@@ -90,15 +142,19 @@ export function TimelineScreen() {
           <article className="history__item">
             <div className="history__when">Example</div>
             <div>
-              <strong>Session note</strong>
-              <p className="muted">Joined class, then a short note and the recording link land here.</p>
+              <span className="pill" style={{ marginBottom: 4, display: "inline-block" }}>
+                Class Summary Filed
+              </span>
+              <p className="muted">Class attendance, teacher summary notes, and recording links appear here after each session.</p>
             </div>
           </article>
           <article className="history__item">
             <div className="history__when">Example</div>
             <div>
-              <strong>Practice</strong>
-              <p className="muted">A finished set shows the score beside the session it belongs to.</p>
+              <span className="pill" style={{ marginBottom: 4, display: "inline-block" }}>
+                Practice Completed
+              </span>
+              <p className="muted">Completed practice sets and checkpoint test scores are logged chronologically.</p>
             </div>
           </article>
         </div>
@@ -106,17 +162,23 @@ export function TimelineScreen() {
         <div className="history">
           {events.map((e) => (
             <article key={e.id} className="history__item">
-              <div className="history__when">{e.created_at ? new Date(e.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : e.event_type}</div>
+              <div className="history__when">
+                {e.created_at
+                  ? new Date(e.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })
+                  : formatEventKind(e.event_type)}
+              </div>
               <div>
-                <strong>{e.event_type.replaceAll("_", " ")}</strong>
-                <p className="muted">{e.body || "Recorded on the timeline."}</p>
+                <div style={{ marginBottom: 4 }}>
+                  <span className="pill">{formatEventKind(e.event_type)}</span>
+                </div>
+                <p className="muted">{e.body || "Activity recorded."}</p>
               </div>
             </article>
           ))}
         </div>
       )}
       <div className="card card--wash" style={{ marginTop: 14 }}>
-        <p className="muted">The ledger. WhatsApp is a channel, not this screen.</p>
+        <p className="muted">Complete chronological history of classes, attendance, practice sets, and teacher updates.</p>
       </div>
     </>
   );
@@ -125,7 +187,7 @@ export function TimelineScreen() {
     return (
       <>
         <h2>{title}</h2>
-        <span className="k">timeline_events</span>
+        <span className="k">Activity &amp; progress history</span>
         {body}
       </>
     );

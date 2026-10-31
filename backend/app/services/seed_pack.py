@@ -34,7 +34,7 @@ from app.models.tables import (
     Test,
     Workspace,
 )
-from app.services.seed import _ident_once, _put, _timeline_once, _user, cid
+from app.services.seed import TENANT_HUMAN, _ident_once, _put, _timeline_once, _user, cid
 from app.services.seed_density import seed_density_facts
 from app.services.seed_internal_v2 import seed_internal_v2
 
@@ -51,6 +51,11 @@ def seed_catalog_pack(
     when: datetime,
 ) -> dict:
     tag = ws_id.split("-")[1]
+    human = TENANT_HUMAN.get(slug, {})
+    student1_name = human.get("student", f"{slug} student")
+    student2_name = human.get("student2", f"{slug} student 2")
+    student3_name = human.get("student3", f"{slug} student 3")
+    teacher_name = human.get("teacher", f"{slug} teacher")
     student_id = cid(tag, 20)
     student2_id = cid(tag, 40)
     student3_id = cid(tag, 66)
@@ -80,7 +85,7 @@ def seed_catalog_pack(
         ws.branding = {"accent": "#2E7D4F", "tagline": name}
         ws.integrations = ["calendar_video"]
 
-    _user(db, student2_user, f"{slug} student 2")
+    _user(db, student2_user, student2_name)
     db.flush()
     _put(
         db,
@@ -88,7 +93,7 @@ def seed_catalog_pack(
         student2_id,
         workspace_id=ws_id,
         user_id=student2_user,
-        display_name=f"{slug} student 2",
+        display_name=student2_name,
     )
     _ident_once(db, ws_id, student2_user, "phone", f"{phone_prefix}s2")
     _ident_once(db, ws_id, student2_user, "email", f"student2@{slug}.sim")
@@ -104,7 +109,7 @@ def seed_catalog_pack(
         db.add(Enrollment(workspace_id=ws_id, cohort_id=cohort_id, student_id=student2_id))
         db.flush()
 
-    _user(db, student3_user, f"{slug} student 3 (unenrolled)")
+    _user(db, student3_user, student3_name)
     db.flush()
     _put(
         db,
@@ -112,11 +117,17 @@ def seed_catalog_pack(
         student3_id,
         workspace_id=ws_id,
         user_id=student3_user,
-        display_name=f"{slug} student 3 (unenrolled)",
+        display_name=student3_name,
     )
     _ident_once(db, ws_id, student3_user, "phone", f"{phone_prefix}s3")
     _ident_once(db, ws_id, student3_user, "email", f"student3@{slug}.sim")
-    _put(db, Cohort, empty_cohort_id, workspace_id=ws_id, name=f"{name} overflow")
+    _put(
+        db,
+        Cohort,
+        empty_cohort_id,
+        workspace_id=ws_id,
+        name=human.get("overflow_cohort", "Weekend Fast-Track Batch"),
+    )
     if not db.query(ParentLink).filter(ParentLink.token == f"link-{slug}-pending").first():
         db.add(
             ParentLink(
@@ -136,7 +147,7 @@ def seed_catalog_pack(
         workspace_id=ws_id,
         cohort_id=cohort_id,
         teacher_user_id=people["teacher"],
-        title="Upcoming class",
+        title="Projectile Motion Problem Solving",
         starts_at=when + timedelta(days=7),
         join_token=f"join-{slug}-next",
         video_url=f"mock://meet/{session_next_id}",
@@ -182,7 +193,7 @@ def seed_catalog_pack(
         cid(tag, 44),
         workspace_id=ws_id,
         session_id=session_id,
-        notes=f"{topic_name}: taught, homework issued.",
+        notes="Covered relative velocity and river-boat problems. Aarav solved all 4 numericals; revise graph slopes before Friday.",
         recorded_at=when,
     )
     _put(
@@ -191,9 +202,9 @@ def seed_catalog_pack(
         q2,
         workspace_id=ws_id,
         topic_id=topic_id,
-        stem=f"{topic_name} follow-up",
-        choices=["A", "B", "C"],
-        answer="B",
+        stem="In a velocity-time graph, the slope of the line represents:",
+        choices=["Displacement", "Instantaneous acceleration", "Average speed", "Net impulse"],
+        answer="Instantaneous acceleration",
         created_by=people["teacher"],
     )
     pset = db.get(PracticeSet, set_id)
@@ -205,9 +216,9 @@ def seed_catalog_pack(
         q3,
         workspace_id=ws_id,
         topic_id=topic_id,
-        stem=f"{topic_name} unused bank item",
-        choices=["A", "B", "C"],
-        answer="C",
+        stem="Two forces of equal magnitude F have a resultant F when the angle between them is:",
+        choices=["60°", "90°", "120°", "180°"],
+        answer="120°",
         created_by=people["teacher"],
     )
     _put(
@@ -215,7 +226,7 @@ def seed_catalog_pack(
         PracticeSet,
         empty_set_id,
         workspace_id=ws_id,
-        title=f"{topic_name} empty set",
+        title="Practice Set 2: Vector Resolution & Inclined Planes",
         question_ids=[],
         created_by=people["teacher"],
     )
@@ -225,18 +236,18 @@ def seed_catalog_pack(
         cid(tag, 78),
         workspace_id=ws_id,
         topic_id=topic_id,
-        title=f"{topic_name} handout",
-        body="PDF path is mock storage.",
+        title=f"{topic_name} — Formula Sheet & Handout (PDF)",
+        body="Downloadable reference sheet covering vector resolution, projectile trajectories, and relative velocity.",
         storage_path=f"mock://files/{slug}/handout.pdf",
         created_by=people["teacher"],
     )
-    _put(db, Plan, plan_term_id, workspace_id=ws_id, name="Term", amount_cents=15000, interval="term")
+    _put(db, Plan, plan_term_id, workspace_id=ws_id, name="Full Term Plan", amount_cents=15000, interval="term")
     _put(
         db,
         AutomationRule,
         cid(tag, 79),
         workspace_id=ws_id,
-        name="Disabled ping",
+        name="Notify parent when homework is graded",
         trigger="assignment_graded",
         action="timeline",
         enabled=0,
@@ -247,7 +258,7 @@ def seed_catalog_pack(
         Test,
         test_id,
         workspace_id=ws_id,
-        title=f"{topic_name} test",
+        title=f"{topic_name} — Weekly Checkpoint Test",
         question_ids=[q1, q2],
         cohort_id=cohort_id,
         created_by=people["teacher"],
@@ -258,8 +269,8 @@ def seed_catalog_pack(
         asg_id,
         workspace_id=ws_id,
         cohort_id=cohort_id,
-        title=f"{topic_name} homework",
-        body="Submit a short note.",
+        title="Problem Set 1: Kinematics & Graphs",
+        body="Solve problems 1–6 showing velocity-time graphs and displacement steps.",
         created_by=people["teacher"],
     )
     _put(
@@ -269,9 +280,9 @@ def seed_catalog_pack(
         workspace_id=ws_id,
         assignment_id=asg_id,
         student_id=student_id,
-        body="Done.",
+        body="Submitted worked solutions for problems 1–6 with velocity-time graphs.",
         grade="A",
-        feedback="Clear work.",
+        feedback="Clean free-body diagrams and accurate slope calculations. Well done!",
         graded_at=when,
     )
     _put(
@@ -280,8 +291,8 @@ def seed_catalog_pack(
         asg_open_id,
         workspace_id=ws_id,
         cohort_id=cohort_id,
-        title=f"{topic_name} worksheet (ungraded)",
-        body="Student 2 submitted; grade on assign-grade.",
+        title="Worksheet 2: Projectile Trajectory & Range",
+        body="Complete the 4 river-swimmer and inclined-projectile derivations before Friday.",
         created_by=people["teacher"],
     )
     _put(
@@ -291,7 +302,7 @@ def seed_catalog_pack(
         workspace_id=ws_id,
         assignment_id=asg_open_id,
         student_id=student2_id,
-        body="Draft answers.",
+        body="Completed questions 1–3; checking the inclined plane range derivation in Q4.",
         grade=None,
         feedback="",
         graded_at=None,
@@ -303,7 +314,7 @@ def seed_catalog_pack(
         workspace_id=ws_id,
         student_id=student_id,
         practice_set_id=set_id,
-        answers={q1: "A"},
+        answers={q1: "Half of initial KE"},
         score=1,
         max_score=2,
         created_at=when,
@@ -315,7 +326,7 @@ def seed_catalog_pack(
         workspace_id=ws_id,
         student_id=student_id,
         test_id=test_id,
-        answers={q1: "A", q2: "B"},
+        answers={q1: "Half of initial KE", q2: "Instantaneous acceleration"},
         score=2,
         max_score=2,
         created_at=when,
@@ -327,7 +338,7 @@ def seed_catalog_pack(
         workspace_id=ws_id,
         student_id=student2_id,
         practice_set_id=set_id,
-        answers={q1: "B", q2: "A"},
+        answers={q1: "Zero", q2: "Displacement"},
         score=0,
         max_score=2,
         created_at=when,
@@ -339,7 +350,7 @@ def seed_catalog_pack(
         workspace_id=ws_id,
         student_id=student_id,
         topic_id=topic_id,
-        body=f"Question on {topic_name}?",
+        body="In problem 4, why does horizontal velocity stay constant when air resistance is ignored?",
         status="open",
         answer="",
         created_at=when,
@@ -351,9 +362,9 @@ def seed_catalog_pack(
         workspace_id=ws_id,
         student_id=student_id,
         topic_id=topic_id,
-        body="Earlier doubt, already answered.",
+        body="How do we choose the reference frame when two objects move in perpendicular directions?",
         status="answered",
-        answer="See the notes in the library.",
+        answer="Take one object as stationary and subtract its velocity vector from the other — see the worked diagram in the lecture notes. [clip]",
         created_at=when,
     )
     _put(
@@ -363,7 +374,7 @@ def seed_catalog_pack(
         workspace_id=ws_id,
         student_id=student2_id,
         topic_id=topic_id,
-        body="Student 2 open doubt.",
+        body="When resolving weight along an inclined plane, why is gravity split into mg sin θ and mg cos θ?",
         status="open",
         answer="",
         created_at=when,
@@ -376,7 +387,7 @@ def seed_catalog_pack(
         thread_id=thread_id,
         student_id=student_id,
         sender_user_id=people["teacher"],
-        body="How is practice going?",
+        body=f"{student1_name} did great on the relative velocity problems today. Please remind them to review graph slopes before Friday.",
         created_at=when,
     )
     _put(
@@ -387,7 +398,7 @@ def seed_catalog_pack(
         thread_id=thread_id,
         student_id=student_id,
         sender_user_id=people["parent"],
-        body="They finished the set.",
+        body=f"Thank you, {teacher_name}! {student1_name} finished Problem Set 1 this evening and is revising the lecture notes.",
         created_at=when,
     )
     _put(
@@ -398,7 +409,7 @@ def seed_catalog_pack(
         thread_id=thread2_id,
         student_id=student2_id,
         sender_user_id=people["teacher"],
-        body="Catch up on the missed class.",
+        body=f"Hi {student2_name}, we missed you in today's session. The recording and formula handout are posted in the library.",
         created_at=when,
     )
     _put(
@@ -407,8 +418,8 @@ def seed_catalog_pack(
         cid(tag, 35),
         workspace_id=ws_id,
         cohort_id=cohort_id,
-        title="This week",
-        body=f"Session recorded. {topic_name} homework is out.",
+        title="This Week: Problem Set 1 & Checkpoint Test",
+        body=f"Session recording is live in the library. Problem Set 1 on {topic_name} is due before Friday's class.",
         created_by=people["teacher"],
         created_at=when,
     )
@@ -418,8 +429,8 @@ def seed_catalog_pack(
         cid(tag, 87),
         workspace_id=ws_id,
         cohort_id=None,
-        title="Workspace notice",
-        body="Applies to every cohort in this tenant.",
+        title="Monthly Assessment Window Opens Friday",
+        body="All batches have a 30-minute checkpoint assessment this Friday. Please review your topic notes and practice sets.",
         created_by=people["owner"],
         created_at=when,
     )
@@ -452,7 +463,7 @@ def seed_catalog_pack(
         workspace_id=ws_id,
         channel="whatsapp",
         to_role="teacher",
-        body="Seed: session recorded (channel, not ledger).",
+        body="Class summary filed for Vectors & Relative Motion — Live Class.",
         status="sent",
         created_at=when,
     )
@@ -463,7 +474,7 @@ def seed_catalog_pack(
         workspace_id=ws_id,
         channel="whatsapp",
         to_role="parent",
-        body="Seed: skipped_quota example.",
+        body="WhatsApp notification paused by workspace quota policy.",
         status="skipped_quota",
         created_at=when,
     )
@@ -509,7 +520,7 @@ def seed_catalog_pack(
         workspace_id=ws_id,
         student_id=student_id,
         session_id=session_id,
-        title="Mentor recap",
+        title="1-on-1 Concept Check: Relative Velocity Graphs",
         kind="mentor",
         status="open",
     )
@@ -520,7 +531,7 @@ def seed_catalog_pack(
         workspace_id=ws_id,
         student_id=student2_id,
         session_id=session_next_id,
-        title="Missed class follow-up",
+        title="Missed Class Follow-Up: Vector Resolution",
         kind="remediate",
         status="booked",
         booked_session_id=session_next_id,
@@ -538,21 +549,21 @@ def seed_catalog_pack(
 
     teacher = people["teacher"]
     student_user = people["student"]
-    _timeline_once(db, ws_id, student_id, "announcement", f"Announcement: This week ({topic_name}).", teacher, when)
-    _timeline_once(db, ws_id, student_id, "session_recorded", f"Recorded Seed session ({topic_name}).", teacher, when)
-    _timeline_once(db, ws_id, student_id, "assignment_graded", f"Homework graded A ({topic_name}).", teacher, when)
-    _timeline_once(db, ws_id, student_id, "practice_attempted", f"Practice set scored 1/2 ({topic_name}).", student_user, when)
-    _timeline_once(db, ws_id, student_id, "doubt_opened", f"Doubt opened on {topic_name}.", student_user, when)
+    _timeline_once(db, ws_id, student_id, "announcement", f"Announcement posted: This Week — Problem Set 1 ({topic_name}).", teacher, when)
+    _timeline_once(db, ws_id, student_id, "session_recorded", f"Class summary filed: Vectors & Relative Motion — Live Class ({topic_name}).", teacher, when)
+    _timeline_once(db, ws_id, student_id, "assignment_graded", f"Problem Set 1: Kinematics & Graphs graded A ({topic_name}).", teacher, when)
+    _timeline_once(db, ws_id, student_id, "practice_attempted", f"Practice Set 1: Projectile & Relative Motion scored 1/2 ({topic_name}).", student_user, when)
+    _timeline_once(db, ws_id, student_id, "doubt_opened", f"Doubt opened on {topic_name}: horizontal velocity in projectile motion.", student_user, when)
     _timeline_once(
         db,
         ws_id,
         student2_id,
         "practice_attempted",
-        f"Practice set scored 0/2 ({topic_name}).",
+        f"Practice Set 1: Projectile & Relative Motion scored 0/2 ({topic_name}).",
         student2_user,
         when,
     )
-    _timeline_once(db, ws_id, student2_id, "doubt_opened", "Student 2 open doubt.", student2_user, when)
+    _timeline_once(db, ws_id, student2_id, "doubt_opened", f"Doubt opened on {topic_name}: resolving forces on an inclined plane.", student2_user, when)
     seed_density_facts(
         db,
         ws_id=ws_id,

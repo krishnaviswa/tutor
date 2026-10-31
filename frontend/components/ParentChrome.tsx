@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { NavIcon } from "@/components/NavIcon";
+import { SectionTabs } from "@/components/SectionTabs";
 import { ShellBack, ShellStage } from "@/components/ShellBack";
 import { ShellControls } from "@/components/ShellControls";
 import { SignOutButton } from "@/components/SignOutButton";
@@ -47,6 +48,7 @@ export function ParentChrome({ screenId, active, children }: ParentChromeProps) 
           <ShellControls />
           <SignOutButton className="signout signout--sm" />
         </header>
+        <SectionTabs screenId={currentId} role="parent" />
         <div className="phonewrap__body">
           <ShellStage>{children}</ShellStage>
         </div>

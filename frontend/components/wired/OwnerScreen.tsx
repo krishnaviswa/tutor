@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { api } from "@/lib/api";
 import { catalogRoute } from "@/lib/screens";
 import { Av, Err, Loading, rupees } from "./bits";
@@ -29,10 +29,84 @@ type WorkspaceCurrent = {
   preview_mode?: boolean;
 };
 
+const ENQUIRY_PACKAGES = [
+  { value: "4", label: "Starter Pack (4 hrs)" },
+  { value: "8", label: "Standard Pack (8 hrs)" },
+  { value: "16", label: "Term Pack (16 hrs)" },
+  { value: "24", label: "Intensive Pack (24 hrs)" },
+] as const;
+
+function errorDetail(err: unknown): string {
+  const raw = err instanceof Error ? err.message : String(err);
+  const jsonStart = raw.indexOf("{");
+  if (jsonStart >= 0) {
+    try {
+      const body = JSON.parse(raw.slice(jsonStart)) as { detail?: unknown };
+      const detail = body.detail;
+      if (typeof detail === "string" && detail) return detail;
+      if (Array.isArray(detail)) {
+        const parts = detail
+          .map((item) => {
+            if (typeof item === "string") return item;
+            if (item && typeof item === "object" && "msg" in item) return String((item as { msg: unknown }).msg);
+            return "";
+          })
+          .filter(Boolean);
+        if (parts.length) return parts.join(" ");
+      }
+    } catch {
+      /* keep the raw message */
+    }
+  }
+  return raw;
+}
+
 export function OwnerScreen() {
   const [data, setData] = useState<Console | null>(null);
   const [workspace, setWorkspace] = useState<WorkspaceCurrent | null>(null);
   const [error, setError] = useState("");
+  const [showEnquiry, setShowEnquiry] = useState(false);
+  const [enquiryName, setEnquiryName] = useState("");
+  const [enquiryPhone, setEnquiryPhone] = useState("");
+  const [enquiryHours, setEnquiryHours] = useState("8");
+  const [enquiryOk, setEnquiryOk] = useState("");
+  const [enquiryError, setEnquiryError] = useState("");
+  const [enquiryBusy, setEnquiryBusy] = useState(false);
+
+  async function submitEnquiry(event: FormEvent) {
+    event.preventDefault();
+    if (enquiryBusy) return;
+    setEnquiryBusy(true);
+    setEnquiryOk("");
+    setEnquiryError("");
+    const rawHours = enquiryHours.trim();
+    const hours = rawHours !== "" && Number.isFinite(Number(rawHours)) ? Number(rawHours) : 8;
+    try {
+      const result = await api("/api/v1/owner/enquiries", {
+        method: "POST",
+        body: JSON.stringify({
+          name: enquiryName.trim(),
+          phone: enquiryPhone.trim(),
+          hours,
+        }),
+      });
+      const detail =
+        result &&
+        typeof result === "object" &&
+        "detail" in result &&
+        typeof (result as { detail?: unknown }).detail === "string"
+          ? (result as { detail: string }).detail
+          : "Enquiry saved.";
+      setEnquiryOk(detail);
+      setEnquiryName("");
+      setEnquiryPhone("");
+      setEnquiryHours("8");
+    } catch (err) {
+      setEnquiryError(errorDetail(err));
+    } finally {
+      setEnquiryBusy(false);
+    }
+  }
 
   useEffect(() => {
     Promise.all([api("/api/v1/owner/console"), api("/api/v1/usage")])
@@ -51,10 +125,24 @@ export function OwnerScreen() {
 
   return (
     <>
-      <h2>{data?.workspace?.name || "Owner console"}</h2>
-      <span className="k">Operating scorecard · same event log</span>
+      <div className="sb" style={{ marginBottom: 10, flexWrap: "wrap", gap: 8 }}>
+        <div>
+          <h2>{data?.workspace?.name || "Owner console"}</h2>
+          <span className="k">Operating scorecard · same event log</span>
+        </div>
+        <button
+          type="button"
+          className={showEnquiry ? "btn btn--sm" : "hot hot--btn"}
+          style={{ width: "auto", margin: 0, cursor: "pointer" }}
+          onClick={() => setShowEnquiry((prev) => !prev)}
+        >
+          {showEnquiry ? "Hide enquiry form" : "+ New Student Enquiry"}
+        </button>
+      </div>
+
       {!data && !error ? <Loading>Loading the scorecard…</Loading> : null}
       <Err message={error} />
+
       {data ? (
         <>
           {sc ? (
@@ -116,7 +204,7 @@ export function OwnerScreen() {
               )}
             </div>
             <div className="card">
-              <h3>Cohort P&L</h3>
+              <h3>Cohort P&amp;L</h3>
               <div className="tblwrap">
                 <table className="tbl">
                   <thead>
@@ -161,12 +249,83 @@ export function OwnerScreen() {
           </div>
         </>
       ) : null}
+
+      {showEnquiry || enquiryOk || enquiryError ? (
+        <form
+          className="card"
+          aria-label="Enquiry"
+          onSubmit={(event) => void submitEnquiry(event)}
+          style={{ marginBottom: 14 }}
+        >
+          <h3>New Student Enquiry &amp; Lesson Pack</h3>
+          <div className="grid g3" style={{ gap: 10 }}>
+            <label className="field">
+              <span>Student Name</span>
+              <input
+                className="field__in"
+                value={enquiryName}
+                onChange={(event) => setEnquiryName(event.target.value)}
+                placeholder="Full name"
+                required
+              />
+            </label>
+            <label className="field">
+              <span>Phone</span>
+              <input
+                className="field__in"
+                value={enquiryPhone}
+                autoComplete="tel"
+                onChange={(event) => setEnquiryPhone(event.target.value)}
+                placeholder="+91..."
+                required
+              />
+            </label>
+            <label className="field">
+              <span>Lesson Pack Size</span>
+              <select
+                className="field__in"
+                value={enquiryHours}
+                onChange={(event) => setEnquiryHours(event.target.value)}
+              >
+                {ENQUIRY_PACKAGES.map((pkg) => (
+                  <option key={pkg.value} value={pkg.value}>
+                    {pkg.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="row" style={{ marginTop: 10, gap: 8 }}>
+            <button className="hot hot--btn" type="submit" disabled={enquiryBusy} style={{ width: "auto", margin: 0 }}>
+              {enquiryBusy ? "Saving…" : "Save enquiry"}
+            </button>
+            <button
+              className="btn btn--sm"
+              type="button"
+              style={{ width: "auto", margin: 0 }}
+              onClick={() => setShowEnquiry(false)}
+            >
+              Close
+            </button>
+          </div>
+          {enquiryOk ? (
+            <p className="muted" role="status" style={{ marginTop: 8 }}>
+              {enquiryOk}
+            </p>
+          ) : null}
+          <Err message={enquiryError} />
+        </form>
+      ) : null}
+
       <div className="card card--wash">
-        <p className="muted">Every number here is derived from the same event log — sessions, attempts, doubts, payments. Quotas still throttle metered send, not always-on core.</p>
+        <p className="muted">
+          Every number here is derived from the same event log — sessions, attempts, doubts, payments. Quotas still
+          throttle metered send, not always-on core.
+        </p>
       </div>
       <div className="row" style={{ marginTop: 12 }}>
         <Link href={catalogRoute("subscription")} className="hot hot--btn ghost">
-          Plan & usage
+          Plan &amp; usage
         </Link>
         <Link href={catalogRoute("payouts")} className="btn btn--sm">
           Payouts

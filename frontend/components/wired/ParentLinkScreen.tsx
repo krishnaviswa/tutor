@@ -33,22 +33,50 @@ function AcceptForm() {
   return (
     <form
       className="tint-violet"
-      style={{ padding: "28px 22px", minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", maxWidth: 420, margin: "0 auto" }}
+      style={{
+        padding: "28px 22px",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        maxWidth: 440,
+        margin: "0 auto",
+      }}
       onSubmit={onSubmit}
     >
-      <h2 style={{ fontSize: "1.2rem", margin: "14px 0 6px" }}>Follow your child’s progress</h2>
-      <p className="muted" style={{ marginBottom: 16 }}>
-        Open the invite token and confirm the student link. Then the parent hub — own child only.
-      </p>
-      <label className="field">
-        <span>Invite token</span>
-        <input className="field__in" value={token} onChange={(e) => setToken(e.target.value)} />
-        <em>Seed token {exam.parentLinkToken}</em>
-      </label>
-      <Err message={error} />
-      <button className="hot hot--btn" type="submit" disabled={busy}>
-        {busy ? "Linking" : "Link my account"}
-      </button>
+      <div className="card" style={{ padding: 20 }}>
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+          <span className="k">Guardian Invitation</span>
+          <span className="pill is-good">Verified Invite</span>
+        </div>
+        <h2 style={{ fontSize: "1.25rem", margin: "10px 0 6px" }}>Follow your child’s progress</h2>
+        <p className="muted" style={{ marginBottom: 16 }}>
+          Link your guardian account to view attendance, teacher notes after class, homework status, and lesson pack hours.
+        </p>
+
+        <Err message={error} />
+
+        <button className="hot hot--btn" type="submit" disabled={busy || !token.trim()} style={{ width: "100%" }}>
+          {busy ? "Linking child account…" : "Accept & Link Child Account"}
+        </button>
+
+        <details style={{ marginTop: 14 }}>
+          <summary className="muted" style={{ cursor: "pointer", fontSize: ".82rem" }}>
+            Enter a different invite code
+          </summary>
+          <div style={{ marginTop: 8 }}>
+            <label className="field">
+              <span>Invite code</span>
+              <input
+                className="field__in"
+                value={token}
+                onChange={(e) => setToken(e.target.value)}
+                placeholder="Paste guardian invite code"
+              />
+            </label>
+          </div>
+        </details>
+      </div>
     </form>
   );
 }
@@ -88,21 +116,31 @@ function MintForm() {
   }
 
   return (
-    <form className="tint-violet" style={{ padding: "28px 22px", maxWidth: 420, margin: "0 auto" }} onSubmit={onSubmit}>
-      <h2 style={{ fontSize: "1.2rem", marginBottom: 8 }}>Mint a parent invite</h2>
-      <label className="field">
-        <span>Student</span>
-        <select className="field__in" value={studentId} onChange={(e) => setStudentId(e.target.value)}>
-          {students.map((s) => (
-            <option key={s.id} value={s.id}>{s.display_name}</option>
-          ))}
-        </select>
-      </label>
-      <Err message={error} />
-      <button className="hot hot--btn" type="submit" disabled={busy || !studentId}>
-        {busy ? "Minting" : "Create invite"}
-      </button>
-      {token ? <p className="muted" style={{ marginTop: 12, fontFamily: "var(--mono)" }}>{token}</p> : null}
+    <form className="tint-violet" style={{ padding: "28px 22px", maxWidth: 440, margin: "0 auto" }} onSubmit={onSubmit}>
+      <div className="card" style={{ padding: 20 }}>
+        <div className="k">Parent &amp; Guardian Access</div>
+        <h2 style={{ fontSize: "1.2rem", margin: "6px 0 12px" }}>Invite a parent or guardian</h2>
+        <label className="field">
+          <span>Select student</span>
+          <select className="field__in" value={studentId} onChange={(e) => setStudentId(e.target.value)}>
+            {students.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.display_name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <Err message={error} />
+        <button className="hot hot--btn" type="submit" disabled={busy || !studentId} style={{ marginTop: 8 }}>
+          {busy ? "Creating invite…" : "Generate Parent Invite"}
+        </button>
+        {token ? (
+          <div className="card card--wash" style={{ marginTop: 12 }}>
+            <div className="k">Share this invite code with the guardian</div>
+            <p style={{ marginTop: 4, fontFamily: "var(--mono)", fontWeight: 600 }}>{token}</p>
+          </div>
+        ) : null}
+      </div>
     </form>
   );
 }

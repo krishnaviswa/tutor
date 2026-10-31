@@ -15,10 +15,10 @@ export const FACULTY_NAV: NavItem[] = [
   { label: "Schedule", destId: "schedule", match: ["schedule", "session-pre", "sessions"], icon: "cal" },
   { label: "Whiteboard", destId: "live-teacher", match: ["live-teacher"], icon: "board", hint: "Shared class canvas" },
   { label: "Availability", destId: "availability", match: ["availability"], icon: "clock" },
-  { label: "Students", destId: "roster", match: ["roster", "cohort-builder"], icon: "users" },
+  { label: "Students", destId: "roster", match: ["roster", "cohort-builder", "mentor"], icon: "users" },
   { label: "Practice", destId: "qbank", match: ["qbank", "practice-build", "assign-issue", "assign-grade", "test-setup", "analysis"], icon: "doc" },
-  { label: "Doubts", destId: "doubt-teacher", match: ["doubt-teacher", "messages"], icon: "chat" },
-  { label: "Records", destId: "record", match: ["record", "session-video"], icon: "flag" },
+  { label: "Doubts", destId: "doubt-teacher", match: ["doubt-teacher", "messages", "announce"], icon: "chat" },
+  { label: "Records", destId: "record", match: ["record", "session-video", "reports"], icon: "flag" },
   { label: "Library", destId: "library", match: ["library"], icon: "book" },
   { label: "Profile", destId: "profile", match: ["profile"], icon: "users" },
 ];
@@ -30,11 +30,16 @@ export const FACULTY_NAV: NavItem[] = [
  * helper always has a parent to resolve to.
  */
 export const ADMIN_NAV: NavItem[] = [
-  { label: "Owner console", destId: "owner", match: ["owner", "subscription", "template-gallery", "automation"], icon: "spark" },
+  {
+    label: "Owner console",
+    destId: "owner",
+    match: ["owner", "payouts", "subscription", "template-gallery", "automation", "branding", "wsetup", "onboard-kind"],
+    icon: "spark",
+  },
   { label: "Billing", destId: "billing", match: ["billing"], icon: "cash" },
-  { label: "Reports", destId: "reports", match: ["reports"], icon: "doc" },
-  { label: "Cohorts", destId: "roster", match: ["roster"], icon: "users" },
-  { label: "Schedule", destId: "schedule", match: ["schedule", "sessions", "availability"], icon: "cal" },
+  { label: "Reports", destId: "reports", match: ["reports", "record", "session-video"], icon: "doc" },
+  { label: "Cohorts", destId: "roster", match: ["roster", "cohort-builder", "mentor"], icon: "users" },
+  { label: "Schedule", destId: "schedule", match: ["schedule", "sessions", "session-pre", "availability"], icon: "cal" },
   { label: "Records", destId: "audit", match: ["audit"], icon: "flag" },
   { label: "Integrations", destId: "integrations", match: ["integrations"], icon: "gear" },
   { label: "Profile", destId: "profile", match: ["profile"], icon: "users" },
@@ -43,12 +48,10 @@ export const ADMIN_NAV: NavItem[] = [
 /** Demo student `appnav`: Home, Classes, Practice, Doubts, You. */
 export const STUDENT_NAV: NavItem[] = [
   { label: "Home", destId: "student-dash", match: ["student-dash"], icon: "home" },
-  { label: "Classes", destId: "library", match: ["library", "lesson", "join"], icon: "play" },
-  { label: "Whiteboard", destId: "live-student", match: ["live-student"], icon: "board", hint: "Shared class canvas" },
+  { label: "Classes", destId: "library", match: ["library", "lesson", "join", "live-student"], icon: "play" },
   { label: "Practice", destId: "practice-play", match: ["practice-play", "practice-result", "test-runner"], icon: "spark" },
   { label: "Doubts", destId: "doubt-student", match: ["doubt-student"], icon: "chat" },
-  { label: "You", destId: "timeline", match: ["timeline", "notif-prefs", "payments"], icon: "flag" },
-  { label: "Profile", destId: "profile", match: ["profile"], icon: "users" },
+  { label: "You", destId: "timeline", match: ["timeline", "notif-prefs", "payments", "profile"], icon: "flag" },
 ];
 
 /** Demo parent `pnav`: Home, Activity, Reports, Fees, Chat. */

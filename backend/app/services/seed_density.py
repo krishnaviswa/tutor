@@ -36,7 +36,7 @@ def seed_density_facts(
     next_token = f"join-{slug}-next"
     row = db.get(ScheduledSession, upcoming_id)
     if row:
-        row.title = topic_name
+        row.title = "Projectile Motion Problem Solving"
         row.starts_at = now + timedelta(hours=6)
         if not row.join_token:
             row.join_token = next_token
@@ -49,7 +49,7 @@ def seed_density_facts(
                 workspace_id=ws_id,
                 cohort_id=cohort_id,
                 teacher_user_id=people["teacher"],
-                title=topic_name,
+                title="Projectile Motion Problem Solving",
                 starts_at=now + timedelta(hours=6),
                 join_token=next_token,
                 video_url=f"mock://meet/{upcoming_id}",
@@ -60,7 +60,7 @@ def seed_density_facts(
 
     practice = db.get(Attempt, cid(tag, 31))
     if practice:
-        practice.answers = {q1: "A"}
+        practice.answers = {q1: "Half of initial KE"}
         practice.score = 1
         practice.max_score = 2
     missed = db.get(Attempt, cid(tag, 50))
@@ -69,7 +69,7 @@ def seed_density_facts(
         missed.score = 0
     answered = db.get(Doubt, cid(tag, 34))
     if answered:
-        answered.answer = "See the notes in the library. [clip]"
+        answered.answer = "Take one object as stationary and subtract its velocity vector from the other — see the worked diagram in the lecture notes. [clip]"
 
     notes = db.get(ContentItem, cid(tag, 27))
     if notes:
@@ -79,9 +79,9 @@ def seed_density_facts(
                 "duration_label": "14 pages",
                 "progress_pct": 70,
                 "notes": [
-                    f"{topic_name}: core idea in the tenant notes.",
-                    "Work the checks after you watch.",
-                    "Ask a doubt if a step does not hold.",
+                    f"{topic_name}: resolve motion into orthogonal components before applying kinematic equations.",
+                    "Sketch the velocity-time graph first to verify displacement and acceleration signs.",
+                    "Post a question in the Doubts queue if any vector subtraction step is unclear.",
                 ],
             }
         )
@@ -91,8 +91,8 @@ def seed_density_facts(
         cid(tag, 52),
         workspace_id=ws_id,
         topic_id=notes.topic_id if notes else None,
-        title=f"{topic_name} video",
-        body="Recorded walkthrough.",
+        title=f"{topic_name} — Recorded Class Walkthrough",
+        body="38-minute recorded walkthrough covering vector components and projectile motion.",
         storage_path=json.dumps(
             {"kind": "video", "duration_label": "38 min", "progress_pct": 40, "notes": []}
         ),
@@ -117,7 +117,7 @@ def seed_density_facts(
             workspace_id=ws_id,
             cohort_id=cohort_id,
             teacher_user_id=people["teacher"],
-            title=f"{topic_name} · day {i}",
+            title=f"{topic_name} · Lecture {i}",
             starts_at=now - timedelta(days=i, hours=2),
             join_token=None,
             video_url=f"mock://meet/{hist_id}",

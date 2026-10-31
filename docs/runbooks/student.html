@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student — TutorOS</title>
+<style>
+:root { color-scheme: light; }
+body { font: 17px/1.55 Georgia, "Iowan Old Style", Palatino, serif; max-width: 40rem; margin: 2.5rem auto; padding: 0 1.25rem 4rem; color: #1c1917; background: #faf7f2; }
+h1 { font-size: 1.85rem; line-height: 1.2; margin: 0 0 0.4rem; }
+h2 { font-size: 1.25rem; margin: 2rem 0 0.6rem; }
+h3 { font-size: 1.05rem; margin: 1.4rem 0 0.4rem; }
+a { color: #1d4e89; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 0.88em; }
+pre { background: #fff; border: 1px solid #e7e5e4; border-radius: 8px; padding: 0.8rem 1rem; overflow: auto; }
+pre code { font-size: 0.82rem; }
+.crumbs { font-size: 0.92rem; margin-bottom: 1.4rem; }
+.soon { background: #fff7ed; border-left: 4px solid #c2410c; padding: 0.2rem 0 0.2rem 1rem; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.95rem; }
+th, td { border: 1px solid #e7e5e4; padding: 0.35rem 0.5rem; text-align: left; vertical-align: top; }
+th { background: #fff; }
+ul, ol { padding-left: 1.25rem; }
+li { margin: 0.35rem 0; }
+</style>
+</head>
+<body>
+<p class="crumbs"><a href="index.html">All runbooks</a> · <a href="student.md">Markdown</a></p>
+<h1>Student</h1>
+<p>This guide is for the learner (<code>Aarav Sharma</code>, Student <code>+9101s</code>, enrolled in <code>Grade 11 Evening Batch (Mon–Fri)</code>). The steps use the exam-prep demo (<strong>Apex Science Academy</strong>). The one-time code is <code>000000</code>. There is no password.</p>
+<h2>Demo Personas (Exam-Prep Workspace)</h2>
+<ul>
+<li><strong>Owner / Admin:</strong> <code>Vikram Nair</code> (<code>+9101o</code>)</li>
+<li><strong>Senior Faculty / Faculty Admin:</strong> <code>Dr. Meera Krishnan</code> (<code>+9101t</code>)</li>
+<li><strong>Teaching Assistant:</strong> <code>Rohan Deshmukh</code> (<code>+9101a</code>)</li>
+<li><strong>Student:</strong> <code>Aarav Sharma</code> (<code>+9101s</code>)</li>
+<li><strong>Parent:</strong> <code>Rajesh Sharma</code> (<code>+9101p</code>)</li>
+</ul>
+<h2>Sign in</h2>
+<ol>
+<li>Open <a href="http://127.0.0.1:3000">http://127.0.0.1:3000</a>. You arrive at the role doors (<code>/app/student/router</code>: <strong>I’m here to learn</strong>, <strong>I’m a teacher</strong>, <strong>I’m a parent</strong>, and <strong>Workspace Owner / Admin</strong>).</li>
+<li>Choose <strong>I’m here to learn</strong>. That opens <code>/app/student/student-login</code>.</li>
+<li>In the 1-click <strong>Workspace &amp; Demo Persona Picker</strong>, <strong>Student — Aarav Sharma (<code>+9101s</code>)</strong> and the <code>Coaching exam-prep</code> workspace are already selected. Code <code>000000</code>. Click <strong>Verify</strong> to land on Home at <code>/app/student</code>.</li>
+<li>Phone OTP is the default. <strong>Magic link</strong> on the same screen uses the student email <code>student@exam-prep.sim</code> and returns the same kind of stub sign-in. It is not a live mailbox.</li>
+</ol>
+<p>The workspace dropdown defaults to the exam-prep seed (<code>Coaching exam-prep</code>). You can switch to <code>Language 1-on-1</code>, <code>Music studio</code>, or a custom workspace ID from the dropdown.</p>
+<h2>Where you land &amp; Section Sub-Tabs</h2>
+<p>The bottom nav is: Home, Classes, Whiteboard, Practice, Doubts, You, Profile.</p>
+<p>The header has Back when you are on a nested screen, a sun or moon theme icon, a bell icon, <strong>Terms</strong>, and Sign out. Below the header, multi-screen student workflows display horizontal <strong>Section Sub-Tabs</strong>:</p>
+<ul>
+<li><strong>Student Classes Sub-Tabs:</strong> <code>Study Library</code> (<code>/app/student/library</code>) · <code>Lesson View</code> (<code>/app/student/lesson</code>) · <code>Join Class</code> (<code>/app/student/join</code>) · <code>Live Whiteboard</code> (<code>/app/student/live-student</code>)</li>
+<li><strong>Student Practice Sub-Tabs:</strong> <code>Practice Sets</code> (<code>/app/student/practice-play</code>) · <code>Mock Tests</code> (<code>/app/student/test-runner</code>) · <code>My Results</code> (<code>/app/student/practice-result</code>)</li>
+<li><strong>Student You Sub-Tabs:</strong> <code>Activity Timeline</code> (<code>/app/student/timeline</code>) · <code>Fees &amp; Packs</code> (<code>/app/student/payments</code>) · <code>Alerts</code> (<code>/app/student/notif-prefs</code>) · <code>My Profile</code> (<code>/app/faculty/profile</code>)</li>
+</ul>
+<p>The bell lists in-app notices (class started, class cancelled, a clarified doubt). <strong>Terms</strong> shows the workspace file <code>docs/legal/terms-and-conditions.md</code>.</p>
+<p>Your WhatsApp channel is off unless the owner turns it on. Notices you act on are in the app.</p>
+<h2>What each nav item does</h2>
+<p><strong>Home</strong> (<code>/app/student</code>). Your name (<code>Aarav Sharma</code>), the next class (<code>Vectors &amp; Relative Motion — Live Class</code> with <code>Dr. Meera Krishnan</code>), due practice, this week’s test, and an open doubt if one is answered. For a 1-on-1 you can say you are unwell (decline) or pick another time (“I am unavailable then”) using structured <code>&lt;select&gt;</code> options. You can send feedback about the teacher. That feedback is stored on the teacher. It is not an assignment grade. Home also links to the whiteboard, the join waiting room, practice, and doubts. Class notices sit on this page.</p>
+<p><strong>Classes</strong> (<code>/app/student/library</code>). Lessons and files for this workspace, with a kind and a progress bar, paired with the <strong>Student Classes</strong> section sub-tabs (<code>Study Library</code>, <code>Lesson View</code>, <code>Join Class</code>, <code>Live Whiteboard</code>). Open one to read the lesson (<code>/app/student/lesson</code>). You do not add library items. A teacher does.</p>
+<p><strong>Whiteboard</strong> (<code>/app/student/live-student</code>). The shared class canvas and, for a cohort session, the class chat. If nothing is upcoming, join from the waiting room (<code>/app/student/join</code>) when a class is on the calendar. The join token for the exam-prep seed is <code>join-exam-prep</code> (selectable from the <code>&lt;select&gt;</code> session picker). The class runs on the mock video link stored on the session. TutorOS does not host the video call.</p>
+<p><strong>Practice</strong> (<code>/app/student/practice-play</code>). Pick a set (<code>Practice Set 1: Projectile &amp; Relative Motion</code>), answer, and submit. Use the <strong>Student Practice</strong> section sub-tabs (<code>Practice Sets</code>, <code>Mock Tests</code>, <code>My Results</code>) to view your result at <code>/app/student/practice-result</code> or take a timed mock test at <code>/app/student/test-runner</code>.</p>
+<p><strong>Doubts</strong> (<code>/app/student/doubt-student</code>). Open the collapsible <strong>+ Ask a Doubt</strong> form, pick a topic or subject from the <code>&lt;select&gt;</code> dropdown, write your question, and send it to the queue. When <code>Dr. Meera Krishnan</code> marks it clarified, you can <strong>Accept</strong> or <strong>Ignore</strong>. Either one finishes the notice.</p>
+<p><strong>You</strong> (<code>/app/student/timeline</code>). Your timeline: the ledger the teacher writes from the 3-step Attendance &amp; Class Summary screen (<code>/app/faculty/record</code>). Use the <strong>Student You</strong> section sub-tabs to switch between <code>Activity Timeline</code> (<code>/app/student/timeline</code>), <code>Fees &amp; Packs</code> (<code>/app/student/payments</code>), <code>Alerts</code> (<code>/app/student/notif-prefs</code>), and <code>My Profile</code> (<code>/app/faculty/profile</code>). On <code>Fees &amp; Packs</code> (<code>/app/student/payments</code>), you see the lesson-pack balance in hours (the exam-prep pack is 8 hours, or less after a class uses time from it) and invoices formatted in Rupees (<code>₹</code>). <code>GET /api/v1/students/{id}/lesson-pack</code> returns <code>balance_minutes</code> and <code>purchased_minutes</code>. The demo pack is 480 minutes only after a seed that includes <code>seed_internal_v2</code>. You can pay an open invoice with the mock checkout. A paid row shows a receipt. Notification choices are <code>/app/student/notif-prefs</code>. Student WhatsApp stays off unless the owner enables it.</p>
+<p><strong>Profile</strong> (<code>/app/faculty/profile</code>). The same profile screen, in the student shell. You can save phone, address, expertise, and a board label. Saving asks for the one-time code. Teachers see your grade, board, and study info. They do not see your phone or address on that card.</p>
+<h2>Jobs you can do today</h2>
+<ol>
+<li>Sign in via the 1-click <strong>Workspace &amp; Demo Persona Picker</strong> as <code>Aarav Sharma</code> (<code>+9101s</code>) and read the next class on Home.</li>
+<li>Join the whiteboard when the class is up, or open <code>Join Class</code> in the <strong>Classes</strong> sub-tabs with the session token.</li>
+<li>Finish the practice set that Home marks as due, and read the result under the <strong>Practice</strong> sub-tabs.</li>
+<li>Ask a doubt via <code>+ Ask a Doubt</code>, then accept or ignore it after the teacher clarifies it.</li>
+<li>On a 1-on-1, decline or propose another time, and send teacher feedback if you want to.</li>
+<li>Pay a mock invoice in Rupees (<code>₹</code>) and keep the receipt on <code>Fees &amp; Packs</code>. Read the hours left on that same screen when the pack balance is there.</li>
+<li>Read your <code>Activity Timeline</code> in the <strong>You</strong> sub-tabs when you want the class history in one list.</li>
+</ol>
+<p>On a 1-on-1 you can decline or propose another time from Home. A move at or outside 24 hours keeps the time on the pack. Inside 24 hours that move uses the session length. Attended and No-show use that length, which is 60 minutes when the session has no end. A student cancel inside 24 hours uses it too. A teacher cancel does not. The owner can waive a forfeit. Home does not print “Hour stays”; Schedule does, before the teacher saves the move. The save response is <code>hour</code> of <code>stays</code> or <code>used</code>.</p>
+<p>You do not file attendance yourself. The teacher (<code>Dr. Meera Krishnan</code>) does, on the 3-step session record: Attended, No-show, Student cancel, or Teacher cancel, with live lesson-pack consequence previews. Unmarked stays unmarked. A stored present still reads as Attended, and absent as No-show. Your parent (<code>Rajesh Sharma</code>) sees the count on their home, and can book an open hour in the next 7 days inside the teacher’s published week. That booking does not use an hour. Sign-in phones stay owner <code>+9101o</code> (<code>Vikram Nair</code>), teacher <code>+9101t</code> (<code>Dr. Meera Krishnan</code>), assistant <code>+9101a</code> (<code>Rohan Deshmukh</code>), student <code>+9101s</code> (<code>Aarav Sharma</code>), parent <code>+9101p</code> (<code>Rajesh Sharma</code>), code <code>000000</code>.</p>
+<h2>Not shipped</h2>
+<div class="soon">
+<ul><li>More than one branch.</li><li>A quality spot-check of a recording.</li></ul>
+</div>
+</body>
+</html>

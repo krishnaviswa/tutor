@@ -54,6 +54,7 @@ export function RosterScreen() {
   const [adding, setAdding] = useState(false);
   const [pasting, setPasting] = useState(false);
   const [pasteText, setPasteText] = useState("");
+  const [inviteStudentId, setInviteStudentId] = useState("");
   const [inviteToken, setInviteToken] = useState("");
   const [role, setRole] = useState("teacher");
   const [saving, setSaving] = useState(false);
@@ -70,8 +71,10 @@ export function RosterScreen() {
       api("/api/v1/cohorts") as Promise<CohortRow[]>,
       api("/api/v1/auth/me") as Promise<{ role?: string }>,
     ]);
-    setStudents(Array.isArray(st) ? st : []);
+    const list = Array.isArray(st) ? st : [];
+    setStudents(list);
     setCohorts(Array.isArray(co) ? co : []);
+    setInviteStudentId((prev) => prev || list[0]?.id || "");
     if (me?.role) setRole(me.role);
   }, []);
 
@@ -167,7 +170,7 @@ export function RosterScreen() {
   }
 
   async function mintInvite() {
-    const sid = students[0]?.id;
+    const sid = inviteStudentId || students[0]?.id;
     if (!sid) {
       setError("Add a student first.");
       return;
@@ -187,11 +190,14 @@ export function RosterScreen() {
     }
   }
 
+  const selectedStudentName =
+    students.find((s) => s.id === (inviteStudentId || students[0]?.id))?.display_name || "Student";
+
   return (
     <>
       <h2>Students</h2>
       <span className="k">{loading ? "Loading roster…" : kicker}</span>
-      <div className="row" style={{ marginBottom: 12 }}>
+      <div className="row" style={{ marginBottom: 12, gap: 8, alignItems: "center", flexWrap: "wrap" }}>
         {canWrite ? (
           <button
             type="button"
@@ -228,25 +234,40 @@ export function RosterScreen() {
               type="button"
               className="btn btn--sm"
               style={{ cursor: "pointer" }}
-              disabled={saving}
-              onClick={() => void mintInvite()}
+              onClick={() => setPasting((open) => !open)}
             >
-              Invite link
+              Paste WhatsApp list
             </button>
+            {students.length > 0 ? (
+              <select
+                className="field__in"
+                aria-label="Student for parent invite link"
+                style={{ width: "auto", minWidth: 160, margin: 0 }}
+                value={inviteStudentId || students[0]?.id || ""}
+                onChange={(e) => setInviteStudentId(e.target.value)}
+              >
+                {students.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.display_name}
+                  </option>
+                ))}
+              </select>
+            ) : null}
             <button
               type="button"
               className="btn btn--sm"
               style={{ cursor: "pointer" }}
-              onClick={() => setPasting((open) => !open)}
+              disabled={saving}
+              onClick={() => void mintInvite()}
             >
-              Paste WhatsApp list
+              Invite link
             </button>
           </>
         ) : null}
       </div>
       {inviteToken ? (
         <div className="card" style={{ marginBottom: 12 }}>
-          <div className="k">Parent invite token</div>
+          <div className="k">Parent invite token for {selectedStudentName}</div>
           <p className="muted" style={{ fontFamily: "var(--mono)" }}>{inviteToken}</p>
         </div>
       ) : null}

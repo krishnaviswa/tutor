@@ -483,7 +483,7 @@
     "own": "Each staff member owns their own. Owner can view or edit anyone.",
     "who": "A teacher or assistant marking when they can teach; owner and office scheduling around it.",
     "why": "Bookings and the calendar need to know when a staff member is free without asking on chat.",
-    "how": "Set weekly windows, then add one-off date exceptions for time off or a swapped day. The schedule screen can shade the week outside these windows.",
+    "how": "Paint one week calendar: drag a block to move it, drag its edges to change the start or end, and click an empty quarter to add an hour. Switch to one date to mark time off or an extra slot for that day only. The schedule screen can shade the week outside these windows.",
     "when": "On joining, at term start, and whenever a holiday or a swap comes up.",
     "roles": [
       "faculty"

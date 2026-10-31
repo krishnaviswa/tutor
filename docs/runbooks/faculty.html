@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Faculty — TutorOS</title>
+<style>
+:root { color-scheme: light; }
+body { font: 17px/1.55 Georgia, "Iowan Old Style", Palatino, serif; max-width: 40rem; margin: 2.5rem auto; padding: 0 1.25rem 4rem; color: #1c1917; background: #faf7f2; }
+h1 { font-size: 1.85rem; line-height: 1.2; margin: 0 0 0.4rem; }
+h2 { font-size: 1.25rem; margin: 2rem 0 0.6rem; }
+h3 { font-size: 1.05rem; margin: 1.4rem 0 0.4rem; }
+a { color: #1d4e89; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 0.88em; }
+pre { background: #fff; border: 1px solid #e7e5e4; border-radius: 8px; padding: 0.8rem 1rem; overflow: auto; }
+pre code { font-size: 0.82rem; }
+.crumbs { font-size: 0.92rem; margin-bottom: 1.4rem; }
+.soon { background: #fff7ed; border-left: 4px solid #c2410c; padding: 0.2rem 0 0.2rem 1rem; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.95rem; }
+th, td { border: 1px solid #e7e5e4; padding: 0.35rem 0.5rem; text-align: left; vertical-align: top; }
+th { background: #fff; }
+ul, ol { padding-left: 1.25rem; }
+li { margin: 0.35rem 0; }
+</style>
+</head>
+<body>
+<p class="crumbs"><a href="index.html">All runbooks</a> · <a href="faculty.md">Markdown</a></p>
+<h1>Faculty</h1>
+<p>This guide is for a teacher (<code>Dr. Meera Krishnan</code>, Senior Faculty / Faculty Admin <code>+9101t</code>) and for an assistant (<code>Rohan Deshmukh</code>, Assistant <code>+9101a</code>). Faculty admin is a grant on that same teaching login. It is not a separate account.</p>
+<p>The steps use the exam-prep demo workspace (<strong>Apex Science Academy</strong>). The one-time code is always <code>000000</code>. There is no username and password.</p>
+<h2>Demo Personas (Exam-Prep Workspace)</h2>
+<ul>
+<li><strong>Owner / Admin:</strong> <code>Vikram Nair</code> (<code>+9101o</code>)</li>
+<li><strong>Senior Faculty / Faculty Admin:</strong> <code>Dr. Meera Krishnan</code> (<code>+9101t</code>)</li>
+<li><strong>Teaching Assistant:</strong> <code>Rohan Deshmukh</code> (<code>+9101a</code>)</li>
+<li><strong>Student:</strong> <code>Aarav Sharma</code> (<code>+9101s</code>, enrolled in <code>Grade 11 Evening Batch (Mon–Fri)</code>)</li>
+<li><strong>Parent:</strong> <code>Rajesh Sharma</code> (<code>+9101p</code>)</li>
+</ul>
+<h2>Sign in</h2>
+<ol>
+<li>Open <a href="http://127.0.0.1:3000">http://127.0.0.1:3000</a>. The site sends you to the role doors at <code>/app/student/router</code> (<strong>I’m here to learn</strong>, <strong>I’m a teacher</strong>, <strong>I’m a parent</strong>, and the direct <strong>Workspace Owner / Admin</strong> door).</li>
+<li>Teacher: choose <strong>I’m a teacher</strong>. On exam-prep that door opens the dashboard sign-in and skips staff sign-in. Use the 1-click <strong>Workspace &amp; Demo Persona Picker</strong> (<code>Demo Persona Quick-Select</code> and <code>Workspace</code> dropdowns) to pick <strong>Teacher — Dr. Meera Krishnan (<code>+9101t</code>)</strong> or keep the prefilled <code>+9101t</code> and <code>000000</code> code. Click <strong>Verify &amp; Continue</strong> to land on <strong>Dashboard</strong> at <code>/app/faculty/teacher-dash</code>.</li>
+<li>Assistant: on the role doors, use <strong>other staff sign-in</strong> (<code>/app/faculty/staff-login</code>) or select <strong>Teaching Assistant — Rohan Deshmukh (<code>+9101a</code>)</strong> in the <strong>Demo Persona Quick-Select</strong> dropdown, code <code>000000</code>. You land on the same dashboard.</li>
+<li>The workspace dropdown defaults to the exam-prep seed (<code>Coaching exam-prep</code>). You can switch to <code>Language 1-on-1</code>, <code>Music studio</code>, or a custom workspace ID from the dropdown.</li>
+</ol>
+<p>Exam-prep hides staff sign-in from the main door on purpose. The “other staff sign-in” link and the 1-click <strong>Workspace &amp; Demo Persona Picker</strong> let an assistant or the owner switch personas immediately.</p>
+<h2>Where you land &amp; Section Sub-Tabs</h2>
+<p>The faculty rail is: Dashboard, Schedule, Whiteboard, Availability, Students, Practice, Doubts, Records, Library, Profile.</p>
+<p>The header has Back (on a screen that sits under a nav item), the place name, a sun or moon theme icon, a bell icon, <strong>Terms</strong>, and Sign out. Below the header, multi-screen workflows display horizontal <strong>Section Sub-Tabs</strong> so you can move across related screens in 1 click:</p>
+<ul>
+<li><strong>Schedule Sub-Tabs:</strong> <code>Week Calendar</code> (<code>/app/faculty/schedule</code>) · <code>Sessions &amp; Supervision</code> (<code>/app/faculty/sessions</code>) · <code>Pre-Class Prep</code> (<code>/app/faculty/session-pre</code>) · <code>My Availability</code> (<code>/app/faculty/availability</code>)</li>
+<li><strong>Students Sub-Tabs:</strong> <code>Student Roster</code> (<code>/app/admin/roster</code>) · <code>Cohorts &amp; Batches</code> (<code>/app/faculty/cohort-builder</code>) · <code>Mentor Backlog</code> (<code>/app/faculty/mentor</code>)</li>
+<li><strong>Practice &amp; Assessments Sub-Tabs:</strong> <code>1. Question Bank</code> (<code>/app/faculty/qbank</code>) · <code>2. Practice Builder</code> (<code>/app/faculty/practice-build</code>) · <code>3. Issue Homework</code> (<code>/app/faculty/assign-issue</code>) · <code>4. Grade Work</code> (<code>/app/faculty/assign-grade</code>) · <code>5. Mock Tests</code> (<code>/app/faculty/test-setup</code>) · <code>6. Cohort Analysis</code> (<code>/app/faculty/analysis</code>)</li>
+<li><strong>Doubts &amp; Comms Sub-Tabs:</strong> <code>Doubts Queue</code> (<code>/app/faculty/doubt-teacher</code>) · <code>Direct Messages</code> (<code>/app/faculty/messages</code>) · <code>Announcements</code> (<code>/app/faculty/announce</code>)</li>
+<li><strong>Records &amp; Reports Sub-Tabs:</strong> <code>Class Record &amp; Roll</code> (<code>/app/faculty/record</code>) · <code>Session Recordings</code> (<code>/app/faculty/session-video</code>) · <code>Progress Reports</code> (<code>/app/faculty/reports</code>)</li>
+</ul>
+<p>The bell lists in-app notices from the notification inbox, including class started, class cancelled, and a clarified doubt. <strong>Terms</strong> opens the workspace terms. The text is the file <code>docs/legal/terms-and-conditions.md</code>. A tech admin edits that file.</p>
+<p>Availability is an Outlook-style week: click an empty quarter, drag a block, and drag an edge to resize. It snaps to 15 minutes. <strong>Every week</strong> repeats; <strong>One date</strong> paints time off or an extra slot for that day. It does not connect to an Outlook mailbox. Schedule is the class week in Asia/Kolkata.</p>
+<h2>What each nav item does</h2>
+<p><strong>Dashboard</strong> (<code>/app/faculty/teacher-dash</code>). The cohort name (<code>Grade 11 Evening Batch (Mon–Fri)</code>), how many students are in it, attendance percent, practice done, the doubt backlog, and a chase list of students (<code>Aarav Sharma</code>, <code>Diya Patel</code>, <code>Kabir Verma</code>) to check on. Class notices sit on this page. From here you can open a student’s timeline, the mentor backlog, or the whiteboard.</p>
+<p><strong>Schedule</strong> (<code>/app/faculty/schedule</code>). The week, in Asia/Kolkata. Use the collapsible <strong>+ New Session</strong> form and structured <code>&lt;select&gt;</code> dropdowns (cohort or 1-on-1 student, subject, time slot) to create a session, move its time, or cancel it. Cancelling tells parents and the admin. A teacher cancel keeps the hour. A 1-on-1 session is booked against one student on the roster. Before <strong>Save time</strong> on a move, the page shows a live consequence preview saying <strong>Hour stays</strong> or <strong>Hour is used</strong>. The save response is <code>hour</code> of <code>stays</code> or <code>used</code>. A move at or outside 24 hours says Hour stays. Inside 24 hours it says Hour is used, and that move uses the session length (60 minutes when the session has no end). When you are the owner, the line is <strong>Hour stays because the owner can waive it.</strong> Use the <strong>Schedule</strong> section sub-tabs to jump to <strong>Sessions &amp; Supervision</strong> (<code>/app/faculty/sessions</code>), <strong>Pre-Class Prep</strong> (<code>/app/faculty/session-pre</code>), and <strong>My Availability</strong> (<code>/app/faculty/availability</code>).</p>
+<p><strong>Whiteboard</strong> (<code>/app/faculty/live-teacher</code>). The shared class canvas for the session, plus cohort chat when the session belongs to a cohort. The assigned teacher can hand the session, its subject, and a library item to a colleague in the same organization using structured <code>&lt;select&gt;</code> pickers. From the board you can open the session record.</p>
+<p><strong>Availability</strong> (<code>/app/faculty/availability</code>). The Outlook-style week above. Save availability. You see your own row (<code>Dr. Meera Krishnan</code>). The owner (<code>Vikram Nair</code>) can pick another staff member from the <code>&lt;select&gt;</code> dropdown and edit theirs. Parents (<code>Rajesh Sharma</code>) book an open hour only inside the week you publish, and only in the next 7 days.</p>
+<p><strong>Students</strong> (<code>/app/admin/roster</code>). The roster. The rail stays the faculty rail when a teacher opens it from Students, and the <strong>Students</strong> section sub-tabs link <code>Student Roster</code>, <code>Cohorts &amp; Batches</code>, and <code>Mentor Backlog</code>. Click the collapsible <strong>+ Add student</strong> button, import a CSV, paste a WhatsApp list (one <code>name,phone</code> per line), or pick a student from the <code>&lt;select&gt;</code> dropdown to mint a parent invite token. Cohorts are on the same page, and <strong>Cohorts &amp; Batches</strong> is <code>/app/faculty/cohort-builder</code> (class chat included). Open a student (<code>Aarav Sharma</code>) to see the card a teacher is allowed to see: grade, board, and study info. Phone and home address stay on that person’s own profile.</p>
+<p><strong>Practice</strong> (<code>/app/faculty/qbank</code>). The question bank, with a collapsible <strong>+ Add Question</strong> form (structured Option A–D inputs, <code>&lt;select&gt;</code> dropdowns for correct answer, difficulty, and topic, plus tag chips). The horizontal <strong>Practice &amp; Assessments</strong> section sub-tabs walk through the 6-step workflow:</p>
+<ul>
+<li><code>1. Question Bank</code>: <code>/app/faculty/qbank</code></li>
+<li><code>2. Practice Builder</code>: <code>/app/faculty/practice-build</code></li>
+<li><code>3. Issue Homework</code>: <code>/app/faculty/assign-issue</code></li>
+<li><code>4. Grade Work</code>: <code>/app/faculty/assign-grade</code></li>
+<li><code>5. Mock Tests</code>: <code>/app/faculty/test-setup</code></li>
+<li><code>6. Cohort Analysis</code>: <code>/app/faculty/analysis</code></li>
+</ul>
+<p><strong>Doubts</strong> (<code>/app/faculty/doubt-teacher</code>). The queue, paired with the <strong>Doubts &amp; Comms</strong> section sub-tabs (<code>Doubts Queue</code>, <code>Direct Messages</code>, <code>Announcements</code>). Open a doubt, write the answer (or insert a preset reply), and mark it clarified. That writes the timeline. WhatsApp is only the channel after the timeline write, and the student channel stays off unless the owner turns it on. The student can accept or ignore the clarified notice. Message threads are <code>/app/faculty/messages</code> and announcements are <code>/app/faculty/announce</code>.</p>
+<p><strong>Records</strong> (<code>/app/faculty/record</code>). The <strong>3-step Attendance &amp; Class Summary flow</strong>, paired with the <strong>Records &amp; Reports</strong> section sub-tabs (<code>Class Record &amp; Roll</code>, <code>Session Recordings</code>, <code>Progress Reports</code>):</p>
+<ol>
+<li><strong>Step 1 · Pick Session:</strong> Choose the scheduled session from the <code>&lt;select&gt;</code> dropdown.</li>
+<li><strong>Step 2 · Mark Attendance Roll (Teacher &amp; Students):</strong> Mark the Lead Teacher (<code>Present</code> or <code>Absent</code>) and each student (<code>Attended</code>, <code>No-show</code>, <code>Student cancel</code>, or <code>Teacher cancel</code>, or use <strong>Mark All Attended</strong>). A student you do not mark stays unmarked. A stored present still reads as Attended, and absent as No-show. A live <strong>Lesson-Pack Hour Impact</strong> badge previews how many student packs will have 1 hour deducted (<code>Attended</code> and <code>No-show</code>) versus preserved (<code>Teacher cancel</code>).</li>
+<li><strong>Step 3 · Save Class Summary Note:</strong> Insert a 1-click summary template or write the class note, review the <strong>Consequence Preview Before Saving</strong> card, and click <strong>Save Class Record</strong>. Saving writes each student’s timeline. Attended and No-show use the session length from the pack, 60 minutes when the session has no end. A student cancel inside 24 hours uses that same length. A teacher cancel keeps it. Session video is <code>/app/faculty/session-video</code>.</li>
+</ol>
+<p><strong>Library</strong> (<code>/app/student/library</code>). Content for this workspace. The address is the library screen. The shell follows whoever is signed in, so a teacher still has the faculty rail. A teacher can open the collapsible <strong>+ Add item</strong> form to add an item (title, body, <code>&lt;select&gt;</code> file kind such as pdf, png, svg, drawio, docx, pptx, xlsx, plus board, subject, and unit labels). Students open the same library and then a lesson.</p>
+<p><strong>Profile</strong> (<code>/app/faculty/profile</code>). Your phone, address, expertise, and subjects. Saving asks for the one-time code. Phone and address are not shown on the card other people see.</p>
+<h2>Faculty admin</h2>
+<p>Sessions (<code>/app/faculty/sessions</code>) includes a <strong>Faculty admin</strong> card. The card is drawn only when <code>GET /api/v1/faculty-admin/me</code> says this person holds the grant. If the grant is missing, the card is not shown.</p>
+<p>The exam-prep seed writes that grant for Senior Faculty <code>Dr. Meera Krishnan</code> (<code>+9101t</code>), granted by owner <code>Vikram Nair</code> (<code>+9101o</code>). Assistant <code>Rohan Deshmukh</code> (<code>+9101a</code>) does not get a grant row. After a normal seed, <code>Dr. Meera Krishnan</code> sees the card on Sessions and <code>Rohan Deshmukh</code> does not.</p>
+<p>A tech admin confirms it by signing in as that person and calling <code>GET /api/v1/faculty-admin/me</code>, or by looking for a row in <code>faculty_admin_grants</code> for that user and workspace.</p>
+<p>When the card is there you can:</p>
+<ul>
+<li>Mark planning attendance for each student: Attended, No-show, Student cancel, or Teacher cancel. Unmarked stays unmarked. A stored present still reads as Attended, and absent as No-show. The teacher line on that card is Present or Absent.</li>
+<li>Read teacher profiles (name, subjects, expertise, organization email) and correct one. Phone and home address stay off this card.</li>
+<li>Grant or remove a teacher’s permission to contact students and parents.</li>
+<li>Transfer the faculty-admin grant to someone else. The workspace owner does not change.</li>
+<li>Revert a handoff. That returns the session to the previous teacher.</li>
+</ul>
+<p>A faculty-admin save on Profile also asks for an email code. That email step is not a new login.</p>
+<h2>A teaching day</h2>
+<ol>
+<li>Sign in via the <strong>Workspace &amp; Demo Persona Picker</strong> (<code>Dr. Meera Krishnan</code>, <code>+9101t</code>) and read the chase list on the dashboard.</li>
+<li>Check the week under <strong>Schedule</strong> (using the <code>Week Calendar</code>, <code>Sessions &amp; Supervision</code>, <code>Pre-Class Prep</code>, and <code>My Availability</code> sub-tabs). Create or move a session, or cancel it if the class will not run.</li>
+<li>Publish the hours you can teach on Availability.</li>
+<li>Open the whiteboard when the class starts. Hand it off only if a colleague should take that session.</li>
+<li>After class, open <strong>Records</strong> and complete the 3-step Attendance &amp; Class Summary flow: pick the session, mark <code>Attended</code>, <code>No-show</code>, <code>Student cancel</code>, or <code>Teacher cancel</code> while checking the live lesson-pack consequence preview, and save the class summary note. Parents (<code>Rajesh Sharma</code>) read that note, and the hours left, on their home screen.</li>
+<li>Clear the doubt queue under <strong>Doubts &amp; Comms</strong>. Mark a doubt clarified when it is done.</li>
+<li>Add or issue practice across the 6 <strong>Practice &amp; Assessments</strong> sub-tabs when the cohort needs work.</li>
+</ol>
+<p>Announcements live at <code>/app/faculty/announce</code>. The mentor backlog is linked from the dashboard and the <strong>Students</strong> sub-tabs at <code>/app/faculty/mentor</code>: book a backlog item onto a session.</p>
+<p>The exam-prep child (<code>Aarav Sharma</code>) starts with an 8-hour pack. Parents see the hours left on Home and on Fees. Booking an open hour does not use one. The owner (<code>Vikram Nair</code>) creates a student and a pack from the owner console (name, phone, hours). Payouts lists delivered sessions. Faculty admin stays the card on Sessions. It is not a separate login. Sign-in phones stay owner <code>+9101o</code> (<code>Vikram Nair</code>), teacher <code>+9101t</code> (<code>Dr. Meera Krishnan</code>), assistant <code>+9101a</code> (<code>Rohan Deshmukh</code>), student <code>+9101s</code> (<code>Aarav Sharma</code>), parent <code>+9101p</code> (<code>Rajesh Sharma</code>), code <code>000000</code>.</p>
+<h2>Not shipped</h2>
+<div class="soon">
+<ul><li>More than one branch.</li><li>A quality spot-check of a recording.</li></ul>
+</div>
+</body>
+</html>

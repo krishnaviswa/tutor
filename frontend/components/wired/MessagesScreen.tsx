@@ -1,15 +1,21 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CohortChat } from "@/components/studio/CohortChat";
 import { api } from "@/lib/api";
 import { AppBar, Err, Loading } from "./bits";
 
 type Thread = { id: string; student_id?: string | null; last_body?: string; unread?: boolean };
+type StudentRow = { id: string; user_id?: string; display_name: string };
+type ContentRow = { id: string; title: string; kind?: string };
 type Role = string;
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function MessagesScreen() {
   const [threads, setThreads] = useState<Thread[]>([]);
+  const [students, setStudents] = useState<StudentRow[]>([]);
+  const [libraryItems, setLibraryItems] = useState<ContentRow[]>([]);
   const [sel, setSel] = useState<Thread | null>(null);
   const [body, setBody] = useState("");
   const [attachment, setAttachment] = useState("");
@@ -30,7 +36,7 @@ export function MessagesScreen() {
 
   function load() {
     api("/api/v1/threads")
-      .then((data) => setThreads(data as Thread[]))
+      .then((data) => setThreads(Array.isArray(data) ? (data as Thread[]) : []))
       .catch((e) => setError(e instanceof Error ? e.message : String(e)))
       .finally(() => setReady(true));
   }
@@ -41,13 +47,41 @@ export function MessagesScreen() {
       .catch(() => undefined);
     api("/api/v1/cohorts")
       .then((rows) => {
-        const list = rows as { id: string; name: string }[];
+        const list = Array.isArray(rows) ? (rows as { id: string; name: string }[]) : [];
         setCohorts(list);
         if (list[0]) setCohortId(list[0].id);
       })
       .catch(() => undefined);
+    api("/api/v1/students")
+      .then((rows) => {
+        const list = Array.isArray(rows) ? (rows as StudentRow[]) : [];
+        setStudents(list);
+      })
+      .catch(() => undefined);
+    api("/api/v1/content")
+      .then((rows) => {
+        const list = Array.isArray(rows) ? (rows as ContentRow[]) : [];
+        setLibraryItems(list);
+      })
+      .catch(() => undefined);
     load();
   }, []);
+
+  const studentNameMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const s of students) {
+      if (s.id) map[s.id] = s.display_name;
+      if (s.user_id) map[s.user_id] = s.display_name;
+    }
+    return map;
+  }, [students]);
+
+  function resolveThreadTitle(rawId?: string | null): string {
+    if (!rawId) return "Conversation";
+    if (studentNameMap[rawId]) return studentNameMap[rawId];
+    if (UUID_RE.test(rawId)) return "Student conversation";
+    return rawId;
+  }
 
   async function send() {
     if (!body.trim()) return;
@@ -98,7 +132,7 @@ export function MessagesScreen() {
               className={active?.id === t.id ? "chat__person on" : "chat__person"}
               onClick={() => setSel(t)}
             >
-              <b>{t.student_id || "Conversation"}</b>
+              <b>{resolveThreadTitle(t.student_id)}</b>
               <span>{t.last_body || "No messages yet"}</span>
             </button>
           ))}
@@ -153,21 +187,33 @@ export function MessagesScreen() {
           </form>
           {role !== "student" && role !== "parent" ? (
             <label className="field" style={{ margin: "0 12px 12px" }}>
-              <span>Student id for a new thread</span>
-              <input className="field__in" value={studentId} onChange={(e) => setStudentId(e.target.value)} />
+              <span>Student for a new thread</span>
+              <select className="field__in" value={studentId} onChange={(e) => setStudentId(e.target.value)}>
+                <option value="">Active thread student (or select student)…</option>
+                {students.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.display_name}
+                  </option>
+                ))}
+              </select>
             </label>
           ) : null}
-          {attachment !== undefined ? (
-            <label className="field" style={{ margin: "0 12px 8px" }}>
-              <span>Attachment</span>
-              <input
-                className="field__in"
-                value={attachment}
-                onChange={(e) => setAttachment(e.target.value)}
-                placeholder="Optional path"
-              />
-            </label>
-          ) : null}
+          <label className="field" style={{ margin: "0 12px 8px" }}>
+            <span>Attachment (Library material)</span>
+            <select
+              className="field__in"
+              value={attachment}
+              onChange={(e) => setAttachment(e.target.value)}
+            >
+              <option value="">No attachment</option>
+              {libraryItems.map((item) => (
+                <option key={item.id} value={item.title || item.id}>
+                  {item.title}
+                  {item.kind ? ` (${item.kind.toUpperCase()})` : ""}
+                </option>
+              ))}
+            </select>
+          </label>
         </section>
       </div>
       {role !== "parent" && cohorts.length > 0 ? (

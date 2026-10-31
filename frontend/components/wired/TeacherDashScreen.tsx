@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import { ClassNotices } from "@/components/studio/ClassNotices";
 import { api } from "@/lib/api";
 import { catalogRoute } from "@/lib/screens";
-import { Av, Err, Loading } from "./bits";
+import { Av, Empty, Err, Loading } from "./bits";
+
+const TZ = "Asia/Kolkata";
 
 type Bar = { day?: string; title?: string; pct: number };
 type Dash = {
@@ -20,8 +22,31 @@ type Dash = {
   at_risk?: { student_id: string; display_name: string; reason: string; tone: string }[];
 };
 
+type SessionItem = {
+  id: string;
+  title: string;
+  starts_at: string | null;
+  status?: string;
+  display_status?: string;
+};
+
+function formatSessionTime(iso: string | null): string {
+  if (!iso) return "Time to be scheduled";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "Scheduled";
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: TZ,
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(d);
+}
+
 function Bars({ rows }: { rows: Bar[] }) {
-  if (!rows.length) return <p className="muted">No sessions in the last week.</p>;
+  if (!rows.length) return <p className="muted">No sessions recorded in the past 7 days.</p>;
   return (
     <div className="bars">
       {rows.map((r) => (
@@ -36,119 +61,188 @@ function Bars({ rows }: { rows: Bar[] }) {
 
 export function TeacherDashScreen() {
   const [data, setData] = useState<Dash | null>(null);
+  const [sessions, setSessions] = useState<SessionItem[]>([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    api("/api/v1/teacher/dashboard")
-      .then((row) => setData(row as Dash))
+    Promise.all([
+      api("/api/v1/teacher/dashboard") as Promise<Dash>,
+      api("/api/v1/sessions").catch(() => []) as Promise<SessionItem[]>,
+    ])
+      .then(([dash, sess]) => {
+        setData(dash);
+        setSessions(Array.isArray(sess) ? sess.slice(0, 4) : []);
+      })
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }, []);
 
   const chase = data?.at_risk ?? [];
   const practicePct = data?.practice_by_set?.[0]?.pct;
+  const openDoubts = data?.doubt_backlog ?? 0;
 
   return (
     <>
-      <h2>{data?.cohort?.name || "This workspace"}</h2>
-      <span className="k">
-        {data?.cohort ? `${data.cohort.size} students · live aggregates` : "Live aggregates · same ledger as record"}
-      </span>
-      {!data && !error ? <Loading>Loading dashboard…</Loading> : null}
+      <div className="page-toolbar">
+        <div className="page-toolbar__title">
+          <h2>{data?.cohort?.name || "Faculty Teaching Hub"}</h2>
+          <span className="k">
+            {data?.cohort
+              ? `${data.cohort.size} enrolled students · Run today's classes, mark attendance, and follow up with students`
+              : "Run today's classes, mark attendance, and support students who need attention"}
+          </span>
+        </div>
+        <div className="page-toolbar__actions">
+          <Link href="/app/faculty/session-pre" className="btn btn--sm">
+            Prep Class
+          </Link>
+          <Link href="/app/faculty/live-teacher" className="hot hot--btn">
+            Launch Live Board
+          </Link>
+          <Link href="/app/faculty/record" className="btn btn--sm">
+            Mark Attendance Roll
+          </Link>
+          <Link href="/app/faculty/doubt-teacher" className="btn btn--sm">
+            Answer Doubts {openDoubts > 0 ? `(${openDoubts})` : ""}
+          </Link>
+        </div>
+      </div>
+
+      {!data && !error ? <Loading>Loading teaching hub…</Loading> : null}
       <Err message={error} />
       <ClassNotices />
+
       {data ? (
         <>
-          <div className="next-action">
-            <div>
-              <div className="k">Next</div>
-              <strong>{chase.length ? `Check in with ${chase[0].display_name}` : "Open the class canvas"}</strong>
-              <p>{chase.length ? chase[0].reason : "Whiteboard, schedule, and the people in this cohort."}</p>
-            </div>
-            <Link href={catalogRoute(chase.length ? "roster" : "live-teacher")} className="hot hot--btn">
-              {chase.length ? "Open students" : "Whiteboard"}
-            </Link>
-          </div>
-          <div className="grid g4" style={{ marginBottom: 14 }}>
+          <div className="grid g4" style={{ marginBottom: 16 }}>
             <div className="stat">
               <div className="stat__v">{data.attendance_pct ?? 0}%</div>
-              <div className="stat__l">Attendance</div>
+              <div className="stat__l">Class Attendance</div>
             </div>
             <div className="stat">
               <div className="stat__v">{practicePct ?? 0}%</div>
-              <div className="stat__l">Practice done</div>
+              <div className="stat__l">Practice Completed</div>
             </div>
             <div className="stat">
-              <div className="stat__v">{data.doubt_backlog ?? 0}</div>
-              <div className="stat__l">Doubt backlog</div>
+              <div className="stat__v">{openDoubts}</div>
+              <div className="stat__l">Open Student Doubts</div>
             </div>
             <div className="stat">
               <div className="stat__v">{chase.length}</div>
-              <div className="stat__l">At risk</div>
+              <div className="stat__l">Students Needing Follow-Up</div>
             </div>
           </div>
+
           <div className="grid g2" style={{ alignItems: "start" }}>
             <div className="card">
-              <h3>Students to chase</h3>
-              {chase.length === 0 ? (
-                <p className="muted">No chase list — attendance and practice look steady.</p>
-              ) : (
-                chase.map((c) => (
-                  <Link key={c.student_id} href={catalogRoute("timeline")} className="hot hot--row">
-                    <div className="sb">
-                      <div className="row" style={{ gap: 8, flexWrap: "nowrap" }}>
-                        <Av name={c.display_name} />
-                        <div className="gr">
-                          <div className="t" style={{ fontSize: ".85rem", fontWeight: 600 }}>
-                            {c.display_name}
-                          </div>
-                          <div className="s">{c.reason}</div>
-                        </div>
-                      </div>
-                      <span className={`pill ${c.tone === "bad" ? "is-bad" : "is-warn"}`}>open record</span>
-                    </div>
-                  </Link>
-                ))
-              )}
-              <div className="row" style={{ marginTop: 6 }}>
-                <Link href={catalogRoute("mentor")} className="hot hot--btn ghost">
-                  Mentor backlog
+              <div className="sb" style={{ marginBottom: 10 }}>
+                <h3 style={{ margin: 0 }}>Today&apos;s Schedule &amp; Next Classes</h3>
+                <Link href={catalogRoute("schedule")} className="btn btn--sm">
+                  Full Calendar
                 </Link>
               </div>
+              {sessions.length === 0 ? (
+                <Empty>No sessions scheduled yet. Open the calendar to add a class.</Empty>
+              ) : (
+                sessions.map((s) => (
+                  <div key={s.id} className="list__i" style={{ flexWrap: "wrap", gap: 10 }}>
+                    <div className="gr">
+                      <div className="t">{s.title}</div>
+                      <div className="s">
+                        {formatSessionTime(s.starts_at)} IST
+                        {s.display_status ? ` · ${s.display_status}` : ""}
+                      </div>
+                    </div>
+                    <div className="row" style={{ gap: 6 }}>
+                      <Link href={`/app/faculty/session-pre?session=${encodeURIComponent(s.id)}`} className="btn btn--sm">
+                        Prep Class
+                      </Link>
+                      <Link
+                        href={`/app/faculty/live-teacher?session=${encodeURIComponent(s.id)}`}
+                        className="btn btn--dark btn--sm"
+                      >
+                        Launch Live Board
+                      </Link>
+                      <Link href={`/app/faculty/record?session=${encodeURIComponent(s.id)}`} className="btn btn--sm">
+                        Mark Attendance Roll
+                      </Link>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
+
             <div className="card">
-              <h3>Attendance this week</h3>
-              <Bars rows={data.attendance_week ?? []} />
-              <div className="hr" />
-              <div className="k" style={{ marginBottom: 8 }}>
-                Practice completion by set
+              <div className="sb" style={{ marginBottom: 10 }}>
+                <h3 style={{ margin: 0 }}>Needs Attention</h3>
+                <Link href={catalogRoute("mentor")} className="btn btn--sm">
+                  Mentor Follow-Ups
+                </Link>
               </div>
-              <Bars
-                rows={(data.practice_by_set ?? []).map((r) => ({
-                  day: (r.title || "set").split(" ").slice(-1)[0],
-                  pct: r.pct,
-                }))}
-              />
+
+              {openDoubts > 0 ? (
+                <div className="list__i" style={{ flexWrap: "wrap", gap: 10 }}>
+                  <div className="gr">
+                    <div className="t">
+                      {openDoubts} Student Doubt{openDoubts === 1 ? "" : "s"} Waiting
+                    </div>
+                    <div className="s">Students are waiting for a step-by-step clarification</div>
+                  </div>
+                  <Link href="/app/faculty/doubt-teacher" className="btn btn--dark btn--sm">
+                    Answer Doubts
+                  </Link>
+                </div>
+              ) : null}
+
+              {chase.length === 0 && openDoubts === 0 ? (
+                <p className="muted">All caught up — attendance, practice, and student doubts are on track.</p>
+              ) : (
+                chase.map((c) => (
+                  <div key={c.student_id} className="list__i" style={{ flexWrap: "wrap", gap: 10 }}>
+                    <div className="row" style={{ gap: 8, flexWrap: "nowrap", flex: 1, minWidth: 180 }}>
+                      <Av name={c.display_name} />
+                      <div className="gr">
+                        <div className="t" style={{ fontSize: ".9rem", fontWeight: 600 }}>
+                          {c.display_name}
+                        </div>
+                        <div className="s">{c.reason}</div>
+                      </div>
+                    </div>
+                    <div className="row" style={{ gap: 6 }}>
+                      <span className={`pill ${c.tone === "bad" ? "is-bad" : "is-warn"}`}>
+                        {c.tone === "bad" ? "High Priority" : "Needs Check-in"}
+                      </span>
+                      <Link href={catalogRoute("mentor")} className="btn btn--sm">
+                        Book 1-on-1
+                      </Link>
+                      <Link href={catalogRoute("timeline")} className="btn btn--sm">
+                        Activity Log
+                      </Link>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="card" style={{ marginTop: 4 }}>
+            <div className="grid g2" style={{ alignItems: "start" }}>
+              <div>
+                <h3>Weekly Attendance Trend</h3>
+                <Bars rows={data.attendance_week ?? []} />
+              </div>
+              <div>
+                <h3>Practice Completion by Set</h3>
+                <Bars
+                  rows={(data.practice_by_set ?? []).map((r) => ({
+                    day: (r.title || "Set").split(" ").slice(-1)[0],
+                    pct: r.pct,
+                  }))}
+                />
+              </div>
             </div>
           </div>
         </>
       ) : null}
-      <div className="card card--wash" style={{ marginTop: 12 }}>
-        <p className="muted">
-          Same numbers the owner sees, scoped to this workspace — attendance from join, completion from attempts, backlog
-          from the doubts queue.
-        </p>
-      </div>
-      <div className="row" style={{ marginTop: 12 }}>
-        <Link href={catalogRoute("live-teacher")} className="hot hot--btn">
-          Open whiteboard
-        </Link>
-        <Link href={catalogRoute("schedule")} className="hot hot--btn">
-          Open schedule
-        </Link>
-        <Link href={catalogRoute("mentor")} className="btn btn--sm">
-          Mentor backlog
-        </Link>
-      </div>
     </>
   );
 }

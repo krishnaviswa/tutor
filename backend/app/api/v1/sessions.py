@@ -33,12 +33,14 @@ class SessionPatch(BaseModel):
     ends_at: datetime | None = None
     status: str | None = None
     cancel_reason: str | None = None
+    waive: bool = False
 
 
 class RecordPatch(BaseModel):
     notes: str | None = None
     attendance: list[dict] | None = None
     teacher_status: str | None = None
+    waive: bool = False
 
 
 class EngagementIn(BaseModel):
@@ -59,6 +61,7 @@ class StudentChangeIn(BaseModel):
     action: str
     reason: str = ""
     starts_at: datetime | None = None
+    waive: bool = False
 
 
 class PlaceLibraryIn(BaseModel):
@@ -188,13 +191,18 @@ def patch_session(
     principal: Principal = Depends(require_roles("owner", "teacher")),
 ):
     s = _get(db, principal.workspace_id, session_id)
+    hour = None
     if body.title is not None:
         s.title = body.title
     # Time edits are allowed in any state (glitch fix). Moving to the future re-reads as "Upcoming".
     if body.starts_at is not None:
-        if teacher_conflict(db, principal.workspace_id, s.teacher_user_id, body.starts_at, skip_id=s.id):
-            raise HTTPException(status.HTTP_409_CONFLICT, "teacher conflict")
-        s.starts_at = body.starts_at
+        hour = sessions_svc.move_start(
+            db,
+            s,
+            body.starts_at,
+            actor_role=principal.role,
+            waive=body.waive,
+        )
     if body.ends_at is not None:
         s.ends_at = body.ends_at
     if body.status is not None:
@@ -210,7 +218,10 @@ def patch_session(
             body.cancel_reason or "",
             bool(ws.student_whatsapp) if ws else False,
         )
-    return _session_out(db, s)
+    out = _session_out(db, s)
+    if hour is not None:
+        out["hour"] = hour
+    return out
 
 
 @router.get("/sessions/{session_id}/board")
@@ -258,7 +269,7 @@ def student_change(
 ):
     s = _get(db, principal.workspace_id, session_id)
     ws = db.get(Workspace, principal.workspace_id)
-    sessions_svc.student_change(
+    s, hour = sessions_svc.student_change(
         db,
         ports,
         principal,
@@ -267,8 +278,12 @@ def student_change(
         reason=body.reason,
         starts_at=body.starts_at,
         student_whatsapp_on=bool(ws.student_whatsapp) if ws else False,
+        waive=body.waive,
     )
-    return _session_out(db, s)
+    out = _session_out(db, s)
+    if hour is not None:
+        out["hour"] = hour
+    return out
 
 
 @router.post("/sessions/{session_id}/board/library")
@@ -340,6 +355,8 @@ def patch_record(
         body.attendance,
         bool(ws.student_whatsapp) if ws else False,
         body.teacher_status,
+        principal.role,
+        body.waive,
     )
 
 

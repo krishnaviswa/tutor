@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tech admin — TutorOS</title>
+<style>
+:root { color-scheme: light; }
+body { font: 17px/1.55 Georgia, "Iowan Old Style", Palatino, serif; max-width: 40rem; margin: 2.5rem auto; padding: 0 1.25rem 4rem; color: #1c1917; background: #faf7f2; }
+h1 { font-size: 1.85rem; line-height: 1.2; margin: 0 0 0.4rem; }
+h2 { font-size: 1.25rem; margin: 2rem 0 0.6rem; }
+h3 { font-size: 1.05rem; margin: 1.4rem 0 0.4rem; }
+a { color: #1d4e89; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 0.88em; }
+pre { background: #fff; border: 1px solid #e7e5e4; border-radius: 8px; padding: 0.8rem 1rem; overflow: auto; }
+pre code { font-size: 0.82rem; }
+.crumbs { font-size: 0.92rem; margin-bottom: 1.4rem; }
+.soon { background: #fff7ed; border-left: 4px solid #c2410c; padding: 0.2rem 0 0.2rem 1rem; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.95rem; }
+th, td { border: 1px solid #e7e5e4; padding: 0.35rem 0.5rem; text-align: left; vertical-align: top; }
+th { background: #fff; }
+ul, ol { padding-left: 1.25rem; }
+li { margin: 0.35rem 0; }
+</style>
+</head>
+<body>
+<p class="crumbs"><a href="index.html">All runbooks</a> · <a href="tech-admin.md">Markdown</a></p>
+<h1>Tech admin</h1>
+<p>This guide is for the person who runs the stack on a machine. It is not a login role. The product roles are owner, teacher, assistant, student, and parent. You use those humanized demo personas and phones when you need to click through the app.</p>
+<p>Biology / NEET in this repository is an example tenant pack. It is not a separate product and not a syllabus database.</p>
+<h2>Run the local stack</h2>
+<p>Follow README section 1. Postgres is the local database. Pytest is the only SQLite path.</p>
+<p>Start Postgres. The container name is <code>tutoros-postgres</code>. Wait until it is healthy.</p>
+<pre><code>docker compose up -d postgres</code></pre>
+<p>The database URL the API expects is <code>postgresql+psycopg://tutor:tutor@127.0.0.1:5432/tutoros</code>.</p>
+<p>From <code>backend/</code>, install dependencies and start the API:</p>
+<pre><code>pip install -r requirements.txt
+python -m uvicorn app.main:app --reload --port 8000</code></pre>
+<p>From <code>frontend/</code>, start the site:</p>
+<pre><code>npm run dev</code></pre>
+<p>The site is <a href="http://127.0.0.1:3000">http://127.0.0.1:3000</a>. It redirects to <code>/app/student/router</code>. The browser calls the API at <code>http://127.0.0.1:8000</code> unless <code>NEXT_PUBLIC_API_BASE</code> is set.</p>
+<p><code>docker compose up -d --build</code> also starts the API container and the web container (site on port 3000, API on port 8000). Inside Compose the API uses the hostname <code>postgres</code>, not <code>127.0.0.1</code>. Copy <code>.env.example</code> when you need a file. Do not commit secrets.</p>
+<p>Wipe the local Postgres seed and load it again:</p>
+<pre><code>cd backend
+python -m app.seed_cli --reset</code></pre>
+<p><code>seed_all</code> skips a workspace that already exists, so a normal API start does not add the lesson-pack rows or humanized persona names to an old database. Demo students (<code>Aarav Sharma</code>, <code>Diya Patel</code>) receive an 8-hour pack (480 minutes on <code>balance_minutes</code> and <code>purchased_minutes</code>) only when the seed includes <code>seed_internal_v2</code>. If parent home has no hours line or shows legacy names after the current API is up, run the reset above. That wipes local app data. Leave the Postgres volume in place.</p>
+<p>Seeded workspaces are <code>exam-prep</code> (<strong>Apex Science Academy</strong>), <code>language-1on1</code> (<strong>Polyglot Language Studio</strong>), and <code>music</code> (<strong>Swar Sangam Music Academy</strong>). Exam-prep personas and phones are:</p>
+<ul>
+<li><strong>Owner / Admin:</strong> <code>Vikram Nair</code> (<code>+9101o</code>)</li>
+<li><strong>Senior Faculty / Faculty Admin:</strong> <code>Dr. Meera Krishnan</code> (<code>+9101t</code>)</li>
+<li><strong>Teaching Assistant:</strong> <code>Rohan Deshmukh</code> (<code>+9101a</code>)</li>
+<li><strong>Student:</strong> <code>Aarav Sharma</code> (<code>+9101s</code>, plus <code>Diya Patel</code> and <code>Kabir Verma</code> in <code>Grade 11 Evening Batch (Mon–Fri)</code>)</li>
+<li><strong>Parent:</strong> <code>Rajesh Sharma</code> (<code>+9101p</code>, plus <code>Sunita Patel</code>)</li>
+</ul>
+<p>The OTP code is <code>000000</code> for every role. Language (<code>+9102</code>) seeds <code>Elena Rostova</code> (owner), <code>Claire Dubois</code> (teacher), <code>Liam O'Connor</code> (assistant), <code>Maya Lin</code> (student), <code>David Lin</code> (parent). Music (<code>+9103</code>) seeds <code>Pandit Ravi Kulkarni</code> (owner), <code>Ananya Sen</code> (teacher), <code>Karthik Iyer</code> (assistant), <code>Zoya Khan</code> (student), <code>Farhan Khan</code> (parent).</p>
+<h2>Tests</h2>
+<p>Pytest uses an in-memory SQLite database. It does not use the Compose Postgres. From <code>backend/</code>:</p>
+<pre><code>python -m pytest</code></pre>
+<p>Vendor ports stay mock. A test run asserts that no live vendor call was made. Product checks that need the real seed go through <code>/api/v1</code> on Postgres, not through pytest.</p>
+<h2>Mock ports</h2>
+<p>Defaults are mock. Nothing in a normal local run calls a live vendor.</p>
+<table><thead><tr><th>Port</th><th>Env</th><th>Default</th></tr></thead><tbody>
+<tr><td>Calendar and video</td><td><code>VIDEO_PROVIDER</code></td><td><code>mock</code></td></tr>
+<tr><td>SMS</td><td><code>SMS_PROVIDER</code></td><td><code>mock</code></td></tr>
+<tr><td>Email</td><td><code>EMAIL_PROVIDER</code></td><td><code>mock</code></td></tr>
+<tr><td>Storage</td><td><code>STORAGE_PROVIDER</code></td><td><code>local</code></td></tr>
+<tr><td>Student payments</td><td><code>PAYMENTS_STUDENT_PROVIDER</code></td><td><code>mock</code></td></tr>
+<tr><td>Platform payments</td><td><code>PAYMENTS_PLATFORM_PROVIDER</code></td><td><code>mock</code></td></tr>
+<tr><td>Push</td><td><code>PUSH_PROVIDER</code></td><td><code>mock</code></td></tr>
+<tr><td>WhatsApp</td><td><code>WHATSAPP_PROVIDER</code></td><td><code>mock</code></td></tr>
+</tbody></table>
+<p>The catalog names live options (Google or Microsoft video, Razorpay, Stripe, Meta WhatsApp, and others). Those are not turned on. The Integrations screen is mock connect. Availability is an Outlook-style week in the app (click, drag, resize, 15-minute snap). It does not sync an Outlook mailbox. Schedule is the class week, also TutorOS data.</p>
+<p>WhatsApp, when the mock channel runs, is for teacher, parent, and admin. Student WhatsApp is off unless the owner enables it. The timeline is written first. A failed send does not roll back the record.</p>
+<h2>Sign-in, Section Sub-Tabs, and the shell</h2>
+<p>Auth is the stub: phone OTP <code>000000</code>, an optional magic link for the student or staff, and a JWT. There is no username and password. Every sign-in gate (<code>LoginGate</code>, <code>StudentLoginScreen</code>, <code>StaffLoginScreen</code>, <code>ParentLinkScreen</code>) includes the 1-click <strong>Workspace &amp; Demo Persona Picker</strong> (<code>Demo Persona Quick-Select</code> and <code>Workspace</code> <code>&lt;select&gt;</code> dropdowns).</p>
+<p>Role doors on <code>/app/student/router</code>:</p>
+<ul>
+<li>Student <code>Aarav Sharma</code> (<code>+9101s</code>) uses <strong>I’m here to learn</strong> and lands on <code>/app/student</code>.</li>
+<li>Teacher <code>Dr. Meera Krishnan</code> (<code>+9101t</code>) uses <strong>I’m a teacher</strong> and lands on <code>/app/faculty/teacher-dash</code>. Exam-prep skips staff sign-in on that door.</li>
+<li>Owner <code>Vikram Nair</code> (<code>+9101o</code>) uses the direct <strong>Workspace Owner / Admin</strong> door (or <strong>other staff sign-in</strong>) and lands on <code>/app/admin</code>.</li>
+<li>Assistant <code>Rohan Deshmukh</code> (<code>+9101a</code>) uses <strong>other staff sign-in</strong> (or selects the assistant persona in the picker) and lands on the faculty dashboard.</li>
+<li>Parent <code>Rajesh Sharma</code> (<code>+9101p</code>) uses <strong>I’m a parent</strong>, accepts invite <code>link-exam-prep</code> (<code>Aarav Sharma</code>), and lands on <code>/app/parent</code>.</li>
+</ul>
+<p>The signed-in header (faculty, owner, student, and parent) includes a sun or moon theme icon, a bell icon, and <strong>Terms</strong>. Below the header, horizontal <strong>Section Sub-Tabs</strong> (<code>SectionTabs.tsx</code>) group multi-screen workflows across <code>Schedule</code>, <code>Students</code>, <code>Practice &amp; Assessments</code>, <code>Doubts &amp; Comms</code>, <code>Records &amp; Reports</code>, <code>Owner Console</code>, <code>Student Classes/Practice/You</code>, and <code>Parent Home/Reports</code>. The bell reads <code>GET /api/v1/notifications/inbox</code> and lists those notices. <strong>Terms</strong> reads <code>docs/legal/terms-and-conditions.md</code> through <code>GET /api/v1/terms</code>.</p>
+<p><code>/operator</code> is a jump list of screens for you. It is not a catalog screen id.</p>
+<h2>Terms</h2>
+<p>The terms text is the markdown file <a href="../legal/terms-and-conditions.md">docs/legal/terms-and-conditions.md</a>. The API route <code>GET /api/v1/terms</code> reads that file from disk on every request. Edit the markdown. The next time someone opens <strong>Terms</strong>, they see the file as it is now. You do not restart the process for a text edit. If the file is missing, the API returns 404 and the dialog says the terms file is not on disk.</p>
+<h2>Faculty-admin grant</h2>
+<p>Faculty admin is a row in <code>faculty_admin_grants</code>, not a login role. The Sessions screen draws the Faculty admin card only when <code>GET /api/v1/faculty-admin/me</code> returns <code>faculty_admin: true</code>.</p>
+<p>The seed writes that row for the exam-prep Senior Faculty (<code>Dr. Meera Krishnan</code>, <code>+9101t</code>), granted by the owner (<code>Vikram Nair</code>, <code>+9101o</code>). The assistant (<code>Rohan Deshmukh</code>, <code>+9101a</code>) does not get a row. If the card is missing, the grant row is missing. Check the table, or call <code>GET /api/v1/faculty-admin/me</code> with that person’s token. Transferring the grant does not change the workspace owner.</p>
+<h2>What the app is doing</h2>
+<p>Usage guides for the four logins are next to this file: <a href="faculty.html">faculty</a>, <a href="admin.html">admin</a>, <a href="student.html">student</a>, <a href="parent.html">parent</a>. HTML copies are linked from <a href="index.html">index.html</a>.</p>
+<p>Parent home (<code>GET /api/v1/parent/home</code>) returns, for each linked child (<code>Aarav Sharma</code>), attendance, the latest class note, the open fee in Rupees (<code>₹</code>), and the latest paid receipt. It also adds <code>lesson_pack</code> and <code>latest_assignment.submitted</code>. When the payload includes <code>lesson_pack.balance_minutes</code>, Home shows that balance in hours. If home has no balance yet, the page also calls <code>GET /api/v1/students/{id}/lesson-pack</code>, which returns <code>balance_minutes</code> and <code>purchased_minutes</code>. The exam-prep pack is 8 hours (480 minutes) only after a seed that includes <code>seed_internal_v2</code>. The same balance is on <code>/app/student/payments</code> when the API returns it. An assignment line appears only when <code>latest_assignment.submitted</code> is present. If the pack, that flag, or the open-hours route is missing, Home hides that card. After a restart on the current API, those cards show. Open hours are <code>GET /api/v1/parent/open-hours</code>. A booking is <code>POST /api/v1/parent/bookings</code> with <code>{start}</code>. Booking does not use the hour. A balance under 60 minutes returns 400 with detail <code>balance under 60 minutes</code>, and the page shows that detail.</p>
+<p>Attended and no-show use the session length, which is 60 minutes when the session has no end. A student cancel or a reschedule uses that length only inside 24 hours. At or outside 24 hours it stays. A teacher cancel does not use it. The owner can waive a forfeit. A reschedule response includes <code>hour</code> of <code>stays</code> or <code>used</code>. Schedule says <strong>Hour stays</strong> or <strong>Hour is used</strong> before Save time. On the 3-step Attendance &amp; Class Summary screen (<code>/app/faculty/record</code>), student marks are Attended, No-show, Student cancel, and Teacher cancel, with live lesson-pack consequence previews before saving. Unmarked stays unmarked. A stored present still reads as Attended, and absent as No-show. Billing (<code>/app/admin/billing</code>) accepts Rupee (<code>₹</code>) presets or custom <code>₹</code> amounts via <code>&lt;select&gt;</code> dropdowns and converts them to <code>amount_cents</code> for the API. <code>GET /api/v1/payouts</code> adds <code>delivered</code> and <code>hours</code>. <code>POST /api/v1/owner/enquiries</code> with <code>{name, phone, hours}</code> is owner only and creates a student and a pack. Faculty admin is the card on Sessions for <code>+9101t</code> (<code>Dr. Meera Krishnan</code>), not a separate login.</p>
+<h2>Not shipped</h2>
+<div class="soon">
+<ul><li>More than one branch.</li><li>A quality spot-check of a recording.</li></ul>
+</div>
+<h2>Closed</h2>
+<div class="soon">
+<p>Not a setup task: a new screen id, a syllabus database, a sixth login role, student WhatsApp on by default, an in-app video platform, or replacing the one-time code with a password.</p>
+</div>
+</body>
+</html>

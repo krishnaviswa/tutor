@@ -44,7 +44,7 @@ export function RouterScreen() {
       <section className="role-doors__panel">
         <h2 style={{ marginBottom: 6 }}>Choose a door</h2>
         <p className="muted" style={{ marginBottom: 18 }}>
-          One workspace. Student, teacher, or parent.
+          One workspace. Student, teacher, parent, or admin.
         </p>
         <Link href={catalogRoute("student-login")} className="hot hot--card">
           <div style={{ fontWeight: 600 }}>I’m here to learn</div>
@@ -57,6 +57,10 @@ export function RouterScreen() {
         <Link href={catalogRoute("parent-link")} className="hot hot--card">
           <div style={{ fontWeight: 600 }}>I’m a parent</div>
           <div className="muted">Activity, reports, and fees for your child</div>
+        </Link>
+        <Link href={catalogRoute("owner")} className="hot hot--card">
+          <div style={{ fontWeight: 600 }}>Workspace Owner / Admin</div>
+          <div className="muted">Scorecard, billing, payouts, quotas, and workspace setup</div>
         </Link>
         <p className="muted" style={{ marginTop: 16, fontSize: 13 }}>
           Mock code 000000

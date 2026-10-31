@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { NavIcon } from "@/components/NavIcon";
+import { SectionTabs } from "@/components/SectionTabs";
 import { ShellBack, ShellStage } from "@/components/ShellBack";
 import { ShellControls } from "@/components/ShellControls";
 import { SignOutButton } from "@/components/SignOutButton";
@@ -70,7 +71,6 @@ export function AppChrome({ kind, role, active, screenId, children }: AppChromeP
           );
         })}
         <div className="cons__side-foot">
-          <ShellControls />
           <SignOutButton />
         </div>
       </aside>
@@ -81,6 +81,7 @@ export function AppChrome({ kind, role, active, screenId, children }: AppChromeP
             <span>{resolvedKind === "admin" ? "Owner" : "Faculty"}</span>
             <strong>{currentTitle}</strong>
           </p>
+          <ShellControls />
         </div>
         {breadcrumb ? (
           <nav className="crumb" aria-label="Breadcrumb">
@@ -89,6 +90,7 @@ export function AppChrome({ kind, role, active, screenId, children }: AppChromeP
             <span className="crumb__here">{currentTitle}</span>
           </nav>
         ) : null}
+        <SectionTabs screenId={currentId} role={resolvedKind} />
         <ShellStage>{children}</ShellStage>
       </div>
     </div>

@@ -1,12 +1,10 @@
-/* Local campus photographs. A full-height rail beside signed-in screens,
-   and a full-bleed photograph behind the role doors and sign-in. */
+/* Campus photographs are a full-bleed backdrop behind sign-in and the role
+   router only. Working consoles do not reserve a side rail or a top band. */
 .campus-atmosphere {
+  display: none;
   position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 340px;
-  z-index: 2;
+  inset: 0;
+  z-index: 0;
   overflow: hidden;
   background: #1c2430;
   pointer-events: none;
@@ -77,31 +75,27 @@
   font-weight: 600;
 }
 
-.cons,
-.phone {
-  padding-right: 340px;
-  box-sizing: border-box;
-}
-
-.phone {
-  max-width: none;
-  margin: 0;
-}
-
-body:has(.login-gate) .campus-atmosphere,
+/* Sign-in forms and the role router. The photo sits behind the card and
+   does not add a column, a band, or padding. */
+body:has(form.login-gate) .campus-atmosphere,
 body:has(.role-doors) .campus-atmosphere {
-  left: 0;
-  width: auto;
-  z-index: 0;
+  display: block;
 }
 
-body:has(.login-gate) .login-gate,
+/* A console on screen always wins, so a working grid never shares the page
+   with the photograph. */
+body:has(.cons) .campus-atmosphere,
+body:has(.phone) .campus-atmosphere {
+  display: none;
+}
+
+body:has(form.login-gate) .login-gate,
 body:has(.role-doors) .role-doors {
   position: relative;
   z-index: 1;
 }
 
-body:has(.login-gate) .login-gate {
+body:has(form.login-gate) .login-gate {
   background: color-mix(in srgb, var(--surface) 92%, transparent);
   backdrop-filter: blur(18px);
   border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
@@ -111,28 +105,8 @@ body:has(.login-gate) .login-gate {
   margin-bottom: 48px;
 }
 
-@media (max-width: 960px) {
-  .campus-atmosphere {
-    top: 0;
-    right: 0;
-    left: 0;
-    bottom: auto;
-    width: auto;
-    height: 200px;
-  }
-  .cons,
-  .phone {
-    padding-right: 0;
-    padding-top: 200px;
-  }
-}
-
 @media print {
   .campus-atmosphere {
     display: none;
-  }
-  .cons,
-  .phone {
-    padding-right: 0;
   }
 }
