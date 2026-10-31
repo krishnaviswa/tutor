@@ -40,8 +40,18 @@ const HOURLY_RATE_PRESETS = [
   { value: "1500", label: "₹1,500/hr — Intensive" },
 ] as const;
 
+const OWNER_ONLY = "Only the workspace owner can change billing.";
+
+/** Billing writes are an owner-console job. A 403 must not surface as raw JSON. */
+function humanize(err: unknown): string {
+  const raw = err instanceof Error ? err.message : String(err);
+  if (/\b403\b/.test(raw) && /forbidden/i.test(raw)) return OWNER_ONLY;
+  return raw;
+}
+
 export function HourlyBillingPanel({ cohortId }: { cohortId: string }) {
   const [cohort, setCohort] = useState<Cohort | null>(null);
+  const [role, setRole] = useState<string | null>(null);
   const [mode, setMode] = useState<BillingMode>("static");
   const [ratePreset, setRatePreset] = useState("500");
   const [customRupees, setCustomRupees] = useState("500");
@@ -74,7 +84,16 @@ export function HourlyBillingPanel({ cohortId }: { cohortId: string }) {
       })
       .catch((err) => {
         if (!live) return;
-        setError(err instanceof Error ? err.message : String(err));
+        setError(humanize(err));
+      });
+    api("/api/v1/auth/me")
+      .then((body) => {
+        if (!live) return;
+        const next = body && typeof body === "object" ? (body as { role?: unknown }).role : "";
+        setRole(typeof next === "string" ? next : "");
+      })
+      .catch(() => {
+        if (live) setRole("");
       });
     return () => {
       live = false;
@@ -86,6 +105,10 @@ export function HourlyBillingPanel({ cohortId }: { cohortId: string }) {
   const rateOk = parsedRateCents > 0;
 
   async function saveMode() {
+    if (role !== "owner") {
+      setError(OWNER_ONLY);
+      return;
+    }
     if (mode === "hourly" && !rateOk) {
       setError("Select or enter an hourly rate in Rupees greater than ₹0.");
       setNote("");
@@ -116,13 +139,17 @@ export function HourlyBillingPanel({ cohortId }: { cohortId: string }) {
       }
       setNote("Billing mode saved.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(humanize(err));
     } finally {
       setBusy("");
     }
   }
 
   async function createInvoice() {
+    if (role !== "owner") {
+      setError(OWNER_ONLY);
+      return;
+    }
     if (!startsOn || !endsOn) {
       setError("Choose a start date and an end date.");
       return;
@@ -147,13 +174,17 @@ export function HourlyBillingPanel({ cohortId }: { cohortId: string }) {
       setInvoice(parseInvoice(first));
       setApproved(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(humanize(err));
     } finally {
       setBusy("");
     }
   }
 
   async function approve() {
+    if (role !== "owner") {
+      setError(OWNER_ONLY);
+      return;
+    }
     if (!invoice?.id) return;
     setBusy("approve");
     setError("");
@@ -172,13 +203,19 @@ export function HourlyBillingPanel({ cohortId }: { cohortId: string }) {
       }));
       setApproved(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(humanize(err));
     } finally {
       setBusy("");
     }
   }
 
-  const showApprove = !!invoice && invoice.status === "pending_review" && !approved && !!invoice.id;
+  const canBill = role === "owner";
+  const locked = role !== null && !canBill;
+  let planName = "Fixed plan (Static)";
+  if (mode === "hourly") {
+    planName = rateOk ? `Hourly billing · ${formatUnits(parsedRateCents)} per hour` : "Hourly billing";
+  }
+  const showApprove = canBill && !!invoice && invoice.status === "pending_review" && !approved && !!invoice.id;
 
   return (
     <section className="studio-panel">
@@ -189,12 +226,20 @@ export function HourlyBillingPanel({ cohortId }: { cohortId: string }) {
           {cohort ? ` · ${(cohort.student_ids || []).length} students` : ""}
         </p>
       </div>
-      {error ? (
+      {error && error !== OWNER_ONLY ? (
         <p className="studio-error" role="alert">
           {error}
         </p>
       ) : null}
-      {note ? <p className="studio-muted">{note}</p> : null}
+      {note && canBill ? <p className="studio-muted">{note}</p> : null}
+      {locked || error === OWNER_ONLY ? (
+        <>
+          <p className="studio-muted">{planName}</p>
+          <p className="studio-muted">{OWNER_ONLY}</p>
+        </>
+      ) : null}
+      {canBill ? (
+      <>
       <fieldset className="studio-field">
         <legend className="studio-muted">Billing mode</legend>
         <div className="studio-choice">
@@ -317,6 +362,8 @@ export function HourlyBillingPanel({ cohortId }: { cohortId: string }) {
             </ul>
           ) : null}
         </>
+      ) : null}
+      </>
       ) : null}
     </section>
   );
