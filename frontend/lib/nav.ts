@@ -19,7 +19,8 @@ export const FACULTY_NAV: NavItem[] = [
   { label: "Practice", destId: "qbank", match: ["qbank", "practice-build", "assign-issue", "assign-grade", "test-setup", "analysis"], icon: "doc" },
   { label: "Doubts", destId: "doubt-teacher", match: ["doubt-teacher", "messages"], icon: "chat" },
   { label: "Records", destId: "record", match: ["record", "session-video"], icon: "flag" },
-  { label: "Content", destId: "library", match: ["library"], icon: "book" },
+  { label: "Library", destId: "library", match: ["library"], icon: "book" },
+  { label: "Profile", destId: "profile", match: ["profile"], icon: "users" },
 ];
 
 /**
@@ -36,6 +37,7 @@ export const ADMIN_NAV: NavItem[] = [
   { label: "Schedule", destId: "schedule", match: ["schedule", "sessions", "availability"], icon: "cal" },
   { label: "Records", destId: "audit", match: ["audit"], icon: "flag" },
   { label: "Integrations", destId: "integrations", match: ["integrations"], icon: "gear" },
+  { label: "Profile", destId: "profile", match: ["profile"], icon: "users" },
 ];
 
 /** Demo student `appnav`: Home, Classes, Practice, Doubts, You. */
@@ -46,6 +48,7 @@ export const STUDENT_NAV: NavItem[] = [
   { label: "Practice", destId: "practice-play", match: ["practice-play", "practice-result", "test-runner"], icon: "spark" },
   { label: "Doubts", destId: "doubt-student", match: ["doubt-student"], icon: "chat" },
   { label: "You", destId: "timeline", match: ["timeline", "notif-prefs", "payments"], icon: "flag" },
+  { label: "Profile", destId: "profile", match: ["profile"], icon: "users" },
 ];
 
 /** Demo parent `pnav`: Home, Activity, Reports, Fees, Chat. */

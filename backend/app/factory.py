@@ -10,10 +10,14 @@ from app.api.v1 import (
     comms,
     content,
     extras,
+    faculty_admin,
+    feedback,
+    handoff,
     join,
     owner,
     parent,
     practice,
+    profiles,
     sessions,
     students,
     stubs,
@@ -70,8 +74,12 @@ def create_app(*, seed: bool = True) -> FastAPI:
     application.include_router(parent.router, prefix=api)
     application.include_router(join.router, prefix=api)
     application.include_router(sessions.router, prefix=api)
+    application.include_router(handoff.router, prefix=api)
     application.include_router(availability.router, prefix=api)
     application.include_router(content.router, prefix=api)
+    application.include_router(profiles.router, prefix=api)
+    application.include_router(faculty_admin.router, prefix=api)
+    application.include_router(feedback.router, prefix=api)
     application.include_router(assignments.router, prefix=api)
     application.include_router(practice.router, prefix=api)
     application.include_router(assessments.router, prefix=api)

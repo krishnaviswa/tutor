@@ -169,6 +169,72 @@ def staff_available(
     return bool(windows)
 
 
+def _on_quarter_hour(hhmm: str, *, end: bool = False) -> bool:
+    """15-minute grid. 23:59 stays valid as the existing end-of-day mark."""
+    if end and hhmm == "23:59":
+        return True
+    if len(hhmm) != 5 or hhmm[2] != ":":
+        return False
+    hour, minute = hhmm.split(":")
+    if not (hour.isdigit() and minute.isdigit()):
+        return False
+    h, m = int(hour), int(minute)
+    if not (0 <= h <= 23 and m in (0, 15, 30, 45)):
+        return False
+    return True
+
+
+def _overlaps(a_start: str, a_end: str, b_start: str, b_end: str) -> bool:
+    return a_start < b_end and b_start < a_end
+
+
+def validate_availability(windows: list, blocks: list) -> None:
+    """Many windows per day. Off-grid, reversed, and overlapping saves are refused."""
+    from fastapi import HTTPException, status
+
+    def _check(start: str, end: str, bucket: list[tuple[str, str]]) -> None:
+        if not _on_quarter_hour(start) or not _on_quarter_hour(end, end=True):
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "not on a 15-minute grid")
+        if not (start < end):
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "end must be after start")
+        for other_start, other_end in bucket:
+            if _overlaps(start, end, other_start, other_end):
+                raise HTTPException(status.HTTP_400_BAD_REQUEST, "overlapping window")
+        bucket.append((start, end))
+
+    by_day: dict[str, list[tuple[str, str]]] = {}
+    for w in windows:
+        day = getattr(w, "weekday", None) or (w.get("weekday") if isinstance(w, dict) else None)
+        start = getattr(w, "start", None) or (w.get("start") if isinstance(w, dict) else "00:00")
+        end = getattr(w, "end", None) or (w.get("end") if isinstance(w, dict) else "23:59")
+        _check(start or "00:00", end or "23:59", by_day.setdefault(day or "", []))
+    by_date: dict[str, list[tuple[str, str]]] = {}
+    for b in blocks:
+        day = getattr(b, "date", None) or (b.get("date") if isinstance(b, dict) else None)
+        start = getattr(b, "start", None) or (b.get("start") if isinstance(b, dict) else "00:00")
+        end = getattr(b, "end", None) or (b.get("end") if isinstance(b, dict) else "23:59")
+        _check(start or "00:00", end or "23:59", by_date.setdefault(day or "", []))
+
+
+def teachers_for_student(db: Session, workspace_id: str, student_id: str) -> set[str]:
+    """Teachers tied to this student by a 1-on-1 or a cohort session."""
+    from app.models.tables import Enrollment
+
+    cohort_ids = [
+        e.cohort_id
+        for e in db.query(Enrollment)
+        .filter(Enrollment.workspace_id == workspace_id, Enrollment.student_id == student_id)
+        .all()
+    ]
+    rows = db.query(ScheduledSession).filter(ScheduledSession.workspace_id == workspace_id).all()
+    found: set[str] = set()
+    for s in rows:
+        if s.student_id == student_id or (s.cohort_id and s.cohort_id in cohort_ids):
+            if s.teacher_user_id:
+                found.add(s.teacher_user_id)
+    return found
+
+
 def auto_assemble(db: Session, workspace_id: str, spec: dict) -> list[str]:
     rows = db.query(Question).filter(Question.workspace_id == workspace_id).all()
     tag = spec.get("tag")

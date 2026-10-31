@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { NavIcon } from "@/components/NavIcon";
+import { ShellBack, ShellStage } from "@/components/ShellBack";
+import { ShellControls } from "@/components/ShellControls";
 import { SignOutButton } from "@/components/SignOutButton";
 import { STUDENT_NAV, resolveBreadcrumb } from "@/lib/nav";
 import { CATALOG_SCREENS, catalogRoute } from "@/lib/screens";
@@ -28,6 +30,7 @@ export function PhoneChrome({ screenId, active, children }: PhoneChromeProps) {
     <div className="phone">
       <div className="phonewrap">
         <header className="crumbstrip">
+          <ShellBack items={STUDENT_NAV} currentId={currentId} />
           <Link href={catalogRoute("student-dash")} className="wm wm--sm">
             TutorOS
           </Link>
@@ -41,9 +44,12 @@ export function PhoneChrome({ screenId, active, children }: PhoneChromeProps) {
               <span className="crumb__here">{currentTitle}</span>
             </nav>
           ) : null}
+          <ShellControls />
           <SignOutButton className="signout signout--sm" />
         </header>
-        <div className="phonewrap__body">{children}</div>
+        <div className="phonewrap__body">
+          <ShellStage>{children}</ShellStage>
+        </div>
         <nav className="appnav" aria-label="Student app">
           {STUDENT_NAV.map((it) => {
             const on = active ? it.label === active : Boolean(currentId && it.match.includes(currentId));

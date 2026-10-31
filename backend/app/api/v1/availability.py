@@ -6,6 +6,8 @@ from app.api.v1.deps import require_roles
 from app.db import get_db
 from app.models.tables import StaffAvailability, StaffMembership, User
 from app.services.auth import Principal
+from app.services.internal_v2 import teachers_for_student, validate_availability
+from app.services.scope import student_for_principal
 
 router = APIRouter()
 
@@ -84,9 +86,16 @@ def list_staff(
 def get_availability(
     teacher_id: str | None = Query(default=None),
     db: Session = Depends(get_db),
-    principal: Principal = Depends(require_roles("owner", "teacher", "assistant")),
+    principal: Principal = Depends(require_roles("owner", "teacher", "assistant", "student")),
 ):
     target = teacher_id or principal.user_id
+    if principal.role == "student":
+        if not teacher_id:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "teacher_id")
+        st = student_for_principal(db, principal)
+        if teacher_id not in teachers_for_student(db, principal.workspace_id, st.id):
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "not your teacher")
+        return _out(_rows(db, principal.workspace_id, teacher_id), teacher_id)
     if target != principal.user_id and principal.role not in ("owner", "assistant"):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "not your availability")
     return _out(_rows(db, principal.workspace_id, target), target)
@@ -111,6 +120,7 @@ def put_availability(
     )
     if not member:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "staff member")
+    validate_availability(body.windows, body.blocks)
     db.query(StaffAvailability).filter(
         StaffAvailability.workspace_id == principal.workspace_id,
         StaffAvailability.user_id == user_id,

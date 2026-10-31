@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { NavIcon } from "@/components/NavIcon";
+import { ShellBack, ShellStage } from "@/components/ShellBack";
+import { ShellControls } from "@/components/ShellControls";
 import { SignOutButton } from "@/components/SignOutButton";
 import { ADMIN_NAV, FACULTY_NAV, resolveBreadcrumb, type NavItem } from "@/lib/nav";
 import { CATALOG_SCREENS, catalogRoute } from "@/lib/screens";
@@ -68,14 +70,18 @@ export function AppChrome({ kind, role, active, screenId, children }: AppChromeP
           );
         })}
         <div className="cons__side-foot">
+          <ShellControls />
           <SignOutButton />
         </div>
       </aside>
       <div className="cons__main">
-        <p className="place">
-          <span>{resolvedKind === "admin" ? "Owner" : "Faculty"}</span>
-          <strong>{currentTitle}</strong>
-        </p>
+        <div className="shell-head">
+          <ShellBack items={items} currentId={currentId} />
+          <p className="place">
+            <span>{resolvedKind === "admin" ? "Owner" : "Faculty"}</span>
+            <strong>{currentTitle}</strong>
+          </p>
+        </div>
         {breadcrumb ? (
           <nav className="crumb" aria-label="Breadcrumb">
             <Link href={catalogRoute(breadcrumb.parent.destId)}>{breadcrumb.parent.label}</Link>
@@ -83,7 +89,7 @@ export function AppChrome({ kind, role, active, screenId, children }: AppChromeP
             <span className="crumb__here">{currentTitle}</span>
           </nav>
         ) : null}
-        {children}
+        <ShellStage>{children}</ShellStage>
       </div>
     </div>
   );

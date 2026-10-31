@@ -58,8 +58,8 @@ Default API `DATABASE_URL` matches Compose. Copy [.env.example](.env.example) if
 | [plan-technical.html](plan-technical.html) | Technical map: layers, entities, 84 APIs, ports, modules, protected tests |
 | [plan-sequence.html](plan-sequence.html) | End-to-end build order: functional + technical paired by phase |
 | [density-map.html](density-map.html) | **005 density board** — iSeek gap, backend workflow, T7.1–T7.12. Open in a browser. |
-| [tutor-platform-architecture.html](tutor-platform-architecture.html) | System map: entry → six tracks → layers → 49 screens → follow the call |
-| [tutor-platform-demo.html](tutor-platform-demo.html) | UI gold (49 screens, six templates). **Incomplete** — focused tracks omit some spine screens |
+| [tutor-platform-architecture.html](tutor-platform-architecture.html) | System map: entry → six tracks → layers → 50 screens → follow the call |
+| [tutor-platform-demo.html](tutor-platform-demo.html) | UI gold (50 screens, six templates). **Incomplete** — focused tracks omit some spine screens |
 | [tutor-platform-role-student.html](tutor-platform-role-student.html) | Generated child: student lane only |
 | [tutor-platform-explorer.html](tutor-platform-explorer.html) | Module toggles and build sequence |
 | [tutor-loop-ui-kit.html](tutor-loop-ui-kit.html) | Exam-prep *template* visuals — not a Biology app |
@@ -71,7 +71,7 @@ python scripts/check_architecture_parity.py
 python scripts/check_agent_config_sync.py --range origin/main...HEAD
 ```
 
-Active Spec Kit directory is `.specify/feature.json` (currently `specs/007-sessions-timetable`, In Progress). 006-internal-v2, 005-dashboard-density, 004-wire-demo-ui are Accepted. Override with `SPECIFY_FEATURE_DIRECTORY`.
+Active Spec Kit directory is `.specify/feature.json` (currently `specs/010-faculty-admin-library`, In Progress). 002–006 are Accepted. 007 stays its own spec (In Progress). 008 stays Draft. 009 and 010 are In Progress and not Accepted. Override with `SPECIFY_FEATURE_DIRECTORY`.
 
 ---
 
@@ -93,7 +93,7 @@ Walk it: [tutor-platform-architecture.html](tutor-platform-architecture.html).
 
 ```
 Entry (role + workspace)
-  → UI (49 screens, domains A–G)
+  → UI (50 screens, domains A–G)
   → API /api/v1
   → Middleware (tenant, authn, authz + flags, QuotaGuard, audit)
   → Services (TimelinePort, Notify.dispatch, …)
@@ -131,9 +131,9 @@ Catalog: [catalog/entities.json](catalog/entities.json), [catalog/modules.json](
 
 ## 6. Screen map
 
-49 ids locked to `tutor-platform-demo.html` `S`. Source: [catalog/screens.json](catalog/screens.json). Each catalog row also carries Owner / Who / Why / How / When from demo `WHY`. The architecture HTML (`tutor-platform-architecture.html`) loads [catalog/embed.js](catalog/embed.js) — after demo edits run `python scripts/build_catalog.py` then `python scripts/build_role_html.py`. Architecture Start lists the six demo tracks from that catalog. Role HTML files are generated from the demo; they are not a second product. Parent hub is `parent-home` (activity, marksheet, results, receipts, teacher chat). `staff-login` is on 1-on-1, K-12, Skills, Music, Everything; Exam-prep omits it.
+50 ids locked to `tutor-platform-demo.html` `S`, including catalog id `profile`. Source: [catalog/screens.json](catalog/screens.json). Each catalog row also carries Owner / Who / Why / How / When from demo `WHY`. The architecture HTML (`tutor-platform-architecture.html`) loads [catalog/embed.js](catalog/embed.js) — after demo edits run `python scripts/build_catalog.py` then `python scripts/build_role_html.py`. Architecture Start lists the six demo tracks from that catalog. Role HTML files are generated from the demo; they are not a second product. Parent hub is `parent-home` (activity, marksheet, results, receipts, teacher chat). `staff-login` is on 1-on-1, K-12, Skills, Music, Everything; Exam-prep omits it.
 
-- **A Identity (9):** `router`, `student-login`, `staff-login`, `wsetup`, `branding`, `roster`, `cohort-builder`, `parent-link`, `parent-home`
+- **A Identity (10):** `router`, `student-login`, `staff-login`, `wsetup`, `branding`, `roster`, `cohort-builder`, `parent-link`, `parent-home`, `profile`
 - **B Teaching (13):** `schedule`, `session-pre`, `sessions`, `availability`, `join`, `live-teacher`, `live-student`, `session-video`, `record`, `library`, `lesson`, `assign-issue`, `assign-grade`
 - **C Practice (7):** `qbank`, `practice-build`, `practice-play`, `practice-result`, `test-setup`, `test-runner`, `analysis`
 - **D Record and comms (6):** `doubt-student`, `doubt-teacher`, `messages`, `announce`, `timeline`, `notif-prefs`
@@ -192,6 +192,8 @@ PM  /speckit.specify + /speckit.clarify
 
 Status: `Draft` → `Specified` → `In Progress` → `Testing` → `Accepted`.
 
+**Accepted** means the tester has run the checks, product has agreed, and the same change updates this README, the architecture HTML, the catalog, and the work-log. Code on a branch can be In Progress and still unverified. That is not Accepted.
+
 Last Accepted feature dir: [specs/006-internal-v2/](specs/006-internal-v2/). Catalog-complete APIs: [specs/003-catalog-complete/](specs/003-catalog-complete/) (Accepted, shell/sim then wired by 004). Spine simulation: [specs/002-sim-spine/](specs/002-sim-spine/) (Accepted, protected). Architecture pack: [specs/001-platform-architecture/](specs/001-platform-architecture/) (Specified; no implement). Cursor rules ↔ Claude Code: see [CLAUDE.md](CLAUDE.md). Sync: `scripts/check_agent_config_sync.py`.
 
 ---
@@ -204,8 +206,29 @@ Last Accepted feature dir: [specs/006-internal-v2/](specs/006-internal-v2/). Cat
 - Demo **incomplete** vs all six tracks: some spine screens still sit only on Everything. `staff-login` is on 1-on-1, K-12, Skills, Music, and Everything; Exam-prep omits it on purpose (faculty starts at cohort/schedule). Fill remaining gaps later — **same ids**, no new screens.
 - **005 dashboard density (Accepted):** named next session, due practice, attendance bars, chase list, scorecard, receipts, content kind/progress on the same 47 ids. Aggregates in `backend/app/services/progress.py`. Action board: [density-map.html](density-map.html). Spec: [specs/005-dashboard-density/](specs/005-dashboard-density/).
 - **006 internal v2 (Accepted):** remaining blueprint depth that does not call a vendor (permissions, waitlists, in-app live chat, rubrics, practice depth, SLA, auto-invoice). Ports stay mock. Spec: [specs/006-internal-v2/](specs/006-internal-v2/).
-- **009 local complete (on `feat/local-complete`):** Apple-like interface on the existing screens. Shared class whiteboard, cohort chat, in-app notices for class started and class cancelled. Billing trail with placeholder tiers, hourly review, receipts, refunds, and payouts from completed sessions. Ports stay mock. Catalog stays 49 screens. pytest 63 passed.
+- **Earlier local-complete pass (on `feat/local-complete`):** Apple-like interface on the existing screens. Shared class whiteboard, cohort chat, in-app notices for class started and class cancelled. Billing trail with placeholder tiers, hourly review, receipts, refunds, and payouts from completed sessions. Ports stay mock. That pass reported pytest 63 passed and a 49-screen catalog. It is a separate event from Spec Kit 009 and 010 below.
 - **007 sessions & timetable (In Progress):** session state is time-driven (`Upcoming` → `Auto completed`, or `Staff completed` once a record is filed) with owner free to re-time in any state; cancelled sessions stay on the calendar; 1-on-1 sessions book against a roster student; `staff_availability` holds per-staff weekly windows + date exceptions and feeds the schedule overlay and booking checks. Adds screen ids `sessions`, `availability`. Spec: [specs/007-sessions-timetable/](specs/007-sessions-timetable/).
+
+### 009 and 010 on `feat/local-complete`
+
+**Status:** In Progress — implemented on branch `feat/local-complete` and still unverified (full suite and browser not done). Not Accepted.
+
+These capabilities are in the branch. They are not Accepted. The tester has not signed the full checks, and product has not agreed. This note does not update the architecture HTML or the work-log. Browser pass, full pytest, and a production build are still open.
+
+- **Paint whiteboard** on the existing `live-teacher` and `live-student` boards: pen, ten colors, eraser, text (one face, one size), pointer, crop, and a local file on the board. Spec: [specs/009-board-availability-notice/](specs/009-board-availability-notice/).
+- **15-minute availability.** More than one window in a day. The student tied to that teacher can see the windows.
+- **Doubt clarified.** An in-app notice. The student may accept it or ignore it.
+- **Attendance** for the student and the teacher on the session.
+- **Content library,** separate from the whiteboard. Filed by board label, subject, and unit. Office, PNG, SVG, PDF, and Draw.io.
+- **Own profiles** for student, teacher, and faculty admin: phone, address, and expertise; the student also saves a board label. Student and teacher saves confirm with OTP. Faculty-admin saves confirm with OTP and email. A student sees a teacher's name, subjects, and organization email. A teacher sees a student's grade, board, and subject-level study info. Phone and address stay on the owner's own profile.
+- **Faculty admin** is a grant on the teaching role, not a second login. Teacher and faculty are the same teaching role. The admin can see attendance, grant or withhold parent and student contact, edit or delete a teacher profile, and hand the faculty-admin grant to someone else. Workspace ownership stays with the owner. Those controls sit on the existing `sessions` screen. Catalog id `profile` is already in the closed set (50).
+- **Handoff.** The assigned teacher hands a session, its subject, and library content to another teacher in the same organization. The colleague is that teacher's choice. Revert is on the sessions list and requires the faculty-admin grant.
+- **Also on the branch:** student feedback on a teacher; a student can reschedule or decline a 1-on-1; dark and light theme and a notification indicator in the one shell.
+- **Back control:** One Back control in the header of faculty/owner (`AppChrome`), student (`PhoneChrome`), and parent (`ParentChrome`). Nested screens return to the menu parent from `resolveBreadcrumb`. Nav homes hide it. A non-menu screen can step back through in-app history only. It never leaves `/app`. An open dialog does not navigate. Escape and the scrim still close the dialog. 200ms fade. `prefers-reduced-motion` skips the slide. Files: `frontend/components/ShellBack.tsx`, `frontend/lib/shell-back.ts`, the three chrome components, `frontend/app/globals.css`. Not clicked through in the browser. The app and API were not running.
+- **Campus aerials:** The rail and sign-in use four wide campus aerials, listed only in `frontend/components/CampusAtmosphere.tsx` lines 7–10: `europe-essex.jpg` (University of Essex, lawns and sports grounds), `india-iiser.jpg` (IISER Thiruvananthapuram), `us-uc-davis.jpg` (UC Davis, canopy and fields), and `china-xiamen.jpg` (Xiamen University). Deleted and no longer referenced: `europe-potsdam.jpg`, `india-bits-2014.png`, `us-stanford.jpg` (Memorial Church), and `china-zhejiang.jpg` (clock tower and facade). Wikimedia Commons, CC BY / CC BY-SA. Portrait quotes unchanged. Not a new screen. Still not browser-checked.
+
+Checks recorded for this note: `backend/tests/test_010_handoff.py` — 2 passed. `test_directory_hides_private_and_withhold_contact` was started. No result is recorded here for the rest of `backend/tests/test_010_faculty_admin_library.py`, and the full suite was not run for this note.
+
 - Inbound WhatsApp replies not in v1.
 - Speech-to-text is a slot on session record, not a port.
 
@@ -222,6 +245,9 @@ Last Accepted feature dir: [specs/006-internal-v2/](specs/006-internal-v2/). Cat
 | 005-dashboard-density | Lift demo named facts onto wired dashboards (same ids, richer `/api/v1` JSON) | Accepted |
 | 006-internal-v2 | In-app blueprint v2 (same 47 ids); vendor ports stay mock | Accepted |
 | 007-sessions-timetable | Session states (upcoming / auto-completed / staff-completed / cancelled), 1-on-1 booking, per-staff availability; adds `sessions` + `availability` (→ 49) and `staff_availability` | In Progress |
+| 008-billing-v2 | Billing v2 | Draft |
+| 009-board-availability-notice | Paint board, 15-minute availability, doubt clarified notice. No new screen id | In Progress — implemented on branch `feat/local-complete` and still unverified (full suite and browser not done). Not Accepted. |
+| 010-faculty-admin-library | Faculty admin grant, profiles, library, attendance, handoff, feedback, shell theme and notices. Catalog id `profile` (50). One Back control in the three shells. Four campus aerials on the rail and sign-in. Not browser-checked | In Progress — implemented on branch `feat/local-complete` and still unverified (full suite and browser not done). Not Accepted. |
 
 Feature → test index (pytest: `cd backend; python -m pytest`, in-memory SQLite, `live_calls == 0`):
 
@@ -233,6 +259,8 @@ Feature → test index (pytest: `cd backend; python -m pytest`, in-memory SQLite
 | 005-dashboard-density | `backend/tests/test_005_density.py` plus 002/003/004 still green (33 passed) — [test-report](specs/005-dashboard-density/test-report.md) |
 | 006-internal-v2 | `backend/tests/test_006_internal_v2.py` plus 002–005 still green (42 passed) — [test-report](specs/006-internal-v2/test-report.md) |
 | 007-sessions-timetable | `backend/tests/test_007_sessions_timetable.py` plus 002–006 still green (52 passed); `tsc --noEmit`; 49 catalog routes — [test-report](specs/007-sessions-timetable/test-report.md) |
+| 009-board-availability-notice | Not Accepted. Full suite not run for this note. |
+| 010-faculty-admin-library | Not Accepted. `backend/tests/test_010_handoff.py` — 2 passed. `test_directory_hides_private_and_withhold_contact` was started; the rest of `backend/tests/test_010_faculty_admin_library.py` has no result in this note. |
 
 ---
 

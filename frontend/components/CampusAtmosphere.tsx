@@ -4,12 +4,10 @@ import { useEffect, useState } from "react";
 import "./campus.css";
 
 const PLACES = [
-  { src: "/inspire/oxford.jpg", place: "Radcliffe Camera, Oxford", region: "Europe", credit: "CC BY 4.0" },
-  { src: "/inspire/cambridge.jpg", place: "King’s College Chapel, Cambridge", region: "Europe", credit: "CC BY-SA 3.0" },
-  { src: "/inspire/iit-bombay.jpg", place: "Main building, IIT Bombay", region: "India", credit: "CC BY-SA 4.0" },
-  { src: "/inspire/iisc.jpg", place: "Indian Institute of Science, Bengaluru", region: "India", credit: "CC BY-SA 4.0" },
-  { src: "/inspire/mit.jpg", place: "Great Dome, MIT", region: "United States", credit: "CC BY-SA 4.0" },
-  { src: "/inspire/tsinghua.jpg", place: "West gate, Tsinghua University", region: "China", credit: "CC0" },
+  { src: "/inspire/europe-essex.jpg", place: "University of Essex, Colchester campus", region: "Europe", credit: "Wikimedia Commons" },
+  { src: "/inspire/india-iiser.jpg", place: "IISER Thiruvananthapuram", region: "India", credit: "Wikimedia Commons" },
+  { src: "/inspire/us-uc-davis.jpg", place: "University of California, Davis", region: "United States", credit: "Wikimedia Commons" },
+  { src: "/inspire/china-xiamen.jpg", place: "Xiamen University", region: "China", credit: "Wikimedia Commons" },
 ] as const;
 
 const QUOTES = [

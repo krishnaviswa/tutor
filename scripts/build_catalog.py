@@ -149,6 +149,13 @@ CONTRACTS: dict[str, dict] = {
         "timelineEvents": ["session.recorded"],
         "shows": "Attendance, notes, board photos, local capture of chat/poll events. Fan-out to each attendee timeline.",
     },
+    "profile": {
+        "apis": ["GET /api/v1/profile", "PUT /api/v1/profile", "POST /api/v1/profile/step-up"],
+        "entities": ["person_profiles", "users", "identities"],
+        "ports": ["sms", "email"],
+        "timelineEvents": [],
+        "shows": "Own phone, address, and expertise. A student also saves a board label. Step-up uses the existing one-time code.",
+    },
     "library": {
         "apis": ["GET /api/v1/content", "POST /api/v1/content"],
         "entities": ["content_items", "topics"],
@@ -567,6 +574,8 @@ def entities() -> list[dict]:
         "questions", "attempts", "doubts", "messages", "invoices",
         "notification_prefs", "notification_deliveries",
         "content_items", "assignments", "submissions", "practice_sets", "tests",
+        "person_profiles", "faculty_admin_grants", "teacher_supervisions", "contact_grants",
+        "teacher_feedback", "email_challenges",
         "announcements", "plans", "payouts", "automation_rules", "backlog_items",
     ]
     out = [{"id": e, "tier": "spine"} for e in spine]

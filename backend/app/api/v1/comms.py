@@ -7,7 +7,9 @@ from app.db import get_db
 from app.models.tables import Announcement, Cohort, Doubt, Message, Student, Workspace, new_id
 from app.ports.mocks import MockPorts
 from app.services.auth import Principal
+from app.services import doubts as doubts_svc
 from app.services import notify, timeline
+from app.services.grants import holds_contact, holds_faculty_admin, is_owner
 from app.services.internal_v2 import meta_of, put_meta, sla_hours
 from app.services.scope import can_read_student, linked_student_ids, student_for_principal
 
@@ -24,6 +26,10 @@ class DoubtPatch(BaseModel):
     answer: str | None = None
     canned_id: str | None = None
     clip: bool | None = None
+
+
+class NoticeIn(BaseModel):
+    action: str
 
 
 class MessageIn(BaseModel):
@@ -58,7 +64,15 @@ def list_mine(
         .all()
     )
     return [
-        {"id": r.id, "body": r.body, "status": r.status, "answer": r.answer, "topic_id": r.topic_id}
+        {
+            "id": r.id,
+            "body": r.body,
+            "status": r.status,
+            "answer": r.answer,
+            "topic_id": r.topic_id,
+            "clarified": r.status == "answered",
+            "notice_action": meta_of(r).get("notice_action"),
+        }
         for r in rows
     ]
 
@@ -121,16 +135,27 @@ def patch_doubt(
     row = db.query(Doubt).filter(Doubt.id == doubt_id, Doubt.workspace_id == principal.workspace_id).first()
     if not row:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "doubt")
-    if body.status is not None:
-        row.status = body.status
-    if body.answer is not None:
-        row.answer = body.answer
-    put_meta(row, canned_id=body.canned_id, clip=body.clip)
-    note = f"Doubt {row.status}"
-    timeline.append(db, principal.workspace_id, row.student_id, "doubt_updated", note, principal.user_id)
-    notify.dispatch_after_timeline(db, ports, principal.workspace_id, note, _wa(db, principal.workspace_id))
-    db.flush()
-    return {"id": row.id, "status": row.status, "answer": row.answer}
+    return doubts_svc.mark(
+        db,
+        ports,
+        principal,
+        row,
+        new_status=body.status,
+        answer=body.answer,
+        canned_id=body.canned_id,
+        clip=body.clip,
+        student_whatsapp_on=_wa(db, principal.workspace_id),
+    )
+
+
+@router.post("/doubts/{doubt_id}/notice")
+def doubt_notice(
+    doubt_id: str,
+    body: NoticeIn,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("student")),
+):
+    return doubts_svc.notice(db, principal, doubt_id, body.action)
 
 
 @router.get("/threads")
@@ -169,6 +194,13 @@ def post_message(
     student_id = body.student_id
     if principal.role == "student":
         student_id = student_for_principal(db, principal).id
+    if principal.role == "teacher" and student_id:
+        if not holds_contact(db, principal.workspace_id, principal.user_id) and not holds_faculty_admin(
+            db, principal.workspace_id, principal.user_id
+        ):
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "contact not granted")
+    if principal.role == "owner" or is_owner(db, principal.workspace_id, principal.user_id):
+        pass
     if student_id and not can_read_student(db, principal, student_id):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "not a participant")
     row = Message(

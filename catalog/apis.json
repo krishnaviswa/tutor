@@ -100,6 +100,18 @@
     "status": "sim"
   },
   {
+    "id": "GET /api/v1/profile",
+    "status": "sim"
+  },
+  {
+    "id": "PUT /api/v1/profile",
+    "status": "sim"
+  },
+  {
+    "id": "POST /api/v1/profile/step-up",
+    "status": "sim"
+  },
+  {
     "id": "GET /api/v1/join/{token}",
     "status": "sim"
   },
@@ -348,79 +360,39 @@
     "status": "sim"
   },
   {
-    "id": "GET /api/v1/sessions/{id}/board",
+    "id": "GET /api/v1/faculty-admin/me",
     "status": "sim"
   },
   {
-    "id": "PUT /api/v1/sessions/{id}/board",
+    "id": "GET /api/v1/faculty-admin/planning",
     "status": "sim"
   },
   {
-    "id": "POST /api/v1/sessions/{id}/start",
+    "id": "GET /api/v1/faculty-admin/directory",
     "status": "sim"
   },
   {
-    "id": "GET /api/v1/cohorts/{id}/messages",
+    "id": "POST /api/v1/faculty-admin/contact-grants",
     "status": "sim"
   },
   {
-    "id": "POST /api/v1/cohorts/{id}/messages",
+    "id": "DELETE /api/v1/faculty-admin/contact-grants/{user_id}",
     "status": "sim"
   },
   {
-    "id": "POST /api/v1/cohorts/{id}/enrollments/{student_id}/plan",
+    "id": "POST /api/v1/faculty-admin/succession",
     "status": "sim"
   },
   {
-    "id": "POST /api/v1/cohorts/{id}/enrollments/{student_id}/cancel",
+    "id": "PATCH /api/v1/profiles/{user_id}",
     "status": "sim"
   },
   {
-    "id": "GET /api/v1/notifications/inbox",
+    "id": "DELETE /api/v1/profiles/{user_id}",
     "status": "sim"
   },
   {
-    "id": "POST /api/v1/billing/subscription/tier",
-    "status": "sim"
-  },
-  {
-    "id": "POST /api/v1/billing/subscription/cancel",
-    "status": "sim"
-  },
-  {
-    "id": "POST /api/v1/billing/subscription/pause",
-    "status": "sim"
-  },
-  {
-    "id": "POST /api/v1/billing/subscription/resume",
-    "status": "sim"
-  },
-  {
-    "id": "POST /api/v1/billing/renewals",
-    "status": "sim"
-  },
-  {
-    "id": "GET /api/v1/invoices/{id}",
-    "status": "sim"
-  },
-  {
-    "id": "POST /api/v1/invoices/hourly",
-    "status": "sim"
-  },
-  {
-    "id": "POST /api/v1/invoices/{id}/approve",
-    "status": "sim"
-  },
-  {
-    "id": "POST /api/v1/invoices/{id}/refund",
-    "status": "sim"
-  },
-  {
-    "id": "POST /api/v1/payouts/{id}/advance",
-    "status": "sim"
-  },
-  {
-    "id": "GET /api/v1/reports/revenue",
+    "id": "POST /api/v1/sessions/{id}/handoff/revert",
     "status": "sim"
   }
 ]

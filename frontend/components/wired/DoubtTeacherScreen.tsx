@@ -94,7 +94,7 @@ export function DoubtTeacherScreen() {
                 <textarea className="field__in" value={answer} onChange={(e) => setAnswer(e.target.value)} rows={4} />
               </label>
               <button className="hot hot--btn" type="button" disabled={busy} onClick={() => void resolve()}>
-                Mark answered
+                Mark clarified
               </button>
             </>
           ) : (

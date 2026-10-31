@@ -110,6 +110,11 @@ def content_out(row: ContentItem, db: Session | None = None, *, lesson: bool = F
         "playlist_ids": meta.get("playlist_ids") or [],
         "drip_at": meta.get("drip_at"),
         "views": int(meta.get("views") or 0),
+        "file_kind": meta.get("file_kind") or meta.get("kind") or "",
+        "board_label": meta.get("board_label") or "",
+        "subject_label": meta.get("subject_label") or "",
+        "unit_label": meta.get("unit_label") or "",
+        "session_id": meta.get("session_id"),
     }
     if lesson:
         notes = meta.get("notes") or []
@@ -200,6 +205,7 @@ def _session_card(sess: ScheduledSession) -> dict:
         "id": sess.id,
         "title": sess.title,
         "starts_at": _iso(starts),
+        "teacher_user_id": sess.teacher_user_id,
         "join_opens_at": _iso(opens),
     }
 
@@ -305,7 +311,76 @@ def student_dashboard(db: Session, principal: Principal) -> dict:
         "this_week": this_week,
         "doubt": doubt_card,
         "weak_tags": _weak_tags(db, ws, attempts),
+        "teacher_windows": _teacher_windows(db, ws, st.id),
     }
+
+
+def _teacher_windows(db: Session, workspace_id: str, student_id: str) -> list[dict]:
+    from app.models.tables import StaffAvailability, User
+    from app.services.internal_v2 import teachers_for_student
+
+    out = []
+    for teacher_id in sorted(teachers_for_student(db, workspace_id, student_id)):
+        rows = (
+            db.query(StaffAvailability)
+            .filter(
+                StaffAvailability.workspace_id == workspace_id,
+                StaffAvailability.user_id == teacher_id,
+                StaffAvailability.kind == "window",
+            )
+            .all()
+        )
+        user = db.get(User, teacher_id)
+        by_day: dict[str, list[dict]] = {}
+        for row in rows:
+            by_day.setdefault(row.weekday or "", []).append(
+                {"start": row.start_time, "end": row.end_time}
+            )
+        gaps = []
+        for day, spans in by_day.items():
+            ordered = sorted(spans, key=lambda s: s["start"])
+            for i in range(len(ordered) - 1):
+                if ordered[i]["end"] < ordered[i + 1]["start"]:
+                    gaps.append(
+                        {"weekday": day, "start": ordered[i]["end"], "end": ordered[i + 1]["start"]}
+                    )
+        out.append(
+            {
+                "teacher_id": teacher_id,
+                "teacher_name": user.display_name if user else teacher_id,
+                "windows": [
+                    {"weekday": r.weekday, "start": r.start_time, "end": r.end_time} for r in rows
+                ],
+                "gaps": gaps,
+            }
+        )
+    return out
+
+
+def _planning(db: Session, workspace_id: str, sessions: list[ScheduledSession]) -> list[dict]:
+    out = []
+    for sess in sessions:
+        att = (
+            db.query(Attendance)
+            .filter(Attendance.workspace_id == workspace_id, Attendance.session_id == sess.id)
+            .all()
+        )
+        rec = (
+            db.query(SessionRecord)
+            .filter(SessionRecord.workspace_id == workspace_id, SessionRecord.session_id == sess.id)
+            .first()
+        )
+        if not att and (rec is None or not rec.teacher_status):
+            continue
+        out.append(
+            {
+                "session_id": sess.id,
+                "teacher_user_id": sess.teacher_user_id,
+                "student_attendance": [{"student_id": a.student_id, "status": a.status} for a in att],
+                "teacher_status": rec.teacher_status if rec else None,
+            }
+        )
+    return out
 
 
 def _attendance_week(sessions: list[ScheduledSession], att_rows: list[Attendance]) -> list[dict]:
@@ -405,6 +480,7 @@ def teacher_dashboard(db: Session, principal: Principal) -> dict:
         "practice_by_set": _practice_by_set(db, ws, [s.id for s in students], attempts),
         "doubt_backlog": open_doubts,
         "at_risk": _at_risk(students, att_rows, attempts),
+        "planning": _planning(db, ws, sessions),
     }
 
 

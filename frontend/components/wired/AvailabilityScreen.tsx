@@ -17,7 +17,7 @@ export function AvailabilityScreen() {
   const [me, setMe] = useState<Me | null>(null);
   const [staff, setStaff] = useState<Staff[]>([]);
   const [target, setTarget] = useState("");
-  const [windows, setWindows] = useState<Record<string, Window | null>>({});
+  const [windows, setWindows] = useState<Record<string, Window[]>>({});
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [error, setError] = useState("");
   const [msg, setMsg] = useState("");
@@ -30,9 +30,12 @@ export function AvailabilityScreen() {
     const data = (await api(
       `/api/v1/availability?teacher_id=${encodeURIComponent(teacherId)}`,
     )) as { windows: Window[]; blocks: Block[] };
-    const byDay: Record<string, Window | null> = {};
-    for (const d of WEEKDAYS) byDay[d] = null;
-    for (const w of data.windows || []) byDay[w.weekday] = { ...w, note: w.note ?? "" };
+    const byDay: Record<string, Window[]> = {};
+    for (const d of WEEKDAYS) byDay[d] = [];
+    for (const w of data.windows || []) {
+      if (!byDay[w.weekday]) byDay[w.weekday] = [];
+      byDay[w.weekday].push({ ...w, note: w.note ?? "" });
+    }
     setWindows(byDay);
     setBlocks((data.blocks || []).map((b) => ({ ...b, note: b.note ?? "" })));
   }, []);
@@ -64,15 +67,25 @@ export function AvailabilityScreen() {
     }
   }
 
-  function toggleDay(day: string) {
+  function addWindow(day: string) {
     setWindows((w) => ({
       ...w,
-      [day]: w[day] ? null : { weekday: day, start: "18:30", end: "20:00", note: "" },
+      [day]: [...(w[day] || []), { weekday: day, start: "10:00", end: "10:30", note: "" }],
     }));
   }
 
-  function setDay(day: string, patch: Partial<Window>) {
-    setWindows((w) => (w[day] ? { ...w, [day]: { ...w[day]!, ...patch } } : w));
+  function setWindow(day: string, index: number, patch: Partial<Window>) {
+    setWindows((w) => ({
+      ...w,
+      [day]: (w[day] || []).map((row, i) => (i === index ? { ...row, ...patch } : row)),
+    }));
+  }
+
+  function removeWindow(day: string, index: number) {
+    setWindows((w) => ({
+      ...w,
+      [day]: (w[day] || []).filter((_, i) => i !== index),
+    }));
   }
 
   async function save() {
@@ -84,7 +97,7 @@ export function AvailabilityScreen() {
       await api(`/api/v1/staff/${encodeURIComponent(target)}/availability`, {
         method: "PUT",
         body: JSON.stringify({
-          windows: WEEKDAYS.map((d) => windows[d]).filter(Boolean),
+          windows: WEEKDAYS.flatMap((d) => windows[d] || []),
           blocks: blocks.filter((b) => b.date),
         }),
       });
@@ -139,42 +152,44 @@ export function AvailabilityScreen() {
       <div className="grid g2" style={{ alignItems: "start", gap: 16 }}>
         <div className="card">
           <h3>Weekly windows</h3>
+          <p className="muted">15-minute grid. A day can hold more than one window.</p>
           {WEEKDAYS.map((d) => {
-            const w = windows[d];
+            const rows = windows[d] || [];
             return (
-              <div
-                key={d}
-                className="list__i"
-                style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0" }}
-              >
-                <label style={{ display: "flex", alignItems: "center", gap: 6, width: 70 }}>
-                  <input
-                    type="checkbox"
-                    checked={!!w}
-                    disabled={readOnly}
-                    onChange={() => toggleDay(d)}
-                  />
-                  {d}
-                </label>
-                {w ? (
-                  <>
+              <div key={d} className="list__i" style={{ padding: "6px 0" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <strong style={{ width: 40 }}>{d}</strong>
+                  {rows.length === 0 ? <span className="muted">no windows</span> : null}
+                  {!readOnly && (
+                    <button type="button" className="btn btn--sm" style={btn} onClick={() => addWindow(d)}>
+                      Add
+                    </button>
+                  )}
+                </div>
+                {rows.map((w, index) => (
+                  <div key={`${d}-${index}`} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
                     <input
                       type="time"
+                      step={900}
                       value={w.start}
                       disabled={readOnly}
-                      onChange={(e) => setDay(d, { start: e.target.value })}
+                      onChange={(e) => setWindow(d, index, { start: e.target.value })}
                     />
                     <span className="muted">–</span>
                     <input
                       type="time"
+                      step={900}
                       value={w.end}
                       disabled={readOnly}
-                      onChange={(e) => setDay(d, { end: e.target.value })}
+                      onChange={(e) => setWindow(d, index, { end: e.target.value })}
                     />
-                  </>
-                ) : (
-                  <span className="muted">unavailable</span>
-                )}
+                    {!readOnly && (
+                      <button type="button" className="btn btn--sm" style={btn} onClick={() => removeWindow(d, index)}>
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
             );
           })}
@@ -248,7 +263,7 @@ export function AvailabilityScreen() {
                   onClick={() =>
                     setBlocks((bs) => [
                       ...bs,
-                      { date: "", start: "00:00", end: "23:59", available: false, note: "" },
+                      { date: "", start: "00:00", end: "23:45", available: false, note: "" },
                     ])
                   }
                 >

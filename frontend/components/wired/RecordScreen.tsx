@@ -99,6 +99,7 @@ function RecordScreenInner() {
   const [notes, setNotes] = useState("");
   const [loadedNotes, setLoadedNotes] = useState("");
   const [attendance, setAttendance] = useState<Record<string, string>>({});
+  const [teacherStatus, setTeacherStatus] = useState("present");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -238,6 +239,7 @@ function RecordScreenInner() {
         body: JSON.stringify({
           notes,
           attendance: rows.map((r) => ({ student_id: r.id, status: r.status })),
+          teacher_status: teacherStatus,
         }),
       })) as PatchResult;
       setSaved(result);
@@ -296,6 +298,15 @@ function RecordScreenInner() {
           <div className="card">
             <div className="sb">
               <h3 style={{ margin: 0 }}>Attendance</h3>
+            </div>
+            <label className="field">
+              <span>Teacher</span>
+              <select className="field__in" value={teacherStatus} onChange={(e) => setTeacherStatus(e.target.value)}>
+                <option value="present">Teacher present</option>
+                <option value="absent">Teacher absent</option>
+              </select>
+            </label>
+            <div className="sb">
               <span className="muted">
                 {present} present · {absent} absent
               </span>

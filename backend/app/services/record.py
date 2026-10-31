@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models.tables import Attendance, AutomationRule, BacklogItem, Enrollment, ScheduledSession, SessionRecord, Student, utcnow
@@ -30,8 +31,13 @@ def patch_record(
     notes: str | None,
     attendance: list[dict] | None,
     student_whatsapp_on: bool,
+    teacher_status: str | None = None,
 ) -> dict:
     rec = get_or_create_record(db, workspace_id, session.id)
+    if teacher_status is not None:
+        if teacher_status not in ("present", "absent"):
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "teacher_status")
+        rec.teacher_status = teacher_status
     if notes is not None:
         rec.notes = notes
         rec.recorded_at = utcnow()
@@ -124,6 +130,7 @@ def patch_record(
         "record_id": rec.id,
         "session_id": session.id,
         "notes": rec.notes,
+        "teacher_status": rec.teacher_status,
         "timeline_event_ids": events,
         "notify": notify_result,
     }

@@ -155,6 +155,9 @@ class ScheduledSession(Base):
     engagement: Mapped[list] = mapped_column(JSON, default=list)
     board: Mapped[dict] = mapped_column(JSON, default=dict)
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    subject_label: Mapped[str] = mapped_column(String(200), default="")
+    library_item_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    prior_teacher_user_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
 
 
 class StaffAvailability(Base):
@@ -194,6 +197,7 @@ class SessionRecord(Base):
     workspace_id: Mapped[str] = mapped_column(String(36), index=True)
     session_id: Mapped[str] = mapped_column(ForeignKey("scheduled_sessions.id"), unique=True)
     notes: Mapped[str] = mapped_column(Text, default="")
+    teacher_status: Mapped[str | None] = mapped_column(String(20), nullable=True)  # present | absent
     recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
@@ -550,3 +554,87 @@ class BacklogItem(Base):
     status: Mapped[str] = mapped_column(String(20), default="open")
     payload: Mapped[dict] = mapped_column(JSON, default=dict)
     booked_session_id: Mapped[str | None] = mapped_column(ForeignKey("scheduled_sessions.id"), nullable=True)
+
+
+class PersonProfile(Base):
+    """Own profile. Phone and home address stay here. Board and grade are labels, not a syllabus."""
+
+    __tablename__ = "person_profiles"
+    __table_args__ = (UniqueConstraint("workspace_id", "user_id", name="uq_person_profile"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    phone: Mapped[str] = mapped_column(String(40), default="")
+    address: Mapped[str] = mapped_column(String(400), default="")
+    expertise: Mapped[str] = mapped_column(String(400), default="")
+    subjects: Mapped[str] = mapped_column(String(400), default="")
+    board_label: Mapped[str] = mapped_column(String(80), default="")
+    grade_label: Mapped[str] = mapped_column(String(80), default="")
+    study_info: Mapped[str] = mapped_column(Text, default="")
+    active: Mapped[int] = mapped_column(Integer, default=1)
+
+
+class FacultyAdminGrant(Base):
+    """Supervisor grant. Not a login role and not workspace ownership."""
+
+    __tablename__ = "faculty_admin_grants"
+    __table_args__ = (UniqueConstraint("workspace_id", "user_id", name="uq_faculty_grant"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    granted_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+
+class TeacherSupervision(Base):
+    """Faculty admin groups teachers. Not a student cohort."""
+
+    __tablename__ = "teacher_supervisions"
+    __table_args__ = (
+        UniqueConstraint("workspace_id", "admin_user_id", "teacher_user_id", name="uq_supervision"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    admin_user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    teacher_user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+
+
+class ContactGrant(Base):
+    """Teacher may speak with students and parents only when this row exists."""
+
+    __tablename__ = "contact_grants"
+    __table_args__ = (UniqueConstraint("workspace_id", "teacher_user_id", name="uq_contact_grant"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    teacher_user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    granted_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+
+class TeacherFeedback(Base):
+    """Student feedback on a teacher. Not an assignment grade comment."""
+
+    __tablename__ = "teacher_feedback"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    teacher_user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    student_id: Mapped[str] = mapped_column(ForeignKey("students.id"))
+    session_id: Mapped[str | None] = mapped_column(ForeignKey("scheduled_sessions.id"), nullable=True)
+    body: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class EmailChallenge(Base):
+    """Faculty-admin profile step-up. Consuming it does not issue a login session."""
+
+    __tablename__ = "email_challenges"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    email: Mapped[str] = mapped_column(String(320))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    consumed: Mapped[int] = mapped_column(Integer, default=0)

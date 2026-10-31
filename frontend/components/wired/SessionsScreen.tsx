@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import { Err } from "@/components/wired/bits";
+import { FacultyAdminPanel } from "@/components/wired/FacultyAdminPanel";
 
 const TZ = "Asia/Kolkata";
 const TABS = ["Upcoming", "Completed", "Cancelled"] as const;
@@ -84,6 +85,7 @@ export function SessionsScreen() {
     <>
       <h2>Sessions</h2>
       <span className="k">All sessions · plan ahead and review what is done · Asia/Kolkata</span>
+      <FacultyAdminPanel />
 
       <div
         className="row"

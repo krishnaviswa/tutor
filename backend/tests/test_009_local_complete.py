@@ -493,9 +493,10 @@ def test_hourly_invoice_reviews_and_freezes(client):
     ).status_code == 404
 
 
-def test_catalog_stays_49_and_ports_stay_mock(client):
+def test_catalog_stays_closed_and_ports_stay_mock(client):
     screens = json.loads((Path(__file__).resolve().parents[2] / "catalog" / "screens.json").read_text(encoding="utf-8"))
     ids = [row["id"] for row in screens]
-    assert len(ids) == 49
-    assert len(set(ids)) == 49
+    assert "profile" in ids
+    assert len(ids) == 50
+    assert len(set(ids)) == 50
     assert client.app.state.ports.live_calls == 0

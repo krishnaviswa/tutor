@@ -18,6 +18,89 @@ type Live = {
 
 type SessionRow = { id: string; title: string };
 
+function SessionMoves({ sessionId }: { sessionId: string }) {
+  const [items, setItems] = useState<{ id: string; title: string }[]>([]);
+  const [staff, setStaff] = useState<{ id: string; display_name: string; role: string }[]>([]);
+  const [contentId, setContentId] = useState("");
+  const [teacherId, setTeacherId] = useState("");
+  const [msg, setMsg] = useState("");
+
+  useEffect(() => {
+    api("/api/v1/content")
+      .then((rows) => setItems(rows as { id: string; title: string }[]))
+      .catch(() => setItems([]));
+    api("/api/v1/staff")
+      .then((rows) => setStaff((rows as { id: string; display_name: string; role: string }[]).filter((r) => r.role === "teacher")))
+      .catch(() => setStaff([]));
+  }, [sessionId]);
+
+  return (
+    <div className="card" style={{ marginBottom: 12 }}>
+      <div className="k">This session</div>
+      <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+        <select value={contentId} onChange={(e) => setContentId(e.target.value)}>
+          <option value="">Library file</option>
+          {items.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.title}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="btn btn--sm"
+          disabled={!contentId}
+          onClick={() =>
+            void api(`/api/v1/sessions/${sessionId}/board/library`, {
+              method: "POST",
+              body: JSON.stringify({ content_id: contentId }),
+            })
+              .then(() => setMsg("Library file is on the board. Save still accepts a file from this computer."))
+              .catch((err) => setMsg(err instanceof Error ? err.message : String(err)))
+          }
+        >
+          Place on board
+        </button>
+        <select value={teacherId} onChange={(e) => setTeacherId(e.target.value)}>
+          <option value="">Colleague</option>
+          {staff.map((person) => (
+            <option key={person.id} value={person.id}>
+              {person.display_name}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="btn btn--sm"
+          disabled={!teacherId}
+          onClick={() =>
+            void api(`/api/v1/sessions/${sessionId}/handoff`, {
+              method: "POST",
+              body: JSON.stringify({ teacher_user_id: teacherId }),
+            })
+              .then(() => setMsg("Handed to that teacher, with the subject and library file."))
+              .catch((err) => setMsg(err instanceof Error ? err.message : String(err)))
+          }
+        >
+          Hand off
+        </button>
+        <button
+          type="button"
+          className="btn btn--sm"
+          onClick={() =>
+            void api(`/api/v1/sessions/${sessionId}/handoff/revert`, { method: "POST" })
+              .then(() => setMsg("Handoff reversed. Other edits stayed."))
+              .catch((err) => setMsg(err instanceof Error ? err.message : String(err)))
+          }
+        >
+          Revert handoff
+        </button>
+      </div>
+      {msg ? <p className="muted">{msg}</p> : null}
+    </div>
+  );
+}
+
 export function LiveTeacherScreen() {
   const params = useSearchParams();
   const [sessionId, setSessionId] = useState(params.get("session") || "");
@@ -101,7 +184,10 @@ export function LiveTeacherScreen() {
       {started ? <p className="muted">{started}</p> : null}
       <Err message={error} />
       {sessionId ? (
-        <SessionBoard sessionId={sessionId} />
+        <>
+          <SessionMoves sessionId={sessionId} />
+          <SessionBoard sessionId={sessionId} />
+        </>
       ) : (
         <p className="muted">No session on the calendar yet. Add one from Schedule, then the canvas opens here.</p>
       )}

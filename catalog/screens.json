@@ -419,12 +419,24 @@
       "GET /api/v1/sessions",
       "POST /api/v1/sessions",
       "PATCH /api/v1/sessions/{id}",
-      "GET /api/v1/students"
+      "GET /api/v1/students",
+      "GET /api/v1/faculty-admin/me",
+      "GET /api/v1/faculty-admin/planning",
+      "GET /api/v1/faculty-admin/directory",
+      "POST /api/v1/faculty-admin/contact-grants",
+      "DELETE /api/v1/faculty-admin/contact-grants/{user_id}",
+      "POST /api/v1/faculty-admin/succession",
+      "PATCH /api/v1/profiles/{user_id}",
+      "DELETE /api/v1/profiles/{user_id}",
+      "POST /api/v1/sessions/{id}/handoff/revert"
     ],
     "entities": [
       "scheduled_sessions",
       "students",
-      "cohorts"
+      "cohorts",
+      "person_profiles",
+      "faculty_admin_grants",
+      "contact_grants"
     ],
     "ports": [
       "whatsapp"
@@ -473,6 +485,44 @@
     "why": "Bookings and the calendar need to know when a staff member is free without asking on chat.",
     "how": "Set weekly windows, then add one-off date exceptions for time off or a swapped day. The schedule screen can shade the week outside these windows.",
     "when": "On joining, at term start, and whenever a holiday or a swap comes up.",
+    "roles": [
+      "faculty"
+    ]
+  },
+  {
+    "id": "profile",
+    "title": "Profile",
+    "route": "/app/faculty/profile",
+    "role": "faculty",
+    "frame": "web",
+    "module": "A3",
+    "domain": "A",
+    "domainName": "Identity & access",
+    "phase": 0,
+    "status": "shell",
+    "demoKey": "profile",
+    "figmaNodeId": null,
+    "apis": [
+      "GET /api/v1/profile",
+      "PUT /api/v1/profile",
+      "POST /api/v1/profile/step-up"
+    ],
+    "entities": [
+      "person_profiles",
+      "users",
+      "identities"
+    ],
+    "ports": [
+      "sms",
+      "email"
+    ],
+    "timelineEvents": [],
+    "shows": "Own phone, address, and expertise. A student also saves a board label. Step-up uses the existing one-time code.",
+    "own": "The person.",
+    "who": "Student, teacher, or faculty admin on their own page.",
+    "why": "Phone and home address belong to the person who saved them. A reduced card is what the other role sees.",
+    "how": "Save phone, address, and expertise. A student also saves the board they are studying. The save asks for the one-time code.",
+    "when": "When the person joins, and when those facts change.",
     "roles": [
       "faculty"
     ]
