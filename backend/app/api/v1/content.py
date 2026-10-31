@@ -30,6 +30,9 @@ class ContentIn(BaseModel):
     subject_topic_id: str | None = None
     unit_topic_id: str | None = None
     session_id: str | None = None
+    filename: str | None = None
+    mime: str | None = None
+    data_base64: str | None = None
 
 
 def _out(row: ContentItem, db: Session | None = None, *, lesson: bool = False) -> dict:
@@ -52,14 +55,14 @@ def create_content(
     ports: MockPorts = Depends(ports_dep),
     principal: Principal = Depends(require_roles("owner", "teacher")),
 ):
-    if body.file_kind:
+    if body.file_kind or body.data_base64 or body.filename:
         row = library_svc.file_material(
             db,
             ports,
             principal,
             title=body.title,
             body=body.body,
-            file_kind=body.file_kind,
+            file_kind=body.file_kind or "",
             storage_name=body.storage_path,
             board=body.board,
             subject=body.subject,
@@ -68,6 +71,9 @@ def create_content(
             subject_topic_id=body.subject_topic_id,
             unit_topic_id=body.unit_topic_id,
             session_id=body.session_id,
+            filename=body.filename,
+            mime=body.mime,
+            data_base64=body.data_base64,
         )
         return _out(row, db)
     if body.topic_id:

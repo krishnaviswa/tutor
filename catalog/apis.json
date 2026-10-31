@@ -143,15 +143,18 @@
   },
   {
     "id": "GET /api/v1/content",
-    "status": "sim"
+    "status": "sim",
+    "note": "Items include filename, mime, size_bytes, and has_file. File bytes stay off this list."
   },
   {
     "id": "POST /api/v1/content",
-    "status": "sim"
+    "status": "sim",
+    "note": "Optional filename, mime, and data_base64 store the chosen file on the content item (workspace_id required). file_kind alone still files a type with no bytes."
   },
   {
     "id": "GET /api/v1/content/{id}",
-    "status": "sim"
+    "status": "sim",
+    "note": "Returns filename, mime, size_bytes, and data_base64 when a file was stored."
   },
   {
     "id": "POST /api/v1/assignments",

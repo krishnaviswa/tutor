@@ -117,11 +117,16 @@ def content_out(row: ContentItem, db: Session | None = None, *, lesson: bool = F
         "subject_label": meta.get("subject_label") or "",
         "unit_label": meta.get("unit_label") or "",
         "session_id": meta.get("session_id"),
+        "filename": str(meta.get("filename") or ""),
+        "mime": str(meta.get("mime") or ""),
+        "size_bytes": int(meta.get("size_bytes") or 0),
+        "has_file": bool(meta.get("data_base64")),
     }
     if lesson:
         notes = meta.get("notes") or []
         out["notes"] = [str(n) for n in notes] if isinstance(notes, list) else []
         out["next_practice"] = _first_practice(db, row.workspace_id) if db is not None else None
+        out["data_base64"] = str(meta.get("data_base64") or "")
     return out
 
 

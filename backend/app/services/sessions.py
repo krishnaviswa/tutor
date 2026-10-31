@@ -437,6 +437,7 @@ def place_library_item(
     """Put a library file on this session's board. A local upload still works without it."""
     from app.models.tables import ContentItem
     from app.services import quota as quota_svc
+    from app.services.progress import content_meta
 
     assert_board_access(db, principal, s, write=True)
     item = (
@@ -449,17 +450,28 @@ def place_library_item(
     decision = quota_svc.decide_paid_send(db, principal.workspace_id, "storage")
     if not decision.allowed:
         raise HTTPException(status.HTTP_409_CONFLICT, "storage blocked")
+    meta = content_meta(item)
+    raw_notes = meta.get("notes")
+    notes = [str(n) for n in raw_notes] if isinstance(raw_notes, list) else []
     prev = board_out(s)
     placement = {
         "id": f"lib-{item.id}",
         "kind": "library",
         "name": item.title,
+        "body": item.body or "",
+        "notes": notes,
+        "file_kind": str(meta.get("file_kind") or meta.get("kind") or "notes"),
+        "filename": str(meta.get("filename") or ""),
+        "mime": str(meta.get("mime") or ""),
+        "file_url": f"/api/v1/content/{item.id}",
+        "subject_label": str(meta.get("subject_label") or ""),
+        "unit_label": str(meta.get("unit_label") or ""),
         "storage_path": item.storage_path,
         "content_id": item.id,
-        "x": 40,
+        "x": 60,
         "y": 40,
-        "w": 640,
-        "h": 480,
+        "w": 1120,
+        "h": 760,
     }
     s.library_item_id = item.id
     quota_svc.increment(db, principal.workspace_id, "storage")

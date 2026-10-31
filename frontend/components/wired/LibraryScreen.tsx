@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Dialog } from "@/components/Dialog";
 import { api } from "@/lib/api";
 import { catalogRoute } from "@/lib/screens";
 import { AppBar, Empty, Err } from "./bits";
@@ -20,12 +21,25 @@ type Item = {
   board_label?: string;
   subject_label?: string;
   unit_label?: string;
+  file_kind?: string;
+  filename?: string;
+  mime?: string;
+  size_bytes?: number;
+  has_file?: boolean;
+  data_base64?: string;
 };
 
 type TopicRow = {
   id: string;
   name?: string;
   title?: string;
+};
+
+type Preview = {
+  title: string;
+  filename: string;
+  url: string;
+  mode: "image" | "file";
 };
 
 const BOARD_OPTIONS = ["CBSE", "ICSE", "IB", "IGCSE", "State Board", "General"] as const;
@@ -47,13 +61,87 @@ const PRESET_UNITS = [
   "Formula Sheet & Reference",
 ] as const;
 
+const FILE_ACCEPT = ".png,.jpg,.jpeg,.webp,.svg,.gif,.pdf,.ppt,.pptx,.doc,.docx,.txt";
+
+const FILE_EXTS = new Set(FILE_ACCEPT.split(",").map((ext) => ext.slice(1)));
+
+const IMAGE_EXTS = new Set(["png", "jpg", "jpeg", "webp", "svg", "gif"]);
+
+const MAX_FILE_BYTES = 50 * 1024 * 1024;
+const MAX_FILE_MB = MAX_FILE_BYTES / (1024 * 1024);
+
+function extensionOf(name: string): string {
+  const base = name.trim().split(/[/\\]/).pop() || "";
+  const dot = base.lastIndexOf(".");
+  if (dot <= 0) return "";
+  return base.slice(dot + 1).toLowerCase();
+}
+
+function formatBytes(size: number): string {
+  if (size < 1024) return `${size} B`;
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(size < 10 * 1024 ? 1 : 0)} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function mimeFor(ext: string, claimed: string): string {
+  const map: Record<string, string> = {
+    png: "image/png",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    webp: "image/webp",
+    svg: "image/svg+xml",
+    gif: "image/gif",
+    pdf: "application/pdf",
+    ppt: "application/vnd.ms-powerpoint",
+    pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    doc: "application/msword",
+    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    txt: "text/plain",
+  };
+  return map[ext] || claimed || "application/octet-stream";
+}
+
+function isImageFile(mime: string, filename: string): boolean {
+  if (mime.toLowerCase().startsWith("image/")) return true;
+  return IMAGE_EXTS.has(extensionOf(filename));
+}
+
+function kindLabel(it: Item): string {
+  const fileKind = (it.file_kind || "").toLowerCase();
+  if (fileKind && fileKind !== "notes") return fileKind;
+  return (it.kind || "notes").toLowerCase();
+}
+
+function readAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === "string" ? reader.result : "";
+      const comma = result.indexOf(",");
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = () => reject(reader.error ?? new Error("Could not read that file."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function blobFromBase64(b64: string, mime: string): Blob {
+  const clean = (b64.includes(",") ? b64.slice(b64.indexOf(",") + 1) : b64).replace(/\s/g, "");
+  const binary = atob(clean);
+  const buffer = new ArrayBuffer(binary.length);
+  const view = new Uint8Array(buffer);
+  for (let i = 0; i < binary.length; i += 1) view[i] = binary.charCodeAt(i);
+  return new Blob([buffer], { type: mime || "application/octet-stream" });
+}
+
 export function LibraryScreen() {
   const [rows, setRows] = useState<Item[]>([]);
   const [topics, setTopics] = useState<TopicRow[]>([]);
   const [showUpload, setShowUpload] = useState(false);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [fileKind, setFileKind] = useState("pdf");
+  const [picked, setPicked] = useState<File | null>(null);
+  const [autoTitle, setAutoTitle] = useState("");
   const [board, setBoard] = useState<string>("CBSE");
   const [subjectChoice, setSubjectChoice] = useState<string>("Physics");
   const [customSubject, setCustomSubject] = useState("");
@@ -63,6 +151,12 @@ export function LibraryScreen() {
   const [role, setRole] = useState<string>("student");
   const [busy, setBusy] = useState(false);
   const [filter, setFilter] = useState("all");
+  const [openingId, setOpeningId] = useState("");
+  const [preview, setPreview] = useState<Preview | null>(null);
+  const [imageFailed, setImageFailed] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const heldUrls = useRef<string[]>([]);
 
   function load() {
     Promise.all([
@@ -78,7 +172,8 @@ export function LibraryScreen() {
           if (firstLabel) setUnitChoice(firstLabel);
         }
       })
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
+      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
+      .finally(() => setLoaded(true));
   }
 
   useEffect(() => {
@@ -86,6 +181,10 @@ export function LibraryScreen() {
       .then((me) => setRole((me as { role?: string }).role ?? "student"))
       .catch(() => undefined);
     load();
+    const urls = heldUrls.current;
+    return () => {
+      urls.forEach((url) => URL.revokeObjectURL(url));
+    };
   }, []);
 
   const canWrite = role === "teacher" || role === "owner";
@@ -98,25 +197,73 @@ export function LibraryScreen() {
   }, [topics]);
 
   const kinds = useMemo(() => {
-    const set = new Set(rows.map((r) => (r.kind || "notes").toLowerCase()));
+    const set = new Set(rows.map((r) => kindLabel(r)));
     return ["all", ...Array.from(set)];
   }, [rows]);
 
-  const shown = rows.filter((r) => filter === "all" || (r.kind || "notes").toLowerCase() === filter);
+  const shown = rows.filter((r) => filter === "all" || kindLabel(r) === filter);
 
   const resolvedSubject = subjectChoice === "__custom__" ? customSubject.trim() : subjectChoice;
   const resolvedUnit = unitChoice === "__custom__" ? customUnit.trim() : unitChoice;
 
+  function onPick(file: File | null) {
+    setError("");
+    if (!file) {
+      setPicked(null);
+      return;
+    }
+    const ext = extensionOf(file.name);
+    if (!FILE_EXTS.has(ext)) {
+      setPicked(null);
+      if (fileRef.current) fileRef.current.value = "";
+      setError("Choose a png, jpg, jpeg, webp, svg, gif, pdf, ppt, pptx, doc, docx, or txt file.");
+      return;
+    }
+    if (file.size <= 0) {
+      setPicked(null);
+      if (fileRef.current) fileRef.current.value = "";
+      setError("That file is empty.");
+      return;
+    }
+    if (file.size > MAX_FILE_BYTES) {
+      setPicked(null);
+      if (fileRef.current) fileRef.current.value = "";
+      setError(`That file is larger than ${MAX_FILE_MB} MB.`);
+      return;
+    }
+    setPicked(file);
+    setTitle((current) => {
+      if (!current.trim() || current === autoTitle) return file.name.slice(0, 200);
+      return current;
+    });
+    setAutoTitle(file.name.slice(0, 200));
+  }
+
+  function clearPicked() {
+    setPicked(null);
+    setAutoTitle("");
+    if (fileRef.current) fileRef.current.value = "";
+  }
+
   async function create() {
+    if (!picked) {
+      setError("Choose a file from this computer before saving.");
+      return;
+    }
     setBusy(true);
     setError("");
     try {
+      const ext = extensionOf(picked.name);
+      const dataBase64 = await readAsBase64(picked);
       await api("/api/v1/content", {
         method: "POST",
         body: JSON.stringify({
-          title,
+          title: title.trim() || picked.name.slice(0, 200),
           body,
-          file_kind: fileKind,
+          filename: picked.name,
+          mime: mimeFor(ext, picked.type),
+          data_base64: dataBase64,
+          file_kind: ext,
           board,
           subject: resolvedSubject,
           unit: resolvedUnit,
@@ -126,12 +273,78 @@ export function LibraryScreen() {
       setBody("");
       setCustomSubject("");
       setCustomUnit("");
+      clearPicked();
       setShowUpload(false);
       load();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setBusy(false);
+    }
+  }
+
+  function closePreview() {
+    setPreview((current) => {
+      if (current?.url) URL.revokeObjectURL(current.url);
+      return null;
+    });
+    setImageFailed(false);
+  }
+
+  async function openItem(it: Item) {
+    const filename = it.filename || it.title || "file";
+    const hintedMime = it.mime || "";
+    const image = isImageFile(hintedMime, filename);
+    const ext = extensionOf(filename);
+    const openInTab = !image && (ext === "pdf" || ext === "txt" || hintedMime === "application/pdf" || hintedMime.startsWith("text/"));
+    const tab = openInTab ? window.open("about:blank", "_blank") : null;
+    setOpeningId(it.id);
+    setError("");
+    try {
+      const detail = (await api(`/api/v1/content/${it.id}`)) as Item;
+      const encoded = detail.data_base64 || "";
+      if (!encoded) {
+        tab?.close();
+        setError("This item has no stored file.");
+        return;
+      }
+      const mime = detail.mime || hintedMime || "application/octet-stream";
+      const storedName = detail.filename || filename;
+      const blob = blobFromBase64(encoded, mime);
+      const url = URL.createObjectURL(blob);
+      heldUrls.current.push(url);
+      const actualImage = isImageFile(mime, storedName);
+      if (actualImage) {
+        tab?.close();
+        setImageFailed(false);
+        setPreview({ title: detail.title || storedName, filename: storedName, url, mode: "image" });
+        return;
+      }
+      const storedExt = extensionOf(storedName);
+      const showInTab = storedExt === "pdf" || storedExt === "txt" || mime === "application/pdf" || mime.startsWith("text/");
+      if (showInTab && tab) {
+        const tabUrl = URL.createObjectURL(blob);
+        heldUrls.current.push(tabUrl);
+        tab.location.href = tabUrl;
+      } else if (tab) {
+        tab.close();
+      }
+      if (!showInTab) {
+        const link = document.createElement("a");
+        const downloadUrl = URL.createObjectURL(blob);
+        heldUrls.current.push(downloadUrl);
+        link.href = downloadUrl;
+        link.download = storedName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+      setPreview({ title: detail.title || storedName, filename: storedName, url, mode: "file" });
+    } catch (err) {
+      tab?.close();
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setOpeningId("");
     }
   }
 
@@ -151,15 +364,21 @@ export function LibraryScreen() {
                 placeholder="e.g., Electrostatics Formula Sheet"
               />
             </label>
-            <label className="field">
-              <span>File format</span>
-              <select className="field__in" value={fileKind} onChange={(e) => setFileKind(e.target.value)}>
-                {["pdf", "png", "svg", "drawio", "docx", "pptx", "xlsx"].map((kind) => (
-                  <option key={kind} value={kind}>
-                    {kind.toUpperCase()}
-                  </option>
-                ))}
-              </select>
+            <label className="field" htmlFor="library-file">
+              <span>Choose file from this computer</span>
+              <input
+                id="library-file"
+                ref={fileRef}
+                className="field__in"
+                type="file"
+                accept={FILE_ACCEPT}
+                onChange={(e) => onPick(e.target.files?.[0] ?? null)}
+              />
+              {picked ? (
+                <span className="muted" style={{ display: "block", marginTop: 8 }}>
+                  {picked.name} · {formatBytes(picked.size)}
+                </span>
+              ) : null}
             </label>
           </div>
 
@@ -248,7 +467,7 @@ export function LibraryScreen() {
               className="hot hot--btn"
               type="button"
               style={{ width: "auto", margin: 0 }}
-              disabled={busy || !title.trim()}
+              disabled={busy || !title.trim() || !picked}
               onClick={() => void create()}
             >
               {busy ? "Uploading…" : "Save material"}
@@ -257,7 +476,10 @@ export function LibraryScreen() {
               className="btn btn--sm"
               type="button"
               style={{ width: "auto", margin: 0 }}
-              onClick={() => setShowUpload(false)}
+              onClick={() => {
+                setShowUpload(false);
+                clearPicked();
+              }}
             >
               Cancel
             </button>
@@ -278,16 +500,20 @@ export function LibraryScreen() {
         ))}
       </div>
 
-      {shown.length === 0 ? (
-        <Empty>No lessons yet. Click &ldquo;+ Upload Material&rdquo; to add study content.</Empty>
+      {!loaded ? null : shown.length === 0 ? (
+        <Empty>
+          {rows.length === 0
+            ? "This list is empty until a file is chosen from this computer."
+            : "Nothing in this filter."}
+        </Empty>
       ) : (
         <div className="lesson-grid">
           {shown.map((it) => {
             const pct = it.progress_pct ?? 0;
-            const kind = it.kind || "notes";
-            const dur = it.duration_label || "Open";
+            const kind = kindLabel(it);
+            const dur = it.duration_label || (it.has_file ? "File" : "Lesson");
             return (
-              <Link key={it.id} href={`${catalogRoute("lesson")}?id=${it.id}`} className="lesson-card">
+              <article key={it.id} className="lesson-card">
                 <span className="k">{kind}</span>
                 <strong>{it.title}</strong>
                 <span className="muted">
@@ -296,14 +522,69 @@ export function LibraryScreen() {
                   {it.subject_label ? ` · ${it.subject_label}` : ""}
                   {it.unit_label ? ` · ${it.unit_label}` : ""}
                 </span>
+                {it.filename ? (
+                  <span className="muted">
+                    {it.filename}
+                    {it.size_bytes ? ` · ${formatBytes(it.size_bytes)}` : ""}
+                  </span>
+                ) : null}
                 <span className="bar" aria-hidden="true">
                   <b style={{ width: `${Math.min(pct, 100)}%` }} />
                 </span>
-              </Link>
+                {it.has_file ? (
+                  <button
+                    type="button"
+                    className="btn btn--sm"
+                    disabled={openingId === it.id}
+                    onClick={() => void openItem(it)}
+                  >
+                    {openingId === it.id ? "Opening…" : "Open"}
+                  </button>
+                ) : (
+                  <Link href={`${catalogRoute("lesson")}?id=${it.id}`} className="btn btn--sm">
+                    View lesson
+                  </Link>
+                )}
+              </article>
             );
           })}
         </div>
       )}
+
+      {preview ? (
+        <Dialog title={preview.title} onClose={closePreview}>
+          {preview.mode === "image" && !imageFailed ? (
+            <img
+              src={preview.url}
+              alt={preview.filename}
+              onError={() => setImageFailed(true)}
+              style={{
+                display: "block",
+                maxWidth: "100%",
+                maxHeight: "60vh",
+                width: "auto",
+                height: "auto",
+                objectFit: "contain",
+                background: "#fff",
+              }}
+            />
+          ) : (
+            <p className="muted" style={{ marginTop: 0 }}>
+              {preview.filename} is stored for this workspace. Open it from the link below.
+            </p>
+          )}
+          <div className="row" style={{ marginTop: 12, gap: 8, flexWrap: "wrap" }}>
+            <a className="hot hot--btn" href={preview.url} download={preview.filename}>
+              Download {preview.filename}
+            </a>
+            {preview.mode === "file" ? (
+              <a className="btn btn--sm" href={preview.url} target="_blank" rel="noopener noreferrer">
+                Open in a new tab
+              </a>
+            ) : null}
+          </div>
+        </Dialog>
+      ) : null}
     </>
   );
 
