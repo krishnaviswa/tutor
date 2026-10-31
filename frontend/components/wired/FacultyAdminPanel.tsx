@@ -284,96 +284,149 @@ export function FacultyAdminPanel({ showWhenRestricted = false }: { showWhenRest
             <div
               key={row.session_id}
               className="list__i"
-              style={{ padding: "10px 0", borderTop: "1px solid var(--line-soft)" }}
+              style={{
+                padding: "12px 0",
+                borderTop: "1px solid var(--line-soft)",
+                flexDirection: "column",
+                alignItems: "stretch",
+                gap: 10,
+              }}
             >
-              <strong>{meta?.title || "Session"}</strong>
-              <div className="muted">
-                {when(meta?.starts_at)}
-                {when(meta?.starts_at) ? " · " : ""}
-                Teacher {names.get(row.teacher_user_id) || "assigned"}: {mark(row.teacher_status)}
+              <div className="sb" style={{ gap: 8 }}>
+                <strong>{meta?.title || "Session"}</strong>
+                <span className="muted">
+                  {when(meta?.starts_at)}
+                  {when(meta?.starts_at) ? " · " : ""}
+                  Teacher {names.get(row.teacher_user_id) || "assigned"}: {mark(row.teacher_status)}
+                </span>
               </div>
-              <div className="row" style={{ marginTop: 8, gap: 6, alignItems: "center" }}>
-                <span className="muted">Teacher</span>
-                <button
-                  type="button"
-                  className={row.teacher_status === "present" ? "btn btn--dark btn--sm" : "btn btn--sm"}
-                  disabled={busy === row.session_id}
-                  onClick={() =>
-                    void run(row.session_id, async () => {
-                      await api(`/api/v1/sessions/${row.session_id}/record`, {
-                        method: "PATCH",
-                        body: JSON.stringify({ teacher_status: "present" }),
-                      });
-                      setMsg("Attendance saved.");
-                    })
-                  }
-                >
-                  Present
-                </button>
-                <button
-                  type="button"
-                  className={row.teacher_status === "absent" ? "btn btn--dark btn--sm" : "btn btn--sm"}
-                  disabled={busy === row.session_id}
-                  onClick={() =>
-                    void run(row.session_id, async () => {
-                      await api(`/api/v1/sessions/${row.session_id}/record`, {
-                        method: "PATCH",
-                        body: JSON.stringify({ teacher_status: "absent" }),
-                      });
-                      setMsg("Attendance saved.");
-                    })
-                  }
-                >
-                  Absent
-                </button>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <div className="sb" style={{ gap: 8 }}>
+                  <span className="muted">Lead Teacher ({names.get(row.teacher_user_id) || "assigned"})</span>
+                  <span
+                    className={`pill ${
+                      row.teacher_status === "present"
+                        ? "is-good"
+                        : row.teacher_status === "absent"
+                          ? "is-bad"
+                          : ""
+                    }`}
+                  >
+                    {mark(row.teacher_status)}
+                  </span>
+                </div>
+                <div className="roll-grid--2">
+                  <button
+                    type="button"
+                    className={row.teacher_status === "present" ? "btn btn--dark btn--sm" : "btn btn--sm"}
+                    disabled={busy === row.session_id}
+                    onClick={() =>
+                      void run(row.session_id, async () => {
+                        await api(`/api/v1/sessions/${row.session_id}/record`, {
+                          method: "PATCH",
+                          body: JSON.stringify({ teacher_status: "present" }),
+                        });
+                        setMsg("Attendance saved.");
+                      })
+                    }
+                  >
+                    Present
+                  </button>
+                  <button
+                    type="button"
+                    className={row.teacher_status === "absent" ? "btn btn--dark btn--sm" : "btn btn--sm"}
+                    disabled={busy === row.session_id}
+                    onClick={() =>
+                      void run(row.session_id, async () => {
+                        await api(`/api/v1/sessions/${row.session_id}/record`, {
+                          method: "PATCH",
+                          body: JSON.stringify({ teacher_status: "absent" }),
+                        });
+                        setMsg("Attendance saved.");
+                      })
+                    }
+                  >
+                    Absent
+                  </button>
+                </div>
               </div>
               {students.length === 0 ? (
                 <p className="muted">No students on this session.</p>
               ) : (
-                students.map((item) => (
-                  <div key={item.student_id} className="row" style={{ marginTop: 6, gap: 6, alignItems: "center" }}>
-                    <span style={{ minWidth: 120 }}>{studentNames[item.student_id] || "Student"}</span>
-                    <span className="muted">{studentMark(item.status)}</span>
-                    {STUDENT_ROLL.map((choice) => (
-                      <button
-                        key={choice.value}
-                        type="button"
-                        className={normalizeStudent(item.status) === choice.value ? "btn btn--dark btn--sm" : "btn btn--sm"}
-                        disabled={busy === row.session_id}
-                        onClick={() =>
-                          void run(row.session_id, async () => {
-                            const next = normalizeStudent(item.status) === choice.value ? "" : choice.value;
-                            await api(`/api/v1/sessions/${row.session_id}/record`, {
-                              method: "PATCH",
-                              body: JSON.stringify({
-                                attendance: explicitMarks(row, item.student_id, next),
-                              }),
-                            });
-                            setMsg("Attendance saved.");
-                          })
-                        }
-                      >
-                        {choice.label}
-                      </button>
-                    ))}
-                  </div>
-                ))
+                students.map((item) => {
+                  const norm = normalizeStudent(item.status);
+                  const tone =
+                    norm === "attended"
+                      ? "is-good"
+                      : norm === "no_show"
+                        ? "is-bad"
+                        : norm === "student_cancel" || norm === "teacher_cancel"
+                          ? "is-warn"
+                          : "";
+                  return (
+                    <div
+                      key={item.student_id}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 6,
+                        paddingTop: 8,
+                        borderTop: "1px solid var(--line-soft)",
+                      }}
+                    >
+                      <div className="sb" style={{ gap: 8 }}>
+                        <span style={{ fontWeight: 500, whiteSpace: "nowrap" }}>
+                          {studentNames[item.student_id] || "Student"}
+                        </span>
+                        <span className={`pill ${tone}`} style={{ padding: "2px 8px" }}>
+                          {studentMark(item.status)}
+                        </span>
+                      </div>
+                      <div className="roll-grid">
+                        {STUDENT_ROLL.map((choice) => (
+                          <button
+                            key={choice.value}
+                            type="button"
+                            className={norm === choice.value ? "btn btn--dark btn--sm" : "btn btn--sm"}
+                            disabled={busy === row.session_id}
+                            onClick={() =>
+                              void run(row.session_id, async () => {
+                                const next = norm === choice.value ? "" : choice.value;
+                                await api(`/api/v1/sessions/${row.session_id}/record`, {
+                                  method: "PATCH",
+                                  body: JSON.stringify({
+                                    attendance: explicitMarks(row, item.student_id, next),
+                                  }),
+                                });
+                                setMsg("Attendance saved.");
+                              })
+                            }
+                          >
+                            {choice.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })
               )}
-              <button
-                type="button"
-                className="hot--btn ghost"
-                style={{ marginTop: 8 }}
-                disabled={!canRevert || busy === row.session_id}
-                title={canRevert ? "Return this session to the previous teacher" : "No handoff to revert"}
-                onClick={() =>
-                  void run(row.session_id, async () => {
-                    await api(`/api/v1/sessions/${row.session_id}/handoff/revert`, { method: "POST" });
-                    setMsg("Handoff reversed. Other edits stayed.");
-                  })
-                }
-              >
-                Revert handoff
-              </button>
+              <div>
+                <button
+                  type="button"
+                  className="hot--btn ghost"
+                  style={{ marginTop: 4 }}
+                  disabled={!canRevert || busy === row.session_id}
+                  title={canRevert ? "Return this session to the previous teacher" : "No handoff to revert"}
+                  onClick={() =>
+                    void run(row.session_id, async () => {
+                      await api(`/api/v1/sessions/${row.session_id}/handoff/revert`, { method: "POST" });
+                      setMsg("Handoff reversed. Other edits stayed.");
+                    })
+                  }
+                >
+                  Revert handoff
+                </button>
+              </div>
             </div>
           );
         })
@@ -388,7 +441,13 @@ export function FacultyAdminPanel({ showWhenRestricted = false }: { showWhenRest
         <div
           key={teacher.user_id}
           className="list__i"
-          style={{ padding: "10px 0", borderTop: "1px solid var(--line-soft)" }}
+          style={{
+            padding: "12px 0",
+            borderTop: "1px solid var(--line-soft)",
+            flexDirection: "column",
+            alignItems: "stretch",
+            gap: 4,
+          }}
         >
           <strong>{teacher.name}</strong>
           <div className="muted">Subjects: {teacher.subjects || "—"}</div>

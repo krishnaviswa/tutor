@@ -402,22 +402,38 @@ function RecordScreenInner() {
               </div>
             </div>
 
-            <div className="list__i" style={{ padding: "10px 0" }}>
-              <div className="gr">
+            <div
+              className="list__i"
+              style={{
+                padding: "12px 0",
+                flexDirection: "column",
+                alignItems: "stretch",
+                gap: 8,
+              }}
+            >
+              <div className="sb" style={{ gap: 8 }}>
                 <div className="t">Lead Teacher</div>
-                <div className="s">
+                <span
+                  className={`pill ${
+                    teacherStatus === "present"
+                      ? "is-good"
+                      : teacherStatus === "absent"
+                        ? "is-bad"
+                        : ""
+                  }`}
+                >
                   {teacherStatus === "present"
                     ? "Present · Verified for teacher payout"
                     : teacherStatus === "absent"
                       ? "Absent"
                       : "Not marked yet"}
-                </div>
+                </span>
               </div>
-              <div className="row" style={{ gap: 6 }}>
+              <div className="roll-grid--2">
                 <button
                   type="button"
                   className={teacherStatus === "present" ? "btn btn--dark btn--sm" : "btn btn--sm"}
-                  style={btnStyle()}
+                  style={btnStyle({ width: "100%", justifyContent: "center" })}
                   onClick={() => setTeacher("present")}
                 >
                   Present
@@ -425,7 +441,7 @@ function RecordScreenInner() {
                 <button
                   type="button"
                   className={teacherStatus === "absent" ? "btn btn--dark btn--sm" : "btn btn--sm"}
-                  style={btnStyle()}
+                  style={btnStyle({ width: "100%", justifyContent: "center" })}
                   onClick={() => setTeacher("absent")}
                 >
                   Absent
@@ -434,25 +450,36 @@ function RecordScreenInner() {
             </div>
 
             {rows.map((r) => (
-              <div key={r.id} className="list__i" style={{ padding: "10px 0", flexWrap: "wrap" }}>
-                <span className="av av--sm" style={{ background: avColor(r.display_name) }}>
-                  {initials(r.display_name)}
-                </span>
-                <div className="gr">
-                  <div className="t">{r.display_name}</div>
-                  <div className="s">
-                    <span className={`pill ${statusPillTone(r.status)}`} style={{ padding: "2px 8px" }}>
-                      {studentLabel(r.status)}
+              <div
+                key={r.id}
+                className="list__i"
+                style={{
+                  padding: "12px 0",
+                  flexDirection: "column",
+                  alignItems: "stretch",
+                  gap: 8,
+                }}
+              >
+                <div className="sb" style={{ gap: 10 }}>
+                  <div className="row" style={{ gap: 10, flexWrap: "nowrap", minWidth: 0 }}>
+                    <span className="av av--sm" style={{ background: avColor(r.display_name) }}>
+                      {initials(r.display_name)}
                     </span>
+                    <div className="t" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {r.display_name}
+                    </div>
                   </div>
+                  <span className={`pill ${statusPillTone(r.status)}`} style={{ padding: "2px 8px" }}>
+                    {studentLabel(r.status)}
+                  </span>
                 </div>
-                <div className="row" style={{ gap: 6 }}>
+                <div className="roll-grid">
                   {STUDENT_ROLL.map((choice) => (
                     <button
                       key={choice.value}
                       type="button"
                       className={r.status === choice.value ? "btn btn--dark btn--sm" : "btn btn--sm"}
-                      style={btnStyle()}
+                      style={btnStyle({ width: "100%", justifyContent: "center", padding: "7px 8px", whiteSpace: "nowrap" })}
                       onClick={() => setStatus(r.id, choice.value)}
                     >
                       {choice.label}

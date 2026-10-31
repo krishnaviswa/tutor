@@ -144,8 +144,12 @@ export function TeacherDashScreen() {
                 <Empty>No sessions scheduled yet. Open the calendar to add a class.</Empty>
               ) : (
                 sessions.map((s) => (
-                  <div key={s.id} className="list__i" style={{ flexWrap: "wrap", gap: 10 }}>
-                    <div className="gr">
+                  <div
+                    key={s.id}
+                    className="list__i"
+                    style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}
+                  >
+                    <div className="sb" style={{ gap: 8 }}>
                       <div className="t">{s.title}</div>
                       <div className="s">
                         {formatSessionTime(s.starts_at)} IST
@@ -197,20 +201,26 @@ export function TeacherDashScreen() {
                 <p className="muted">All caught up — attendance, practice, and student doubts are on track.</p>
               ) : (
                 chase.map((c) => (
-                  <div key={c.student_id} className="list__i" style={{ flexWrap: "wrap", gap: 10 }}>
-                    <div className="row" style={{ gap: 8, flexWrap: "nowrap", flex: 1, minWidth: 180 }}>
-                      <Av name={c.display_name} />
-                      <div className="gr">
-                        <div className="t" style={{ fontSize: ".9rem", fontWeight: 600 }}>
-                          {c.display_name}
+                  <div
+                    key={c.student_id}
+                    className="list__i"
+                    style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}
+                  >
+                    <div className="sb" style={{ gap: 8 }}>
+                      <div className="row" style={{ gap: 8, flexWrap: "nowrap", minWidth: 0 }}>
+                        <Av name={c.display_name} />
+                        <div style={{ minWidth: 0 }}>
+                          <div className="t" style={{ fontSize: ".9rem", fontWeight: 600 }}>
+                            {c.display_name}
+                          </div>
+                          <div className="s">{c.reason}</div>
                         </div>
-                        <div className="s">{c.reason}</div>
                       </div>
-                    </div>
-                    <div className="row" style={{ gap: 6 }}>
                       <span className={`pill ${c.tone === "bad" ? "is-bad" : "is-warn"}`}>
                         {c.tone === "bad" ? "High Priority" : "Needs Check-in"}
                       </span>
+                    </div>
+                    <div className="row" style={{ gap: 6 }}>
                       <Link href={catalogRoute("mentor")} className="btn btn--sm">
                         Book 1-on-1
                       </Link>
