@@ -82,7 +82,7 @@ const TOOLS: { id: Tool; label: string }[] = [
   { id: "pen", label: "Pen" },
   { id: "eraser", label: "Eraser" },
   { id: "text", label: "Text" },
-  { id: "laser", label: "Laser" },
+  { id: "laser", label: "Pointer" },
   { id: "crop", label: "Crop" },
 ];
 
@@ -99,8 +99,8 @@ const COLORS = [
   { name: "gray", hex: "#8e8e93" },
 ] as const;
 
-const PPTX_SENTENCE =
-  "PowerPoint slides cannot be opened for markup here. Upload a PDF or an image of the slide to mark it up.";
+const PPTX_SENTENCE = "PowerPoint cannot be opened for markup here — upload a PDF or an image.";
+const CLASS_LOCK = "Only the assigned teacher or the owner can change this class.";
 
 const emptyDoc = (): BoardDoc => ({ strokes: [], texts: [], placements: [], erases: [] });
 
@@ -360,7 +360,15 @@ function viewStyle(crop: Crop | null): CSSProperties {
   };
 }
 
-export function SessionBoard({ sessionId, library = false }: { sessionId: string; library?: boolean }) {
+export function SessionBoard({
+  sessionId,
+  library = false,
+  readOnly = false,
+}: {
+  sessionId: string;
+  library?: boolean;
+  readOnly?: boolean;
+}) {
   const [doc, setDoc] = useState<BoardDoc>(emptyDoc);
   const [tool, setTool] = useState<Tool>("pen");
   const [color, setColor] = useState("black");
@@ -572,7 +580,7 @@ export function SessionBoard({ sessionId, library = false }: { sessionId: string
   }
 
   function onPointerDown(event: ReactPointerEvent<HTMLCanvasElement>) {
-    if (!showInk) return;
+    if (readOnly || !showInk) return;
     const point = documentPoint(event);
     event.currentTarget.setPointerCapture(event.pointerId);
     if (toolRef.current === "laser") {
@@ -763,6 +771,7 @@ export function SessionBoard({ sessionId, library = false }: { sessionId: string
   }
 
   async function saveBoard(quiet = false) {
+    if (readOnly) return false;
     const snapshot = docRef.current;
     setSaving(true);
     if (!quiet) setNote("Saving.");
@@ -794,6 +803,7 @@ export function SessionBoard({ sessionId, library = false }: { sessionId: string
   }
 
   async function placeContent(contentId: string) {
+    if (readOnly) return;
     lock.current += 1;
     setBusy(true);
     setNote("Opening that file.");
@@ -822,7 +832,7 @@ export function SessionBoard({ sessionId, library = false }: { sessionId: string
   }
 
   async function onFile(file: File | null) {
-    if (!file) return;
+    if (readOnly || !file) return;
     const ext = extensionOf(file.name);
     if (!MARKUP_EXT.has(ext)) {
       setNote("Choose a png, jpg, webp, gif, svg, pdf, ppt, or pptx file.");
@@ -957,7 +967,17 @@ export function SessionBoard({ sessionId, library = false }: { sessionId: string
 
   return (
     <div className="studio-board">
-      <div className="studio-toolbar" role="toolbar" aria-label="Board tools">
+      {readOnly ? (
+        <p className="studio-status" role="status">
+          {CLASS_LOCK}
+        </p>
+      ) : null}
+      <div
+        className="studio-toolbar"
+        role="toolbar"
+        aria-label="Board tools"
+        style={readOnly ? { pointerEvents: "none", opacity: 0.55 } : undefined}
+      >
         <div className="studio-modes" role="group" aria-label="Board mode">
           <button type="button" aria-pressed={mode === "blank"} onClick={() => selectMode("blank")}>
             Blank board
@@ -1105,7 +1125,7 @@ export function SessionBoard({ sessionId, library = false }: { sessionId: string
           <canvas
             ref={canvasRef}
             className="doc-stage__ink"
-            style={{ cursor: inkCursor }}
+            style={{ cursor: inkCursor, pointerEvents: readOnly ? "none" : undefined }}
             aria-label="Class whiteboard"
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { formatInr, maskIds } from "@/lib/format";
 
 export function AppBar({ title, extra }: { title: string; extra?: ReactNode }) {
   return (
@@ -23,7 +24,7 @@ export function Err({ message }: { message?: string | null }) {
   if (!message) return null;
   return (
     <div className="state state--error" role="alert">
-      <p>{message}</p>
+      <p>{maskIds(message)}</p>
     </div>
   );
 }
@@ -37,7 +38,7 @@ export function Empty({ children }: { children: ReactNode }) {
 }
 
 export function rupees(cents: number) {
-  return `₹${(cents / 100).toLocaleString("en-IN")}`;
+  return formatInr(cents);
 }
 
 export function initials(name: string) {

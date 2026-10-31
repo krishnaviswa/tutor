@@ -12,6 +12,7 @@ import {
   readBalanceMinutes,
   readOpenHourStarts,
 } from "@/lib/lessonPack";
+import { formatWhen, shortId } from "@/lib/format";
 import { AppBar, Av, Empty, Err, Loading, rupees } from "./bits";
 
 type FeeFact = { amount_cents: number; due_on?: string; status: string; receipt_id?: string | null; label?: string };
@@ -283,12 +284,12 @@ export function ParentHomeScreen() {
                 <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid var(--line-soft)" }}>
                   <div className="k">Tuition &amp; Receipts</div>
                   <div style={{ fontWeight: 600, margin: "4px 0" }}>
-                    {fee ? `${rupees(fee.amount_cents)} due ${fee.due_on || ""}` : "No open invoice"}
+                    {fee ? `${rupees(fee.amount_cents)} due ${formatWhen(fee.due_on) || ""}` : "No open invoice"}
                   </div>
                   <div className="muted">
                     {fee?.status ? <span className="pill">{fee.status}</span> : null}{" "}
                     {receipt
-                      ? `Latest receipt ${receipt.receipt_id || ""} · ${rupees(receipt.amount_cents)} paid`
+                      ? `Latest receipt ${shortId(receipt.receipt_id)} · ${rupees(receipt.amount_cents)} paid`
                       : "No paid receipt yet"}
                   </div>
                 </div>

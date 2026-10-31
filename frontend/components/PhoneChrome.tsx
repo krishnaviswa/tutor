@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { NavIcon } from "@/components/NavIcon";
+import { BrandLockup } from "@/components/SignedInMark";
 import { SectionTabs } from "@/components/SectionTabs";
 import { ShellBack, ShellStage } from "@/components/ShellBack";
 import { ShellControls } from "@/components/ShellControls";
@@ -32,9 +33,7 @@ export function PhoneChrome({ screenId, active, children }: PhoneChromeProps) {
       <div className="phonewrap">
         <header className="crumbstrip">
           <ShellBack items={STUDENT_NAV} currentId={currentId} />
-          <Link href={catalogRoute("student-dash")} className="wm wm--sm">
-            TutorOS
-          </Link>
+          <BrandLockup href={catalogRoute("student-dash")} />
           <span className="place" style={{ margin: 0 }}>
             <strong>{currentTitle || "Home"}</strong>
           </span>

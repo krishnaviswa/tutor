@@ -70,7 +70,7 @@ export function BillingScreen() {
         }),
       })) as { id: string };
       setInvoiceId(row.id);
-      setNote(`Invoice ${row.id} created`);
+      setNote("Invoice created.");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -99,8 +99,8 @@ export function BillingScreen() {
           ))}
         </div>
       )}
-      <form className="card" onSubmit={onCreate}>
-        <div className="grid g2" style={{ gap: 10 }}>
+      <form className="card form-stack" onSubmit={onCreate}>
+        <div className="form-row">
           <label className="field">
             <span>Student</span>
             <select className="field__in" value={studentId} onChange={(e) => setStudentId(e.target.value)}>
@@ -123,13 +123,13 @@ export function BillingScreen() {
           </label>
         </div>
 
-        <label className="list__i" style={{ cursor: "pointer", margin: "4px 0" }}>
+        <label className="row">
           <input type="checkbox" checked={auto} onChange={(e) => setAuto(e.target.checked)} />
           <span>Automatically calculate amount from selected plan</span>
         </label>
 
         {!auto ? (
-          <div className="grid g2" style={{ gap: 10 }}>
+          <div className={amountPreset === "custom" ? "form-row" : undefined}>
             <label className="field">
               <span>Fee amount (₹)</span>
               <select
@@ -174,16 +174,14 @@ export function BillingScreen() {
           </select>
         </label>
 
-        <button className="hot hot--btn" type="submit" disabled={busy || !studentId} aria-busy={busy}>
-          {busy ? "Issuing" : "Issue invoice"}
-        </button>
-        {note ? (
-          <p className="muted" style={{ marginTop: 8 }}>
-            {note}
-          </p>
-        ) : null}
-        {invoiceId ? <InvoiceTrail invoiceId={invoiceId} /> : null}
+        <div className="form-actions">
+          <button className="hot hot--btn" type="submit" disabled={busy || !studentId} aria-busy={busy}>
+            {busy ? "Issuing" : "Issue invoice"}
+          </button>
+          {note ? <p className="meta-line">{note}</p> : null}
+        </div>
       </form>
+      {invoiceId ? <InvoiceTrail invoiceId={invoiceId} /> : null}
       <button
         className="btn btn--sm"
         type="button"

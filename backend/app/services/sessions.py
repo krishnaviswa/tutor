@@ -7,11 +7,14 @@ from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.models.tables import Enrollment, ScheduledSession, Student, utcnow
+from app.models.tables import Enrollment, ScheduledSession, StaffMembership, Student, utcnow
 from app.ports.mocks import MockPorts
 from app.services import notify, timeline
 from app.services.auth import Principal
+from app.services.grants import is_owner
 from app.services.scope import student_for_principal
+
+CLASS_CHANGE_DENIED = "Only the assigned teacher or the owner can change this class."
 
 DEFAULT_DURATION = timedelta(minutes=90)
 
@@ -57,6 +60,23 @@ def _student_name(db: Session, workspace_id: str, student_id: str | None) -> str
     return st.display_name if st else None
 
 
+def session_mode(s: ScheduledSession) -> str:
+    """1-on-1 when a student is set, or when the session is not a cohort class."""
+    if s.student_id or not s.cohort_id:
+        return "1-on-1"
+    return "cohort"
+
+
+def class_roster_ids(s: ScheduledSession) -> list[str]:
+    """Students the teacher put in this class. Unset or empty means nobody."""
+    if session_mode(s) == "1-on-1":
+        return [s.student_id] if s.student_id else []
+    raw = s.class_student_ids
+    if isinstance(raw, list):
+        return [str(item) for item in raw if item]
+    return []
+
+
 def session_out(db: Session, s: ScheduledSession, now: datetime | None = None) -> dict:
     return {
         "id": s.id,
@@ -64,6 +84,8 @@ def session_out(db: Session, s: ScheduledSession, now: datetime | None = None) -
         "cohort_id": s.cohort_id,
         "student_id": s.student_id,
         "student_name": _student_name(db, s.workspace_id, s.student_id),
+        "student_ids": class_roster_ids(s),
+        "mode": session_mode(s),
         "teacher_user_id": s.teacher_user_id,
         "title": s.title,
         "starts_at": s.starts_at.isoformat() if s.starts_at else None,
@@ -128,14 +150,78 @@ def affected_students(db: Session, s: ScheduledSession) -> list[str]:
         return [s.student_id]
     if not s.cohort_id:
         return []
-    return [
-        e.student_id
-        for e in db.query(Enrollment).filter(
+    # A saved class list, including an empty one, is the class. Older rows have no list.
+    if isinstance(s.class_student_ids, list):
+        return [str(item) for item in s.class_student_ids if item]
+    found: list[str] = []
+    for enrollment in db.query(Enrollment).filter(
+        Enrollment.workspace_id == s.workspace_id,
+        Enrollment.cohort_id == s.cohort_id,
+    ):
+        if _enrollment_active(enrollment.status) and enrollment.student_id not in found:
+            found.append(enrollment.student_id)
+    return found
+
+
+def _clean_student_ids(student_ids: list[str]) -> list[str]:
+    cleaned: list[str] = []
+    seen: set[str] = set()
+    for raw in student_ids:
+        sid = str(raw or "").strip()
+        if not sid or sid in seen:
+            continue
+        seen.add(sid)
+        cleaned.append(sid)
+    return cleaned
+
+
+def set_class_students(db: Session, principal: Principal, s: ScheduledSession, student_ids: list[str]) -> None:
+    """The assigned teacher or the owner chooses who is in this class."""
+    assert_can_change_session(db, principal, s)
+    cleaned = _clean_student_ids(student_ids)
+    if session_mode(s) == "1-on-1":
+        if len(cleaned) > 1:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "a 1-on-1 has one student")
+        if not cleaned:
+            s.student_id = None
+            return
+        student = (
+            db.query(Student)
+            .filter(Student.id == cleaned[0], Student.workspace_id == s.workspace_id)
+            .first()
+        )
+        if not student:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "student")
+        s.student_id = student.id
+        return
+    enrolled = {
+        row.student_id
+        for row in db.query(Enrollment).filter(
             Enrollment.workspace_id == s.workspace_id,
             Enrollment.cohort_id == s.cohort_id,
         )
-        if _enrollment_active(e.status)
-    ]
+        if _enrollment_active(row.status)
+    }
+    if any(sid not in enrolled for sid in cleaned):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "student is not in this cohort")
+    s.class_student_ids = cleaned
+
+
+def set_library_choice(db: Session, s: ScheduledSession, library_item_id: str | None) -> None:
+    raw = (library_item_id or "").strip()
+    if not raw:
+        s.library_item_id = None
+        return
+    from app.models.tables import ContentItem
+
+    item = (
+        db.query(ContentItem)
+        .filter(ContentItem.id == raw, ContentItem.workspace_id == s.workspace_id)
+        .first()
+    )
+    if not item:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "handout")
+    s.library_item_id = item.id
 
 
 def student_belongs(db: Session, principal: Principal, s: ScheduledSession) -> bool:
@@ -159,16 +245,58 @@ def student_belongs(db: Session, principal: Principal, s: ScheduledSession) -> b
     return bool(row and _enrollment_active(row.status))
 
 
+def caller_is_owner(db: Session, principal: Principal) -> bool:
+    return principal.role == "owner" or is_owner(db, principal.workspace_id, principal.user_id)
+
+
+def _can_teach(db: Session, workspace_id: str, user_id: str) -> bool:
+    row = (
+        db.query(StaffMembership)
+        .filter(
+            StaffMembership.workspace_id == workspace_id,
+            StaffMembership.user_id == user_id,
+            StaffMembership.role.in_(("owner", "teacher", "assistant")),
+        )
+        .first()
+    )
+    return row is not None
+
+
+def assert_can_change_session(db: Session, principal: Principal, s: ScheduledSession) -> None:
+    """Owner may change any class. A teacher or assistant may change only a class assigned to them."""
+    if caller_is_owner(db, principal):
+        return
+    if principal.role in ("teacher", "assistant") and s.teacher_user_id == principal.user_id:
+        return
+    raise HTTPException(status.HTTP_403_FORBIDDEN, CLASS_CHANGE_DENIED)
+
+
+def assign_teacher(db: Session, principal: Principal, requested: str | None) -> str:
+    """Owner may name any teacher. A teacher or assistant may only assign themselves."""
+    if caller_is_owner(db, principal):
+        target = requested or principal.user_id
+        if target != principal.user_id and not _can_teach(db, principal.workspace_id, target):
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "teacher")
+        return target
+    if principal.role in ("teacher", "assistant"):
+        if requested and requested != principal.user_id:
+            raise HTTPException(status.HTTP_403_FORBIDDEN, CLASS_CHANGE_DENIED)
+        return principal.user_id
+    raise HTTPException(status.HTTP_403_FORBIDDEN, CLASS_CHANGE_DENIED)
+
+
 def assert_board_access(db: Session, principal: Principal, s: ScheduledSession, *, write: bool) -> None:
-    """Owner and teacher read and write. Assistant reads (session GET includes assistant; PATCH does not).
-    A student who belongs to the session reads and writes. Parents do not."""
+    """Owner may mark any board. A teacher or assistant may mark only their own class.
+    A student who belongs may mark it. Parents may not. Anyone else on staff may look."""
     if principal.role == "parent":
         raise HTTPException(status.HTTP_403_FORBIDDEN, "forbidden")
-    if principal.role in ("owner", "teacher"):
+    if caller_is_owner(db, principal):
         return
-    if principal.role == "assistant":
+    if principal.role in ("teacher", "assistant"):
+        if s.teacher_user_id == principal.user_id:
+            return
         if write:
-            raise HTTPException(status.HTTP_403_FORBIDDEN, "forbidden")
+            raise HTTPException(status.HTTP_403_FORBIDDEN, CLASS_CHANGE_DENIED)
         return
     if principal.role == "student":
         if student_belongs(db, principal, s):
@@ -288,6 +416,11 @@ def cancel(
     reason: str,
     student_whatsapp_on: bool,
 ) -> dict:
+    if s.status == "cancelled":
+        if reason:
+            s.cancel_reason = reason
+        db.flush()
+        return {"timeline_event_ids": [], "notify": {"sent": [], "skipped": []}}
     s.status = "cancelled"
     s.cancelled_at = utcnow()
     if reason:
@@ -298,7 +431,7 @@ def cancel(
     for sid in students:
         ev = timeline.append(db, workspace_id, sid, "session.cancelled", body, actor_user_id)
         event_ids.append(ev.id)
-    notify.deliver_in_app(db, workspace_id, body, students)
+    notify.deliver_in_app(db, workspace_id, body, students, event_id=f"{s.id}:session.cancelled")
     notify_result = notify.dispatch_after_timeline(db, ports, workspace_id, body, student_whatsapp_on)
     from app.services.lesson_packs import note_teacher_cancel
 
@@ -347,7 +480,7 @@ def start_session(
     for sid in students:
         ev = timeline.append(db, workspace_id, sid, "session.started", body, actor_user_id)
         event_ids.append(ev.id)
-    notify.deliver_in_app(db, workspace_id, body, students)
+    notify.deliver_in_app(db, workspace_id, body, students, event_id=f"{s.id}:session.started")
     db.flush()
     return {
         "session_id": s.id,

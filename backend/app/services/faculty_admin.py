@@ -229,8 +229,8 @@ def assigned_sessions(db: Session, workspace_id: str, user_id: str) -> list[str]
 
 
 def planning_attendance(db: Session, principal: Principal) -> list[dict]:
-    """Marks already saved, plus each session's students still unmarked (status null)."""
-    from app.services.sessions import affected_students
+    """Chosen students for each session. An empty class list is an empty roll."""
+    from app.services.sessions import class_roster_ids
 
     _require_admin(db, principal)
     sessions = (
@@ -257,10 +257,7 @@ def planning_attendance(db: Session, principal: Principal) -> list[dict]:
             .first()
         )
         marks = {a.student_id: a.status for a in att}
-        roster = affected_students(db, sess)
-        for sid in marks:
-            if sid not in roster:
-                roster.append(sid)
+        roster = class_roster_ids(sess)
         out.append(
             {
                 "session_id": sess.id,

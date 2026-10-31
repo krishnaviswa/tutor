@@ -39,3 +39,8 @@ Do not build these.
 - Replacing OTP with username and password.
 
 Biology / NEET is an example tenant only, not the product domain.
+
+## Known defects
+
+Sign-in persona list is recorded in `docs/defects.md`.
+

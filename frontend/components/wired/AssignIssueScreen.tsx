@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { api } from "@/lib/api";
+import { formatWhen } from "@/lib/format";
 import { catalogRoute } from "@/lib/screens";
 import { Empty, Err } from "./bits";
 
@@ -224,7 +225,7 @@ export function AssignIssueScreen() {
                 <div className="s muted">
                   {[
                     r.cohort_id && cohortMap[r.cohort_id] ? cohortMap[r.cohort_id] : "All cohorts",
-                    r.due_at ? `Due ${r.due_at}` : null,
+                    r.due_at && formatWhen(r.due_at) ? `Due ${formatWhen(r.due_at)}` : null,
                     r.allow_resubmit ? "Resubmission allowed" : null,
                   ]
                     .filter(Boolean)

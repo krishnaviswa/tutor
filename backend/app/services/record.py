@@ -3,10 +3,11 @@ from __future__ import annotations
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.models.tables import Attendance, AutomationRule, BacklogItem, Enrollment, ScheduledSession, SessionRecord, Student, utcnow
+from app.models.tables import Attendance, AutomationRule, BacklogItem, ScheduledSession, SessionRecord, Student, utcnow
 from app.ports.mocks import MockPorts
 from app.services import notify, timeline
 from app.services.lesson_packs import canonical_attendance, sync_attendance_marks
+from app.services.sessions import class_roster_ids
 
 
 def get_or_create_record(db: Session, workspace_id: str, session_id: str) -> SessionRecord:
@@ -86,16 +87,8 @@ def patch_record(
             student_ids.append(st.id)
             marked[st.id] = raw
         sync_attendance_marks(db, session, marked, actor_role=actor_role, waive=waive)
-    elif session.student_id:
-        student_ids = [session.student_id]
-    elif session.cohort_id:
-        student_ids = [
-            e.student_id
-            for e in db.query(Enrollment).filter(
-                Enrollment.workspace_id == workspace_id,
-                Enrollment.cohort_id == session.cohort_id,
-            )
-        ]
+    else:
+        student_ids = class_roster_ids(session)
     events = []
     body = f"Session recorded: {session.title}"
     for sid in student_ids:

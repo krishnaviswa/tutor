@@ -5,7 +5,14 @@ import { CohortChat } from "@/components/studio/CohortChat";
 import { api } from "@/lib/api";
 import { AppBar, Err, Loading } from "./bits";
 
-type Thread = { id: string; student_id?: string | null; last_body?: string; unread?: boolean };
+type ChatLine = { id: string; body: string };
+type Thread = {
+  id: string;
+  student_id?: string | null;
+  last_body?: string;
+  unread?: boolean;
+  messages?: ChatLine[];
+};
 type StudentRow = { id: string; user_id?: string; display_name: string };
 type ContentRow = { id: string; title: string; kind?: string };
 type Role = string;
@@ -26,7 +33,6 @@ export function MessagesScreen() {
   const [ready, setReady] = useState(false);
   const [cohorts, setCohorts] = useState<{ id: string; name: string }[]>([]);
   const [cohortId, setCohortId] = useState("");
-  const [delivery, setDelivery] = useState("");
   const logRef = useRef<HTMLDivElement>(null);
 
   const samples: Thread[] = [
@@ -34,11 +40,18 @@ export function MessagesScreen() {
     { id: "ex-2", last_body: "I sent the notes from today’s session.", student_id: "Example · class notes" },
   ];
 
-  function load() {
-    api("/api/v1/threads")
-      .then((data) => setThreads(Array.isArray(data) ? (data as Thread[]) : []))
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
-      .finally(() => setReady(true));
+  async function load(): Promise<Thread[]> {
+    try {
+      const data = await api("/api/v1/threads");
+      const list = Array.isArray(data) ? (data as Thread[]) : [];
+      setThreads(list);
+      return list;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+      return [];
+    } finally {
+      setReady(true);
+    }
   }
 
   useEffect(() => {
@@ -83,26 +96,39 @@ export function MessagesScreen() {
     return rawId;
   }
 
+  function chooseStudent(id: string) {
+    setStudentId(id);
+    if (!id) return;
+    const existing = threads.find((thread) => thread.student_id === id);
+    if (existing) {
+      setSel(existing);
+      return;
+    }
+    setSel({ id: "new", student_id: id, messages: [] });
+  }
+
   async function send() {
     if (!body.trim()) return;
     setBusy(true);
     setError("");
+    const open = sel && sel.id !== "new" && threads.some((thread) => thread.id === sel.id) ? sel : null;
+    const threadId = open ? open.id : "new";
+    const sid = open ? open.student_id || undefined : studentId || undefined;
     try {
-      const real = sel && threads.some((t) => t.id === sel.id) ? sel : null;
-      const threadId = real?.id || "new";
-      await api(`/api/v1/threads/${threadId}/messages`, {
+      const saved = (await api(`/api/v1/threads/${threadId}/messages`, {
         method: "POST",
         body: JSON.stringify({
           body,
-          student_id: studentId || real?.student_id || undefined,
+          ...(sid ? { student_id: sid } : {}),
           ...(attachment.trim() ? { attachment: attachment.trim() } : {}),
         }),
-      });
+      })) as { thread_id?: string };
       setBody("");
-      setDelivery("Sent");
-      load();
+      const next = await load();
+      const opened = next.find((thread) => thread.id === saved.thread_id) || null;
+      setSel(opened);
+      setStudentId(opened?.student_id || "");
     } catch (err) {
-      setDelivery("");
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setBusy(false);
@@ -110,14 +136,20 @@ export function MessagesScreen() {
   }
 
   const shown = threads.length ? threads : samples;
-  const active = sel && threads.some((t) => t.id === sel.id) ? sel : shown[0];
-  const example = active ? !threads.some((t) => t.id === active.id) : false;
+  const active = sel && (sel.id === "new" || threads.some((thread) => thread.id === sel.id)) ? sel : shown[0];
+  const example = active ? active.id !== "new" && !threads.some((thread) => thread.id === active.id) : false;
+  const transcript =
+    active?.messages && active.messages.length
+      ? active.messages
+      : active?.last_body
+        ? [{ id: `${active.id}-last`, body: active.last_body }]
+        : [];
 
   useEffect(() => {
     const log = logRef.current;
     if (!log) return;
     log.scrollTop = log.scrollHeight;
-  }, [active?.id, active?.last_body, delivery, body]);
+  }, [active?.id, active?.messages?.length, active?.last_body, body]);
 
   const list = (
     <>
@@ -144,11 +176,13 @@ export function MessagesScreen() {
                 Example thread, so the inbox isn’t an empty page. A message you send is saved.
               </p>
             ) : null}
-            {active?.last_body ? (
-              <div className="bubble">
-                {active.last_body}
-                <small>{active.unread ? "Unread" : "On the record"}</small>
-              </div>
+            {transcript.length ? (
+              transcript.map((line) => (
+                <div className="bubble" key={line.id}>
+                  {line.body}
+                  <small>{active?.unread ? "Unread" : "On the record"}</small>
+                </div>
+              ))
             ) : (
               <p className="muted">Write the first note in this thread.</p>
             )}
@@ -170,10 +204,7 @@ export function MessagesScreen() {
               rows={2}
               value={body}
               placeholder="Write a message"
-              onChange={(event) => {
-                setBody(event.target.value);
-                if (delivery) setDelivery("");
-              }}
+              onChange={(event) => setBody(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter" && !event.shiftKey) {
                   event.preventDefault();
@@ -182,13 +213,13 @@ export function MessagesScreen() {
               }}
             />
             <button className="hot hot--btn" type="submit" disabled={busy || !body.trim()} aria-busy={busy}>
-              {busy ? "Sending" : delivery || "Send"}
+              Send
             </button>
           </form>
           {role !== "student" && role !== "parent" ? (
             <label className="field" style={{ margin: "0 12px 12px" }}>
               <span>Student for a new thread</span>
-              <select className="field__in" value={studentId} onChange={(e) => setStudentId(e.target.value)}>
+              <select className="field__in" value={studentId} onChange={(e) => chooseStudent(e.target.value)}>
                 <option value="">Active thread student (or select student)…</option>
                 {students.map((s) => (
                   <option key={s.id} value={s.id}>

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { formatWhen, shortId } from "@/lib/format";
 import { formatPackHours, readBalanceMinutes } from "@/lib/lessonPack";
 import { AppBar, Empty, Err, rupees } from "./bits";
 
@@ -31,8 +32,12 @@ function humanStatusLabel(state?: string, status?: string): string {
 }
 
 function humanInvoiceCode(inv: Inv): string {
-  if (inv.receipt_id) return inv.receipt_id;
-  return `INV-${inv.id.slice(-4).toUpperCase()}`;
+  if (inv.receipt_id && !/^[0-9a-f]{8}-/i.test(inv.receipt_id)) return inv.receipt_id;
+  return `INV-${shortId(inv.id).toUpperCase()}`;
+}
+
+function showWhen(value?: string | null) {
+  return value ? formatWhen(value) : "";
 }
 
 function invoiceRows(data: unknown): Inv[] {
@@ -155,7 +160,7 @@ export function PaymentsScreen() {
             </div>
             <p className="muted" style={{ margin: 0 }}>
               {due
-                ? `Current due on ${due.due_on || "this term"} · ${rupees(totalPaidCents)} paid to date`
+                ? `Current due on ${showWhen(due.due_on) || "this term"} · ${rupees(totalPaidCents)} paid to date`
                 : `All invoices settled · ${rupees(totalPaidCents)} paid to date`}
             </p>
           </div>
@@ -169,7 +174,7 @@ export function PaymentsScreen() {
               <div className="card" style={{ borderColor: "color-mix(in srgb, var(--crimson) 40%, var(--line))" }}>
                 <div className="sb" style={{ marginBottom: 6 }}>
                   <span className="k" style={{ color: "var(--crimson)" }}>
-                    Due {due.due_on || "Now"}
+                    Due {showWhen(due.due_on) || "Now"}
                   </span>
                   <span className={`pill ${pillFor(due.state)}`}>
                     {humanStatusLabel(due.state, due.status)}
@@ -217,7 +222,7 @@ export function PaymentsScreen() {
                       {r.label || "Tuition Fee"} · {rupees(r.amount_cents)}
                     </div>
                     <div className="s">
-                      Receipt {humanInvoiceCode(r)} {r.due_on ? `· Paid (${r.due_on})` : ""}
+                      Receipt {humanInvoiceCode(r)} {showWhen(r.due_on) ? `· Paid (${showWhen(r.due_on)})` : ""}
                     </div>
                   </div>
                   <span className="pill is-good">Paid</span>
@@ -230,7 +235,7 @@ export function PaymentsScreen() {
                       {r.label || "Upcoming Installment"} · {rupees(r.amount_cents)}
                     </div>
                     <div className="s">
-                      {humanInvoiceCode(r)} {r.due_on ? `· Due ${r.due_on}` : ""}
+                      {humanInvoiceCode(r)} {showWhen(r.due_on) ? `· Due ${showWhen(r.due_on)}` : ""}
                     </div>
                   </div>
                   {r.status === "pending_review" ? (

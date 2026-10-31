@@ -45,8 +45,29 @@ type SessionRow = {
   id: string;
   title: string;
   starts_at: string | null;
-  cohort_id: string;
+  cohort_id?: string | null;
+  student_id?: string | null;
+  student_ids?: string[];
+  mode?: string;
+  teacher_user_id?: string | null;
 };
+
+const CLASS_LOCK = "Only the assigned teacher or the owner can change this class.";
+
+function plainDetail(err: unknown): string {
+  const raw = (err instanceof Error ? err.message : String(err)).replace(/\s+/g, " ").trim();
+  const start = raw.indexOf("{");
+  if (start >= 0) {
+    try {
+      const body = JSON.parse(raw.slice(start)) as { detail?: unknown };
+      if (typeof body.detail === "string" && body.detail.trim()) return body.detail.trim();
+    } catch {
+      /* use the sentence below */
+    }
+  }
+  if (raw.includes("403") || raw.includes(CLASS_LOCK)) return CLASS_LOCK;
+  return raw.replace(/^\d{3}\s+/, "") || "Could not save that class.";
+}
 
 type StudentRow = {
   id: string;
@@ -135,6 +156,16 @@ function RecordScreenInner() {
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<PatchResult | null>(null);
   const [capture, setCapture] = useState<{ kind: string }[]>([]);
+  const [me, setMe] = useState<{ id: string; role: string } | null>(null);
+
+  useEffect(() => {
+    api("/api/v1/auth/me")
+      .then((row) => {
+        const person = row as { id?: string; role?: string };
+        setMe({ id: person.id || "", role: person.role || "" });
+      })
+      .catch(() => undefined);
+  }, []);
 
   const loadLists = useCallback(async () => {
     const [sess, studs] = await Promise.all([
@@ -218,13 +249,13 @@ function RecordScreenInner() {
 
   const rows = useMemo(() => {
     const byId = new Map(students.map((s) => [s.id, s]));
-    const ids = new Set<string>([...students.map((s) => s.id), ...Object.keys(attendance)]);
-    return [...ids].map((id, idx) => ({
+    const chosen = session?.student_ids ?? (session?.student_id ? [session.student_id] : []);
+    return chosen.map((id, idx) => ({
       id,
-      display_name: byId.get(id)?.display_name ?? `Enrolled Student ${idx + 1}`,
+      display_name: byId.get(id)?.display_name ?? `Student ${idx + 1}`,
       status: normalizeStudent(attendance[id]),
     }));
-  }, [students, attendance]);
+  }, [students, attendance, session]);
 
   const attended = rows.filter((r) => r.status === "attended").length;
   const noShow = rows.filter((r) => r.status === "no_show").length;
@@ -285,25 +316,33 @@ function RecordScreenInner() {
     setSaved(null);
   }
 
+  const readOnly = Boolean(
+    me &&
+      (me.role === "teacher" || me.role === "assistant") &&
+      session?.teacher_user_id &&
+      session.teacher_user_id !== me.id,
+  );
+
   async function saveRecord() {
-    if (!sessionId || saving) return;
+    if (!sessionId || saving || readOnly) return;
     setSaving(true);
     setError(null);
     try {
+      const marked = rows
+        .filter((r) => normalizeStudent(r.status))
+        .map((r) => ({ student_id: r.id, status: normalizeStudent(r.status) }));
       const result = (await api(`/api/v1/sessions/${sessionId}/record`, {
         method: "PATCH",
         body: JSON.stringify({
           notes,
-          attendance: rows
-            .filter((r) => normalizeStudent(r.status))
-            .map((r) => ({ student_id: r.id, status: normalizeStudent(r.status) })),
+          ...(rows.length > 0 ? { attendance: marked } : {}),
           teacher_status: teacherStatus,
         }),
       })) as PatchResult;
       setSaved(result);
       setLoadedNotes(result.notes ?? notes);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(plainDetail(err));
     } finally {
       setSaving(false);
     }
@@ -381,7 +420,7 @@ function RecordScreenInner() {
             <div className="sb" style={{ marginBottom: 8 }}>
               <h3 style={{ margin: 0 }}>Step 2 · Mark Attendance Roll (Teacher &amp; Students)</h3>
               {rows.length > 0 ? (
-                <button type="button" className="btn btn--sm" style={btnStyle()} onClick={markAllAttended}>
+                <button type="button" className="btn btn--sm" style={btnStyle()} onClick={markAllAttended} disabled={readOnly}>
                   Mark All Attended
                 </button>
               ) : null}
@@ -435,6 +474,7 @@ function RecordScreenInner() {
                   className={teacherStatus === "present" ? "btn btn--dark btn--sm" : "btn btn--sm"}
                   style={btnStyle({ width: "100%", justifyContent: "center" })}
                   onClick={() => setTeacher("present")}
+                  disabled={readOnly}
                 >
                   Present
                 </button>
@@ -443,6 +483,7 @@ function RecordScreenInner() {
                   className={teacherStatus === "absent" ? "btn btn--dark btn--sm" : "btn btn--sm"}
                   style={btnStyle({ width: "100%", justifyContent: "center" })}
                   onClick={() => setTeacher("absent")}
+                  disabled={readOnly}
                 >
                   Absent
                 </button>
@@ -481,6 +522,7 @@ function RecordScreenInner() {
                       className={r.status === choice.value ? "btn btn--dark btn--sm" : "btn btn--sm"}
                       style={btnStyle({ width: "100%", justifyContent: "center", padding: "7px 8px", whiteSpace: "nowrap" })}
                       onClick={() => setStatus(r.id, choice.value)}
+                      disabled={readOnly}
                     >
                       {choice.label}
                     </button>
@@ -491,7 +533,7 @@ function RecordScreenInner() {
 
             {rows.length === 0 && !loading ? (
               <p className="muted" style={{ marginTop: 8 }}>
-                No students enrolled in this workspace yet.
+                No students are selected for this class yet.
               </p>
             ) : null}
           </div>
@@ -513,6 +555,7 @@ function RecordScreenInner() {
                       setNotes(tpl);
                       setSaved(null);
                     }}
+                    disabled={readOnly}
                   >
                     {tpl.slice(0, 42)}…
                   </button>
@@ -531,6 +574,7 @@ function RecordScreenInner() {
                   setSaved(null);
                 }}
                 placeholder="Key topics covered today, homework assigned, and students to follow up with next class…"
+                readOnly={readOnly}
               />
             </label>
 
@@ -543,13 +587,18 @@ function RecordScreenInner() {
               </p>
             </div>
 
+            {readOnly ? (
+              <p role="status" style={{ marginBottom: 10 }}>
+                {CLASS_LOCK}
+              </p>
+            ) : null}
             <div className="row" style={{ gap: 10 }}>
               <button
                 type="button"
                 className="hot hot--btn"
                 style={btnStyle()}
                 onClick={saveRecord}
-                disabled={saving || !sessionId}
+                disabled={saving || !sessionId || readOnly}
               >
                 {saving ? "Saving Class Record…" : "Save Class Record"}
               </button>

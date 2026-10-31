@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import { api } from "@/lib/api";
+import { shortId } from "@/lib/format";
 import { catalogRoute } from "@/lib/screens";
 import { Err } from "./bits";
 
@@ -81,7 +82,7 @@ export function WsetupScreen() {
         <label className="field">
           <span>Workspace slug</span>
           <input className="field__in" value={slug} onChange={(e) => setSlug(e.target.value)} />
-          <em>Current {ws?.id}</em>
+          <em>Current {shortId(ws?.id)}</em>
         </label>
         <label className="field">
           <span>Kind</span>

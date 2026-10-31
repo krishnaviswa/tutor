@@ -1,6 +1,9 @@
 """010 faculty admin, profiles, library, attendance, handoff, feedback. Mock ports only."""
 
+import base64
 from datetime import datetime, timedelta, timezone
+
+from fastapi import HTTPException
 
 from app.db import session_factory
 from app.models.tables import FacultyAdminGrant, Identity, PersonProfile, StaffMembership, User
@@ -71,6 +74,82 @@ def test_own_profile_and_step_up(client):
     assert teacher_saved.status_code == 200, teacher_saved.text
     me = client.get("/api/v1/auth/me", headers=teacher).json()
     assert me["id"] == TEACHER
+
+
+def test_profile_photo_and_display_name(client):
+    from app.services.profiles import AVATAR_MAX_BYTES, _clean_photo
+
+    teacher = auth(login(client, "+9101t", WS_EXAM, "teacher"))
+    owner = auth(login(client, "+9101o", WS_EXAM, "owner"))
+    student = auth(login(client, "+9101s", WS_EXAM, "student"))
+    parent = auth(login(client, "+9101p", WS_EXAM, "parent"))
+
+    assert client.get("/api/v1/auth/me", headers=teacher).json()["display_name"] == "Dr. Meera Krishnan"
+    assert client.get("/api/v1/auth/me", headers=owner).json()["display_name"] == "Vikram Nair"
+    assert client.get("/api/v1/auth/me", headers=student).json()["display_name"] == "Aarav Sharma"
+    assert client.get("/api/v1/auth/me", headers=parent).json()["display_name"] == "Rajesh Sharma"
+
+    teacher_profile = client.get("/api/v1/profile", headers=teacher).json()
+    assert teacher_profile["display_name"] == "Dr. Meera Krishnan"
+    assert teacher_profile["photo"] == ""
+    assert client.get("/api/v1/profile", headers=owner).json()["display_name"] == "Vikram Nair"
+    assert client.get("/api/v1/profile", headers=student).json()["display_name"] == "Aarav Sharma"
+    assert client.get("/api/v1/profile", headers=parent).json()["display_name"] == "Rajesh Sharma"
+
+    tiny = base64.b64encode(b"\x89PNG\r\n").decode()
+    data_url = f"data:image/png;base64,{tiny}"
+    step = _step(client, student)
+    rejected = client.put(
+        "/api/v1/profile",
+        headers=student,
+        json={
+            "photo": "data:text/plain;base64,YQ==",
+            "challenge_id": step["challenge_id"],
+            "code": "000000",
+        },
+    )
+    assert rejected.status_code == 400
+    saved = client.put(
+        "/api/v1/profile",
+        headers=student,
+        json={
+            "photo": data_url,
+            "address": "12 Lane",
+            "challenge_id": step["challenge_id"],
+            "code": "000000",
+        },
+    )
+    assert saved.status_code == 200, saved.text
+    assert saved.json()["display_name"] == "Aarav Sharma"
+    assert saved.json()["photo"].startswith("data:image/png;base64,")
+    again = client.get("/api/v1/profile", headers=student).json()
+    assert again["photo"] == saved.json()["photo"]
+
+    kept_step = _step(client, student)
+    kept = client.put(
+        "/api/v1/profile",
+        headers=student,
+        json={
+            "address": "13 Lane",
+            "challenge_id": kept_step["challenge_id"],
+            "code": "000000",
+        },
+    )
+    assert kept.status_code == 200, kept.text
+    assert kept.json()["address"] == "13 Lane"
+    assert kept.json()["photo"] == saved.json()["photo"]
+
+    card = client.get(f"/api/v1/profiles/{STUDENT_USER}/card", headers=teacher).json()
+    assert "photo" not in card
+    assert "phone" not in card
+
+    huge = "data:image/png;base64," + ("A" * (((AVATAR_MAX_BYTES + 2) // 3) * 4 + 80))
+    try:
+        _clean_photo(huge)
+    except HTTPException as exc:
+        assert exc.status_code == 400
+    else:
+        raise AssertionError("oversized photo accepted")
 
 
 def test_reduced_cards_hide_phone_and_address(client):

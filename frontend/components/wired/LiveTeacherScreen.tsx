@@ -16,7 +16,24 @@ type Live = {
   engagement: { kind: string; payload?: Record<string, unknown> }[];
 };
 
-type SessionRow = { id: string; title: string };
+type SessionRow = { id: string; title: string; teacher_user_id?: string | null };
+
+const CLASS_LOCK = "Only the assigned teacher or the owner can change this class.";
+
+function explainLiveError(err: unknown): string {
+  const raw = (err instanceof Error ? err.message : String(err)).replace(/\s+/g, " ").trim();
+  const start = raw.indexOf("{");
+  if (start >= 0) {
+    try {
+      const body = JSON.parse(raw.slice(start)) as { detail?: unknown };
+      if (typeof body.detail === "string" && body.detail.trim()) return body.detail.trim();
+    } catch {
+      /* use the sentence below */
+    }
+  }
+  if (raw.includes("403") || raw.includes(CLASS_LOCK)) return CLASS_LOCK;
+  return raw.replace(/^\d{3}\s+/, "") || "Could not update this class.";
+}
 
 export function LiveTeacherScreen() {
   const params = useSearchParams();
@@ -26,6 +43,16 @@ export function LiveTeacherScreen() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [started, setStarted] = useState("");
+  const [me, setMe] = useState<{ id: string; role: string } | null>(null);
+
+  useEffect(() => {
+    api("/api/v1/auth/me")
+      .then((row) => {
+        const person = row as { id?: string; role?: string };
+        setMe({ id: person.id || "", role: person.role || "" });
+      })
+      .catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     api("/api/v1/sessions")
@@ -34,14 +61,14 @@ export function LiveTeacherScreen() {
         setSessions(list);
         if (!sessionId && list[0]) setSessionId(list[0].id);
       })
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
+      .catch((e) => setError(explainLiveError(e)));
   }, [sessionId]);
 
   function loadLive(id: string) {
     if (!id) return;
     api(`/api/v1/sessions/${id}/live`)
       .then((row) => setLive(row as Live))
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
+      .catch((e) => setError(explainLiveError(e)));
   }
 
   useEffect(() => {
@@ -59,11 +86,19 @@ export function LiveTeacherScreen() {
       });
       loadLive(sessionId);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(explainLiveError(err));
     } finally {
       setBusy(false);
     }
   }
+
+  const selected = sessions.find((row) => row.id === sessionId);
+  const readOnly = Boolean(
+    me &&
+      (me.role === "teacher" || me.role === "assistant") &&
+      selected?.teacher_user_id &&
+      selected.teacher_user_id !== me.id,
+  );
 
   return (
     <div className="board-room">
@@ -83,13 +118,17 @@ export function LiveTeacherScreen() {
           <button
             className="btn btn--sm"
             type="button"
-            disabled={busy || !sessionId}
+            disabled={busy || !sessionId || readOnly}
             onClick={() => {
+              if (readOnly) {
+                setError(CLASS_LOCK);
+                return;
+              }
               setBusy(true);
               setError("");
               api(`/api/v1/sessions/${sessionId}/start`, { method: "POST" })
                 .then(() => setStarted("Class started. People in this class can see the notice."))
-                .catch((err) => setError(err instanceof Error ? err.message : String(err)))
+                .catch((err) => setError(explainLiveError(err)))
                 .finally(() => setBusy(false));
             }}
           >
@@ -100,7 +139,7 @@ export function LiveTeacherScreen() {
       {started ? <p className="muted">{started}</p> : null}
       <Err message={error} />
       {sessionId ? (
-        <SessionBoard sessionId={sessionId} library />
+        <SessionBoard sessionId={sessionId} library={!readOnly} readOnly={readOnly} />
       ) : (
         <p className="muted">No session on the calendar yet. Add one from Schedule, then the canvas opens here.</p>
       )}

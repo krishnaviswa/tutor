@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { api } from "@/lib/api";
+import { shortId } from "@/lib/format";
 import { Dialog } from "@/components/Dialog";
 import { Empty, Err } from "./bits";
 
@@ -271,7 +272,7 @@ export function QbankScreen() {
                 <option value="">General / Unspecified</option>
                 {topics.map((t) => (
                   <option key={t.id} value={t.id}>
-                    {t.title || t.name || t.id}
+                    {t.title || t.name || shortId(t.id)}
                   </option>
                 ))}
                 {topics.length === 0 &&

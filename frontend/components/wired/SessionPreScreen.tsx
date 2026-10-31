@@ -27,12 +27,18 @@ const VIDEO_PRESETS = [
 type SessionRow = {
   id: string;
   workspace_id: string;
-  cohort_id: string;
+  cohort_id?: string | null;
+  student_id?: string | null;
+  student_ids?: string[];
+  mode?: string;
   title: string;
   starts_at: string | null;
   subject_label?: string;
   library_item_id?: string | null;
+  teacher_user_id?: string | null;
 };
+
+const CLASS_LOCK = "Only the assigned teacher or the owner can change this class.";
 
 type StudentRow = {
   id: string;
@@ -42,6 +48,7 @@ type StudentRow = {
 type CohortRow = {
   id: string;
   name: string;
+  student_ids?: string[];
 };
 
 type ContentRow = {
@@ -73,6 +80,29 @@ function formatWhen(iso: string | null): string {
     minute: "2-digit",
     hour12: true,
   }).format(new Date(iso));
+}
+
+function choiceStatus(draft: string, saved: string): "Not chosen" | "Not saved" | "Saved" {
+  if (!draft) return "Not chosen";
+  if (draft !== saved) return "Not saved";
+  return "Saved";
+}
+
+function choiceTone(label: string): string {
+  if (label === "Saved") return "is-good";
+  if (label === "Not saved") return "is-warn";
+  return "is-info";
+}
+
+function sameIds(left: string[], right: string[]): boolean {
+  if (left.length !== right.length) return false;
+  const a = [...left].sort();
+  const b = [...right].sort();
+  return a.every((id, index) => id === b[index]);
+}
+
+function isOneOnOne(sess: SessionRow): boolean {
+  return sess.mode === "1-on-1" || Boolean(sess.student_id) || !sess.cohort_id;
 }
 
 function humanVideoBadge(url: string | null): { label: string; tone: string } {
@@ -147,20 +177,25 @@ export function SessionPreScreen() {
   const [allSessions, setAllSessions] = useState<SessionRow[]>([]);
   const [session, setSession] = useState<SessionRow | null>(null);
   const [students, setStudents] = useState<StudentRow[]>([]);
+  const [candidates, setCandidates] = useState<StudentRow[]>([]);
   const [materials, setMaterials] = useState<ContentRow[]>([]);
   const [cohortName, setCohortName] = useState("");
+  const [mode, setMode] = useState<"cohort" | "1-on-1">("cohort");
   const [savedTopic, setSavedTopic] = useState("");
-  const [draftTopic, setDraftTopic] = useState(TOPIC_PRESETS[0]);
-  const [loadedTopic, setLoadedTopic] = useState(TOPIC_PRESETS[0]);
+  const [draftTopic, setDraftTopic] = useState("");
+  const [loadedTopic, setLoadedTopic] = useState("");
   const [savedHandoutId, setSavedHandoutId] = useState("");
   const [draftHandoutId, setDraftHandoutId] = useState("");
   const [loadedHandoutId, setLoadedHandoutId] = useState("");
+  const [draftStudentIds, setDraftStudentIds] = useState<string[]>([]);
+  const [loadedStudentIds, setLoadedStudentIds] = useState<string[]>([]);
   const [savedVideoUrl, setSavedVideoUrl] = useState<string | null>(null);
   const [draftPreset, setDraftPreset] = useState(VIDEO_PRESETS[0].id);
   const [loadedPreset, setLoadedPreset] = useState(VIDEO_PRESETS[0].id);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [saving, setSaving] = useState(false);
+  const [me, setMe] = useState<{ id: string; role: string } | null>(null);
 
   const load = useCallback(async (id: string) => {
     if (!id) return;
@@ -175,26 +210,37 @@ export function SessionPreScreen() {
         api("/api/v1/sessions").catch(() => []) as Promise<SessionRow[]>,
       ]);
       setSession(sess);
-      setStudents(Array.isArray(roster) ? roster : []);
+      const people = Array.isArray(roster) ? roster : [];
+      setStudents(people);
       setAllSessions(Array.isArray(sessList) ? sessList : [sess]);
       const items = Array.isArray(contentList) ? contentList : [];
       setMaterials(items);
       const match = Array.isArray(coh) ? coh.find((c) => c.id === sess.cohort_id) : undefined;
-      setCohortName(match?.name || "Active Cohort");
+      setCohortName(match?.name || "");
+      const oneOnOne = isOneOnOne(sess);
+      setMode(oneOnOne ? "1-on-1" : "cohort");
+      const byId = new Map(people.map((student) => [student.id, student]));
+      const memberIds = match?.student_ids ?? [];
+      setCandidates(
+        memberIds.map((id) => byId.get(id) || { id, display_name: "Student" }),
+      );
+      const chosen = Array.isArray(sess.student_ids)
+        ? sess.student_ids.filter((id) => id)
+        : sess.student_id
+          ? [sess.student_id]
+          : [];
+      setDraftStudentIds(chosen);
+      setLoadedStudentIds(chosen);
 
       const topicSaved = (sess.subject_label || "").trim();
-      const topicShown = topicSaved || TOPIC_PRESETS[0];
       setSavedTopic(topicSaved);
-      setDraftTopic(topicShown);
-      setLoadedTopic(topicShown);
+      setDraftTopic(topicSaved);
+      setLoadedTopic(topicSaved);
 
       const handoutSaved = (sess.library_item_id || "").trim();
-      const handoutShown = items.some((item) => item.id === handoutSaved)
-        ? handoutSaved
-        : handoutSaved || items[0]?.id || "";
       setSavedHandoutId(handoutSaved);
-      setDraftHandoutId(handoutShown);
-      setLoadedHandoutId(handoutShown);
+      setDraftHandoutId(handoutSaved);
+      setLoadedHandoutId(handoutSaved);
 
       const url = video?.video_url || null;
       const presetShown = presetForUrl(url);
@@ -204,6 +250,15 @@ export function SessionPreScreen() {
     } catch (err) {
       setError(saveError(err).replace("save the pre-class setup", "load this session"));
     }
+  }, []);
+
+  useEffect(() => {
+    api("/api/v1/auth/me")
+      .then((row) => {
+        const person = row as { id?: string; role?: string };
+        setMe({ id: person.id || "", role: person.role || "" });
+      })
+      .catch(() => undefined);
   }, []);
 
   useEffect(() => {
@@ -227,8 +282,6 @@ export function SessionPreScreen() {
     router.replace(`/app/faculty/session-pre?session=${encodeURIComponent(id)}`);
   }
 
-  const shown = useMemo(() => students.slice(0, 6), [students]);
-  const extra = Math.max(0, students.length - shown.length);
   const topicChoices = useMemo(() => {
     const extraTopics = [savedTopic, draftTopic].filter((topic) => topic && !TOPIC_PRESETS.includes(topic));
     return [...new Set([...extraTopics, ...TOPIC_PRESETS])];
@@ -236,29 +289,60 @@ export function SessionPreScreen() {
   const draftPresetObj = VIDEO_PRESETS.find((p) => p.id === draftPreset) ?? null;
   const showCurrentLink = Boolean(savedVideoUrl) && !VIDEO_PRESETS.some((p) => p.url === savedVideoUrl);
   const dirty =
-    draftTopic !== loadedTopic || draftHandoutId !== loadedHandoutId || draftPreset !== loadedPreset;
+    draftTopic !== loadedTopic ||
+    draftHandoutId !== loadedHandoutId ||
+    draftPreset !== loadedPreset ||
+    !sameIds(draftStudentIds, loadedStudentIds);
+  const topicPill = choiceStatus(draftTopic, savedTopic);
+  const handoutPill = choiceStatus(draftHandoutId, savedHandoutId);
+  const chosenStudents = useMemo(() => {
+    const byId = new Map(students.map((student) => [student.id, student]));
+    return draftStudentIds.map((id) => byId.get(id) || candidates.find((student) => student.id === id) || { id, display_name: "Student" });
+  }, [draftStudentIds, students, candidates]);
+  const shown = useMemo(() => chosenStudents.slice(0, 6), [chosenStudents]);
+  const extra = Math.max(0, chosenStudents.length - shown.length);
+  const classCount = mode === "1-on-1" ? Math.min(draftStudentIds.length, 1) : draftStudentIds.length;
   const readyCount = [Boolean(sessionId), Boolean(savedTopic), Boolean(savedHandoutId), Boolean(savedVideoUrl)].filter(
     Boolean,
   ).length;
   const statusLabel = dirty ? "Unsaved changes" : readyCount === 4 ? "All 4 Steps Ready" : `${readyCount} of 4 Ready`;
   const statusTone = dirty ? "is-warn" : readyCount === 4 ? "is-good" : "is-info";
   const badge = humanVideoBadge(savedVideoUrl);
+  const readOnly = Boolean(
+    me &&
+      (me.role === "teacher" || me.role === "assistant") &&
+      session?.teacher_user_id &&
+      session.teacher_user_id !== me.id,
+  );
+
+  function toggleStudent(id: string) {
+    if (readOnly) return;
+    setDraftStudentIds((current) =>
+      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
+    );
+    setNotice("");
+  }
 
   async function saveSetup() {
-    if (!sessionId || saving) return;
-    const snapshot = { topic: draftTopic, handoutId: draftHandoutId, preset: draftPreset };
+    if (!sessionId || saving || readOnly) return;
+    const studentIds =
+      mode === "1-on-1" ? draftStudentIds.filter(Boolean).slice(0, 1) : [...draftStudentIds];
+    const snapshot = { topic: draftTopic, handoutId: draftHandoutId, preset: draftPreset, studentIds };
     const handout = materials.find((item) => item.id === snapshot.handoutId);
     const preset = VIDEO_PRESETS.find((item) => item.id === snapshot.preset);
     setSaving(true);
     setError("");
     setNotice("");
     try {
-      if (snapshot.topic) {
-        await api(`/api/v1/sessions/${sessionId}`, {
-          method: "PATCH",
-          body: JSON.stringify({ subject_label: snapshot.topic }),
-        });
-      }
+      const patch: { subject_label: string; student_ids: string[]; library_item_id?: string } = {
+        subject_label: snapshot.topic,
+        student_ids: snapshot.studentIds,
+      };
+      if (!snapshot.handoutId) patch.library_item_id = "";
+      await api(`/api/v1/sessions/${sessionId}`, {
+        method: "PATCH",
+        body: JSON.stringify(patch),
+      });
       if (handout && handout.id !== savedHandoutId) {
         await api(`/api/v1/sessions/${sessionId}/board/library`, {
           method: "POST",
@@ -279,6 +363,7 @@ export function SessionPreScreen() {
       setDraftTopic(snapshot.topic);
       setDraftHandoutId(snapshot.handoutId);
       setDraftPreset(snapshot.preset);
+      setDraftStudentIds(snapshot.studentIds);
       setNotice("");
       setError(message);
     } finally {
@@ -313,7 +398,10 @@ export function SessionPreScreen() {
         <div className="page-toolbar__title">
           <h2>Pre-Class Setup — {session?.title || "Session"}</h2>
           <span className="k">
-            {cohortName || "Cohort"} · {formatWhen(session?.starts_at ?? null)} IST · Verify your pre-class checklist and launch the live board
+            {session
+              ? `${mode === "1-on-1" ? "1-on-1" : cohortName ? `Cohort class · ${cohortName}` : "Cohort class"} · `
+              : ""}
+            {formatWhen(session?.starts_at ?? null)} IST · Verify your pre-class checklist and launch the live board
           </span>
         </div>
         <div className="page-toolbar__actions">
@@ -357,7 +445,7 @@ export function SessionPreScreen() {
                 >
                   {allSessions.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {s.title} ({formatWhen(s.starts_at)})
+                      {s.title} ({formatWhen(s.starts_at)}) · {isOneOnOne(s) ? "1-on-1" : "Cohort class"}
                     </option>
                   ))}
                 </select>
@@ -368,11 +456,13 @@ export function SessionPreScreen() {
                 <select
                   className="field__in"
                   value={draftTopic}
+                  disabled={readOnly}
                   onChange={(e) => {
                     setDraftTopic(e.target.value);
                     setNotice("");
                   }}
                 >
+                  <option value="">Choose a topic</option>
                   {topicChoices.map((topic) => (
                     <option key={topic} value={topic}>
                       {topic}
@@ -386,20 +476,18 @@ export function SessionPreScreen() {
                 <select
                   className="field__in"
                   value={draftHandoutId}
+                  disabled={readOnly}
                   onChange={(e) => {
                     setDraftHandoutId(e.target.value);
                     setNotice("");
                   }}
                 >
-                  {materials.length === 0 ? (
-                    <option value="">No library handout filed yet</option>
-                  ) : (
-                    materials.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.title} {m.subject_label ? `· ${m.subject_label}` : ""}
-                      </option>
-                    ))
-                  )}
+                  <option value="">No handout</option>
+                  {materials.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.title} {m.subject_label ? `· ${m.subject_label}` : ""}
+                    </option>
+                  ))}
                   {draftHandoutId && !materials.some((m) => m.id === draftHandoutId) ? (
                     <option value={draftHandoutId}>Saved handout</option>
                   ) : null}
@@ -408,30 +496,26 @@ export function SessionPreScreen() {
             </div>
 
             <div className="row" style={{ marginTop: 12, gap: 6 }}>
-              <span className="pill is-good">Session Selected</span>
-              {savedTopic ? (
-                <span className="pill is-good">Topic: {savedTopic.split(" ")[0]}</span>
-              ) : (
-                <span className="pill is-info">Topic not saved</span>
-              )}
-              <span className={`pill ${savedHandoutId ? "is-good" : "is-info"}`}>
-                {savedHandoutId ? "Handout Attached" : "Handout not saved"}
-              </span>
-              <span className={`pill is-${badge.tone}`}>{badge.label}</span>
+              <span className={`pill ${choiceTone(topicPill)}`}>Topic · {topicPill}</span>
+              <span className={`pill ${choiceTone(handoutPill)}`}>Handout · {handoutPill}</span>
             </div>
 
             <div style={{ marginTop: 14 }}>
-              <button
-                type="button"
-                className="hot hot--btn"
-                style={btnStyle()}
-                disabled={saving}
-                onClick={() => void saveSetup()}
-              >
-                {saving ? "Saving…" : "Save pre-class setup"}
-              </button>
+              {readOnly ? null : (
+                <button
+                  type="button"
+                  className="hot hot--btn"
+                  style={btnStyle()}
+                  disabled={saving}
+                  onClick={() => void saveSetup()}
+                >
+                  {saving ? "Saving…" : "Save pre-class setup"}
+                </button>
+              )}
               <p role="status" className="muted" style={{ margin: "8px 0 0", fontSize: ".85rem" }}>
-                {notice || "Saves the lesson topic, library handout, and classroom room."}
+                {readOnly
+                  ? CLASS_LOCK
+                  : notice || "Saves the lesson topic, library handout, classroom room, and who is in this class."}
               </p>
             </div>
           </div>
@@ -447,6 +531,7 @@ export function SessionPreScreen() {
               <select
                 className="field__in"
                 value={draftPreset}
+                disabled={readOnly}
                 onChange={(e) => {
                   setDraftPreset(e.target.value);
                   setNotice("");
@@ -485,11 +570,20 @@ export function SessionPreScreen() {
         <div>
           <div className="card">
             <div className="sb">
-              <h3 style={{ margin: 0 }}>Enrolled Student Roster</h3>
-              <span className="pill is-info">{students.length} enrolled</span>
+              <h3 style={{ margin: 0 }}>Students in this class</h3>
+              <span className="row" style={{ gap: 6 }}>
+                <span className={`pill ${mode === "1-on-1" ? "is-good" : "is-info"}`}>
+                  {mode === "1-on-1" ? "1-on-1" : "Cohort class"}
+                </span>
+                <span className="pill is-info">{classCount} in this class</span>
+              </span>
             </div>
             <p className="muted" style={{ marginTop: 6 }}>
-              Students in {cohortName || "this cohort"} receive the join link and whiteboard access automatically.
+              {mode === "1-on-1"
+                ? classCount
+                  ? "This is a 1-on-1. Only the student you chose is in this class."
+                  : "This is a 1-on-1. Choose the one student for this class."
+                : "You choose who is in this class. The cohort list is only the people you can pick."}
             </p>
             <div className="avrow" style={{ marginTop: 12 }}>
               {shown.map((st) => (
@@ -507,23 +601,70 @@ export function SessionPreScreen() {
                   +{extra}
                 </span>
               ) : null}
-              {students.length === 0 ? <span className="muted">No students enrolled yet</span> : null}
+              {classCount === 0 ? <span className="muted">No students selected yet</span> : null}
             </div>
-            {students.length > 0 ? (
-              <div style={{ marginTop: 12 }}>
-                {shown.map((st) => (
-                  <div key={st.id} className="list__i" style={{ padding: "8px 0" }}>
-                    <span className="av av--sm" style={{ background: avColor(st.display_name) }}>
-                      {initials(st.display_name)}
-                    </span>
-                    <div className="gr">
-                      <div className="t" style={{ fontSize: ".9rem" }}>{st.display_name}</div>
-                      <div className="s">Enrolled · Ready to join</div>
+            {mode === "1-on-1" ? (
+              classCount === 0 ? (
+                <label className="field" style={{ marginTop: 12 }}>
+                  <span>Student</span>
+                  <select
+                    className="field__in"
+                    value=""
+                    onChange={(e) => {
+                      setDraftStudentIds(e.target.value ? [e.target.value] : []);
+                      setNotice("");
+                    }}
+                  >
+                    <option value="">Choose a student</option>
+                    {students.map((st) => (
+                      <option key={st.id} value={st.id}>
+                        {st.display_name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : (
+                <div style={{ marginTop: 12 }}>
+                  {chosenStudents.slice(0, 1).map((st) => (
+                    <div key={st.id} className="list__i" style={{ padding: "8px 0" }}>
+                      <span className="av av--sm" style={{ background: avColor(st.display_name) }}>
+                        {initials(st.display_name)}
+                      </span>
+                      <div className="gr">
+                        <div className="t" style={{ fontSize: ".9rem" }}>{st.display_name}</div>
+                        <div className="s">1-on-1 · In this class</div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              )
+            ) : candidates.length === 0 ? (
+              <p className="muted" style={{ marginTop: 12 }}>No students in this cohort to pick.</p>
+            ) : (
+              <div style={{ marginTop: 12 }}>
+                {candidates.map((st) => {
+                  const checked = draftStudentIds.includes(st.id);
+                  return (
+                    <label key={st.id} className="list__i" style={{ padding: "8px 0", gap: 10, cursor: "pointer" }}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        disabled={readOnly}
+                        onChange={() => toggleStudent(st.id)}
+                        aria-label={st.display_name}
+                      />
+                      <span className="av av--sm" style={{ background: avColor(st.display_name) }}>
+                        {initials(st.display_name)}
+                      </span>
+                      <div className="gr">
+                        <div className="t" style={{ fontSize: ".9rem" }}>{st.display_name}</div>
+                        <div className="s">{checked ? "In this class" : "Not in this class"}</div>
+                      </div>
+                    </label>
+                  );
+                })}
               </div>
-            ) : null}
+            )}
           </div>
 
           <div className="card card--wash">
@@ -534,8 +675,14 @@ export function SessionPreScreen() {
               Automatic Handout Release &amp; Attendance Roll
             </div>
             <p className="muted" style={{ marginBottom: 12 }}>
-              Lesson notes for <b>{session?.title || "this class"}</b> release to {students.length} student
-              {students.length === 1 ? "" : "s"}, and you can mark the attendance roll in one click.
+              {classCount === 0 ? (
+                "No students are selected yet."
+              ) : (
+                <>
+                  Lesson notes for <b>{session?.title || "this class"}</b> release to {classCount} student
+                  {classCount === 1 ? "" : "s"} chosen for this class, and you can mark the attendance roll in one click.
+                </>
+              )}
             </p>
             <div className="row" style={{ gap: 8 }}>
               <Link

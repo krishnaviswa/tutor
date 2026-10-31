@@ -6,7 +6,19 @@ import { MarkdownView } from "@/components/MarkdownView";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { api } from "@/lib/api";
 
-type Notice = { id: string; body?: string };
+type Notice = { id: string; body?: string; event_id?: string | null };
+
+function uniqueNotices(list: Notice[]): Notice[] {
+  const seen = new Set<string>();
+  const out: Notice[] = [];
+  for (const row of list) {
+    const key = row.event_id || row.id;
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(row);
+  }
+  return out;
+}
 
 function BellIcon() {
   return (
@@ -40,9 +52,9 @@ export function ShellControls() {
       try {
         const data = (await api("/api/v1/notifications/inbox")) as Notice[];
         if (stop) return;
-        const list = Array.isArray(data) ? data : [];
+        const list = uniqueNotices(Array.isArray(data) ? data : []);
         setCount(list.length);
-        setRows(list.slice(0, 8));
+        setRows(list);
       } catch {
         if (!stop) {
           setCount(0);

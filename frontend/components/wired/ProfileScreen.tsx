@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AVATAR_ACCEPT, AVATAR_MAX_BYTES, PersonAvatar, publishIdentity } from "@/components/SignedInMark";
 import { api } from "@/lib/api";
 import { Err } from "./bits";
 
@@ -13,7 +14,10 @@ type Profile = {
   grade_label: string;
   study_info: string;
   organization_email: string;
+  photo: string;
 };
+
+const IMAGE_TYPES = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"]);
 
 type Step = { challenge_id: string; email_challenge_id?: string | null; faculty_admin?: boolean };
 
@@ -56,7 +60,22 @@ const empty: Profile = {
   grade_label: "",
   study_info: "",
   organization_email: "",
+  photo: "",
 };
+
+function readProfile(row: Partial<Profile> | null | undefined): Profile {
+  return {
+    phone: row?.phone ?? "",
+    address: row?.address ?? "",
+    expertise: row?.expertise ?? "",
+    subjects: row?.subjects ?? "",
+    board_label: row?.board_label ?? "",
+    grade_label: row?.grade_label ?? "",
+    study_info: row?.study_info ?? "",
+    organization_email: row?.organization_email ?? "",
+    photo: row?.photo ?? "",
+  };
+}
 
 function tokenParts(current: string): string[] {
   return current
@@ -163,6 +182,7 @@ function ChipField({
 
 export function ProfileScreen() {
   const [role, setRole] = useState("student");
+  const [name, setName] = useState("");
   const [form, setForm] = useState<Profile>(empty);
   const [code, setCode] = useState("");
   const [emailCode, setEmailCode] = useState("");
@@ -177,12 +197,20 @@ export function ProfileScreen() {
 
   useEffect(() => {
     api("/api/v1/auth/me")
-      .then((me) => setRole((me as { role?: string }).role || "student"))
+      .then((me) => {
+        const row = me as { role?: string; display_name?: string };
+        setRole(row.role || "student");
+        const next = row.display_name?.trim() || "";
+        if (next) setName((current) => current || next);
+      })
       .catch(() => undefined);
     api("/api/v1/profile")
       .then((row) => {
-        const next = { ...empty, ...(row as Profile) };
+        const data = row as Partial<Profile> & { display_name?: string };
+        const next = readProfile(data);
         setForm(next);
+        const loadedName = data.display_name?.trim() || "";
+        if (loadedName) setName(loadedName);
         const expertiseExtra = customText(next.expertise, EXPERTISE_PRESETS);
         const subjectsExtra = customText(next.subjects, SUBJECT_PRESETS);
         setExpertiseCustom(expertiseExtra);
@@ -195,6 +223,34 @@ export function ProfileScreen() {
 
   function set<K extends keyof Profile>(key: K, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function onPhoto(file: File | null) {
+    if (!file) return;
+    const type = file.type === "image/jpg" ? "image/jpeg" : file.type;
+    if (!IMAGE_TYPES.has(type)) {
+      setError("Choose a JPEG, PNG, WebP, or GIF.");
+      return;
+    }
+    if (file.size <= 0) {
+      setError("That photo is empty.");
+      return;
+    }
+    if (file.size > AVATAR_MAX_BYTES) {
+      setError("That photo is larger than 2 MB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const url = typeof reader.result === "string" ? reader.result : "";
+      if (!url.startsWith("data:image/")) {
+        setError("Choose a JPEG, PNG, WebP, or GIF.");
+        return;
+      }
+      setError("");
+      set("photo", url);
+    };
+    reader.readAsDataURL(file);
   }
 
   async function begin() {
@@ -225,9 +281,12 @@ export function ProfileScreen() {
           email_challenge_id: step.email_challenge_id,
           email_code: emailCode || undefined,
         }),
-      })) as Profile;
-      const next = { ...empty, ...saved };
+      })) as Profile & { display_name?: string };
+      const next = readProfile(saved);
+      const savedName = saved.display_name?.trim() || name;
       setForm(next);
+      if (saved.display_name?.trim()) setName(saved.display_name.trim());
+      publishIdentity({ name: savedName, photo: next.photo });
       const expertiseExtra = customText(next.expertise, EXPERTISE_PRESETS);
       const subjectsExtra = customText(next.subjects, SUBJECT_PRESETS);
       setExpertiseCustom(expertiseExtra);
@@ -252,6 +311,22 @@ export function ProfileScreen() {
       <Err message={error} />
       {msg ? <p className="muted">{msg}</p> : null}
       <div className="card">
+        <div className="who who--card">
+          <PersonAvatar name={name} photo={form.photo} large />
+          <div className="who__copy">
+            <span className="who__name">{name}</span>
+            <label className="field">
+              <span>Photo</span>
+              <input
+                className="field__in"
+                type="file"
+                accept={AVATAR_ACCEPT}
+                onChange={(e) => onPhoto(e.target.files?.[0] ?? null)}
+              />
+              <em>JPEG, PNG, WebP, or GIF. Up to 2 MB. It saves with the profile.</em>
+            </label>
+          </div>
+        </div>
         <div className="form-stack">
           <div className="form-row">
             <label className="field">

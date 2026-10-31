@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { api } from "@/lib/api";
+import { formatWhen } from "@/lib/format";
 import { Empty, Err } from "./bits";
 
 type Row = {
@@ -192,7 +193,7 @@ export function AnnounceScreen() {
               <div className="s muted">
                 {[
                   r.cohort_id && cohortMap[r.cohort_id] ? cohortMap[r.cohort_id] : "Whole workspace",
-                  r.scheduled_at,
+                  r.scheduled_at ? formatWhen(r.scheduled_at) : "",
                   (r.channels || []).map((ch) => (ch === "in_app" ? "In-app timeline" : ch)).join(", "),
                 ]
                   .filter(Boolean)

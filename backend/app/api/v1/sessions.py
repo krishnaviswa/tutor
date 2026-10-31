@@ -26,6 +26,7 @@ class SessionIn(BaseModel):
     student_id: str | None = None
     ends_at: datetime | None = None
     book: bool = False
+    teacher_user_id: str | None = None
 
 
 class SessionPatch(BaseModel):
@@ -35,6 +36,9 @@ class SessionPatch(BaseModel):
     status: str | None = None
     cancel_reason: str | None = None
     subject_label: str | None = None
+    library_item_id: str | None = None
+    student_ids: list[str] | None = None
+    teacher_user_id: str | None = None
     waive: bool = False
 
 
@@ -119,7 +123,7 @@ def list_sessions(
 def create_session(
     body: SessionIn,
     db: Session = Depends(get_db),
-    principal: Principal = Depends(require_roles("owner", "teacher", "student")),
+    principal: Principal = Depends(require_roles("owner", "teacher", "assistant", "student")),
 ):
     if bool(body.cohort_id) == bool(body.student_id):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "exactly one of cohort_id or student_id")
@@ -139,7 +143,6 @@ def create_session(
         )
         if not st:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, "student")
-    teacher_id = principal.user_id
     ws = db.get(Workspace, principal.workspace_id)
     if principal.role == "student":
         if not body.book:
@@ -150,6 +153,8 @@ def create_session(
             .first()
         )
         teacher_id = first.teacher_user_id if first else principal.user_id
+    else:
+        teacher_id = sessions_svc.assign_teacher(db, principal, body.teacher_user_id)
     # Availability gates bookings made against a person: student self-booking, or a 1-on-1.
     # A teacher scheduling their own cohort class is the authority and is not gated.
     if (principal.role == "student" or body.student_id) and not staff_available(
@@ -190,10 +195,13 @@ def patch_session(
     body: SessionPatch,
     db: Session = Depends(get_db),
     ports: MockPorts = Depends(ports_dep),
-    principal: Principal = Depends(require_roles("owner", "teacher")),
+    principal: Principal = Depends(require_roles("owner", "teacher", "assistant")),
 ):
     s = _get(db, principal.workspace_id, session_id)
+    sessions_svc.assert_can_change_session(db, principal, s)
     hour = None
+    if body.teacher_user_id is not None:
+        s.teacher_user_id = sessions_svc.assign_teacher(db, principal, body.teacher_user_id)
     if body.title is not None:
         s.title = body.title
     if body.subject_label is not None:
@@ -201,6 +209,10 @@ def patch_session(
         if len(label) > 200:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, "topic is too long")
         s.subject_label = label
+    if "library_item_id" in body.model_fields_set:
+        sessions_svc.set_library_choice(db, s, body.library_item_id)
+    if body.student_ids is not None:
+        sessions_svc.set_class_students(db, principal, s, body.student_ids)
     # Time edits are allowed in any state (glitch fix). Moving to the future re-reads as "Upcoming".
     if body.starts_at is not None:
         hour = sessions_svc.move_start(
@@ -309,9 +321,10 @@ def place_library(
 def start_session(
     session_id: str,
     db: Session = Depends(get_db),
-    principal: Principal = Depends(require_roles("owner", "teacher")),
+    principal: Principal = Depends(require_roles("owner", "teacher", "assistant")),
 ):
     s = _get(db, principal.workspace_id, session_id)
+    sessions_svc.assert_can_change_session(db, principal, s)
     return sessions_svc.start_session(db, principal.workspace_id, s, principal.user_id)
 
 
@@ -351,6 +364,7 @@ def patch_record(
     principal: Principal = Depends(require_roles("owner", "teacher")),
 ):
     s = _get(db, principal.workspace_id, session_id)
+    sessions_svc.assert_can_change_session(db, principal, s)
     ws = db.get(Workspace, principal.workspace_id)
     return record_svc.patch_record(
         db,
@@ -400,6 +414,7 @@ async def video_link(
     principal: Principal = Depends(require_roles("owner", "teacher")),
 ):
     s = _get(db, principal.workspace_id, session_id)
+    sessions_svc.assert_can_change_session(db, principal, s)
     chosen = _chosen_video_url(await request.body())
     s.video_url = chosen or ports.create_video_link(s.id)
     if not s.join_token:

@@ -123,6 +123,12 @@ def test_start_and_cancel_in_app_even_when_whatsapp_fails(client):
     )
     assert created.status_code == 200, created.text
     sid = created.json()["id"]
+    picked = client.patch(
+        f"/api/v1/sessions/{sid}",
+        headers=teacher,
+        json={"student_ids": [STUDENT]},
+    )
+    assert picked.status_code == 200, picked.text
 
     def boom(*_a, **_k):
         raise RuntimeError("whatsapp down")

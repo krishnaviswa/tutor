@@ -158,6 +158,8 @@ class ScheduledSession(Base):
     subject_label: Mapped[str] = mapped_column(String(200), default="")
     library_item_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     prior_teacher_user_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    # Students the teacher put in this class. None is a session from before that choice.
+    class_student_ids: Mapped[list | None] = mapped_column(JSON, nullable=True)
 
 
 class StaffAvailability(Base):
@@ -437,6 +439,7 @@ class NotificationDelivery(Base):
     student_id: Mapped[str | None] = mapped_column(ForeignKey("students.id"), nullable=True)
     body: Mapped[str] = mapped_column(Text, default="")
     status: Mapped[str] = mapped_column(String(20), default="sent")
+    event_id: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
@@ -572,6 +575,7 @@ class PersonProfile(Base):
     board_label: Mapped[str] = mapped_column(String(80), default="")
     grade_label: Mapped[str] = mapped_column(String(80), default="")
     study_info: Mapped[str] = mapped_column(Text, default="")
+    photo: Mapped[str] = mapped_column(Text, default="")
     active: Mapped[int] = mapped_column(Integer, default=1)
 
 

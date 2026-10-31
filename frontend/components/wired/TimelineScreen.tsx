@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { maskIds } from "@/lib/format";
 import { AppBar, Err } from "./bits";
 
 type Ev = { id: string; event_type: string; body: string; created_at?: string | null };
@@ -171,7 +172,7 @@ export function TimelineScreen() {
                 <div style={{ marginBottom: 4 }}>
                   <span className="pill">{formatEventKind(e.event_type)}</span>
                 </div>
-                <p className="muted">{e.body || "Activity recorded."}</p>
+                <p className="muted">{maskIds(e.body || "") || "Activity recorded."}</p>
               </div>
             </article>
           ))}

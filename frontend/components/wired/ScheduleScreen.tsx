@@ -25,6 +25,25 @@ const TIME_SLOTS_15M = Array.from({ length: (22 - 7) * 4 }, (_, idx) => {
 });
 
 const QUICK_SLOTS = ["09:00", "11:00", "16:00", "17:30", "18:30", "19:30", "20:30"] as const;
+const CLASS_LOCK = "Only the assigned teacher or the owner can change this class.";
+
+function explainSessionError(err: unknown): string {
+  const raw = (err instanceof Error ? err.message : String(err)).replace(/\s+/g, " ").trim();
+  const start = raw.indexOf("{");
+  if (start >= 0) {
+    try {
+      const body = JSON.parse(raw.slice(start)) as { detail?: unknown };
+      if (typeof body.detail === "string" && body.detail.trim()) return body.detail.trim();
+    } catch {
+      /* use the sentence below */
+    }
+  }
+  if (raw.includes("403") || raw.includes(CLASS_LOCK)) return CLASS_LOCK;
+  if (raw.startsWith("409") || raw.includes("teacher conflict")) return "That slot conflicts with another class.";
+  if (raw.includes("outside availability")) return "That time is outside the teacher's availability.";
+  const plain = raw.replace(/^\d{3}\s+/, "").trim();
+  return plain && !plain.startsWith("{") && !plain.startsWith("[") ? plain : "Could not save that class.";
+}
 
 export type SessionRow = {
   id: string;
@@ -136,6 +155,10 @@ export function ScheduleScreen() {
   const [avail, setAvail] = useState<Availability | null>(null);
   const [ready, setReady] = useState(false);
   const [isOwner, setIsOwner] = useState<boolean | null>(null);
+  const [role, setRole] = useState<string | null>(null);
+  const [meId, setMeId] = useState("");
+  const [teachers, setTeachers] = useState<{ id: string; display_name: string }[]>([]);
+  const [assignTeacherId, setAssignTeacherId] = useState("");
   const [originalStart, setOriginalStart] = useState<string | null>(null);
   const [hourNote, setHourNote] = useState("");
 
@@ -174,10 +197,27 @@ export function ScheduleScreen() {
     let cancelled = false;
     api("/api/v1/auth/me")
       .then((me) => {
-        if (!cancelled) setIsOwner((me as { role?: string }).role === "owner");
+        if (cancelled) return;
+        const row = me as { role?: string; id?: string };
+        const nextRole = row.role || "";
+        setRole(nextRole);
+        setMeId(row.id || "");
+        setIsOwner(nextRole === "owner");
+        if (nextRole !== "owner") return;
+        return api("/api/v1/staff").then((people) => {
+          if (cancelled || !Array.isArray(people)) return;
+          const list = (people as { id: string; display_name: string; role: string }[])
+            .filter((person) => person.role === "teacher" || person.role === "assistant")
+            .map((person) => ({ id: person.id, display_name: person.display_name }));
+          setTeachers(list);
+          setAssignTeacherId((current) => current || list[0]?.id || "");
+        });
       })
       .catch(() => {
-        if (!cancelled) setIsOwner(false);
+        if (!cancelled) {
+          setIsOwner(false);
+          setRole("");
+        }
       });
     return () => {
       cancelled = true;
@@ -283,6 +323,7 @@ export function ScheduleScreen() {
           setHourNote(hourConsequence(originalStart, isOwner === true, result?.hour));
         }
       } else {
+        if (role === "owner" && assignTeacherId) payload.teacher_user_id = assignTeacherId;
         await api("/api/v1/sessions", { method: "POST", body: JSON.stringify(payload) });
         setHourNote("");
       }
@@ -291,10 +332,7 @@ export function ScheduleScreen() {
       setOriginalStart(null);
       await load();
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (msg.startsWith("409")) setError("That slot conflicts with another class.");
-      else if (msg.includes("outside availability")) setError("That time is outside the teacher's availability.");
-      else setError(msg);
+      setError(explainSessionError(err));
     } finally {
       setBusy(false);
     }
@@ -311,7 +349,7 @@ export function ScheduleScreen() {
       });
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(explainSessionError(err));
     } finally {
       setBusy(false);
     }
@@ -545,6 +583,22 @@ export function ScheduleScreen() {
               )}
             </>
           )}
+          {role === "owner" && !editingId ? (
+            <label className="field">
+              <span>Teacher</span>
+              <select
+                className="field__in"
+                value={assignTeacherId}
+                onChange={(e) => setAssignTeacherId(e.target.value)}
+              >
+                {teachers.map((person) => (
+                  <option key={person.id} value={person.id}>
+                    {person.display_name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
           {editingId && originalStart && isOwner !== null ? (
             <p className="muted" role="status">
               {hourConsequence(originalStart, isOwner)}
@@ -610,6 +664,7 @@ export function ScheduleScreen() {
                 {byDay[i].length ? (
                   byDay[i].map((s) => {
                     const cancelled = s.status === "cancelled";
+                    const mine = role === "owner" || (!!meId && s.teacher_user_id === meId);
                     return (
                       <div key={s.id} style={{ marginBottom: 6 }}>
                         <Link
@@ -633,7 +688,7 @@ export function ScheduleScreen() {
                             {s.student_name ? ` · ${s.student_name}` : ""}
                           </div>
                         </Link>
-                        {!cancelled && (
+                        {!cancelled && mine ? (
                           <div className="row" style={{ gap: 4, marginTop: 4 }}>
                             <button
                               type="button"
@@ -653,7 +708,12 @@ export function ScheduleScreen() {
                               Cancel
                             </button>
                           </div>
-                        )}
+                        ) : null}
+                        {!cancelled && role && role !== "owner" && !mine ? (
+                          <p className="muted" style={{ margin: "4px 0 0" }}>
+                            {CLASS_LOCK}
+                          </p>
+                        ) : null}
                       </div>
                     );
                   })

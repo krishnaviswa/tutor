@@ -11,6 +11,7 @@ type ClassNotice = {
   status: string;
   to_role: string;
   student_id?: string;
+  event_id?: string | null;
 };
 
 type StudentRow = { id: string; user_id?: string; display_name: string };
@@ -55,9 +56,16 @@ export function ClassNotices() {
           setError("Could not read class notices.");
           return;
         }
+        const seen = new Set<string>();
         const newest = (data as ClassNotice[])
           .slice()
           .sort((a, b) => timeMs(b.created_at) - timeMs(a.created_at))
+          .filter((notice) => {
+            const key = notice.event_id || notice.id;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          })
           .slice(0, 8);
         setNotices(newest);
         setError("");
