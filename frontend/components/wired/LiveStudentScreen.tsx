@@ -86,10 +86,7 @@ export function LiveStudentScreen() {
   return (
     <div className="board-room">
       <header className="board-room__bar">
-        <div>
-          <h2>Whiteboard</h2>
-          <p className="muted">{live?.session.title || "Shared class canvas"}</p>
-        </div>
+        <h2 className="board-room__title">{live?.session.title || "Class whiteboard"}</h2>
         <Link href={catalogRoute("join")} className="btn btn--sm">
           Join for attendance
         </Link>
