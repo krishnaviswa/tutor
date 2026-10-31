@@ -452,7 +452,7 @@ export function FacultyAdminPanel({ showWhenRestricted = false }: { showWhenRest
           <strong>{teacher.name}</strong>
           <div className="muted">Subjects: {teacher.subjects || "—"}</div>
           <div className="muted">Expertise: {teacher.expertise || "—"}</div>
-          <div className="muted">Organization email: {teacher.organization_email || "—"}</div>
+          <p className="meta-line">Organization email: {teacher.organization_email || "—"}</p>
           <div className="muted">Student and parent conversations: {teacher.contact ? "allowed" : "withheld"}</div>
           {editing === teacher.user_id ? (
             <div style={{ marginTop: 8 }}>
@@ -523,10 +523,10 @@ export function FacultyAdminPanel({ showWhenRestricted = false }: { showWhenRest
                 />
               </div>
 
-              <div className="row" style={{ marginTop: 8, gap: 8 }}>
+              <div className="form-actions">
                 <button
                   type="button"
-                  className="hot--btn"
+                  className="hot hot--btn"
                   disabled={busy === teacher.user_id}
                   onClick={() =>
                     void run(teacher.user_id, async () => {
@@ -541,7 +541,7 @@ export function FacultyAdminPanel({ showWhenRestricted = false }: { showWhenRest
                 >
                   Save teacher
                 </button>
-                <button type="button" className="hot--btn ghost" onClick={() => setEditing(null)}>
+                <button type="button" className="hot hot--btn ghost" onClick={() => setEditing(null)}>
                   Cancel
                 </button>
               </div>

@@ -270,8 +270,8 @@ export function SessionsScreen() {
                     </div>
 
                     {isHandingOff ? (
-                      <div className="row" style={{ gap: 8, alignItems: "flex-end", flexWrap: "wrap" }}>
-                        <label className="field" style={{ margin: 0, minWidth: 220 }}>
+                      <div>
+                        <label className="field" style={{ margin: 0 }}>
                           <span>Substitute teacher</span>
                           <select
                             className="field__in"
@@ -288,15 +288,16 @@ export function SessionsScreen() {
                               ))}
                           </select>
                         </label>
-                        <button
-                          type="button"
-                          className="hot hot--btn"
-                          style={{ width: "auto", margin: 0 }}
-                          disabled={!substituteId || handoffBusy}
-                          onClick={() => void submitHandoff(s.id)}
-                        >
-                          {handoffBusy ? "Transferring…" : "Confirm handoff"}
-                        </button>
+                        <div className="form-actions">
+                          <button
+                            type="button"
+                            className="hot hot--btn"
+                            disabled={!substituteId || handoffBusy}
+                            onClick={() => void submitHandoff(s.id)}
+                          >
+                            {handoffBusy ? "Transferring…" : "Confirm handoff"}
+                          </button>
+                        </div>
                       </div>
                     ) : null}
                   </div>
