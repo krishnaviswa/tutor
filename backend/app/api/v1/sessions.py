@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
@@ -33,6 +34,7 @@ class SessionPatch(BaseModel):
     ends_at: datetime | None = None
     status: str | None = None
     cancel_reason: str | None = None
+    subject_label: str | None = None
     waive: bool = False
 
 
@@ -194,6 +196,11 @@ def patch_session(
     hour = None
     if body.title is not None:
         s.title = body.title
+    if body.subject_label is not None:
+        label = body.subject_label.strip()
+        if len(label) > 200:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "topic is too long")
+        s.subject_label = label
     # Time edits are allowed in any state (glitch fix). Moving to the future re-reads as "Upcoming".
     if body.starts_at is not None:
         hour = sessions_svc.move_start(
@@ -360,15 +367,41 @@ def patch_record(
     )
 
 
+def _chosen_video_url(raw: bytes) -> str:
+    """Empty body keeps the mock classroom link. A preset URL is stored as given."""
+    text = raw.decode("utf-8", errors="replace").strip()
+    if not text:
+        return ""
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "video url") from exc
+    if not isinstance(payload, dict):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "video url")
+    value = payload.get("video_url")
+    if value is None or value == "":
+        return ""
+    if not isinstance(value, str):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "video url")
+    chosen = value.strip()
+    if not chosen:
+        return ""
+    if len(chosen) > 500 or not chosen.startswith(("https://", "http://", "mock://")):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "video url")
+    return chosen
+
+
 @router.post("/sessions/{session_id}/video-link")
-def video_link(
+async def video_link(
     session_id: str,
+    request: Request,
     db: Session = Depends(get_db),
     ports: MockPorts = Depends(ports_dep),
     principal: Principal = Depends(require_roles("owner", "teacher")),
 ):
     s = _get(db, principal.workspace_id, session_id)
-    s.video_url = ports.create_video_link(s.id)
+    chosen = _chosen_video_url(await request.body())
+    s.video_url = chosen or ports.create_video_link(s.id)
     if not s.join_token:
         s.join_token = new_id()
     if not s.recording_url:

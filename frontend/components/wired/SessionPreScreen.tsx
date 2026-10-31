@@ -30,6 +30,8 @@ type SessionRow = {
   cohort_id: string;
   title: string;
   starts_at: string | null;
+  subject_label?: string;
+  library_item_id?: string | null;
 };
 
 type StudentRow = {
@@ -73,13 +75,62 @@ function formatWhen(iso: string | null): string {
   }).format(new Date(iso));
 }
 
-function humanVideoBadge(url: string | null, presetId: string): { label: string; tone: string } {
+function humanVideoBadge(url: string | null): { label: string; tone: string } {
   if (!url) return { label: "Not generated yet", tone: "warn" };
-  const match = VIDEO_PRESETS.find((p) => p.id === presetId);
+  const match = VIDEO_PRESETS.find((p) => p.url === url);
   if (match) return { label: `${match.label} · Ready`, tone: "good" };
   if (url.includes("meet.google.com")) return { label: "Google Meet · Ready", tone: "good" };
   if (url.includes("zoom.us")) return { label: "Zoom Classroom · Ready", tone: "good" };
   return { label: "Classroom Link · Ready", tone: "good" };
+}
+
+function roomLabel(url: string | null): string {
+  if (!url) return "";
+  const match = VIDEO_PRESETS.find((p) => p.url === url);
+  return match ? `${match.label} (${match.url})` : url;
+}
+
+function presetForUrl(url: string | null): string {
+  if (!url) return VIDEO_PRESETS[0].id;
+  const match = VIDEO_PRESETS.find((p) => p.url === url);
+  return match ? match.id : "current";
+}
+
+function detailText(detail: unknown): string {
+  if (typeof detail === "string" && detail.trim()) return detail.trim();
+  if (!Array.isArray(detail)) return "";
+  return detail
+    .map((item) => {
+      if (typeof item === "string") return item;
+      if (item && typeof item === "object" && "msg" in item) return String((item as { msg: unknown }).msg || "");
+      return "";
+    })
+    .filter((part) => part.trim())
+    .join(" ");
+}
+
+/** One sentence. FastAPI `detail` only — never the raw JSON body. */
+function saveError(err: unknown): string {
+  const raw = (err instanceof Error ? err.message : String(err)).replace(/\s+/g, " ").trim();
+  const jsonStart = raw.indexOf("{");
+  const arrayStart = raw.indexOf("[");
+  const start = jsonStart >= 0 && (arrayStart < 0 || jsonStart < arrayStart) ? jsonStart : arrayStart;
+  let detail = "";
+  if (start >= 0) {
+    try {
+      const body = JSON.parse(raw.slice(start)) as { detail?: unknown };
+      detail = detailText(body.detail);
+    } catch {
+      detail = "";
+    }
+  }
+  if (!detail) {
+    const stripped = raw.replace(/^\d{3}\s+/, "").trim();
+    if (stripped && !stripped.startsWith("{") && !stripped.startsWith("[")) detail = stripped;
+  }
+  if (!detail) return "Could not save the pre-class setup.";
+  const sentence = detail.endsWith(".") ? detail.slice(0, -1) : detail;
+  return `Could not save the pre-class setup: ${sentence}.`;
 }
 
 function btnStyle(extra?: CSSProperties): CSSProperties {
@@ -98,14 +149,18 @@ export function SessionPreScreen() {
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [materials, setMaterials] = useState<ContentRow[]>([]);
   const [cohortName, setCohortName] = useState("");
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [videoPreset, setVideoPreset] = useState<string>(VIDEO_PRESETS[0].id);
-  const [selectedTopic, setSelectedTopic] = useState<string>(TOPIC_PRESETS[0]);
-  const [selectedHandoutId, setSelectedHandoutId] = useState<string>("");
-  const [handoutAttached, setHandoutAttached] = useState(false);
+  const [savedTopic, setSavedTopic] = useState("");
+  const [draftTopic, setDraftTopic] = useState(TOPIC_PRESETS[0]);
+  const [loadedTopic, setLoadedTopic] = useState(TOPIC_PRESETS[0]);
+  const [savedHandoutId, setSavedHandoutId] = useState("");
+  const [draftHandoutId, setDraftHandoutId] = useState("");
+  const [loadedHandoutId, setLoadedHandoutId] = useState("");
+  const [savedVideoUrl, setSavedVideoUrl] = useState<string | null>(null);
+  const [draftPreset, setDraftPreset] = useState(VIDEO_PRESETS[0].id);
+  const [loadedPreset, setLoadedPreset] = useState(VIDEO_PRESETS[0].id);
   const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [attachingHandout, setAttachingHandout] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const load = useCallback(async (id: string) => {
     if (!id) return;
@@ -124,15 +179,30 @@ export function SessionPreScreen() {
       setAllSessions(Array.isArray(sessList) ? sessList : [sess]);
       const items = Array.isArray(contentList) ? contentList : [];
       setMaterials(items);
-      if (items[0]) {
-        setSelectedHandoutId((prev) => prev || items[0].id);
-        setHandoutAttached(true);
-      }
       const match = Array.isArray(coh) ? coh.find((c) => c.id === sess.cohort_id) : undefined;
       setCohortName(match?.name || "Active Cohort");
-      setVideoUrl(video?.video_url || null);
+
+      const topicSaved = (sess.subject_label || "").trim();
+      const topicShown = topicSaved || TOPIC_PRESETS[0];
+      setSavedTopic(topicSaved);
+      setDraftTopic(topicShown);
+      setLoadedTopic(topicShown);
+
+      const handoutSaved = (sess.library_item_id || "").trim();
+      const handoutShown = items.some((item) => item.id === handoutSaved)
+        ? handoutSaved
+        : handoutSaved || items[0]?.id || "";
+      setSavedHandoutId(handoutSaved);
+      setDraftHandoutId(handoutShown);
+      setLoadedHandoutId(handoutShown);
+
+      const url = video?.video_url || null;
+      const presetShown = presetForUrl(url);
+      setSavedVideoUrl(url);
+      setDraftPreset(presetShown);
+      setLoadedPreset(presetShown);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(saveError(err).replace("save the pre-class setup", "load this session"));
     }
   }, []);
 
@@ -143,7 +213,7 @@ export function SessionPreScreen() {
         setAllSessions(list);
         if (!paramId && list[0]) setFallbackId(list[0].id);
       })
-      .catch((err) => setError(err instanceof Error ? err.message : String(err)));
+      .catch((err) => setError(saveError(err).replace("save the pre-class setup", "load sessions")));
   }, [paramId]);
 
   useEffect(() => {
@@ -152,45 +222,67 @@ export function SessionPreScreen() {
   }, [sessionId, load]);
 
   function handleSelectSession(id: string) {
+    setNotice("");
     setFallbackId(id);
     router.replace(`/app/faculty/session-pre?session=${encodeURIComponent(id)}`);
   }
 
   const shown = useMemo(() => students.slice(0, 6), [students]);
   const extra = Math.max(0, students.length - shown.length);
+  const topicChoices = useMemo(() => {
+    const extraTopics = [savedTopic, draftTopic].filter((topic) => topic && !TOPIC_PRESETS.includes(topic));
+    return [...new Set([...extraTopics, ...TOPIC_PRESETS])];
+  }, [savedTopic, draftTopic]);
+  const draftPresetObj = VIDEO_PRESETS.find((p) => p.id === draftPreset) ?? null;
+  const showCurrentLink = Boolean(savedVideoUrl) && !VIDEO_PRESETS.some((p) => p.url === savedVideoUrl);
+  const dirty =
+    draftTopic !== loadedTopic || draftHandoutId !== loadedHandoutId || draftPreset !== loadedPreset;
+  const readyCount = [Boolean(sessionId), Boolean(savedTopic), Boolean(savedHandoutId), Boolean(savedVideoUrl)].filter(
+    Boolean,
+  ).length;
+  const statusLabel = dirty ? "Unsaved changes" : readyCount === 4 ? "All 4 Steps Ready" : `${readyCount} of 4 Ready`;
+  const statusTone = dirty ? "is-warn" : readyCount === 4 ? "is-good" : "is-info";
+  const badge = humanVideoBadge(savedVideoUrl);
 
-  async function attachLink() {
-    if (!sessionId) return;
-    setBusy(true);
+  async function saveSetup() {
+    if (!sessionId || saving) return;
+    const snapshot = { topic: draftTopic, handoutId: draftHandoutId, preset: draftPreset };
+    const handout = materials.find((item) => item.id === snapshot.handoutId);
+    const preset = VIDEO_PRESETS.find((item) => item.id === snapshot.preset);
+    setSaving(true);
     setError("");
+    setNotice("");
     try {
-      const row = (await api(`/api/v1/sessions/${sessionId}/video-link`, { method: "POST" })) as {
-        video_url?: string;
-      };
-      const preset = VIDEO_PRESETS.find((p) => p.id === videoPreset);
-      setVideoUrl(row.video_url || preset?.url || "https://meet.google.com/tutor-room-a");
+      if (snapshot.topic) {
+        await api(`/api/v1/sessions/${sessionId}`, {
+          method: "PATCH",
+          body: JSON.stringify({ subject_label: snapshot.topic }),
+        });
+      }
+      if (handout && handout.id !== savedHandoutId) {
+        await api(`/api/v1/sessions/${sessionId}/board/library`, {
+          method: "POST",
+          body: JSON.stringify({ content_id: handout.id }),
+        });
+      }
+      if (preset && preset.url !== savedVideoUrl) {
+        await api(`/api/v1/sessions/${sessionId}/video-link`, {
+          method: "POST",
+          body: JSON.stringify({ video_url: preset.url }),
+        });
+      }
+      setNotice("Saved.");
+      await load(sessionId);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      const message = saveError(err);
+      await load(sessionId);
+      setDraftTopic(snapshot.topic);
+      setDraftHandoutId(snapshot.handoutId);
+      setDraftPreset(snapshot.preset);
+      setNotice("");
+      setError(message);
     } finally {
-      setBusy(false);
-    }
-  }
-
-  async function attachHandoutToBoard() {
-    if (!sessionId || !selectedHandoutId) {
-      setHandoutAttached(true);
-      return;
-    }
-    setAttachingHandout(true);
-    setError("");
-    try {
-      await api(`/api/v1/sessions/${sessionId}/board/library`, {
-        method: "POST",
-        body: JSON.stringify({ content_id: selectedHandoutId }),
-      }).catch(() => null);
-      setHandoutAttached(true);
-    } finally {
-      setAttachingHandout(false);
+      setSaving(false);
     }
   }
 
@@ -214,9 +306,6 @@ export function SessionPreScreen() {
       </>
     );
   }
-
-  const badge = humanVideoBadge(videoUrl, videoPreset);
-  const selectedPresetObj = VIDEO_PRESETS.find((p) => p.id === videoPreset) ?? VIDEO_PRESETS[0];
 
   return (
     <>
@@ -255,9 +344,7 @@ export function SessionPreScreen() {
           <div className="card">
             <div className="sb" style={{ marginBottom: 12 }}>
               <h3 style={{ margin: 0 }}>Pre-Class Readiness Checklist</h3>
-              <span className={`pill ${videoUrl ? "is-good" : "is-info"}`}>
-                {videoUrl ? "All 4 Steps Ready" : "3 of 4 Ready"}
-              </span>
+              <span className={`pill ${statusTone}`}>{statusLabel}</span>
             </div>
 
             <div className="form-grid">
@@ -280,10 +367,13 @@ export function SessionPreScreen() {
                 <span>2. Lesson Topic Focus</span>
                 <select
                   className="field__in"
-                  value={selectedTopic}
-                  onChange={(e) => setSelectedTopic(e.target.value)}
+                  value={draftTopic}
+                  onChange={(e) => {
+                    setDraftTopic(e.target.value);
+                    setNotice("");
+                  }}
                 >
-                  {TOPIC_PRESETS.map((topic) => (
+                  {topicChoices.map((topic) => (
                     <option key={topic} value={topic}>
                       {topic}
                     </option>
@@ -295,18 +385,14 @@ export function SessionPreScreen() {
                 <span>3. Library Handout / Worksheet</span>
                 <select
                   className="field__in"
-                  value={selectedHandoutId}
+                  value={draftHandoutId}
                   onChange={(e) => {
-                    setSelectedHandoutId(e.target.value);
-                    setHandoutAttached(true);
+                    setDraftHandoutId(e.target.value);
+                    setNotice("");
                   }}
                 >
                   {materials.length === 0 ? (
-                    <>
-                      <option value="preset-notes">Core Concept Notes &amp; Worked Examples (PDF)</option>
-                      <option value="preset-sheet">In-Class Practice Worksheet (10 Questions)</option>
-                      <option value="preset-formula">Formula Summary Sheet</option>
-                    </>
+                    <option value="">No library handout filed yet</option>
                   ) : (
                     materials.map((m) => (
                       <option key={m.id} value={m.id}>
@@ -314,28 +400,39 @@ export function SessionPreScreen() {
                       </option>
                     ))
                   )}
+                  {draftHandoutId && !materials.some((m) => m.id === draftHandoutId) ? (
+                    <option value={draftHandoutId}>Saved handout</option>
+                  ) : null}
                 </select>
               </label>
             </div>
 
-            <div className="row" style={{ marginTop: 12, justifyContent: "space-between" }}>
-              <div className="row" style={{ gap: 6 }}>
-                <span className="pill is-good">Session Selected</span>
-                <span className="pill is-good">Topic: {selectedTopic.split(" ")[0]}</span>
-                <span className={`pill ${handoutAttached ? "is-good" : "is-info"}`}>
-                  {handoutAttached ? "Handout Attached" : "Handout Selected"}
-                </span>
-                <span className={`pill is-${badge.tone}`}>{badge.label}</span>
-              </div>
+            <div className="row" style={{ marginTop: 12, gap: 6 }}>
+              <span className="pill is-good">Session Selected</span>
+              {savedTopic ? (
+                <span className="pill is-good">Topic: {savedTopic.split(" ")[0]}</span>
+              ) : (
+                <span className="pill is-info">Topic not saved</span>
+              )}
+              <span className={`pill ${savedHandoutId ? "is-good" : "is-info"}`}>
+                {savedHandoutId ? "Handout Attached" : "Handout not saved"}
+              </span>
+              <span className={`pill is-${badge.tone}`}>{badge.label}</span>
+            </div>
+
+            <div style={{ marginTop: 14 }}>
               <button
                 type="button"
-                className="btn btn--sm"
+                className="hot hot--btn"
                 style={btnStyle()}
-                disabled={attachingHandout}
-                onClick={() => void attachHandoutToBoard()}
+                disabled={saving}
+                onClick={() => void saveSetup()}
               >
-                {attachingHandout ? "Pinning to Board…" : "Pin Handout to Whiteboard"}
+                {saving ? "Saving…" : "Save pre-class setup"}
               </button>
+              <p role="status" className="muted" style={{ margin: "8px 0 0", fontSize: ".85rem" }}>
+                {notice || "Saves the lesson topic, library handout, and classroom room."}
+              </p>
             </div>
           </div>
 
@@ -349,9 +446,13 @@ export function SessionPreScreen() {
               <span>Select Classroom Room Preset</span>
               <select
                 className="field__in"
-                value={videoPreset}
-                onChange={(e) => setVideoPreset(e.target.value)}
+                value={draftPreset}
+                onChange={(e) => {
+                  setDraftPreset(e.target.value);
+                  setNotice("");
+                }}
               >
+                {showCurrentLink ? <option value="current">Current classroom link</option> : null}
                 {VIDEO_PRESETS.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.label}
@@ -361,25 +462,15 @@ export function SessionPreScreen() {
             </label>
 
             <div className="muted" style={{ fontSize: ".85rem", marginBottom: 12 }}>
-              {videoUrl
-                ? `Active room: ${selectedPresetObj.label} (${selectedPresetObj.url})`
-                : "Generate a 1-click classroom room link so enrolled students can join from their dashboard."}
+              {savedVideoUrl
+                ? `Saved classroom link: ${roomLabel(savedVideoUrl)}.`
+                : "No classroom link is saved yet."}
+              {draftPresetObj && draftPresetObj.url !== savedVideoUrl
+                ? ` ${draftPresetObj.label} will be stored when you save.`
+                : ""}
             </div>
 
             <div className="row" style={{ gap: 8 }}>
-              <button
-                type="button"
-                className="hot hot--btn"
-                style={btnStyle()}
-                disabled={busy}
-                onClick={() => void attachLink()}
-              >
-                {busy
-                  ? "Generating Link…"
-                  : videoUrl
-                    ? "Refresh Meet / Classroom Link"
-                    : "Generate Meet / Classroom Link"}
-              </button>
               <Link
                 href={`/app/faculty/live-teacher?session=${encodeURIComponent(sessionId)}`}
                 className="btn btn--sm"
