@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { api } from "@/lib/api";
 import "./studio.css";
 
-export type Stroke = {
+type Tool = "pencil" | "eraser" | "text" | "pointer" | "crop";
+
+type Stroke = {
   id: string;
   x1: number;
   y1: number;
@@ -13,254 +15,355 @@ export type Stroke = {
   color: string;
 };
 
-export type SessionBoardProps = {
-  sessionId: string;
+type TextBox = {
+  id: string;
+  x: number;
+  y: number;
+  text: string;
+  color: string;
+  face: "sans";
+  size: 18;
 };
 
-type BoardPayload = {
-  strokes?: unknown;
+type Placement = {
+  id: string;
+  name: string;
+  kind: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  src?: string;
+  storage_path?: string;
+  content_id?: string;
+  crop?: { x: number; y: number; w: number; h: number };
+  file_name?: string;
+};
+
+type BoardDoc = {
+  strokes: Stroke[];
+  texts: TextBox[];
+  placements: Placement[];
+  erases: { id: string; x: number; y: number }[];
   updated_at?: string;
 };
-
-type Point = { x: number; y: number };
 
 const VIEW_W = 1600;
 const VIEW_H = 1000;
 const POLL_MS = 4000;
+const TEXT_FACE = "sans" as const;
+const TEXT_SIZE = 18;
 
-const PENS = [
-  { id: "ink", label: "Ink", color: "var(--ink)" },
-  { id: "blue", label: "Blue", color: "#0071E3" },
-  { id: "red", label: "Red", color: "#FF3B30" },
+const COLORS = [
+  { name: "black", hex: "#1d1d1f" },
+  { name: "white", hex: "#f5f5f7" },
+  { name: "red", hex: "#ff3b30" },
+  { name: "orange", hex: "#ff9500" },
+  { name: "yellow", hex: "#ffcc00" },
+  { name: "green", hex: "#34c759" },
+  { name: "blue", hex: "#0071e3" },
+  { name: "purple", hex: "#af52de" },
+  { name: "brown", hex: "#8d6e63" },
+  { name: "gray", hex: "#8e8e93" },
 ] as const;
+
+const emptyDoc = (): BoardDoc => ({ strokes: [], texts: [], placements: [], erases: [] });
 
 function boardPath(sessionId: string) {
   return `/api/v1/sessions/${encodeURIComponent(sessionId)}/board`;
 }
 
-function errText(err: unknown) {
-  return err instanceof Error ? err.message : String(err);
+function paint(color: string) {
+  return COLORS.find((c) => c.name === color)?.hex || color || "#1d1d1f";
 }
 
-function isStroke(value: unknown): value is Stroke {
-  if (!value || typeof value !== "object") return false;
-  const stroke = value as Stroke;
-  return (
-    typeof stroke.id === "string" &&
-    typeof stroke.x1 === "number" &&
-    typeof stroke.y1 === "number" &&
-    typeof stroke.x2 === "number" &&
-    typeof stroke.y2 === "number" &&
-    typeof stroke.color === "string"
-  );
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object";
 }
 
-function normalizeStrokes(body: unknown): Stroke[] {
-  const strokes = (body as BoardPayload | null)?.strokes;
-  if (!Array.isArray(strokes)) return [];
-  return strokes.filter(isStroke);
+function asDoc(body: unknown): BoardDoc {
+  const raw = isRecord(body) ? body : {};
+  const strokes = Array.isArray(raw.strokes) ? (raw.strokes.filter(isRecord) as Stroke[]) : [];
+  const texts = Array.isArray(raw.texts) ? (raw.texts.filter(isRecord) as TextBox[]) : [];
+  const placements = Array.isArray(raw.placements) ? (raw.placements.filter(isRecord) as Placement[]) : [];
+  const erases = Array.isArray(raw.erases) ? (raw.erases.filter(isRecord) as BoardDoc["erases"]) : [];
+  return { strokes, texts, placements, erases, updated_at: typeof raw.updated_at === "string" ? raw.updated_at : undefined };
 }
 
-function sameStrokeIds(a: Stroke[], b: Stroke[]) {
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i += 1) {
-    if (a[i].id !== b[i].id) return false;
-  }
-  return true;
+function pointOf(event: PointerEvent<SVGSVGElement>) {
+  const rect = event.currentTarget.getBoundingClientRect();
+  const x = ((event.clientX - rect.left) / rect.width) * VIEW_W;
+  const y = ((event.clientY - rect.top) / rect.height) * VIEW_H;
+  return { x: Math.max(0, Math.min(VIEW_W, x)), y: Math.max(0, Math.min(VIEW_H, y)) };
 }
 
-function round(n: number) {
-  return Math.round(n * 10) / 10;
+function nearStroke(stroke: Stroke, x: number, y: number) {
+  const dx = stroke.x2 - stroke.x1;
+  const dy = stroke.y2 - stroke.y1;
+  const len = Math.hypot(dx, dy) || 1;
+  const t = Math.max(0, Math.min(1, ((x - stroke.x1) * dx + (y - stroke.y1) * dy) / (len * len)));
+  const px = stroke.x1 + t * dx;
+  const py = stroke.y1 + t * dy;
+  return Math.hypot(px - x, py - y) < 18;
 }
 
-function clamp(n: number, max: number) {
-  return Math.max(0, Math.min(max, n));
-}
-
-export function SessionBoard({ sessionId }: SessionBoardProps) {
-  const [strokes, setStrokes] = useState<Stroke[]>([]);
-  const [color, setColor] = useState<string>(PENS[0].color);
+export function SessionBoard({ sessionId }: { sessionId: string }) {
+  const [doc, setDoc] = useState<BoardDoc>(emptyDoc);
+  const [tool, setTool] = useState<Tool>("pencil");
+  const [color, setColor] = useState<string>("black");
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
-
-  const strokesRef = useRef<Stroke[]>([]);
+  const [selected, setSelected] = useState<string | null>(null);
+  const docRef = useRef(doc);
+  const toolRef = useRef(tool);
   const colorRef = useRef(color);
-  const drawingRef = useRef(false);
-  const dirtyRef = useRef(false);
-  const movedRef = useRef(false);
-  const lastRef = useRef<Point | null>(null);
-  const syncGen = useRef(0);
+  const selectedRef = useRef(selected);
+  const drawing = useRef(false);
+  const dirty = useRef(false);
+  const last = useRef<{ x: number; y: number } | null>(null);
+  const drag = useRef<{ id: string; dx: number; dy: number } | null>(null);
 
+  docRef.current = doc;
+  toolRef.current = tool;
   colorRef.current = color;
+  selectedRef.current = selected;
 
   useEffect(() => {
-    let cancelled = false;
-    drawingRef.current = false;
-    dirtyRef.current = false;
-    lastRef.current = null;
-    strokesRef.current = [];
-    setStrokes([]);
-    setStatus("");
-
+    let stop = false;
     async function pull() {
-      const genAtStart = syncGen.current;
+      if (dirty.current || drawing.current) return;
       try {
         const body = await api(boardPath(sessionId));
-        if (cancelled || genAtStart !== syncGen.current) return;
-        // A poll must not cut through an in-progress stroke or unsaved marks.
-        if (drawingRef.current || dirtyRef.current) return;
-        const next = normalizeStrokes(body);
-        if (!sameStrokeIds(strokesRef.current, next)) {
-          strokesRef.current = next;
-          setStrokes(next);
-        }
-        setStatus((prev) => (prev && prev !== "Saved" ? "" : prev));
+        if (!stop && !dirty.current) setDoc(asDoc(body));
       } catch (err) {
-        if (!cancelled && genAtStart === syncGen.current) setStatus(errText(err));
+        if (!stop) setStatus(err instanceof Error ? err.message : String(err));
       }
     }
-
     void pull();
     const timer = window.setInterval(() => void pull(), POLL_MS);
     return () => {
-      cancelled = true;
+      stop = true;
       window.clearInterval(timer);
     };
   }, [sessionId]);
 
-  function commitLocal(next: Stroke[]) {
-    strokesRef.current = next;
-    dirtyRef.current = true;
-    setStrokes(next);
-    setStatus("");
+  function update(next: BoardDoc) {
+    dirty.current = true;
+    docRef.current = next;
+    setDoc(next);
   }
 
-  function pointFromEvent(event: React.PointerEvent<SVGSVGElement>): Point {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = rect.width ? ((event.clientX - rect.left) / rect.width) * VIEW_W : 0;
-    const y = rect.height ? ((event.clientY - rect.top) / rect.height) * VIEW_H : 0;
-    return { x: clamp(x, VIEW_W), y: clamp(y, VIEW_H) };
+  function onPointerDown(event: PointerEvent<SVGSVGElement>) {
+    const p = pointOf(event);
+    event.currentTarget.setPointerCapture(event.pointerId);
+    if (toolRef.current === "pointer") {
+      const hit = [...docRef.current.placements].reverse().find(
+        (item) => p.x >= item.x && p.x <= item.x + item.w && p.y >= item.y && p.y <= item.y + item.h,
+      );
+      if (hit) {
+        setSelected(hit.id);
+        drag.current = { id: hit.id, dx: p.x - hit.x, dy: p.y - hit.y };
+      } else {
+        setSelected(null);
+      }
+      return;
+    }
+    if (toolRef.current === "text") {
+      const text = window.prompt("Text");
+      if (!text) return;
+      update({
+        ...docRef.current,
+        texts: [
+          ...docRef.current.texts,
+          { id: crypto.randomUUID(), x: p.x, y: p.y, text, color: colorRef.current, face: TEXT_FACE, size: TEXT_SIZE },
+        ],
+      });
+      return;
+    }
+    if (toolRef.current === "crop") {
+      const hit = docRef.current.placements.find((item) => item.id === selectedRef.current);
+      if (!hit) return;
+      const crop = {
+        x: Math.max(0, Math.min(1, (p.x - hit.x) / hit.w)),
+        y: Math.max(0, Math.min(1, (p.y - hit.y) / hit.h)),
+        w: 0.5,
+        h: 0.5,
+      };
+      update({
+        ...docRef.current,
+        placements: docRef.current.placements.map((item) => (item.id === hit.id ? { ...item, crop } : item)),
+      });
+      return;
+    }
+    drawing.current = true;
+    last.current = p;
   }
 
-  function appendStroke(from: Point, to: Point) {
+  function onPointerMove(event: PointerEvent<SVGSVGElement>) {
+    const p = pointOf(event);
+    if (drag.current && toolRef.current === "pointer") {
+      const { id, dx, dy } = drag.current;
+      update({
+        ...docRef.current,
+        placements: docRef.current.placements.map((item) =>
+          item.id === id ? { ...item, x: p.x - dx, y: p.y - dy } : item,
+        ),
+      });
+      return;
+    }
+    if (!drawing.current || !last.current) return;
+    if (toolRef.current === "eraser") {
+      update({
+        ...docRef.current,
+        strokes: docRef.current.strokes.filter((stroke) => !nearStroke(stroke, p.x, p.y)),
+        texts: docRef.current.texts.filter((box) => Math.hypot(box.x - p.x, box.y - p.y) > 28),
+        erases: [...docRef.current.erases, { id: crypto.randomUUID(), x: p.x, y: p.y }],
+      });
+      last.current = p;
+      return;
+    }
+    if (toolRef.current !== "pencil") return;
     const stroke: Stroke = {
       id: crypto.randomUUID(),
-      x1: round(from.x),
-      y1: round(from.y),
-      x2: round(to.x),
-      y2: round(to.y),
+      x1: last.current.x,
+      y1: last.current.y,
+      x2: p.x,
+      y2: p.y,
       color: colorRef.current,
     };
-    commitLocal(strokesRef.current.concat(stroke));
+    last.current = p;
+    update({ ...docRef.current, strokes: [...docRef.current.strokes, stroke] });
   }
 
-  function onPointerDown(event: React.PointerEvent<SVGSVGElement>) {
-    if (event.button !== 0) return;
-    event.preventDefault();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    drawingRef.current = true;
-    movedRef.current = false;
-    lastRef.current = pointFromEvent(event);
-  }
-
-  function onPointerMove(event: React.PointerEvent<SVGSVGElement>) {
-    if (!drawingRef.current || !lastRef.current) return;
-    const next = pointFromEvent(event);
-    const last = lastRef.current;
-    const dx = next.x - last.x;
-    const dy = next.y - last.y;
-    if (dx * dx + dy * dy < 1) return;
-    movedRef.current = true;
-    appendStroke(last, next);
-    lastRef.current = next;
-  }
-
-  function onPointerUp(event: React.PointerEvent<SVGSVGElement>) {
-    if (!drawingRef.current) return;
-    const last = lastRef.current;
-    if (last && !movedRef.current) {
-      const x2 = last.x > VIEW_W - 0.8 ? last.x - 0.8 : last.x + 0.8;
-      const y2 = last.y > VIEW_H - 0.8 ? last.y - 0.8 : last.y + 0.8;
-      appendStroke(last, { x: x2, y: y2 });
-    }
-    drawingRef.current = false;
-    lastRef.current = null;
+  function onPointerUp(event: PointerEvent<SVGSVGElement>) {
+    drawing.current = false;
+    last.current = null;
+    drag.current = null;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
   }
 
-  function clearBoard() {
-    drawingRef.current = false;
-    lastRef.current = null;
-    commitLocal([]);
+  async function onFile(file: File | null) {
+    if (!file) return;
+    const id = crypto.randomUUID();
+    let src: string | undefined;
+    if (file.type.startsWith("image/") && file.size < 1_500_000) {
+      src = await file.arrayBuffer().then((buf) => {
+        const bytes = new Uint8Array(buf);
+        let binary = "";
+        bytes.forEach((b) => {
+          binary += String.fromCharCode(b);
+        });
+        return `data:${file.type};base64,${btoa(binary)}`;
+      });
+    }
+    update({
+      ...docRef.current,
+      placements: [
+        ...docRef.current.placements,
+        {
+          id,
+          name: file.name,
+          kind: file.type || "file",
+          x: 80,
+          y: 80,
+          w: 720,
+          h: 480,
+          src,
+          file_name: file.name,
+        },
+      ],
+    });
+    setSelected(id);
+    setTool("pointer");
+  }
+
+  function removeSelected() {
+    if (!selected) return;
+    update({
+      ...docRef.current,
+      placements: docRef.current.placements.filter((item) => item.id !== selected),
+    });
+    setSelected(null);
   }
 
   async function saveBoard() {
-    const snapshot = strokesRef.current.slice();
-    syncGen.current += 1;
+    const snapshot = docRef.current;
     setSaving(true);
     setStatus("");
     try {
-      await api(boardPath(sessionId), {
-        method: "PUT",
-        body: JSON.stringify({ strokes: snapshot }),
-      });
-      // Drop a poll that left before this PUT and would paint the previous snapshot.
-      syncGen.current += 1;
-      if (sameStrokeIds(strokesRef.current, snapshot)) dirtyRef.current = false;
+      const saved = asDoc(
+        await api(boardPath(sessionId), {
+          method: "PUT",
+          body: JSON.stringify({
+            strokes: snapshot.strokes,
+            texts: snapshot.texts,
+            placements: snapshot.placements,
+            erases: snapshot.erases,
+          }),
+        }),
+      );
+      setDoc(saved);
+      dirty.current = false;
       setStatus("Saved");
     } catch (err) {
-      setStatus(errText(err));
+      setStatus(err instanceof Error ? err.message : String(err));
     } finally {
       setSaving(false);
     }
   }
 
-  const saved = status === "Saved";
-
   return (
     <div className="studio-board">
       <div className="studio-toolbar" role="toolbar" aria-label="Board tools">
+        {(["pencil", "eraser", "text", "pointer", "crop"] as Tool[]).map((name) => (
+          <button
+            key={name}
+            type="button"
+            className="studio-btn"
+            aria-pressed={tool === name}
+            onClick={() => setTool(name)}
+          >
+            {name}
+          </button>
+        ))}
         <div className="studio-pens">
-          {PENS.map((pen) => (
+          {COLORS.map((pen) => (
             <button
-              key={pen.id}
+              key={pen.name}
               type="button"
-              className={`studio-pen studio-pen--${pen.id}`}
-              aria-label={pen.label}
-              aria-pressed={color === pen.color}
-              onClick={() => setColor(pen.color)}
+              className="studio-pen"
+              style={{ background: pen.hex }}
+              aria-label={pen.name}
+              aria-pressed={color === pen.name}
+              onClick={() => setColor(pen.name)}
             />
           ))}
         </div>
-        <p
-          className={saved ? "studio-status studio-status--ok" : "studio-status"}
-          role="status"
-          aria-live="polite"
-        >
+        <label className="studio-btn">
+          Upload
+          <input
+            type="file"
+            accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.svg"
+            hidden
+            onChange={(event) => void onFile(event.target.files?.[0] ?? null)}
+          />
+        </label>
+        <button type="button" className="studio-btn" onClick={removeSelected} disabled={!selected}>
+          Remove file
+        </button>
+        <button type="button" className="studio-btn studio-btn--primary" onClick={() => void saveBoard()} disabled={saving}>
+          Save
+        </button>
+        <p className="studio-status" role="status">
           {status}
         </p>
-        <div className="studio-actions">
-          <button type="button" className="studio-btn" aria-label="Clear board" onClick={clearBoard}>
-            Clear
-          </button>
-          <button
-            type="button"
-            className="studio-btn studio-btn--primary"
-            aria-label="Save board"
-            onClick={() => void saveBoard()}
-            disabled={saving}
-          >
-            Save
-          </button>
-        </div>
       </div>
       <div className="studio-surface">
         <svg
           className="studio-surface__svg"
           viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
-          preserveAspectRatio="none"
           role="img"
           aria-label="Class whiteboard"
           onPointerDown={onPointerDown}
@@ -269,23 +372,62 @@ export function SessionBoard({ sessionId }: SessionBoardProps) {
           onPointerCancel={onPointerUp}
         >
           <rect width={VIEW_W} height={VIEW_H} fill="var(--surface)" />
-          {strokes.map((stroke) => (
+          {doc.placements.map((item) => {
+            const crop = item.crop;
+            return (
+              <g key={item.id} transform={`translate(${item.x} ${item.y})`}>
+                <rect
+                  width={item.w}
+                  height={item.h}
+                  fill="var(--sunk)"
+                  stroke={selected === item.id ? "var(--accent)" : "var(--line)"}
+                  strokeWidth={selected === item.id ? 4 : 1}
+                />
+                {item.src ? (
+                  <image
+                    href={item.src}
+                    width={item.w}
+                    height={item.h}
+                    preserveAspectRatio="xMidYMid slice"
+                    style={
+                      crop
+                        ? { clipPath: `inset(${crop.y * 100}% ${(1 - crop.x - crop.w) * 100}% ${(1 - crop.y - crop.h) * 100}% ${crop.x * 100}%)` }
+                        : undefined
+                    }
+                  />
+                ) : (
+                  <text x={16} y={36} fill="var(--ink)" fontSize={28} fontFamily="sans-serif">
+                    {item.name}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+          {doc.strokes.map((stroke) => (
             <line
               key={stroke.id}
               x1={stroke.x1}
               y1={stroke.y1}
               x2={stroke.x2}
               y2={stroke.y2}
-              strokeWidth={2.5}
+              stroke={paint(stroke.color)}
+              strokeWidth={3}
               strokeLinecap="round"
-              vectorEffect="non-scaling-stroke"
-              style={{ stroke: stroke.color }}
             />
           ))}
+          {doc.texts.map((box) => (
+            <text
+              key={box.id}
+              x={box.x}
+              y={box.y}
+              fill={paint(box.color)}
+              fontSize={TEXT_SIZE}
+              fontFamily="sans-serif"
+            >
+              {box.text}
+            </text>
+          ))}
         </svg>
-        {strokes.length === 0 ? (
-          <p className="studio-hint">Draw on the board. It stays with this class.</p>
-        ) : null}
       </div>
     </div>
   );

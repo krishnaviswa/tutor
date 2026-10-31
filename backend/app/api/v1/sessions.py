@@ -38,6 +38,7 @@ class SessionPatch(BaseModel):
 class RecordPatch(BaseModel):
     notes: str | None = None
     attendance: list[dict] | None = None
+    teacher_status: str | None = None
 
 
 class EngagementIn(BaseModel):
@@ -46,8 +47,22 @@ class EngagementIn(BaseModel):
 
 
 class BoardIn(BaseModel):
-    strokes: list = []
+    strokes: list | None = None
+    texts: list | None = None
+    placements: list | None = None
+    erases: list | None = None
+    remove_placement_ids: list[str] = []
     updated_at: str | None = None
+
+
+class StudentChangeIn(BaseModel):
+    action: str
+    reason: str = ""
+    starts_at: datetime | None = None
+
+
+class PlaceLibraryIn(BaseModel):
+    content_id: str
 
 
 
@@ -74,9 +89,9 @@ def list_sessions(
     dt_from: datetime | None = Query(default=None, alias="from"),
     dt_to: datetime | None = Query(default=None, alias="to"),
     db: Session = Depends(get_db),
-    principal: Principal = Depends(require_roles("owner", "teacher", "assistant")),
+    principal: Principal = Depends(require_roles("owner", "teacher", "assistant", "student")),
 ):
-    return sessions_svc.list_sessions(
+    rows = sessions_svc.list_sessions(
         db,
         principal.workspace_id,
         scope=scope,
@@ -85,6 +100,14 @@ def list_sessions(
         dt_from=dt_from,
         dt_to=dt_to,
     )
+    if principal.role != "student":
+        return rows
+    kept = []
+    for row in rows:
+        s = _get(db, principal.workspace_id, row["id"])
+        if sessions_svc.student_belongs(db, principal, s):
+            kept.append(row)
+    return kept
 
 
 @router.post("/sessions")
@@ -148,9 +171,12 @@ def create_session(
 def get_session(
     session_id: str,
     db: Session = Depends(get_db),
-    principal: Principal = Depends(require_roles("owner", "teacher", "assistant")),
+    principal: Principal = Depends(require_roles("owner", "teacher", "assistant", "student")),
 ):
-    return _session_out(db, _get(db, principal.workspace_id, session_id))
+    s = _get(db, principal.workspace_id, session_id)
+    if principal.role == "student" and not sessions_svc.student_belongs(db, principal, s):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "session")
+    return _session_out(db, s)
 
 
 @router.patch("/sessions/{session_id}")
@@ -203,11 +229,58 @@ def put_board(
     session_id: str,
     body: BoardIn,
     db: Session = Depends(get_db),
+    ports: MockPorts = Depends(ports_dep),
     principal: Principal = Depends(require_roles("owner", "teacher", "assistant", "student")),
 ):
     s = _get(db, principal.workspace_id, session_id)
     sessions_svc.assert_board_access(db, principal, s, write=True)
-    return sessions_svc.board_put(s, body.strokes, body.updated_at)
+    return sessions_svc.board_put(
+        s,
+        body.strokes,
+        body.updated_at,
+        texts=body.texts,
+        placements=body.placements,
+        erases=body.erases,
+        remove_placement_ids=body.remove_placement_ids,
+        db=db,
+        ports=ports,
+        workspace_id=principal.workspace_id,
+    )
+
+
+@router.post("/sessions/{session_id}/student-change")
+def student_change(
+    session_id: str,
+    body: StudentChangeIn,
+    db: Session = Depends(get_db),
+    ports: MockPorts = Depends(ports_dep),
+    principal: Principal = Depends(require_roles("student")),
+):
+    s = _get(db, principal.workspace_id, session_id)
+    ws = db.get(Workspace, principal.workspace_id)
+    sessions_svc.student_change(
+        db,
+        ports,
+        principal,
+        s,
+        action=body.action,
+        reason=body.reason,
+        starts_at=body.starts_at,
+        student_whatsapp_on=bool(ws.student_whatsapp) if ws else False,
+    )
+    return _session_out(db, s)
+
+
+@router.post("/sessions/{session_id}/board/library")
+def place_library(
+    session_id: str,
+    body: PlaceLibraryIn,
+    db: Session = Depends(get_db),
+    ports: MockPorts = Depends(ports_dep),
+    principal: Principal = Depends(require_roles("owner", "teacher", "student")),
+):
+    s = _get(db, principal.workspace_id, session_id)
+    return sessions_svc.place_library_item(db, ports, principal, s, body.content_id)
 
 
 @router.post("/sessions/{session_id}/start")
@@ -240,6 +313,7 @@ def get_record(
     return {
         "session": _session_out(db, s),
         "notes": rec.notes if rec else "",
+        "teacher_status": rec.teacher_status if rec else None,
         "attendance": [{"student_id": a.student_id, "status": a.status} for a in att],
         "capture": s.engagement or [],
     }
@@ -265,6 +339,7 @@ def patch_record(
         body.notes,
         body.attendance,
         bool(ws.student_whatsapp) if ws else False,
+        body.teacher_status,
     )
 
 

@@ -2,7 +2,6 @@
 
 import { useEffect, type ReactNode } from "react";
 import { CampusAtmosphere } from "@/components/CampusAtmosphere";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { applyTheme, readStoredTheme } from "@/lib/theme";
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -18,9 +17,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     <>
       <CampusAtmosphere />
       {children}
-      <div className="theme-dock">
-        <ThemeToggle />
-      </div>
     </>
   );
 }

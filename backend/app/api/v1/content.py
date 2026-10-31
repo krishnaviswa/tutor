@@ -8,6 +8,7 @@ from app.models.tables import ContentItem, Topic
 from app.ports.mocks import MockPorts
 from app.services.auth import Principal
 from app.services.internal_v2 import meta_of, put_meta
+from app.services import library as library_svc
 from app.services.progress import content_out
 
 router = APIRouter()
@@ -21,6 +22,14 @@ class ContentIn(BaseModel):
     kind: str | None = None
     playlist_ids: list[str] | None = None
     drip_at: str | None = None
+    file_kind: str | None = None
+    board: str | None = None
+    subject: str | None = None
+    unit: str | None = None
+    board_topic_id: str | None = None
+    subject_topic_id: str | None = None
+    unit_topic_id: str | None = None
+    session_id: str | None = None
 
 
 def _out(row: ContentItem, db: Session | None = None, *, lesson: bool = False) -> dict:
@@ -43,6 +52,24 @@ def create_content(
     ports: MockPorts = Depends(ports_dep),
     principal: Principal = Depends(require_roles("owner", "teacher")),
 ):
+    if body.file_kind:
+        row = library_svc.file_material(
+            db,
+            ports,
+            principal,
+            title=body.title,
+            body=body.body,
+            file_kind=body.file_kind,
+            storage_name=body.storage_path,
+            board=body.board,
+            subject=body.subject,
+            unit=body.unit,
+            board_topic_id=body.board_topic_id,
+            subject_topic_id=body.subject_topic_id,
+            unit_topic_id=body.unit_topic_id,
+            session_id=body.session_id,
+        )
+        return _out(row, db)
     if body.topic_id:
         topic = (
             db.query(Topic)

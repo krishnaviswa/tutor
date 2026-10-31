@@ -17,12 +17,19 @@ type Item = {
   playlist_ids?: string[];
   drip_at?: string | null;
   views?: number;
+  board_label?: string;
+  subject_label?: string;
+  unit_label?: string;
 };
 
 export function LibraryScreen() {
   const [rows, setRows] = useState<Item[]>([]);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [fileKind, setFileKind] = useState("pdf");
+  const [board, setBoard] = useState("");
+  const [subject, setSubject] = useState("");
+  const [unit, setUnit] = useState("");
   const [error, setError] = useState("");
   const [role, setRole] = useState<string>("student");
   const [busy, setBusy] = useState(false);
@@ -54,7 +61,14 @@ export function LibraryScreen() {
     try {
       await api("/api/v1/content", {
         method: "POST",
-        body: JSON.stringify({ title, body }),
+        body: JSON.stringify({
+          title,
+          body,
+          file_kind: fileKind,
+          board,
+          subject,
+          unit,
+        }),
       });
       setTitle("");
       setBody("");
@@ -79,6 +93,28 @@ export function LibraryScreen() {
             <span>Body</span>
             <textarea className="field__in" value={body} onChange={(e) => setBody(e.target.value)} rows={3} />
           </label>
+          <label className="field">
+            <span>File</span>
+            <select className="field__in" value={fileKind} onChange={(e) => setFileKind(e.target.value)}>
+              {["pdf", "png", "svg", "drawio", "docx", "pptx", "xlsx"].map((kind) => (
+                <option key={kind} value={kind}>
+                  {kind}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>Board label</span>
+            <input className="field__in" value={board} onChange={(e) => setBoard(e.target.value)} placeholder="CBSE" />
+          </label>
+          <label className="field">
+            <span>Subject</span>
+            <input className="field__in" value={subject} onChange={(e) => setSubject(e.target.value)} />
+          </label>
+          <label className="field">
+            <span>Unit</span>
+            <input className="field__in" value={unit} onChange={(e) => setUnit(e.target.value)} />
+          </label>
           <button className="hot hot--btn" type="button" disabled={busy || !title} onClick={() => void create()}>
             Add item
           </button>
@@ -97,32 +133,30 @@ export function LibraryScreen() {
         ))}
       </div>
       {shown.length === 0 ? (
-        <Empty>No content yet.</Empty>
+        <Empty>No lessons yet. A teacher can add one above.</Empty>
       ) : (
-        shown.map((it) => {
-          const pct = it.progress_pct ?? 0;
-          const kind = it.kind || "notes";
-          const dur = it.duration_label || "Open lesson";
-          return (
-            <Link key={it.id} href={`${catalogRoute("lesson")}?id=${it.id}`} className="hot hot--row">
-              <div className="gr">
-                <div className="t">{it.title}</div>
-                <div className="s muted">
-                  {kind} · {dur}
-                  {(it.playlist_ids || []).length ? ` · playlist ${it.playlist_ids?.length}` : ""}
-                  {it.drip_at ? ` · drip ${it.drip_at}` : ""}
-                  {it.views ? ` · ${it.views} views` : ""}
-                </div>
-                {pct > 0 ? (
-                  <div style={{ height: 4, background: "var(--sunk)", borderRadius: 2, marginTop: 6 }}>
-                    <b style={{ display: "block", height: "100%", width: `${pct}%`, background: "var(--tint)", borderRadius: 2 }} />
-                  </div>
-                ) : null}
-              </div>
-              {pct === 100 ? <span className="pill is-good">done</span> : null}
-            </Link>
-          );
-        })
+        <div className="lesson-grid">
+          {shown.map((it) => {
+            const pct = it.progress_pct ?? 0;
+            const kind = it.kind || "notes";
+            const dur = it.duration_label || "Open";
+            return (
+              <Link key={it.id} href={`${catalogRoute("lesson")}?id=${it.id}`} className="lesson-card">
+                <span className="k">{kind}</span>
+                <strong>{it.title}</strong>
+                <span className="muted">
+                  {dur}
+                  {it.board_label ? ` · ${it.board_label}` : ""}
+                  {it.subject_label ? ` · ${it.subject_label}` : ""}
+                  {it.unit_label ? ` · ${it.unit_label}` : ""}
+                </span>
+                <span className="bar" aria-hidden="true">
+                  <b style={{ width: `${Math.min(pct, 100)}%` }} />
+                </span>
+              </Link>
+            );
+          })}
+        </div>
       )}
     </>
   );

@@ -4,7 +4,14 @@ import { useEffect, useState, type FormEvent } from "react";
 import { api } from "@/lib/api";
 import { AppBar, Empty, Err } from "./bits";
 
-type Doubt = { id: string; body: string; status: string; answer?: string | null };
+type Doubt = {
+  id: string;
+  body: string;
+  status: string;
+  answer?: string | null;
+  clarified?: boolean;
+  notice_action?: string | null;
+};
 
 export function DoubtStudentScreen() {
   const [rows, setRows] = useState<Doubt[]>([]);
@@ -57,8 +64,36 @@ export function DoubtStudentScreen() {
           rows.map((r) => (
             <div key={r.id} className="card">
               <div className="t">{r.body}</div>
-              <div className="s muted">{r.status}</div>
+              <div className="s muted">{r.clarified || r.status === "answered" ? "Clarified" : r.status}</div>
               {r.answer ? <p style={{ marginTop: 8 }}>{r.answer}</p> : null}
+              {(r.clarified || r.status === "answered") && !r.notice_action ? (
+                <div className="row" style={{ marginTop: 8 }}>
+                  <button
+                    type="button"
+                    className="btn btn--sm"
+                    onClick={() =>
+                      void api(`/api/v1/doubts/${r.id}/notice`, {
+                        method: "POST",
+                        body: JSON.stringify({ action: "accept" }),
+                      }).then(load)
+                    }
+                  >
+                    Accept
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn--sm"
+                    onClick={() =>
+                      void api(`/api/v1/doubts/${r.id}/notice`, {
+                        method: "POST",
+                        body: JSON.stringify({ action: "ignore" }),
+                      }).then(load)
+                    }
+                  >
+                    Ignore
+                  </button>
+                </div>
+              ) : null}
             </div>
           ))
         )}

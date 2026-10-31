@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { api } from "@/lib/api";
+import { Dialog } from "@/components/Dialog";
 import { Empty, Err } from "./bits";
 
 type Question = {
@@ -119,8 +120,7 @@ export function QbankScreen() {
         </div>
       )}
       {open ? (
-        <div className="card" style={{ marginTop: 14 }}>
-          <h3 style={{ margin: 0 }}>{open.stem}</h3>
+        <Dialog title={open.stem} onClose={() => setOpen(null)}>
           {(open.choices || []).map((c) => (
             <div key={c} className={`qopt${c === open.answer ? " sel" : ""}`}>
               <i>✓</i>
@@ -128,7 +128,7 @@ export function QbankScreen() {
             </div>
           ))}
           <p className="muted">Answer: {open.answer}</p>
-        </div>
+        </Dialog>
       ) : null}
     </>
   );

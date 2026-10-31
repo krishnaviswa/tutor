@@ -152,8 +152,14 @@ export function ScheduleScreen() {
   }, [sessions, monday]);
 
   const availByWeekday = useMemo(() => {
-    const map: Record<string, boolean> = {};
-    for (const w of avail?.windows ?? []) map[w.weekday] = true;
+    const map: Record<string, { start: string; end: string }[]> = {};
+    for (const w of avail?.windows ?? []) {
+      if (!map[w.weekday]) map[w.weekday] = [];
+      map[w.weekday].push({ start: w.start, end: w.end });
+    }
+    for (const day of Object.keys(map)) {
+      map[day].sort((a, b) => a.start.localeCompare(b.start));
+    }
     return map;
   }, [avail]);
 
@@ -361,14 +367,24 @@ export function ScheduleScreen() {
       <div className="tblwrap">
         <div className="week">
           {weekDays.map((day, i) => {
-            const dim = showAvail && !availByWeekday[day.label];
+            const spans = availByWeekday[day.label] || [];
+            const dim = showAvail && spans.length === 0;
+            const gapNote = spans
+              .map((span, index) => {
+                const next = spans[index + 1];
+                return next && span.end < next.start ? `${span.end}–${next.start} closed` : "";
+              })
+              .filter(Boolean)
+              .join(" · ");
             return (
               <div key={day.ymd} className={dim ? "week__day is-off" : "week__day"}>
                 <div className="k" style={{ marginBottom: 8 }}>
                   {day.label} {dayNum(day.ymd)}
                   {showAvail && (
                     <span className="muted" style={{ marginLeft: 4 }}>
-                      {availByWeekday[day.label] ? "· free" : "· off"}
+                      {spans.length
+                        ? `· ${spans.map((span) => `${span.start}–${span.end}`).join(", ")}${gapNote ? ` · ${gapNote}` : ""}`
+                        : "· off"}
                     </span>
                   )}
                 </div>
@@ -414,9 +430,7 @@ export function ScheduleScreen() {
                     );
                   })
                 ) : (
-                  <div className="muted">
-                    —
-                  </div>
+                  <div className="muted">Open</div>
                 )}
               </div>
             );

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/lib/api";
+import { catalogRoute } from "@/lib/screens";
+import { Dialog } from "@/components/Dialog";
 import { Err } from "./bits";
 
 type StudentRow = {
@@ -55,6 +57,7 @@ export function RosterScreen() {
   const [inviteToken, setInviteToken] = useState("");
   const [role, setRole] = useState("teacher");
   const [saving, setSaving] = useState(false);
+  const [profile, setProfile] = useState<StudentRow | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -333,7 +336,7 @@ export function RosterScreen() {
               const shownPhone = s.phone || phones[s.id] || "—";
               const status = "active";
               return (
-                <tr key={s.id}>
+                <tr key={s.id} onClick={() => setProfile(s)} style={{ cursor: "pointer" }}>
                   <td>
                     <div className="row" style={{ gap: 8, flexWrap: "nowrap" }}>
                       <span className="av av--sm" style={{ background: avColor(s.display_name) }}>
@@ -384,6 +387,21 @@ export function RosterScreen() {
           </div>
         ))}
       </div>
+      {profile ? (
+        <Dialog title={profile.display_name} onClose={() => setProfile(null)}>
+          <div className="profile-meta">
+            <span className="pill">Student</span>
+            {cohortNamesFor(profile.id, cohorts).map((n) => (
+              <span key={n} className="pill is-good">{n}</span>
+            ))}
+          </div>
+          <p className="muted">Phone {profile.phone || phones[profile.id] || "not on file"}</p>
+          <p style={{ marginTop: 10 }}>On this workspace record. Attendance, practice, and doubts for this person stay on their timeline.</p>
+          <div style={{ marginTop: 16 }}>
+            <Link className="hot hot--btn" href={catalogRoute("timeline")}>Open their record</Link>
+          </div>
+        </Dialog>
+      ) : null}
       <div style={{ marginTop: 6 }}>
         <Link className="hot hot--btn" href="/app/faculty/cohort-builder">
           Add a cohort

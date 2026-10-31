@@ -293,5 +293,11 @@ export const CATALOG_SCREENS = [
     "title": "Staff availability",
     "route": "/app/faculty/availability",
     "role": "faculty"
+  },
+  {
+    "id": "profile",
+    "title": "Profile",
+    "route": "/app/faculty/profile",
+    "role": "faculty"
   }
 ] as const;

@@ -34,6 +34,7 @@ export function CohortChat({ cohortId, title }: { cohortId: string; title?: stri
   const [busy, setBusy] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [sendError, setSendError] = useState("");
+  const [delivery, setDelivery] = useState("");
   const listRef = useRef<HTMLUListElement>(null);
 
   const load = useCallback(async () => {
@@ -78,6 +79,7 @@ export function CohortChat({ cohortId, title }: { cohortId: string; title?: stri
         body: JSON.stringify({ body: text }),
       });
       setBody((current) => (current.trim() === text ? "" : current));
+      setDelivery("Sent");
       await load();
     } catch (err) {
       setSendError(err instanceof Error ? err.message : String(err));
@@ -135,7 +137,7 @@ export function CohortChat({ cohortId, title }: { cohortId: string; title?: stri
           />
         </label>
         <button className="studio-chat__send" type="submit" disabled={draftEmpty || busy} aria-busy={busy}>
-          Send
+          {busy ? "Sending" : delivery || "Send"}
         </button>
       </form>
     </section>

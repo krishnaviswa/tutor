@@ -85,13 +85,16 @@ export function DoubtTeacherScreen() {
         <div className="card">
           {sel ? (
             <>
-              <h3>{sel.body}</h3>
+              <div className="sb">
+                <h3>{sel.body}</h3>
+                <button type="button" className="btn btn--sm" onClick={() => setSel(null)}>Close</button>
+              </div>
               <label className="field">
                 <span>Answer</span>
                 <textarea className="field__in" value={answer} onChange={(e) => setAnswer(e.target.value)} rows={4} />
               </label>
               <button className="hot hot--btn" type="button" disabled={busy} onClick={() => void resolve()}>
-                Mark answered
+                Mark clarified
               </button>
             </>
           ) : (

@@ -132,6 +132,30 @@
     "tier": "spine"
   },
   {
+    "id": "person_profiles",
+    "tier": "spine"
+  },
+  {
+    "id": "faculty_admin_grants",
+    "tier": "spine"
+  },
+  {
+    "id": "teacher_supervisions",
+    "tier": "spine"
+  },
+  {
+    "id": "contact_grants",
+    "tier": "spine"
+  },
+  {
+    "id": "teacher_feedback",
+    "tier": "spine"
+  },
+  {
+    "id": "email_challenges",
+    "tier": "spine"
+  },
+  {
     "id": "announcements",
     "tier": "spine"
   },
@@ -149,22 +173,6 @@
   },
   {
     "id": "backlog_items",
-    "tier": "spine"
-  },
-  {
-    "id": "invoice_events",
-    "tier": "spine"
-  },
-  {
-    "id": "receipts",
-    "tier": "spine"
-  },
-  {
-    "id": "platform_subscriptions",
-    "tier": "spine"
-  },
-  {
-    "id": "platform_invoices",
     "tier": "spine"
   }
 ]
