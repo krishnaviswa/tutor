@@ -181,7 +181,7 @@ Workspace isolation on board, availability, and timeline. Cross-workspace id →
 
 ## Catalog copy (implement time, not this pass)
 
-When a human has said OK and a builder lands the behavior, update `shows` text for the screens in the table above through `scripts/build_catalog.py` contracts. Do not add a screen. Do not paste demo HTML into `product-viewer.html`. Demo `R['live-teacher']` / `R['live-student']` / `R['availability']` may gain the paint tools and multi-window editor so gold matches the wired UI. That is a builder task after the gate.
+When a human has said OK and a builder lands the behavior, update `shows` text for the screens in the table above through `scripts/build_catalog.py` contracts. Do not add a screen. Do not paste demo HTML into `product-book/product-viewer.html`. Demo `R['live-teacher']` / `R['live-student']` / `R['availability']` may gain the paint tools and multi-window editor so gold matches the wired UI. That is a builder task after the gate.
 
 ## Risks
 

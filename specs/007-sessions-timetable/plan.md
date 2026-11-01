@@ -9,7 +9,7 @@
 ## Stack
 
 No new stack. FastAPI thin routers + services (mock ports), SQLAlchemy 2 (`create_all`, no Alembic),
-Next.js 15 wired screens following `tutor-platform-demo.html`. pytest in-memory SQLite.
+Next.js 15 wired screens following `product-book/tutor-platform-demo.html`. pytest in-memory SQLite.
 
 ## Data model — `backend/app/models/tables.py`
 
@@ -84,7 +84,7 @@ New `backend/app/api/v1/availability.py`, registered in `app/factory.py` under `
 
 ## Catalog & demo
 
-- `tutor-platform-demo.html`: add `'sessions'` and `'availability'` to `var S` (`role:'faculty',
+- `product-book/tutor-platform-demo.html`: add `'sessions'` and `'availability'` to `var S` (`role:'faculty',
   frame:'web', mod:'B1', dom:'B'`), to `var WHY`, add `R['sessions']` / `R['availability']` renders
   (console screens via `cons('teacher', 'Schedule', main)`), and a step for each in the `t1`/`t2`
   `steps:[]` next to `schedule`. Add `staff_availability` handling to `R['schedule']` (cancelled row

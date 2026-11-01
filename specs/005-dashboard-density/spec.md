@@ -11,7 +11,7 @@
 
 004 wired all 47 catalog screens onto existing `/api/v1`. The routes work. The **picture of a running academy does not**. Wired dashboards return counts (`upcoming_sessions`, `attempts`, quota `used/cap`). Demo gold already shows named next class, due practice, attendance bars, at-risk students, receipts, and a parent marksheet. Compared with a coaching OS such as iSeekAcademy, the live app feels empty because it is empty — not because a 48th screen is missing.
 
-005 lifts **demo density** onto the **same screen ids** and the **same API paths**. Backend computes named operating facts from the existing ledger. Frontend renders them the way `tutor-platform-demo.html` already does. No new catalog screen. No marketplace. No live Razorpay. Biology / NEET remains an example tenant pack.
+005 lifts **demo density** onto the **same screen ids** and the **same API paths**. Backend computes named operating facts from the existing ledger. Frontend renders them the way `product-book/tutor-platform-demo.html` already does. No new catalog screen. No marketplace. No live Razorpay. Biology / NEET remains an example tenant pack.
 
 Human OK to specify this feature is the 2026-09-06 comparison chat. Implemented T7.1–T7.11; T7.12 Accept 2026-09-06.
 
@@ -65,7 +65,7 @@ Human OK to specify this feature is the 2026-09-06 comparison chat. Implemented 
 10. **Given** dashboard JSON, **when** it is produced, **then** it is computed in `services/` from existing tables (`scheduled_sessions`, `attendance`, `attempts`, `doubts`, `invoices`, `content_items`, `timeline_events`, `backlog_items`). Routers stay thin. No new syllabus tables.
 11. **Given** `python -m app.seed_cli --reset`, **when** a human logs in as exam-prep student/teacher/owner/parent, **then** every density field above has a non-empty example. Attendance for “present today” still comes from join/enter, not a fake pre-write of live class attendance.
 12. **Given** pytest, **when** 005 lands, **then** 002 + 003 suites stay green and `live_calls == 0`. New tests cover student/teacher/owner/parent density payloads.
-13. **Given** Accept, **when** 005 closes, **then** the same change updates `catalog/screens.json` `shows`, `README.md` §11–§12, `product-viewer.html` tiles, and `work-log.html`.
+13. **Given** Accept, **when** 005 closes, **then** the same change updates `catalog/screens.json` `shows`, `README.md` §11–§12, `product-book/product-viewer.html` tiles, and `product-book/work-log.html`.
 
 ## Out of scope
 

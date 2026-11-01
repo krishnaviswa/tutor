@@ -12,7 +12,7 @@ the transcript — back afterwards. This keeps video at **$0** to run (blueprint
 rooms or running speech-to-text ourselves both break that, so both stay out of v1 and the
 prototype.
 
-Companion screen: **Session video & transcript** in `tutor-platform-demo.html` (Teach stage). Two
+Companion screen: **Session video & transcript** in `product-book/tutor-platform-demo.html` (Teach stage). Two
 states — *generated Meet link* (default) and *use a Microsoft Teams link* — plus a transcript
 panel that stays empty until a provider file is imported.
 

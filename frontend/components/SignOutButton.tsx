@@ -9,13 +9,11 @@ export function SignOutButton({ className }: { className?: string }) {
       type="button"
       className={className ?? "signout"}
       onClick={() => {
-        clearToken();
-        // Full document navigation, not router.push: there is no server
-        // session to invalidate (stateless JWT in localStorage), and
-        // RoleChrome swallows /auth/me errors by defaulting to role
-        // "student" instead of redirecting. A hard nav guarantees no
-        // stale chrome/page state survives sign-out.
-        window.location.assign(catalogRoute("router"));
+        // Wait until the httpOnly cookie is cleared, then leave. A hard
+        // navigation drops the signed-in page so Back does not restore it.
+        void clearToken().then(() => {
+          window.location.assign(catalogRoute("router"));
+        });
       }}
     >
       Sign out

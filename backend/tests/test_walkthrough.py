@@ -1,8 +1,8 @@
 """Cross-role golden-path smoke test: teach -> bill -> pay -> parent visibility.
 
 Chains what the individual 002-007 suites only test in isolation, so a break in how the
-screens hand session/invoice ids to each other (see billing-subscription-plan.html /
-integrations-backlog-and-golden-path.html §2) shows up here instead of only in a live demo.
+screens hand session/invoice ids to each other (see product-book/billing-subscription-plan.html /
+product-book/integrations-backlog-and-golden-path.html §2) shows up here instead of only in a live demo.
 """
 
 from app.services.seed import PEOPLE_EXAM, WS_EXAM, cid

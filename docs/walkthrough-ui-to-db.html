@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI to Database Walkthrough</title>
+<style>
+:root{--bg:#fafaf7;--panel:#fff;--ink:#1c1f24;--mut:#606873;--line:#dcdfe4;--accent:#2457d6;--code:#f2f4f7;
+--fe:#d97706;--net:#7c3aed;--mw:#0891b2;--rt:#2457d6;--sv:#059669;--db:#be185d;--bad:#b42318}
+@media (prefers-color-scheme:dark){:root{--bg:#14161a;--panel:#1c1f26;--ink:#e8eaee;--mut:#9aa3af;--line:#2d333d;--accent:#6c93ff;--code:#12141a;
+--fe:#f59e0b;--net:#a78bfa;--mw:#22d3ee;--rt:#6c93ff;--sv:#34d399;--db:#f472b6;--bad:#f87171}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,Segoe UI,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.5rem;margin:0 0 4px}
+.sub{color:var(--mut);margin:0 0 18px}
+.tabs{display:flex;gap:8px;margin:0 0 14px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit}
+.tab[aria-selected=true]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);font-weight:600}
+.lanes{display:flex;gap:6px;margin:0 0 14px;flex-wrap:wrap}
+.lane{flex:1 1 110px;text-align:center;padding:8px 4px;border-radius:8px;border:2px solid var(--line);background:var(--panel);font-size:.82rem;color:var(--mut);transition:.15s}
+.lane b{display:block;color:var(--ink);font-size:.9rem}
+.lane.on{color:var(--ink);transform:translateY(-2px)}
+.grid{display:grid;grid-template-columns:260px 1fr;gap:16px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+.steps{border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden;align-self:start}
+.step{display:flex;gap:8px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;color:var(--ink);padding:9px 10px;cursor:pointer;font:inherit;font-size:.86rem}
+.step:last-child{border-bottom:0}
+.step i{font-style:normal;flex:0 0 22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.72rem;color:#fff}
+.step[aria-current=true]{background:var(--code);font-weight:600}
+.card{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:16px 18px}
+.card h2{margin:0 0 4px;font-size:1.15rem}
+.tag{display:inline-block;font-size:.74rem;padding:2px 8px;border-radius:99px;color:#fff;margin-right:6px}
+.file{font:.82rem ui-monospace,Consolas,monospace;color:var(--mut)}
+pre{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:10px 12px;overflow:auto;font:.8rem/1.5 ui-monospace,Consolas,monospace;margin:10px 0}
+pre .hl{background:color-mix(in srgb,var(--accent) 22%,transparent);display:block;margin:0 -12px;padding:0 12px}
+.state{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+@media(max-width:600px){.state{grid-template-columns:1fr}}
+.state div{border:1px dashed var(--line);border-radius:8px;padding:8px 10px;font-size:.82rem}
+.state b{display:block;color:var(--mut);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em}
+.py{border-left:3px solid var(--accent);padding:6px 12px;margin:12px 0 0;background:var(--code);border-radius:0 8px 8px 0;font-size:.88rem}
+.nav{display:flex;gap:8px;margin-top:14px}
+button.nb{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 16px;border-radius:8px;cursor:pointer;font:inherit}
+button.nb:disabled{opacity:.4;cursor:default}
+.err{margin-top:12px;font-size:.84rem;color:var(--bad)}
+h3{margin:28px 0 8px}
+table{border-collapse:collapse;width:100%;font-size:.85rem}
+td,th{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:var(--code)}
+code{font:.82rem ui-monospace,Consolas,monospace;background:var(--code);padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>UI to Database Walkthrough</h1>
+<p class="sub">Click through one real request, layer by layer. Every file and line was read from this repo; login payloads were captured by running the app. Companion: <code>walkthrough-ui-to-db.md</code> (Mermaid).</p>
+
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" data-flow="login" aria-selected="true">A. Sign in (username + password)</button>
+  <button class="tab" role="tab" data-flow="start" aria-selected="false">B. Start class (an authenticated call)</button>
+</div>
+<div class="lanes" id="lanes"></div>
+<div class="grid">
+  <div class="steps" id="steps"></div>
+  <div>
+    <div class="card" id="card"></div>
+    <div class="nav"><button class="nb" id="prev">Back</button><button class="nb" id="next">Next</button></div>
+  </div>
+</div>
+
+<h3>Python concepts, where each lives</h3>
+<table>
+<tr><th>Concept</th><th>Where</th><th>Role</th></tr>
+<tr><td>App factory</td><td><code>app/main.py:3</code> → <code>factory.py:37</code></td><td>Builds <code>FastAPI()</code>, middleware, DB init and seed, mounts routers under <code>/api/v1</code>. Uvicorn serves <code>app.main:app</code>.</td></tr>
+<tr><td>Middleware order</td><td><code>factory.py:54-61</code></td><td>Last added is outermost: CORS, then RequestId, then Idempotency, then the router.</td></tr>
+<tr><td>Pydantic model</td><td><code>auth.py:37 PasswordIn</code></td><td>Body schema. Invalid JSON shape gives 422 and your function never runs.</td></tr>
+<tr><td><code>Depends</code></td><td>function parameters</td><td>FastAPI runs the dependency first and injects its result.</td></tr>
+<tr><td><code>get_db</code></td><td><code>db.py:129</code></td><td>Opens a Session, yields it, commits after the endpoint returns, rolls back on exception. Endpoints only <code>flush()</code>.</td></tr>
+<tr><td><code>current_principal</code> / <code>require_roles</code></td><td><code>api/v1/deps.py:54 / :97</code></td><td>JWT to <code>Principal</code>, module gate, role gate (401, 404, 403).</td></tr>
+<tr><td>Service</td><td><code>app/services/*.py</code></td><td>The business logic. Routers stay thin.</td></tr>
+<tr><td>Model</td><td><code>app/models/tables.py</code></td><td>ORM tables, each with <code>workspace_id</code>.</td></tr>
+<tr><td>Port</td><td><code>app/ports/mocks.py</code></td><td>SMS, email, video edges. The mock appends to a list and never calls a vendor.</td></tr>
+</table>
+
+<h3>Follow any other button</h3>
+<ol>
+<li>Find the <code>api("/api/v1/...")</code> call in <code>frontend/components/**</code>.</li>
+<li>Search <code>backend/app/api/v1</code> for the matching <code>@router.&lt;verb&gt;("...")</code>.</li>
+<li>Read the signature: body model, <code>require_roles</code>, <code>get_db</code>.</li>
+<li>Follow the call into <code>services/&lt;topic&gt;.py</code>, then to the tables in <code>models/tables.py</code>.</li>
+<li>Run the backend and open <code>http://127.0.0.1:8000/docs</code> to try any endpoint by hand.</li>
+</ol>
+</div>
+
+<script>
+const C={fe:'var(--fe)',net:'var(--net)',mw:'var(--mw)',rt:'var(--rt)',sv:'var(--sv)',db:'var(--db)'};
+const LANES=[['fe','Browser UI','React / Next.js'],['net','Network','fetch + CORS'],['mw','Middleware','factory.py'],['rt','Router','api/v1/*.py'],['sv','Service','services/*.py'],['db','Database','models + get_db']];
+const FLOWS={
+login:[
+{l:'fe',t:'1. Page mounts, no token',f:'frontend/components/LoginGate.tsx:60-87',
+ code:`useEffect(() => {\n  async function check() {\n    if (!getToken()) {\n      setAuthed(false);\n      setReady(true);   // show the form\n      return;\n    }\n    const me = await api("/api/v1/auth/me");  // token exists: verify it\n    ...`,hl:[2,3,4,5],
+ d:'LoginGate wraps every protected screen. With nothing in localStorage it shows the sign-in form. With a token it calls GET /auth/me and clears the token if the role does not match.',
+ py:'',br:'localStorage: tutoros_token = (none)',be:'nothing yet'},
+{l:'fe',t:'2. Click Sign in',f:'LoginGate.tsx:168-176',
+ code:`async function onPassword(e: FormEvent) {\n  e.preventDefault();\n  setBusy(true);\n  const ver = await api("/api/v1/auth/password", {\n    method: "POST",\n    body: JSON.stringify({ username: username.trim(), password, workspace_id: ws }),\n  });`,hl:[3,4,5,6],
+ d:'The form onSubmit handler stops the browser reload and sends the credentials as JSON through the shared api() helper.',
+ py:'',br:'React state: busy = true',be:'nothing yet'},
+{l:'fe',t:'3. api() builds the request',f:'frontend/lib/api.ts:8-25',
+ code:`export async function api(path, init = {}) {\n  const headers = new Headers(init.headers);\n  headers.set("Content-Type", "application/json");\n  const t = getToken();\n  if (t) headers.set("Authorization", \`Bearer \${t}\`);\n  const res = await fetch(\`\${API_BASE}\${path}\`, { ...init, headers });\n  ...\n  if (!res.ok) throw new Error(\`\${res.status} \${...}\`);\n  return body;\n}`,hl:[2,5,7],
+ d:'One wrapper for every call. API_BASE is http://127.0.0.1:8000 unless NEXT_PUBLIC_API_BASE is set. A non-2xx response throws, which is how errors reach the catch block in LoginGate.',
+ py:'',br:'No Authorization header yet (no token)',be:'nothing yet'},
+{l:'net',t:'4. Cross-origin request',f:'backend/app/factory.py:56-61',
+ code:`application.add_middleware(\n  CORSMiddleware,\n  allow_origins=["*"],\n  allow_methods=["*"],\n  allow_headers=["*"],\n)`,hl:[2,3,4,5],
+ d:'The UI runs on :3000 and the API on :8000, so the browser first sends an OPTIONS preflight. CORSMiddleware answers it, then the real POST goes through.',
+ py:'',br:'POST http://127.0.0.1:8000/api/v1/auth/password',be:'preflight answered by CORS'},
+{l:'mw',t:'5. Middleware chain',f:'factory.py:54-55, middleware/request_id.py',
+ code:`application.add_middleware(IdempotencyMiddleware)\napplication.add_middleware(RequestIdMiddleware)\napplication.add_middleware(CORSMiddleware, ...)\n\n# RequestIdMiddleware.dispatch\nrid = request.headers.get("x-request-id") or new_id()\nrequest.state.request_id = rid\nresponse = await call_next(request)\nresponse.headers["x-request-id"] = rid`,hl:[6,7,8,9],
+ d:'Each middleware wraps the next. Added last means outermost, so the order inward is CORS, RequestId, Idempotency, then the router. call_next() is the inner layers; code after it runs on the way out.',
+ py:'<b>Python idea:</b> <code>await call_next(request)</code> is a pause point. Everything before it is the inbound path, everything after is the outbound path.',br:'waiting',be:'request.state.request_id set'},
+{l:'rt',t:'6. Route matched',f:'factory.py:73 + api/v1/auth.py:79',
+ code:`# factory.py\napplication.include_router(auth.router, prefix="/api/v1")\n\n# auth.py\nrouter = APIRouter()\n@router.post("/auth/password")\ndef password_login(body: PasswordIn, db: Session = Depends(get_db)):`,hl:[2,6,7],
+ d:'The prefix from include_router plus the decorator path gives POST /api/v1/auth/password. The decorator registers the function at import time.',
+ py:'<b>Python idea:</b> a decorator registers the function; nothing runs until a matching request arrives.',br:'waiting',be:'matched password_login'},
+{l:'rt',t:'7. Validation and Depends',f:'auth.py:37-40, db.py:129-136',
+ code:`class PasswordIn(BaseModel):\n    username: str\n    password: str\n    workspace_id: str\n\ndef get_db():\n    db = session_factory()()\n    try:\n        yield db          # endpoint runs here\n        db.commit()\n    except Exception:\n        db.rollback(); raise\n    finally:\n        db.close()`,hl:[1,2,3,4,8,9],
+ d:'FastAPI parses the JSON into PasswordIn. If a field is missing it returns 422 before your code runs. It also runs get_db up to the yield and passes that Session in as db.',
+ py:'<b>Python idea:</b> a generator dependency. Code before <code>yield</code> is setup, code after is teardown. The commit happens after the function returns, so a raised exception becomes a rollback.',br:'waiting',be:'Session opened'},
+{l:'rt',t:'8. Look up the identity',f:'auth.py:80-92',
+ code:`ident = (\n    db.query(Identity)\n    .filter(Identity.kind == "username",\n            Identity.value == body.username.strip(),\n            Identity.workspace_id == body.workspace_id)\n    .first()\n)\nuser = db.get(User, ident.user_id) if ident else None\nif not user or not password_matches(user.password_hash or "", body.password):\n    raise HTTPException(401, "unknown username or password")`,hl:[2,3,4,5,8,9,10],
+ d:'The username is scoped to the workspace. Missing user and wrong password give the same message so it does not reveal which one failed.',
+ py:'<b>SQL issued:</b> <code>SELECT ... FROM identities WHERE kind=? AND value=? AND workspace_id=? LIMIT 1</code>, then a primary-key lookup on <code>users</code>.',br:'waiting',be:'SELECT identities, SELECT users'},
+{l:'sv',t:'9. Check the password',f:'backend/app/services/auth.py:20-27',
+ code:`def hash_password(password):\n    return hashlib.pbkdf2_hmac("sha256", password.encode(), _PASSWORD_SALT, 120_000).hex()\n\ndef password_matches(stored, password):\n    if not stored or not password:\n        return False\n    return hmac.compare_digest(stored, hash_password(password))`,hl:[2,7],
+ d:'The typed password is hashed with PBKDF2 and compared to users.password_hash in constant time. The seed stores the hash of "TutorDemo1" (seed.py:235).',
+ py:'',br:'waiting',be:'compare_digest(...)'},
+{l:'sv',t:'10. Find the role',f:'services/auth.py:94-116',
+ code:`def role_in_workspace(db, user_id, workspace_id):\n    mem = db.query(StaffMembership).filter(...).first()\n    if mem: return mem.role                     # owner | teacher | assistant\n    if db.query(Student)...first(): return "student"\n    if db.query(ParentLink)...accepted_at.isnot(None)...: return "parent"\n    raise HTTPException(403, "no membership")`,hl:[3,4,5],
+ d:'A user is just a person. Their role comes from which membership table has them in this workspace.',
+ py:'',br:'waiting',be:'role = "teacher"'},
+{l:'sv',t:'11. Mint the token',f:'services/auth.py:38-46, 129-140',
+ code:`token = jwt.encode(\n  {"sub": user_id, "workspace_id": workspace_id, "role": role, "jti": jti},\n  settings.jwt_secret, algorithm="HS256")\n\ndb.add(SessionAuth(workspace_id=..., user_id=user.id, role=role, token_jti=jti))\ndb.flush()\nreturn token`,hl:[1,2,3,5,6],
+ d:'The JWT carries who, which workspace, and which role. A sessions_auth row records the jti. The token has no expiry, and the stored jti is not checked on later requests, so logout is client-side only.',
+ py:'<b>flush vs commit:</b> flush sends the INSERT inside the open transaction; nothing is permanent until get_db commits.',br:'waiting',be:'INSERT sessions_auth (uncommitted)'},
+{l:'db',t:'12. Return, commit, respond',f:'auth.py:95, db.py:129-136',
+ code:`return {"token": token, "role": role, "workspace_id": body.workspace_id}\n\n# back in get_db after the endpoint returns:\ndb.commit()\ndb.close()`,hl:[1,4],
+ d:'FastAPI serialises the returned dict to JSON. RequestId adds x-request-id on the way out. The commit makes the sessions_auth row permanent.',
+ py:'<b>Real captured response:</b><br><code>200 {"token":"eyJ...","role":"teacher","workspace_id":"aaaaaaaa-0001-..."}</code>',br:'waiting',be:'COMMIT; row in sessions_auth'},
+{l:'fe',t:'13. Store token, show app',f:'LoginGate.tsx:177-182, lib/session.ts:35',
+ code:`if (ver.role && !allowedRoles.includes(ver.role)) {\n  setError("That account is a different role...");\n  return;\n}\nsetToken(ver.token);   // localStorage.setItem("tutoros_token", ...)\nsetAuthed(true);       // re-render: return <>{children}</>`,hl:[5,6],
+ d:'The token is saved in localStorage, which api() reads for every later call. setAuthed(true) makes LoginGate render the protected screen.',
+ py:'',br:'localStorage: tutoros_token = eyJ... ; authed = true',be:'idle'},
+],
+start:[
+{l:'fe',t:'1. Teacher clicks Start class',f:'frontend/components/wired/LiveTeacherScreen.tsx:129',
+ code:`api(\`/api/v1/sessions/\${sessionId}/start\`, { method: "POST" })\n  .then(() => setStarted("Class started. People in this class can see the notice."))\n  .catch((err) => setError(explainLiveError(err)))\n  .finally(() => setBusy(false));`,hl:[1],
+ d:'Same api() helper as login, but now getToken() finds the JWT, so it adds Authorization: Bearer <token>.',
+ py:'',br:'Authorization: Bearer eyJ...',be:'nothing yet'},
+{l:'mw',t:'2. Middleware, then route',f:'api/v1/sessions.py:324-333',
+ code:`@router.post("/sessions/{session_id}/start")\ndef start_session(\n    session_id: str,\n    db: Session = Depends(get_db),\n    principal: Principal = Depends(require_roles("owner", "teacher", "assistant")),\n):`,hl:[1,3,5],
+ d:'{session_id} in the path becomes the session_id argument. Two dependencies are resolved before the body runs: the DB session and the authorised caller.',
+ py:'<b>Python idea:</b> <code>require_roles("owner","teacher","assistant")</code> is called at import time and returns an inner function, which is what <code>Depends</code> stores (a closure).',br:'waiting',be:'matched'},
+{l:'rt',t:'3. Who is calling? (JWT)',f:'api/v1/deps.py:54-74',
+ code:`def current_principal(request, db=Depends(get_db), authorization: Annotated[str|None, Header()] = None):\n    if not authorization or not authorization.lower().startswith("bearer "):\n        raise HTTPException(401, "sign in")\n    payload = decode_jwt(authorization.split(" ", 1)[1].strip())\n    user = db.get(User, payload["sub"])\n    principal = Principal(user_id=user.id, workspace_id=payload["workspace_id"],\n                          role=payload["role"], display_name=user.display_name)\n    _g1(db, request.url.path, principal)\n    return principal`,hl:[2,3,4,5,6,8],
+ d:'The Authorization header is injected from the HTTP header. decode_jwt verifies the signature. The workspace and role come from the signed token, never from the request body, which is what keeps tenants apart.',
+ py:'<b>Errors:</b> no header gives 401 "sign in"; bad signature gives 401 "invalid session"; deleted user gives 401 "unknown user".',br:'waiting',be:'SELECT users WHERE id = sub'},
+{l:'rt',t:'4. Module gate and role gate',f:'deps.py:76-94, 97-103',
+ code:`# _g1: ("/api/v1/sessions", "B1") in MODULE_FOR_PATH_PREFIX\nif path.startswith(prefix) and mod not in modules:\n    raise HTTPException(404, "module off")\n\ndef require_roles(*roles):\n    def _inner(principal=Depends(current_principal)):\n        if principal.role not in roles:\n            raise HTTPException(403, "forbidden")\n        return principal\n    return _inner`,hl:[2,3,7,8],
+ d:'The workspace must have module B1 (Schedule) switched on, and for a teacher the owner must have allowed it for them. Then the role must be in the allowed list.',
+ py:'',br:'waiting',be:'SELECT feature_flags, workspaces, staff_memberships'},
+{l:'rt',t:'5. Load the class, workspace-scoped',f:'sessions.py:82-90, 324-333',
+ code:`s = _get(db, principal.workspace_id, session_id)\n# _get: query(ScheduledSession).filter(id == session_id,\n#                                       workspace_id == principal.workspace_id)\n# 404 "session" if missing\nsessions_svc.assert_can_change_session(db, principal, s)\nreturn sessions_svc.start_session(db, principal.workspace_id, s, principal.user_id)`,hl:[1,5,6],
+ d:'The router does only loading and delegating. A session id from another workspace is a 404, not a 403, so it does not even confirm it exists.',
+ py:'',br:'waiting',be:'SELECT scheduled_sessions'},
+{l:'sv',t:'6. Authorise the change',f:'backend/app/services/sessions.py:276-282',
+ code:`def assert_can_change_session(db, principal, s):\n    if caller_is_owner(db, principal):\n        return\n    if principal.role in ("teacher", "assistant") and s.teacher_user_id == principal.user_id:\n        return\n    raise HTTPException(403, CLASS_CHANGE_DENIED)`,hl:[2,4,6],
+ d:'The owner can change any class. A teacher or assistant can change only a class assigned to them.',
+ py:'',br:'waiting',be:'maybe SELECT staff_memberships'},
+{l:'sv',t:'7. Business logic',f:'services/sessions.py:473-501',
+ code:`if s.started_at is not None:\n    return {..., "idempotent": True, ...}      # second click is harmless\ns.started_at = utcnow()                         # ORM change tracked\nstudents = affected_students(db, s)\nfor sid in students:\n    ev = timeline.append(db, workspace_id, sid, "session.started", body, actor_user_id)\nnotify.deliver_in_app(db, workspace_id, body, students, event_id=f"{s.id}:session.started")\ndb.flush()`,hl:[1,2,3,6,7],
+ d:'It sets started_at, writes one timeline event per affected student ("Timeline is the ledger"), and creates in-app notices. It does not call any video or SMS vendor.',
+ py:'<b>Python idea:</b> assigning <code>s.started_at</code> on an ORM object is enough; SQLAlchemy emits the UPDATE at flush.',br:'waiting',be:'UPDATE scheduled_sessions; INSERT timeline_events x N; INSERT notification_deliveries'},
+{l:'db',t:'8. Commit and respond',f:'db.py:129-136',
+ code:`return {"session_id": s.id, "started_at": ..., "idempotent": False, "timeline_event_ids": event_ids}\n# get_db: db.commit()  (all writes in one transaction)`,hl:[2],
+ d:'Everything above is one transaction. If any step raised, get_db would roll all of it back, so there is never a half-started class.',
+ py:'',br:'waiting',be:'COMMIT'},
+{l:'fe',t:'9. UI updates',f:'LiveTeacherScreen.tsx:131',
+ code:`.then(() => setStarted("Class started. People in this class can see the notice."))\n.catch((err) => setError(explainLiveError(err)))   // 401/403/404/409 land here`,hl:[1],
+ d:'A 2xx resolves .then and the message shows. Any HTTPException became an Error("403 {...}") in api() and lands in .catch.',
+ py:'',br:'started message shown',be:'idle'},
+]};
+const ERRS={login:'Failure paths: wrong credentials 401 "unknown username or password"; missing JSON field 422; unknown role/membership 403 "no membership"; role not allowed on this screen is rejected client-side.',start:'Failure paths: no/bad token 401; module off 404; wrong role 403; other workspace 404; not your class 403.'};
+let flow='login',i=0;
+const $=id=>document.getElementById(id);
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function render(){
+ const S=FLOWS[flow],s=S[i];
+ $('lanes').innerHTML=LANES.map(([k,n,sub])=>`<div class="lane ${k===s.l?'on':''}" style="${k===s.l?`border-color:${C[k]}`:''}"><b>${n}</b>${sub}</div>`).join('');
+ $('steps').innerHTML=S.map((x,j)=>`<button class="step" data-i="${j}" ${j===i?'aria-current="true"':''}><i style="background:${C[x.l]}">${j+1}</i><span>${esc(x.t.replace(/^\d+\.\s*/,''))}</span></button>`).join('');
+ const lines=esc(s.code).split('\n').map((ln,n)=>s.hl.includes(n+1)?`<span class="hl">${ln||' '}</span>`:ln+'\n').join('');
+ const lane=LANES.find(l=>l[0]===s.l)[1];
+ $('card').innerHTML=`<h2>${esc(s.t)}</h2><span class="tag" style="background:${C[s.l]}">${lane}</span><span class="file">${esc(s.f)}</span><pre>${lines}</pre><p>${esc(s.d)}</p>${s.py?`<div class="py">${s.py}</div>`:''}<div class="state"><div><b>Browser</b>${esc(s.br)}</div><div><b>Backend / DB</b>${esc(s.be)}</div></div>${i===S.length-1?`<div class="err">${esc(ERRS[flow])}</div>`:''}`;
+ $('prev').disabled=i===0;$('next').disabled=i===S.length-1;
+}
+$('steps').onclick=e=>{const b=e.target.closest('.step');if(b){i=+b.dataset.i;render()}};
+$('prev').onclick=()=>{if(i>0){i--;render()}};
+$('next').onclick=()=>{if(i<FLOWS[flow].length-1){i++;render()}};
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{flow=t.dataset.flow;i=0;document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===t));render()});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click()});
+render();
+</script>
+</body>
+</html>

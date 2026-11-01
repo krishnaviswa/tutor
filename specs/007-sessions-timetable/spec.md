@@ -108,8 +108,8 @@ Human OK to implement is the 2026-09-10 plan chat (`.claude/plans/in-the-session
 14. Given `catalog/screens.json`, when anyone lists ids, then exactly 49 appear — the 47 plus
     `sessions` and `availability`; `python scripts/build_catalog.py` and
     `python scripts/build_role_html.py` regenerate cleanly.
-15. Given Accept, when 007 closes, then `README.md` §5–§7, `tutor-platform-architecture.html`,
-    `product-viewer.html`, and `work-log.html` name 007 and the two new screens.
+15. Given Accept, when 007 closes, then `README.md` §5–§7, `product-book/tutor-platform-architecture.html`,
+    `product-book/product-viewer.html`, and `product-book/work-log.html` name 007 and the two new screens.
 
 ## Out of scope
 

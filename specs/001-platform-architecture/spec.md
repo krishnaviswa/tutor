@@ -21,7 +21,7 @@ Before any app code, TutorOS needs a shared map so Cursor and Claude Code cannot
 ## Acceptance criteria
 
 1. **Given** the repo README, **when** I read the first 40 lines, **then** it states subject-neutral and that Biology/NEET/NCERT is an example tenant.
-2. **Given** `tutor-platform-architecture.html`, **when** I click Start → a role → a domain → a screen → Follow the call, **then** I see APIs, middleware, ports/entities, and Back returns one step.
+2. **Given** `product-book/tutor-platform-architecture.html`, **when** I click Start → a role → a domain → a screen → Follow the call, **then** I see APIs, middleware, ports/entities, and Back returns one step.
 3. **Given** the architecture Start view, **when** I look at example workspaces, **then** I see at least coaching, languages, and music — not Biology as the product.
 4. **Given** `catalog/screens.json`, **when** compared to demo `S`, **then** the 47 ids match, and each screen has Owner / Who / Why / How / When copied from demo `WHY`.
 5. **Given** WhatsApp in the plan, **when** I read role lists, **then** teacher, parent, and admin are wired; student is owner-gated default off.

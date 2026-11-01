@@ -26,7 +26,7 @@ Also: `npm run check-routes` — 47 catalog routes present. Catalog vs FastAPI: 
 | 16 Accept updates README, catalog, architecture, hub, work log | Pass | This Accept change |
 | 17 Optional Postgres; pytest SQLite | Pass | `conftest.py` `sqlite:///:memory:`; Docker not required to Accept |
 | 18 Biology/NEET example-only | Pass | Seeds are exam-prep / language / music; `docs/examples/` unchanged as requirements |
-| 19 HTML guide is documentation | Pass | `plan-viewer.html` + satellites remain docs, not a 48th screen |
+| 19 HTML guide is documentation | Pass | `product-book/plan-viewer.html` + satellites remain docs, not a 48th screen |
 
 ## Converge gaps (do not block Accept)
 

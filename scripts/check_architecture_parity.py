@@ -18,7 +18,7 @@ def fail(msg: str) -> None:
 
 
 def demo_ids() -> set[str]:
-    text = (ROOT / "tutor-platform-demo.html").read_text(encoding="utf-8")
+    text = (ROOT / "product-book" / "tutor-platform-demo.html").read_text(encoding="utf-8")
     block = re.search(r"var S=\{(.*?)\n\};", text, re.S)
     if not block:
         fail("demo.html: var S not found")
@@ -33,7 +33,7 @@ def main() -> int:
     if catalog_ids != d_ids:
         fail(f"catalog vs demo ids: only-catalog={sorted(catalog_ids-d_ids)} only-demo={sorted(d_ids-catalog_ids)}")
 
-    html = (ROOT / "tutor-platform-architecture.html").read_text(encoding="utf-8")
+    html = (ROOT / "product-book" / "tutor-platform-architecture.html").read_text(encoding="utf-8")
     if "catalog/embed.js" not in html:
         fail("architecture HTML must script-src catalog/embed.js")
     if "catalog/hub-chrome.js" not in html:
@@ -138,7 +138,7 @@ def main() -> int:
     if not (fd / "spec.md").exists():
         fail(f"missing {fd}/spec.md")
 
-    demo_text = (ROOT / "tutor-platform-demo.html").read_text(encoding="utf-8")
+    demo_text = (ROOT / "product-book" / "tutor-platform-demo.html").read_text(encoding="utf-8")
     if "var ROLE_ONLY=null;" not in demo_text:
         fail("demo.html must keep var ROLE_ONLY=null; (role children flip it)")
     import importlib.util
@@ -150,19 +150,19 @@ def main() -> int:
     assert _spec.loader is not None
     _spec.loader.exec_module(_mod)
     for role in _mod.ROLES:
-        path = ROOT / f"tutor-platform-role-{role}.html"
+        path = ROOT / "product-book" / f"tutor-platform-role-{role}.html"
         if not path.exists():
-            fail(f"missing {path.name} — run scripts/build_role_html.py")
+            fail(f"missing product-book/{path.name} — run scripts/build_role_html.py")
             continue
         expected = _mod.render_role(demo_text, role)
         actual = path.read_text(encoding="utf-8")
         if actual.replace("\r\n", "\n") != expected.replace("\r\n", "\n"):
             fail(f"{path.name} out of sync with demo — run scripts/build_role_html.py")
 
-    hub = ROOT / "product-viewer.html"
-    log = ROOT / "work-log.html"
+    hub = ROOT / "product-book" / "product-viewer.html"
+    log = ROOT / "product-book" / "work-log.html"
     if not hub.is_file():
-        fail("missing product-viewer.html hub")
+        fail("missing product-book/product-viewer.html hub")
     else:
         hub_text = hub.read_text(encoding="utf-8")
         for needle, label in (
@@ -176,13 +176,13 @@ def main() -> int:
         if "catalog/hub-chrome.js" not in hub_text:
             fail("product-viewer.html must load catalog/hub-chrome.js")
     if not log.is_file():
-        fail("missing work-log.html")
+        fail("missing product-book/work-log.html")
     elif "product-viewer.html" not in log.read_text(encoding="utf-8"):
         fail("work-log.html must link back to product-viewer.html")
     for arm, label in (
-        (ROOT / "tutor-platform-demo.html", "demo"),
-        (ROOT / "tutor-platform-architecture.html", "architecture"),
-        (ROOT / "tutor-platform-explorer.html", "explorer"),
+        (ROOT / "product-book" / "tutor-platform-demo.html", "demo"),
+        (ROOT / "product-book" / "tutor-platform-architecture.html", "architecture"),
+        (ROOT / "product-book" / "tutor-platform-explorer.html", "explorer"),
     ):
         if "product-viewer.html" not in arm.read_text(encoding="utf-8"):
             fail(f"{label} HTML must link back to product-viewer.html")

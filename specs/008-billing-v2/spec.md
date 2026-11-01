@@ -24,7 +24,7 @@ was still missing. It also confirmed a real gap: a session's end time is optiona
 not a verified actual one.
 
 This spec covers three scopes, all grounded in a source-level pass over `tables.py`, `owner.py`, `extras.py`,
-`internal_v2.py`, and `ports/mocks.py` (see `billing-subscription-plan.html` for the full trace):
+`internal_v2.py`, and `ports/mocks.py` (see `product-book/billing-subscription-plan.html` for the full trace):
 
 - **A — Platform subscription** (Axis A): give the tenant a real subscription — tier, trial, status,
   upgrade/downgrade/cancel — instead of only a quota dashboard.
@@ -180,8 +180,8 @@ genuinely new business rule (the review gate in story 18).
     still raises on a non-mock provider (ports stay mock, non-negotiable #8).
 24. Given `catalog/screens.json`, when anyone lists ids, then exactly the same 49 ids from 007 appear — this
     spec adds zero new screen ids.
-25. Given Accept, when 008 closes, then `README.md`, `tutor-platform-architecture.html`,
-    `product-viewer.html`, and `work-log.html` name 008 and every screen it extended.
+25. Given Accept, when 008 closes, then `README.md`, `product-book/tutor-platform-architecture.html`,
+    `product-book/product-viewer.html`, and `product-book/work-log.html` name 008 and every screen it extended.
 
 ## Clarifications
 
@@ -213,7 +213,7 @@ this spec can proceed without them:
    and small-cohort tutoring) — but this should be an explicit owner decision, possibly even a per-workspace
    or per-cohort toggle, before Architect sizes it.
 2. **Platform subscription tier names, prices, and entitlements (Epic A).** There is no existing
-   customer-facing pricing table anywhere in this repo. `tutor-platform-explorer.html` uses `starter` /
+   customer-facing pricing table anywhere in this repo. `product-book/tutor-platform-explorer.html` uses `starter` /
    `cohort` / `institute` as internal module-availability tier labels, which is a reasonable naming
    starting point, but has no attached price or quota entitlement per tier. Business needs to supply actual
    tier names, prices, and what each tier entitles (quota caps, seat counts) before this can be built —
@@ -224,7 +224,7 @@ this spec can proceed without them:
    second-approval requirement above some amount? Left unconstrained in this spec pending a business answer;
    the mock-port checkout has no real money movement to protect against yet, so this is lower urgency than
    items 1–2, but should be answered before Axis B's payment ports go live (see
-   `integrations-backlog-and-golden-path.html` §1, `payments-live` backlog group).
+   `product-book/integrations-backlog-and-golden-path.html` §1, `payments-live` backlog group).
 
 ## Out of scope
 
@@ -232,7 +232,7 @@ this spec can proceed without them:
   against a real settlement file — ports stay mock (non-negotiable #8); see the integrations backlog's
   `payments-live` group for that follow-on spec.
 - GST/tax invoicing, VAT/sales-tax, Terms of Service / Refund Policy publishing, DPA paperwork — legal/tax
-  work tracked in `billing-subscription-plan.html` §6, not a Spec Kit feature.
+  work tracked in `product-book/billing-subscription-plan.html` §6, not a Spec Kit feature.
 - Real teacher payouts to a bank rail, KYC/PAN collection — `payouts` stays a computed-in-app record, not a
   money-movement integration.
 - Per-teacher or per-subject rate cards — this spec is one rate per hourly cohort; a `rate_cards` table for
@@ -242,7 +242,7 @@ this spec can proceed without them:
 - Reusing QuotaGuard/usage meters for hourly revenue accounting — quotas remain a throttle, never a billing
   source (source plan §3 guardrail).
 - A 50th screen, any new screen id, custom roles, lifting the mock-port guard.
-- The `integrations-backlog-and-golden-path.html` walkthrough test, `BillingScreen.tsx` default-amount UX
+- The `product-book/integrations-backlog-and-golden-path.html` walkthrough test, `BillingScreen.tsx` default-amount UX
   fix, and other golden-path punch-list items — those are small enough to fold into whichever spec's tasks
   pick them up, but they are not user stories of this spec.
 
@@ -254,5 +254,5 @@ this spec can proceed without them:
       (hourly billing) with its own checklist/analyze pass given it is the highest-risk epic.
 - [ ] AC evidenced in `test-report.md`; 002–007 stay green; `live_calls == 0`.
 - [ ] Catalog stays 49 ids; role HTML regenerated; no new screen id introduced.
-- [ ] `README.md`, `tutor-platform-architecture.html`, `product-viewer.html`, `work-log.html` name 008 on
+- [ ] `README.md`, `product-book/tutor-platform-architecture.html`, `product-book/product-viewer.html`, `product-book/work-log.html` name 008 on
       Accept.

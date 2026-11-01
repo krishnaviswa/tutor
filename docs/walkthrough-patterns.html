@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI Operation Patterns</title>
+<style>
+:root{--bg:#fafaf7;--panel:#fff;--ink:#1c1f24;--mut:#606873;--line:#dcdfe4;--accent:#2457d6;--code:#f2f4f7;
+--fe:#d97706;--net:#7c3aed;--mw:#0891b2;--rt:#2457d6;--sv:#059669;--db:#be185d;--bad:#b42318}
+@media (prefers-color-scheme:dark){:root{--bg:#14161a;--panel:#1c1f26;--ink:#e8eaee;--mut:#9aa3af;--line:#2d333d;--accent:#6c93ff;--code:#12141a;
+--fe:#f59e0b;--net:#a78bfa;--mw:#22d3ee;--rt:#6c93ff;--sv:#34d399;--db:#f472b6;--bad:#f87171}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,Segoe UI,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.5rem;margin:0 0 4px}
+.sub{color:var(--mut);margin:0 0 16px}
+code{font:.82rem ui-monospace,Consolas,monospace;background:var(--code);padding:1px 5px;border-radius:4px}
+.layout{display:grid;grid-template-columns:270px 1fr;gap:16px;align-items:start}
+@media(max-width:860px){.layout{grid-template-columns:1fr}}
+.side{border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden}
+.side h4{margin:0;padding:9px 12px;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);border-bottom:1px solid var(--line)}
+.pat{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;color:var(--ink);padding:9px 12px;cursor:pointer;font:inherit}
+.pat:last-child{border-bottom:0}
+.pat small{display:block;color:var(--mut);font-size:.78rem}
+.pat b{font-size:.9rem}
+.pat .n{float:right;font-size:.74rem;color:var(--mut);border:1px solid var(--line);border-radius:99px;padding:0 7px}
+.pat[aria-current=true]{background:var(--code);box-shadow:inset 3px 0 0 var(--accent)}
+.views{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap}
+.vt{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:6px 13px;border-radius:8px;cursor:pointer;font:inherit;font-size:.88rem}
+.vt[aria-selected=true]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);font-weight:600}
+.card{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:16px 18px;margin-bottom:12px}
+.card h2{margin:0 0 4px;font-size:1.2rem}
+.card h3{margin:0 0 6px;font-size:1rem}
+.lead{color:var(--mut);margin:0 0 8px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.two{grid-template-columns:1fr}}
+ul{margin:4px 0;padding-left:20px}
+.tag{display:inline-block;font-size:.72rem;padding:1px 8px;border-radius:99px;color:#fff;margin-right:6px}
+.spine{display:inline-block;font-size:.7rem;padding:0 7px;border-radius:99px;border:1px solid var(--line);color:var(--mut);margin-left:6px}
+.flow{display:grid;grid-template-columns:230px 1fr;gap:14px}
+@media(max-width:800px){.flow{grid-template-columns:1fr}}
+.steps{border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden;align-self:start}
+.step{display:flex;gap:8px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;color:var(--ink);padding:8px 10px;cursor:pointer;font:inherit;font-size:.84rem}
+.step:last-child{border-bottom:0}
+.step i{font-style:normal;flex:0 0 22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.72rem;color:#fff}
+.step[aria-current=true]{background:var(--code);font-weight:600}
+.step.sp{opacity:.62}
+.file{font:.8rem ui-monospace,Consolas,monospace;color:var(--mut)}
+pre{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:10px 12px;overflow:auto;font:.79rem/1.5 ui-monospace,Consolas,monospace;margin:10px 0}
+pre .hl{background:color-mix(in srgb,var(--accent) 22%,transparent);display:block;margin:0 -12px;padding:0 12px}
+.nav{display:flex;gap:8px}
+button.nb{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:6px 14px;border-radius:8px;cursor:pointer;font:inherit}
+button.nb:disabled{opacity:.4;cursor:default}
+.hide-spine .sp{display:none}
+.opt{font-size:.84rem;color:var(--mut);margin:0 0 10px;display:flex;gap:6px;align-items:center}
+table{border-collapse:collapse;width:100%;font-size:.84rem}
+td,th{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+th{background:var(--code);position:sticky;top:0}
+td.c{text-align:center}
+.chip{display:inline-block;font-size:.68rem;padding:0 6px;border-radius:5px;border:1px solid var(--line);margin-right:3px;color:var(--mut)}
+.m{font:.72rem ui-monospace,Consolas,monospace;padding:1px 6px;border-radius:4px;background:var(--code)}
+input[type=search]{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;margin-bottom:10px}
+.scroll{max-height:520px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.pill{cursor:pointer}
+.pillrow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.pill{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:3px 10px;border-radius:99px;font:inherit;font-size:.8rem}
+.pill[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.note{font-size:.84rem;color:var(--mut);border-left:3px solid var(--line);padding:2px 10px;margin:8px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>UI Operation Patterns</h1>
+<p class="sub">All <b id="total"></b> API endpoints behind the UI fall into 8 patterns. Each pattern is one end-to-end shape: button, <code>api()</code>, middleware, router, dependencies, service, database, and back. Pick a pattern, then choose what to see. For a line-by-line login and "Start class" trace, open <a href="walkthrough-ui-to-db.html">walkthrough-ui-to-db.html</a>.</p>
+
+<div class="layout">
+  <nav class="side" id="side"><h4>Pick a pattern</h4></nav>
+  <main>
+    <div class="views" role="tablist" id="views"></div>
+    <div id="main"></div>
+  </main>
+</div>
+</div>
+
+<script>
+const ROUTES=[["POST","/auth/magic-link","auth","P1",0,0,1,0,0,0],["POST","/auth/otp/start","auth","P1",0,0,1,0,0,0],["POST","/auth/otp/verify","auth","P1",0,0,0,0,0,0],["POST","/auth/password","auth","P1",0,0,0,0,0,0],["GET","/join/{token}","join","P1",0,0,0,0,0,0],["GET","/analysis/{cohort_id}","assessments","P2",0,0,0,0,0,0],["GET","/announcements","comms","P2",0,0,0,0,0,0],["GET","/assignments","assignments","P2",0,0,0,0,0,0],["GET","/assignments/{assignment_id}/submissions","assignments","P2",0,0,0,0,0,0],["GET","/attempts/{attempt_id}","practice","P2",0,0,0,0,0,0],["GET","/audit","extras","P2",0,0,0,0,1,0],["GET","/auth/me","auth","P2",0,0,0,0,0,0],["GET","/automation-rules","extras","P2",0,0,0,0,0,0],["GET","/availability","availability","P2",0,0,0,0,0,0],["GET","/backlog","extras","P2",0,0,0,0,0,0],["GET","/billing/subscription","owner","P2",0,0,0,1,0,1],["GET","/cohorts","cohorts","P2",0,0,0,0,0,0],["GET","/content","content","P2",0,0,0,0,0,0],["GET","/content/{content_id}","content","P2",0,0,0,0,0,0],["GET","/content/{content_id}/slides","content","P2",0,0,0,0,0,0],["GET","/doubts","comms","P2",0,0,0,0,0,0],["GET","/doubts/queue","comms","P2",0,0,0,0,0,0],["GET","/faculty-admin/directory","faculty_admin","P2",0,0,0,0,0,0],["GET","/faculty-admin/me","faculty_admin","P2",0,0,0,0,0,0],["GET","/faculty-admin/planning","faculty_admin","P2",0,0,0,0,0,0],["GET","/faculty-admin/supervision","faculty_admin","P2",0,0,0,0,0,0],["GET","/feedback","feedback","P2",0,0,0,0,0,0],["GET","/integrations","extras","P2",0,0,0,0,0,0],["GET","/invoices/mine","extras","P2",0,0,0,0,0,0],["GET","/invoices/{invoice_id}","extras","P2",0,0,0,0,0,0],["GET","/me/dashboard","extras","P2",0,0,0,0,0,0],["GET","/notifications/prefs","extras","P2",0,0,0,0,0,0],["GET","/owner/console","owner","P2",0,0,0,0,0,1],["GET","/owner/faculty-access","owner","P2",0,0,0,0,0,0],["GET","/parent/home","parent","P2",0,0,0,0,0,0],["GET","/parent/open-hours","lesson_packs","P2",0,0,0,0,0,0],["GET","/payouts","extras","P2",0,0,0,0,0,0],["GET","/plans","extras","P2",0,0,0,0,0,0],["GET","/practice-sets","practice","P2",0,0,0,0,0,0],["GET","/practice-sets/{set_id}/play","practice","P2",0,0,0,0,0,0],["GET","/profile","profiles","P2",0,0,0,0,0,0],["GET","/profiles/{user_id}/card","profiles","P2",0,0,0,0,0,0],["GET","/questions","practice","P2",0,0,0,0,0,0],["GET","/reports","extras","P2",0,0,0,0,0,0],["GET","/reports/revenue","extras","P2",0,0,0,0,0,0],["GET","/sessions","sessions","P2",0,0,0,0,0,0],["GET","/sessions/{session_id}","sessions","P2",0,0,0,0,0,0],["GET","/sessions/{session_id}/record","sessions","P2",0,0,0,0,0,0],["GET","/sessions/{session_id}/video","sessions","P2",0,0,0,0,0,0],["GET","/staff","availability","P2",0,0,0,0,0,0],["GET","/students","students","P2",0,0,0,0,0,0],["GET","/students/{student_id}/lesson-pack","lesson_packs","P2",0,0,0,0,0,0],["GET","/students/{student_id}/timeline","students","P2",0,0,0,0,0,0],["GET","/teacher/dashboard","extras","P2",0,0,0,0,0,0],["GET","/templates","extras","P2",0,0,0,0,0,0],["GET","/terms","terms","P2",0,0,0,0,0,0],["GET","/tests","assessments","P2",0,0,0,0,0,0],["GET","/tests/{test_id}/run","assessments","P2",0,0,0,0,0,0],["GET","/threads","comms","P2",0,0,0,0,0,0],["GET","/topics","topics","P2",0,0,0,0,0,0],["GET","/usage","owner","P2",0,0,0,0,0,1],["GET","/workspaces/current","workspaces","P2",0,0,0,0,0,0],["PATCH","/analysis/{finding_id}/action","assessments","P3",0,0,0,0,0,0],["POST","/assignments","assignments","P3",0,0,0,0,0,0],["POST","/billing/renewals","owner","P3",0,0,0,0,1,0],["POST","/cohorts","cohorts","P3",0,0,0,0,0,0],["PATCH","/cohorts/{cohort_id}","cohorts","P3",0,0,0,0,0,0],["POST","/cohorts/{cohort_id}/enrollments/{student_id}/plan","cohorts","P3",0,0,0,0,0,0],["POST","/data-export","extras","P3",0,0,0,0,0,0],["POST","/doubts/{doubt_id}/notice","comms","P3",0,0,0,0,0,0],["POST","/faculty-admin/contact-grants","faculty_admin","P3",0,0,0,0,0,0],["DELETE","/faculty-admin/contact-grants/{user_id}","faculty_admin","P3",0,0,0,0,0,0],["POST","/faculty-admin/grants","faculty_admin","P3",0,0,0,0,0,0],["POST","/faculty-admin/succession","faculty_admin","P3",0,0,0,0,0,0],["POST","/faculty-admin/supervision","faculty_admin","P3",0,0,0,0,0,0],["POST","/feedback","feedback","P3",0,0,0,0,0,0],["POST","/invoices/hourly","extras","P3",0,0,0,0,1,0],["PUT","/notifications/prefs","extras","P3",0,0,0,0,0,0],["POST","/owner/enquiries","lesson_packs","P3",0,0,0,0,0,0],["POST","/parent-links","parent","P3",0,0,0,0,0,0],["POST","/parent/bookings","lesson_packs","P3",0,0,0,0,0,0],["POST","/practice-sets","practice","P3",0,0,0,0,0,0],["PUT","/profile","profiles","P3",0,0,0,0,0,0],["DELETE","/profiles/{user_id}","profiles","P3",0,0,0,0,0,0],["PATCH","/profiles/{user_id}","profiles","P3",0,0,0,0,0,0],["POST","/questions","practice","P3",0,0,0,0,0,0],["POST","/reports/export","extras","P3",0,0,0,0,0,0],["POST","/sessions","sessions","P3",0,0,0,0,0,0],["POST","/sessions/{session_id}/handoff","handoff","P3",0,0,0,0,0,0],["POST","/sessions/{session_id}/handoff/revert","handoff","P3",0,0,0,0,0,0],["POST","/students","students","P3",0,0,0,0,0,0],["POST","/students/import","students","P3",0,0,0,0,0,0],["POST","/tests","assessments","P3",0,0,0,0,0,0],["POST","/threads/{thread_id}/messages","comms","P3",0,0,0,0,0,0],["POST","/workspaces","workspaces","P3",0,0,0,0,0,0],["POST","/announcements","comms","P4",1,1,0,0,1,1],["POST","/assignments/{assignment_id}/grade","assignments","P4",1,1,0,0,1,1],["POST","/doubts","comms","P4",1,1,0,0,1,1],["PATCH","/doubts/{doubt_id}","comms","P4",1,1,0,1,1,1],["POST","/invoices","extras","P4",1,0,0,0,0,0],["POST","/invoices/{invoice_id}/refund","extras","P4",1,0,0,1,1,0],["POST","/join/{token}/enter","join","P4",1,0,0,1,0,0],["POST","/payments/checkout","extras","P4",1,0,1,1,0,0],["POST","/practice-sets/{set_id}/attempt","practice","P4",1,1,0,0,1,1],["PATCH","/sessions/{session_id}","sessions","P4",1,1,0,1,1,1],["POST","/sessions/{session_id}/engagement","sessions","P4",1,1,0,0,0,0],["PATCH","/sessions/{session_id}/record","sessions","P4",1,1,0,1,1,1],["POST","/sessions/{session_id}/start","sessions","P4",1,1,0,0,0,0],["POST","/sessions/{session_id}/student-change","sessions","P4",1,1,0,1,1,1],["POST","/tests/{test_id}/submit","assessments","P4",1,1,0,0,1,1],["POST","/backlog/{item_id}/book","extras","P5",0,0,0,1,0,0],["POST","/billing/subscription/cancel","owner","P5",0,0,0,1,1,0],["POST","/billing/subscription/pause","owner","P5",0,0,0,1,1,0],["POST","/billing/subscription/resume","owner","P5",0,0,0,1,1,0],["POST","/billing/subscription/tier","owner","P5",0,0,0,1,1,0],["POST","/cohorts/{cohort_id}/enrollments/{student_id}/cancel","cohorts","P5",0,0,0,1,1,0],["POST","/invoices/{invoice_id}/approve","extras","P5",0,0,0,1,1,0],["POST","/parent-links/{token}/accept","parent","P5",0,0,0,1,0,0],["POST","/payouts/{payout_id}/advance","extras","P5",0,0,0,1,1,0],["POST","/content","content","P6",0,0,1,0,0,1],["POST","/integrations/{name}/connect","extras","P6",0,0,1,0,0,0],["POST","/profile/step-up","profiles","P6",0,0,1,0,0,1],["POST","/sessions/{session_id}/board/library","sessions","P6",0,0,1,0,0,1],["POST","/sessions/{session_id}/video-link","sessions","P6",0,0,1,0,0,0],["PATCH","/automation-rules/{rule_id}","extras","P7",0,0,0,0,0,0],["PATCH","/billing/quotas","owner","P7",0,0,0,0,0,1],["POST","/billing/whatsapp-pause","owner","P7",0,0,0,0,0,0],["PUT","/owner/faculty-access/{user_id}","owner","P7",0,0,0,0,0,0],["PUT","/staff/{user_id}/availability","availability","P7",0,0,0,0,0,0],["PATCH","/workspaces/current","workspaces","P7",0,0,0,0,0,0],["PATCH","/workspaces/current/branding","workspaces","P7",0,0,0,0,0,0],["POST","/workspaces/current/template","extras","P7",0,0,0,0,0,0],["GET","/cohorts/{cohort_id}/messages","cohorts","P8",0,0,0,0,0,0],["POST","/cohorts/{cohort_id}/messages","cohorts","P8",0,0,0,0,0,0],["GET","/notifications/inbox","extras","P8",0,1,0,0,0,0],["GET","/sessions/{session_id}/board","sessions","P8",0,0,0,0,0,0],["PUT","/sessions/{session_id}/board","sessions","P8",0,0,1,0,0,1],["GET","/sessions/{session_id}/live","sessions","P8",0,0,0,0,0,0]];
+// [method, path, module, pattern, timeline, notify, port, statusChange, audit, quota]
+const LAYERS={fe:['Browser UI','var(--fe)'],net:['Network / api()','var(--net)'],mw:['Middleware + deps','var(--mw)'],rt:['Router','var(--rt)'],sv:['Service','var(--sv)'],db:['DB / Port','var(--db)']};
+
+const PATTERNS=[
+{id:'P1',name:'Public sign-in',tag:'No token yet; ends by minting one',
+ what:'The only calls made without a JWT. They check who you are and hand back a token, which the UI stores for every later call.',
+ front:'A form submit that calls <code>api()</code> and then <code>setToken()</code>.',back:'No <code>current_principal</code> dependency. Looks up Identity/User, then <code>issue_session()</code>. Public GET <code>/join/{token}</code> also lives here.',
+ never:['No Authorization header is sent','No workspace scoping from a token; the workspace id comes from the request body','Role is decided by membership tables, not by the request'],
+ varies:['Password, OTP (SMS via mock port), or magic link (mock email)','Which membership table decides the role'],
+ steps:[
+ {l:'fe',t:'Form submit',f:'frontend/components/LoginGate.tsx:168-176',code:'async function onPassword(e) {\n  e.preventDefault();\n  setBusy(true);\n  const ver = await api("/api/v1/auth/password", {\n    method: "POST",\n    body: JSON.stringify({ username, password, workspace_id: ws }),\n  });',hl:[4,5,6],d:'Handler stops the page reload, sets busy, and posts JSON through the shared helper.'},
+ {l:'net',t:'api() with no token',f:'frontend/lib/api.ts:8-25',code:'const t = getToken();\nif (t) headers.set("Authorization", `Bearer ${t}`);   // skipped: no token yet\nconst res = await fetch(`${API_BASE}${path}`, { ...init, headers });',hl:[2],d:'Cross-origin call to the API on :8000. CORS middleware answers the preflight.'},
+ {l:'mw',t:'Middleware, no auth gate',f:'backend/app/factory.py:54-61',code:'application.add_middleware(IdempotencyMiddleware)\napplication.add_middleware(RequestIdMiddleware)\napplication.add_middleware(CORSMiddleware, allow_origins=["*"], ...)',hl:[],d:'Outermost is CORS, then RequestId, then Idempotency. There is no principal dependency on these routes.'},
+ {l:'rt',t:'Validate body, open DB',f:'backend/app/api/v1/auth.py:37-40, 79-80',code:'class PasswordIn(BaseModel):\n    username: str\n    password: str\n    workspace_id: str\n\n@router.post("/auth/password")\ndef password_login(body: PasswordIn, db: Session = Depends(get_db)):',hl:[6,7],d:'A missing field is a 422 before the function runs.'},
+ {l:'sv',t:'Verify and find the role',f:'backend/app/api/v1/auth.py:80-93, services/auth.py:24, 94',code:'user = db.get(User, ident.user_id) if ident else None\nif not user or not password_matches(user.password_hash or "", body.password):\n    raise HTTPException(401, "unknown username or password")\nrole = role_in_workspace(db, user.id, body.workspace_id)',hl:[2,3,4],d:'PBKDF2 compare in constant time, then staff membership, student, or accepted parent link decides the role.'},
+ {l:'db',t:'Mint token, write session row',f:'backend/app/services/auth.py:129-140',code:'token, jti = encode_jwt(user.id, workspace_id, role)\ndb.add(SessionAuth(workspace_id=..., user_id=user.id, role=role, token_jti=jti))\ndb.flush()\nreturn token',hl:[1,2],d:'JWT holds sub, workspace_id, role, jti. The row is committed by get_db after the handler returns. No expiry is set.'},
+ {l:'fe',t:'Store token, show the app',f:'LoginGate.tsx:177-182, lib/session.ts:35',code:'setToken(ver.token);   // localStorage "tutoros_token"\nsetAuthed(true);       // render <>{children}</>',hl:[1],d:'From now on every api() call attaches the Bearer token, which is what moves you into the other seven patterns.'}],
+ notes:['<b>Sim behavior:</b> <code>/auth/magic-link</code> issues the token immediately and only records a mock email. <code>/auth/otp/verify</code> accepts the configured code (<code>000000</code> by default).']},
+
+{id:'P2',name:'Read a screen',tag:'GET: list, detail, dashboard',
+ what:'A screen loads data when it opens. The handler checks who you are, queries only your workspace, shapes the rows, and returns JSON. Nothing is written.',
+ front:'<code>useEffect(() =&gt; load(), [])</code> calling <code>api("/api/v1/...")</code>, often with <code>Promise.all</code>, then <code>setRows</code>.',back:'<code>GET</code> with <code>require_roles(...)</code> and <code>db.query(...).filter(workspace_id == principal.workspace_id)</code>.',
+ never:['No commit has anything to write','workspace_id always comes from the token','Responses are plain dicts shaped by an <code>_out()</code> helper'],
+ varies:['Role-based narrowing: students only see their own rows','Path or query params (<code>/students/{id}/timeline</code>, <code>?scope=</code>)','Aggregates (<code>/me/dashboard</code>, <code>/reports/*</code>)'],
+ steps:[
+ {l:'fe',t:'Screen mounts and loads',f:'frontend/components/wired/AnnounceScreen.tsx:48-58',code:'function load() {\n  Promise.all([api("/api/v1/announcements"), api("/api/v1/cohorts")])\n    .then(([a, c]) => {\n      setRows(Array.isArray(a) ? a : []);\n      setCohorts(Array.isArray(c) ? c : []);\n    })\n    .catch((e) => setError(e.message));\n}\nuseEffect(() => { load(); }, []);',hl:[2,9],d:'Runs once on mount. Several GETs fire in parallel. The Array.isArray guard keeps the page alive if the server returns something else.'},
+ {l:'net',t:'api() attaches the token',f:'frontend/lib/api.ts:11-12',code:'const t = getToken();\nif (t) headers.set("Authorization", `Bearer ${t}`);',hl:[2],d:'Spine step. Same for every authenticated call.',spine:1},
+ {l:'mw',t:'Identity and gates',f:'backend/app/api/v1/deps.py:54-103',code:'def current_principal(request, db=Depends(get_db), authorization=Header()):\n    payload = decode_jwt(authorization.split(" ", 1)[1].strip())   # 401\n    user = db.get(User, payload["sub"])\n    principal = Principal(user.id, payload["workspace_id"], payload["role"], user.display_name)\n    _g1(db, request.url.path, principal)    # 404 "module off"\n    return principal\n# require_roles(...) then raises 403 if role not allowed',hl:[2,5],d:'Spine step. JWT, module gate, then role gate. Order matters: a switched-off module is a 404 even for an allowed role.',spine:1},
+ {l:'rt',t:'Query scoped to the workspace',f:'backend/app/api/v1/students.py:61-68',code:'@router.get("/students")\ndef list_students(db=Depends(get_db),\n                  principal=Depends(require_roles("owner","teacher","assistant"))):\n    rows = db.query(Student).filter(Student.workspace_id == principal.workspace_id).all()\n    joined = _joined_by_user(db, rows)\n    return [_out(s, joined.get(s.user_id)) for s in rows]',hl:[4,6],d:'This filter is the tenant boundary. A handler that forgets it would leak other workspaces, so every query carries it.'},
+ {l:'sv',t:'Per-role narrowing (optional)',f:'backend/app/api/v1/sessions.py:93-119',code:'rows = sessions_svc.list_sessions(db, principal.workspace_id, scope=scope, ...)\nif principal.role != "student":\n    return rows\nkept = []\nfor row in rows:\n    s = _get(db, principal.workspace_id, row["id"])\n    if sessions_svc.student_belongs(db, principal, s):\n        kept.append(row)\nreturn kept',hl:[2,7],d:'The same route returns less to a student: only classes they are enrolled in.'},
+ {l:'db',t:'SELECT only',f:'backend/app/db.py:129-136',code:'yield db\ndb.commit()   # nothing pending, so this is a no-op',hl:[],d:'No flush, no add, so there is nothing to persist.'},
+ {l:'fe',t:'Render',f:'AnnounceScreen.tsx:52-56',code:'setRows(Array.isArray(a) ? a : []);',hl:[1],d:'State change re-renders the list. A failure lands in the error banner instead.'}]},
+
+{id:'P3',name:'Save a form',tag:'Create or edit one record',
+ what:'A form posts or patches one record. The handler validates the body, checks that any ids you reference belong to your workspace, writes the row, and returns it.',
+ front:'<code>onSubmit</code> with <code>busy</code>/<code>error</code> state, <code>api(path, {method:"POST"|"PATCH"|"PUT"})</code>, then reload or update state.',back:'Pydantic body model, <code>require_roles</code>, <code>db.add()</code> or attribute assignment, <code>db.flush()</code>, return <code>_out(row)</code>.',
+ never:['New rows get <code>workspace_id=principal.workspace_id</code>, never a client value','Referenced ids are re-checked in the same workspace (400 or 404)','The handler does not commit; get_db does'],
+ varies:['POST create vs PATCH partial edit vs PUT replace','Multi-call forms (create cohort, then PATCH its students)','Owner-only vs teacher-allowed'],
+ steps:[
+ {l:'fe',t:'Form submit',f:'frontend/components/wired/CohortBuilderScreen.tsx:82-93',code:'const row = await api("/api/v1/cohorts", {\n  method: "POST",\n  body: JSON.stringify({ name: cohortTitle }),\n});\nif (picked.length) {\n  await api(`/api/v1/cohorts/${row.id}`, {\n    method: "PATCH",\n    body: JSON.stringify({ student_ids: picked }),\n  });\n}',hl:[1,2,3,6,7,8],d:'One screen action can be two calls: create the row, then edit it using the id that came back.'},
+ {l:'net',t:'api() attaches the token',f:'frontend/lib/api.ts:8-25',code:'headers.set("Content-Type", "application/json");\nif (t) headers.set("Authorization", `Bearer ${t}`);',hl:[2],d:'Spine step.',spine:1},
+ {l:'mw',t:'Body model, identity, role',f:'backend/app/api/v1/cohorts.py:77-82, deps.py:97-103',code:'@router.post("/cohorts")\ndef create_cohort(\n    body: CohortIn,\n    db: Session = Depends(get_db),\n    principal: Principal = Depends(require_roles("owner", "teacher")),\n):',hl:[3,5],d:'FastAPI validates <code>CohortIn</code> first (422). Then the dependencies run: 401 bad token, 404 module off, 403 wrong role.'},
+ {l:'rt',t:'Check referenced ids',f:'backend/app/api/v1/sessions.py:122-145',code:'if body.cohort_id:\n    cohort = (db.query(Cohort)\n              .filter(Cohort.id == body.cohort_id,\n                      Cohort.workspace_id == principal.workspace_id).first())\n    if not cohort:\n        raise HTTPException(400, "cohort")',hl:[3,4,5,6],d:'A client could send any id. The workspace filter stops it pointing at another tenant\'s cohort.'},
+ {l:'sv',t:'Build the row',f:'backend/app/api/v1/cohorts.py:83-86',code:'c = Cohort(workspace_id=principal.workspace_id, name=body.name, meta={"invite_token": new_id()})\ndb.add(c)\ndb.flush()\nreturn _out(c, db)',hl:[1,2,3],d:'<code>flush()</code> sends the INSERT inside the open transaction so the generated id is available, without committing yet.'},
+ {l:'db',t:'Commit',f:'backend/app/db.py:129-136',code:'yield db       # handler ran\ndb.commit()    # INSERT becomes permanent\n# on exception: db.rollback()',hl:[2],d:'If anything raised, none of the writes persist.'},
+ {l:'fe',t:'Reset and reload',f:'AnnounceScreen.tsx:67-86 (same shape)',code:'setTitle(""); setShowCompose(false);\nload();                      // re-run the GETs from pattern 2',hl:[2],d:'The common idiom: after a write, re-run the read pattern instead of patching local state.'}]},
+
+{id:'P4',name:'Action with ledger and channels',tag:'Write the timeline, then notify',
+ what:'A teaching event happens (announce, start class, submit a test, ask a doubt). The service records it on the timeline, which is the ledger, and only then fans out to channels like WhatsApp, in-app notices and audit.',
+ front:'Same <code>onSubmit</code> or button as Save a form, but the response also reflects side effects ("People in this class can see the notice").',back:'<code>timeline.append(...)</code> per student, then <code>notify.dispatch_after_timeline(...)</code> (paid channels) or <code>notify.deliver_in_app(...)</code> (in-app only).',
+ never:['Timeline first, channels after: a failed send never rolls back the ledger','Student WhatsApp is off unless the owner enabled it','Paid channels pass through QuotaGuard and the WhatsApp pause switch'],
+ varies:['Which events are written and for whom','Channel set: WhatsApp via port, or in-app only (session start)','Whether the route also changes status (grade, record, refund)'],
+ steps:[
+ {l:'fe',t:'Publish',f:'frontend/components/wired/AnnounceScreen.tsx:67-86',code:'await api("/api/v1/announcements", {\n  method: "POST",\n  body: JSON.stringify({ title, body, cohort_id: cohortId || null, channels: ["in_app"] }),\n});\nsetShowCompose(false);\nload();',hl:[1,2,3],d:'Looks like any form, which is why the pattern is easy to miss from the frontend alone.'},
+ {l:'net',t:'api() + spine',f:'api.ts, deps.py',code:'# token -> current_principal -> require_roles("owner","teacher")',hl:[],d:'Spine steps: token, middleware, JWT decode, module gate, role gate.',spine:1},
+ {l:'rt',t:'Validate and insert the record',f:'backend/app/api/v1/comms.py:203-227',code:'row = Announcement(workspace_id=principal.workspace_id, title=body.title,\n                   body=body.body, cohort_id=body.cohort_id, created_by=principal.user_id)\ndb.add(row)\ndb.flush()\nput_meta(row, scheduled_at=body.scheduled_at, channels=body.channels or ["in_app"])',hl:[1,3,4],d:'Same as Save a form up to here. Dependencies include <code>ports: MockPorts = Depends(ports_dep)</code> for the next steps.'},
+ {l:'sv',t:'Write the ledger',f:'comms.py:229-231, services/timeline.py:8-26',code:'students = db.query(Student).filter(Student.workspace_id == principal.workspace_id).all()\nfor st in students:\n    timeline.append(db, principal.workspace_id, st.id, "announcement", note, principal.user_id)\n\n# timeline.append: db.add(TimelineEvent(...)); db.flush()',hl:[2,3],d:'One <code>timeline_events</code> row per student. This is the product\'s source of truth; channels are only messengers.'},
+ {l:'sv',t:'Fan out to channels',f:'backend/app/services/notify.py:34-111',code:'for role in ["teacher","parent","admin"] (+ "student" only if student_whatsapp_on):\n    if not _channel_on(...whatsapp...):   skipped "prefs_off"\n    if workspace paused:                  status "skipped_pause"\n    decision = quota_svc.decide_paid_send(db, ws, "whatsapp")\n    if not decision.allowed:              status "skipped_quota"\n    try: ports.send_whatsapp(role, body)  except: status "failed"\n    quota_svc.increment(db, ws, "whatsapp"); status "sent"\ndb.add(AuditLog(action="notify.dispatch", payload={sent, skipped}))',hl:[3,4,5,6],d:'Each skip or failure is recorded as a NotificationDelivery row with a reason. The port is a mock that appends to a list and never calls a vendor.'},
+ {l:'db',t:'One transaction',f:'backend/app/db.py:129-136',code:'db.commit()   # announcement + timeline rows + deliveries + audit, together',hl:[1],d:'All rows commit together, or all roll back if something unexpected raised (a handled send failure does not raise).'},
+ {l:'fe',t:'Reload',f:'AnnounceScreen.tsx:75-77',code:'load();   // pattern 2 again',hl:[1],d:'Back to the read pattern.'}],
+ notes:['<b>Lighter variant:</b> <code>POST /sessions/{id}/start</code> (services/sessions.py:473-501) writes timeline rows and calls <code>notify.deliver_in_app</code> only, with no WhatsApp and no QuotaGuard. It is also idempotent: a second click returns <code>idempotent: true</code>.']},
+
+{id:'P5',name:'Move a record through its lifecycle',tag:'Guarded state change, audited',
+ what:'A button moves a record from one state to the next (approve an invoice, pause a subscription, accept a parent link). The service refuses illegal moves with 409, applies the change, and writes an audit row.',
+ front:'A button with a <code>busy</code> flag; the response is parsed and replaces local state (<code>parseInvoice</code>), and a 409 is shown as a message.',back:'<code>row.status</code> check, then <code>row.status = ...</code>, <code>audit(...)</code>, <code>db.flush()</code>.',
+ never:['The current state is checked before changing it','A wrong-state call is 409 Conflict, not a silent no-op','The change is audited with the actor id'],
+ varies:['Owner-only (billing) vs staff vs parent actions','Extra business rules (refund amount must not exceed what remains)','Some also write the ledger (refund)'],
+ steps:[
+ {l:'fe',t:'Click Approve',f:'frontend/components/studio/HourlyBillingPanel.tsx:186-206',code:'setBusy("approve");\nconst body = await api(`/api/v1/invoices/${invoice.id}/approve`, {\n  method: "POST",\n  body: JSON.stringify({}),\n});\nconst next = parseInvoice(body);\nsetInvoice(...); setApproved(true);',hl:[2,3,6],d:'No form fields: the verb is the route. The server response is the new truth and replaces local state.'},
+ {l:'net',t:'api() + spine',f:'api.ts, deps.py',code:'# token -> current_principal -> require_roles("owner")',hl:[],d:'Spine steps. A teacher calling this gets 403.',spine:1},
+ {l:'rt',t:'Thin handler',f:'backend/app/api/v1/extras.py:361-369',code:'@router.post("/invoices/{invoice_id}/approve")\ndef approve_invoice(invoice_id, db=Depends(get_db),\n                    principal=Depends(require_roles("owner"))):\n    row = billing.get_invoice(db, principal.workspace_id, invoice_id)\n    billing.approve_invoice(db, row, principal.user_id)\n    return invoice_out(row, db)',hl:[4,5],d:'Load the row scoped to the workspace, then hand it to the service.'},
+ {l:'sv',t:'Guard the transition',f:'backend/app/services/billing.py:538-540',code:'def approve_invoice(db, row, actor_user_id):\n    if (row.kind or "static") != "hourly" or row.status != "pending_review":\n        raise HTTPException(409, "not pending review")',hl:[2,3],d:'Only a pending-review hourly invoice can be approved. Clicking twice the second time is a 409.'},
+ {l:'sv',t:'Apply and audit',f:'billing.py:541-555',code:'snap["frozen"] = True\nrow.status = "open"\naudit(db, row.workspace_id, actor_user_id, "billing.hourly_approve",\n      {"invoice_id": row.id, "amount_cents": row.amount_cents})\ndb.flush()',hl:[2,3],d:'The amount is frozen in a snapshot so later rate changes cannot alter an approved invoice.'},
+ {l:'db',t:'Commit',f:'db.py:129-136',code:'db.commit()   # UPDATE invoices + INSERT audit_log',hl:[1],d:'Both rows persist together.'},
+ {l:'fe',t:'Show the new state or the 409',f:'HourlyBillingPanel.tsx:203-206',code:'} catch (err) {\n  setError(humanize(err));   // "409 {...}" becomes readable text\n}',hl:[2],d:'api() threw Error("409 ...") for the non-2xx; the catch turns it into a message.'}],
+ notes:['<b>Other guards in this pattern:</b> refund requires status <code>paid</code> and amount &le; remaining (services/billing.py:368-386). Payout advance, subscription pause/resume/cancel/tier, enrollment cancel, parent-link accept and backlog book follow the same check-then-change shape.']},
+
+{id:'P6',name:'Call a vendor edge (port)',tag:'Video, storage, integrations, mock by default',
+ what:'The action needs something outside the app: a video link, a stored file, an integration connection. The handler calls a port. In this build the port is a mock that records the call and returns a fake result.',
+ front:'A Save button that posts a preset (<code>video_url</code>) or a file; the result is a link or a stored path.',back:'<code>ports: MockPorts = Depends(ports_dep)</code>, then <code>ports.create_video_link</code> / <code>ports.local_put</code> / <code>ports.connect_integration</code>.',
+ never:['Logic never talks to a vendor SDK directly; it goes through the port','Providers must be <code>mock</code> or <code>local</code> or the app refuses to start','Tests assert <code>live_calls == 0</code>'],
+ varies:['Which port method','Whether a QuotaGuard meter wraps it (storage)','Whether the caller can supply their own value (preset video URL)'],
+ steps:[
+ {l:'fe',t:'Save with a preset link',f:'frontend/components/wired/SessionPreScreen.tsx:353-358',code:'if (preset && preset.url !== savedVideoUrl) {\n  await api(`/api/v1/sessions/${sessionId}/video-link`, {\n    method: "POST",\n    body: JSON.stringify({ video_url: preset.url }),\n  });\n}',hl:[2,3,4],d:'Only calls the endpoint when the choice changed. Video is Google Meet or Teams links only, never self-hosted.'},
+ {l:'net',t:'api() + spine',f:'api.ts, deps.py',code:'# token -> current_principal -> require_roles("owner","teacher")',hl:[],d:'Spine steps.',spine:1},
+ {l:'mw',t:'Inject the port',f:'backend/app/api/v1/deps.py:50-51',code:'def ports_dep(request: Request):\n    return request.app.state.ports      # MockPorts() set in create_app()',hl:[2],d:'One shared port object lives on the app. Handlers receive it with <code>Depends(ports_dep)</code>, which also makes it replaceable in tests.'},
+ {l:'rt',t:'Authorise and read the choice',f:'backend/app/api/v1/sessions.py:412-424',code:'s = _get(db, principal.workspace_id, session_id)\nsessions_svc.assert_can_change_session(db, principal, s)\nchosen = _chosen_video_url(await request.body())',hl:[1,2],d:'Workspace-scoped load, then "is this your class" (owner, or the assigned teacher). The body is parsed by hand so an empty body is allowed.'},
+ {l:'sv',t:'Call the port',f:'sessions.py:425-428, ports/mocks.py',code:'s.video_url = chosen or ports.create_video_link(s.id)   # "mock://meet/<id>"\nif not s.join_token:\n    s.join_token = new_id()\nif not s.recording_url:\n    s.recording_url = f"mock://record/{s.id}"\ndb.flush()',hl:[1],d:'A preset wins. Otherwise the port runs, and the mock appends to <code>ports.video</code> and returns a fake URL.'},
+ {l:'db',t:'Commit',f:'db.py:129-136',code:'db.commit()   # UPDATE scheduled_sessions',hl:[1],d:'The mock call is not a database write. Only the session row is.'},
+ {l:'fe',t:'Reload the session',f:'SessionPreScreen.tsx:360-361',code:'setNotice("Saved.");\nawait load(sessionId);',hl:[2],d:'Back to the read pattern.'}],
+ notes:['<b>Where the safety rails are:</b> <code>factory.py:37-52</code> raises at startup if any provider is not <code>mock</code>/<code>local</code>. Storage writes in <code>POST /content</code> and the whiteboard also pass QuotaGuard (<code>quota_svc.decide_paid_send(..., "storage")</code>).']},
+
+{id:'P7',name:'Change workspace rules',tag:'Owner settings that reshape later requests',
+ what:'The owner flips a setting (which tools a teacher gets, branding, quotas, WhatsApp pause, template). The write itself is small. The effect shows up on other people\'s later requests, because the gate reads these rows every time.',
+ front:'A toggle or settings form that PUTs/PATCHes, usually with a note like "That teacher sees the change on their next page."',back:'Owner-only handler writing JSON on <code>StaffMembership.meta</code>, <code>Workspace.branding</code>, quota rows or feature flags.',
+ never:['Owner role is required (403 otherwise)','The write does not notify anyone; behavior changes on the next request','The settings are read back by <code>_g1</code>, <code>/auth/me</code> or QuotaGuard'],
+ varies:['Which row stores the setting','Which later behavior it changes: visible modules, preview mode, send limits, bookable hours'],
+ steps:[
+ {l:'fe',t:'Owner toggles a tool',f:'frontend/components/wired/OwnerScreen.tsx:88-100',code:'const modules = on ? [...current.modules, moduleId] : current.modules.filter(id => id !== moduleId);\nconst saved = await api(`/api/v1/owner/faculty-access/${userId}`, {\n  method: "PUT",\n  body: JSON.stringify({ modules }),\n});\nsetNote("Saved. That teacher sees the change on their next page.");',hl:[2,3,4,5],d:'PUT replaces the whole module list for one teacher.'},
+ {l:'net',t:'api() + spine',f:'api.ts, deps.py',code:'# token -> current_principal -> require_roles("owner")',hl:[],d:'Spine steps.',spine:1},
+ {l:'rt',t:'Owner-only handler',f:'backend/app/api/v1/owner.py:66-74',code:'@router.put("/owner/faculty-access/{user_id}")\ndef put_faculty_access(user_id, body: ModulesIn, db=Depends(get_db),\n                       principal=Depends(require_roles("owner"))):\n    modules = set_staff_modules(db, principal.workspace_id, user_id, body.modules)\n    return {"user_id": user_id, "modules": modules}',hl:[3,4],d:'Thin: all it does is call the service.'},
+ {l:'sv',t:'Write the setting',f:'backend/app/services/internal_v2.py:96-112',code:'allowed = [m for m in modules if m in TEACHING_MODULES]\nrow = db.query(StaffMembership).filter(workspace_id==..., user_id==..., role=="teacher").first()\nif not row: raise HTTPException(404, "teacher")\ndata = meta_of(row); data["modules"] = allowed\nrow.meta = data',hl:[1,4,5],d:'Unknown module ids are dropped. The list lives in a JSON column on the teacher\'s membership row.'},
+ {l:'db',t:'Commit',f:'db.py:129-136',code:'db.commit()   # UPDATE staff_memberships.meta',hl:[1],d:'Nothing else is notified. The effect is deferred.'},
+ {l:'mw',t:'Next teacher request: the gate reads it',f:'backend/app/api/v1/deps.py:76-94, services/internal_v2.py:115-130',code:'extra = staff_allowed_modules(db, principal)   # reads StaffMembership.meta["modules"]\nif extra is None: return\nfor prefix, mod in MODULE_FOR_PATH_PREFIX:\n    if path.startswith(prefix) and mod not in extra:\n        raise HTTPException(404, "module off")',hl:[1,5],d:'This is the payoff. Every teacher request runs this, so a removed module immediately becomes 404 for that teacher.'},
+ {l:'fe',t:'UI learns the permissions',f:'backend/app/api/v1/auth.py:111-122',code:'return {..., "permissions": staff_allowed_modules(db, principal), ...}   # GET /auth/me',hl:[1],d:'The frontend can read the allowed modules from <code>/auth/me</code> to hide navigation.'}],
+ notes:['<b>Same pattern, other reads:</b> <code>PATCH /workspaces/current/branding</code> sets <code>preview_mode</code> which <code>_g1</code> uses to add modules (deps.py:83-85). <code>PATCH /billing/quotas</code> and <code>POST /billing/whatsapp-pause</code> feed QuotaGuard and the notify fan-out. <code>PUT /staff/{id}/availability</code> gates booking in <code>POST /sessions</code>.']},
+
+{id:'P8',name:'Stay in sync (polling)',tag:'Repeat GET on a timer, merge on PUT',
+ what:'A screen several people look at keeps itself fresh by asking again every few seconds. There are no websockets: the frontend re-runs a GET on an interval, and writes go through a merging PUT.',
+ front:'<code>useEffect</code> with <code>setInterval</code> and a cleanup that clears it. Guards such as <code>dirty</code>/<code>lock</code> stop a poll from overwriting an edit in progress.',back:'Ordinary GET and PUT/POST handlers. The shared state sits in a JSON column or message table.',
+ never:['No WebSocket or EventSource in the frontend (searched)','Polling and saving are separate calls','A poll in flight is ignored if the user edited meanwhile'],
+ varies:['Interval: board 4s, cohort chat 8s, notification bell 15s','Merge rules on the server for concurrent writers','Quota check when a write carries a file'],
+ steps:[
+ {l:'fe',t:'Start the timer',f:'frontend/components/studio/SessionBoard.tsx:469-496',code:'async function pull() {\n  if (stop || dirty.current || lock.current > 0) return;\n  const ticket = lock.current;\n  const body = await api(boardPath(sessionId));\n  if (stop || dirty.current || lock.current !== ticket) return;\n  setDoc(asDoc(body));\n}\nvoid pull();\nconst timer = window.setInterval(() => void pull(), POLL_MS);   // 4000\nreturn () => { stop = true; window.clearInterval(timer); };',hl:[2,5,8,9,10],d:'Pulls once immediately, then every 4 seconds. The checks before and after the await drop a stale response if the user drew something in between.'},
+ {l:'net',t:'api() + spine',f:'api.ts, deps.py',code:'# token -> current_principal -> require_roles(owner, teacher, assistant, student)',hl:[],d:'Spine steps, repeated on every tick.',spine:1},
+ {l:'rt',t:'Read the shared state',f:'backend/app/api/v1/sessions.py:250-259',code:'@router.get("/sessions/{session_id}/board")\ndef get_board(session_id, db=Depends(get_db), principal=Depends(require_roles(...))):\n    s = _get(db, principal.workspace_id, session_id)\n    sessions_svc.assert_board_access(db, principal, s, write=False)\n    return sessions_svc.board_out(s)',hl:[3,4,5],d:'Read access is checked per tick. The board is one JSON column on the session row.'},
+ {l:'fe',t:'User draws: mark dirty, then save',f:'SessionBoard.tsx:555-570',code:'lock.current += 1;\ntry {\n  await api(boardPath(sessionId), { method: "PUT", body: JSON.stringify({ placements: ... }) });\n} finally {\n  lock.current -= 1;\n}',hl:[1,3,6],d:'<code>lock</code> blocks polls while a save is in flight.'},
+ {l:'rt',t:'Write access and merge',f:'sessions.py:261-282, services/sessions.py:350-419',code:'sessions_svc.assert_board_access(db, principal, s, write=True)\nreturn sessions_svc.board_put(s, body.strokes, body.updated_at, texts=..., placements=..., erases=..., db=db, ports=ports, workspace_id=...)\n# board_put: colour whitelist (400), merge placements by id, erases never delete placements',hl:[1,2],d:'The server merges rather than replaces, so two people adding items do not wipe each other.'},
+ {l:'sv',t:'File upload on the board: quota and port',f:'services/sessions.py:385-403',code:'decision = quota_svc.decide_paid_send(db, workspace_id, "storage")\nif not decision.allowed:\n    raise HTTPException(409, "storage blocked")\nstored["storage_path"] = ports.local_put(path)\nquota_svc.increment(db, workspace_id, "storage")',hl:[1,3,4],d:'Only when a placement carries a file: QuotaGuard, then the storage port (pattern 6 inside pattern 8).'},
+ {l:'db',t:'Commit',f:'db.py:129-136',code:'db.commit()   # UPDATE scheduled_sessions.board',hl:[1],d:'The next tick of every other viewer reads this value.'}],
+ notes:['<b>Other pollers:</b> notification bell (<code>ShellControls.tsx:50-70</code>, 15s, <code>GET /notifications/inbox</code>), cohort chat (<code>CohortChat.tsx:110-115</code>, 8s). The <code>setInterval</code> in <code>TestRunnerScreen.tsx:74</code> is only a countdown clock, not a poll.']}
+];
+
+const VIEWS=[['flow','Flow'],['recog','How to recognise it'],['routes','Routes in this pattern'],['compare','Compare patterns'],['find','Find any route']];
+const COLS=[['token','Needs a token'],['gate','Module + role gate'],['write','Writes DB'],['tl','Writes timeline'],['ch','Channels / notify'],['port','Calls a port'],['quota','QuotaGuard'],['audit','Audit row'],['guard','State guard (409)'],['poll','Repeats on a timer']];
+const MATRIX={P1:'no,no,yes,no,no,some,no,no,no,no',P2:'yes,yes,no,no,no,no,no,no,no,no',P3:'yes,yes,yes,no,no,no,no,no,no,no',P4:'yes,yes,yes,yes,yes,yes,yes,yes,some,no',P5:'yes,yes,yes,some,no,no,no,yes,yes,no',P6:'yes,yes,yes,no,no,yes,some,no,no,no',P7:'yes,yes,yes,no,no,no,some,no,no,no',P8:'yes,yes,yes,no,no,some,some,no,no,yes'};
+const SYM={yes:'●',some:'◐',no:'–'};
+
+let cur='P1',view='flow',si=0,hideSpine=false,findQ='',findP='';
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const count=id=>ROUTES.filter(r=>r[3]===id).length;
+$('total').textContent=ROUTES.length;
+
+function chips(r){const c=[];if(r[4])c.push('timeline');if(r[5])c.push('notify');if(r[6])c.push('port');if(r[7])c.push('status');if(r[8])c.push('audit');if(r[9])c.push('quota');return c.map(x=>`<span class="chip">${x}</span>`).join('')}
+function routeRow(r,showP){return `<tr><td><span class="m">${r[0]}</span></td><td><code>${esc(r[1])}</code></td><td>${r[2]}</td>${showP?`<td>${r[3]} ${PATTERNS.find(p=>p.id===r[3]).name}</td>`:''}<td>${chips(r)}</td></tr>`}
+
+function renderSide(){
+ $('side').innerHTML='<h4>Pick a pattern</h4>'+PATTERNS.map(p=>`<button class="pat" data-p="${p.id}" ${p.id===cur?'aria-current="true"':''}><span class="n">${count(p.id)}</span><b>${p.id} ${p.name}</b><small>${p.tag}</small></button>`).join('');
+}
+function renderViews(){
+ $('views').innerHTML=VIEWS.map(([k,n])=>`<button class="vt" role="tab" data-v="${k}" aria-selected="${k===view}">${n}</button>`).join('');
+}
+function renderFlow(p){
+ const S=p.steps;if(si>=S.length)si=0;const s=S[si];
+ const list=S.map((x,j)=>`<button class="step ${x.spine?'sp':''}" data-i="${j}" ${j===si?'aria-current="true"':''}><i style="background:${LAYERS[x.l][1]}">${j+1}</i><span>${esc(x.t)}</span></button>`).join('');
+ const lines=esc(s.code).split('\n').map((ln,n)=>s.hl.includes(n+1)?`<span class="hl">${ln||' '}</span>`:ln+'\n').join('');
+ return `<div class="card"><h2>${p.id}. ${p.name}</h2><p class="lead">${p.what}</p></div>
+ <label class="opt"><input type="checkbox" id="hs" ${hideSpine?'checked':''}> Hide the steps that are identical for every authenticated call (token, middleware, gates)</label>
+ <div class="flow ${hideSpine?'hide-spine':''}"><div class="steps">${list}</div>
+ <div><div class="card"><h3>${si+1}. ${esc(s.t)}${s.spine?'<span class="spine">same for all authenticated calls</span>':''}</h3>
+ <span class="tag" style="background:${LAYERS[s.l][1]}">${LAYERS[s.l][0]}</span><span class="file">${esc(s.f)}</span><pre>${lines}</pre><p>${s.d}</p>
+ <div class="nav"><button class="nb" id="pv" ${si===0?'disabled':''}>Back</button><button class="nb" id="nx" ${si===S.length-1?'disabled':''}>Next</button></div></div>
+ ${(p.notes||[]).map(n=>`<div class="note">${n}</div>`).join('')}</div></div>`;
+}
+function renderRecog(p){
+ return `<div class="card"><h2>${p.id}. ${p.name}</h2><p class="lead">${p.what}</p>
+ <div class="two"><div><h3>In the frontend</h3><p>${p.front}</p><h3>In the backend</h3><p>${p.back}</p></div>
+ <div><h3>Always true</h3><ul>${p.never.map(x=>`<li>${x}</li>`).join('')}</ul><h3>What varies</h3><ul>${p.varies.map(x=>`<li>${x}</li>`).join('')}</ul></div></div></div>`;
+}
+function renderRoutes(p){
+ const rs=ROUTES.filter(r=>r[3]===p.id);
+ return `<div class="card"><h2>${p.id}. ${p.name}: ${rs.length} routes</h2><p class="lead">Chips show which extra stages each route touches (found by reading the handler and the services it calls). A route is placed by its dominant effect, so a few touch more than one pattern.</p>
+ <div class="scroll"><table><tr><th>Verb</th><th>Path (/api/v1)</th><th>Router</th><th>Also touches</th></tr>${rs.map(r=>routeRow(r,false)).join('')}</table></div></div>`;
+}
+function renderCompare(){
+ return `<div class="card"><h2>Compare the patterns</h2><p class="lead">● always, ◐ sometimes, – never. Click a row name to open that pattern.</p>
+ <div class="scroll"><table><tr><th>Pattern</th><th>Routes</th>${COLS.map(c=>`<th>${c[1]}</th>`).join('')}</tr>
+ ${PATTERNS.map(p=>`<tr><td><a href="#" data-open="${p.id}">${p.id} ${p.name}</a></td><td class="c">${count(p.id)}</td>${MATRIX[p.id].split(',').map(v=>`<td class="c">${SYM[v]}</td>`).join('')}</tr>`).join('')}</table></div>
+ <p class="note">Every authenticated pattern shares the same spine: <code>api()</code> adds the Bearer token, middleware runs, <code>current_principal</code> decodes the JWT and applies the module gate, <code>require_roles</code> checks the role, and <code>get_db</code> commits or rolls back. Patterns differ only in what happens between the gate and the commit.</p></div>`;
+}
+function renderFind(){
+ const q=findQ.toLowerCase();
+ const rs=ROUTES.filter(r=>(!findP||r[3]===findP)&&(!q||(r[0]+' '+r[1]+' '+r[2]).toLowerCase().includes(q)));
+ return `<div class="card"><h2>Find any route</h2><p class="lead">Type part of a path (for example <code>invoice</code>) and see which pattern it follows.</p>
+ <input type="search" id="fq" placeholder="Search routes" value="${esc(findQ)}">
+ <div class="pillrow">${PATTERNS.map(p=>`<button class="pill" data-fp="${p.id}" aria-pressed="${findP===p.id}">${p.id}</button>`).join('')}</div>
+ <div class="scroll"><table><tr><th>Verb</th><th>Path (/api/v1)</th><th>Router</th><th>Pattern</th><th>Also touches</th></tr>${rs.map(r=>routeRow(r,true)).join('')}</table></div><p class="lead">${rs.length} of ${ROUTES.length}</p></div>`;
+}
+function render(){
+ const p=PATTERNS.find(x=>x.id===cur);renderSide();renderViews();
+ const m=$('main');
+ m.innerHTML=view==='flow'?renderFlow(p):view==='recog'?renderRecog(p):view==='routes'?renderRoutes(p):view==='compare'?renderCompare():renderFind();
+ const hs=$('hs');if(hs)hs.onchange=()=>{hideSpine=hs.checked;render()};
+ const pv=$('pv'),nx=$('nx');if(pv)pv.onclick=()=>{si--;render()};if(nx)nx.onclick=()=>{si++;render()};
+ const fq=$('fq');if(fq){fq.oninput=()=>{findQ=fq.value;const pos=fq.selectionStart;render();const f=$('fq');f.focus();f.setSelectionRange(pos,pos)}}
+}
+document.addEventListener('click',e=>{
+ const a=e.target.closest('[data-p]');if(a){cur=a.dataset.p;si=0;if(view==='compare'||view==='find')view='flow';render();return}
+ const v=e.target.closest('[data-v]');if(v){view=v.dataset.v;render();return}
+ const s=e.target.closest('[data-i]');if(s){si=+s.dataset.i;render();return}
+ const o=e.target.closest('[data-open]');if(o){e.preventDefault();cur=o.dataset.open;si=0;view='flow';render();return}
+ const f=e.target.closest('[data-fp]');if(f){findP=findP===f.dataset.fp?'':f.dataset.fp;render();return}
+});
+document.addEventListener('keydown',e=>{if(view!=='flow'||e.target.tagName==='INPUT')return;const n=PATTERNS.find(x=>x.id===cur).steps.length;if(e.key==='ArrowRight'&&si<n-1){si++;render()}if(e.key==='ArrowLeft'&&si>0){si--;render()}});
+render();
+</script>
+</body>
+</html>

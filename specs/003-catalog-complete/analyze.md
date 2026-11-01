@@ -1,6 +1,6 @@
 # analyze.md — 003-catalog-complete
 
-Read-only consistency check of spec / plan / checklist / catalog. **Do not implement.** `tasks.md` and the HTML guide come next; implement needs **human OK on `plan-viewer.html`**.
+Read-only consistency check of spec / plan / checklist / catalog. **Do not implement.** `tasks.md` and the HTML guide come next; implement needs **human OK on `product-book/plan-viewer.html`**.
 
 | Check | Result |
 |---|---|
@@ -24,7 +24,7 @@ Read-only consistency check of spec / plan / checklist / catalog. **Do not imple
 
 1. **001 HTML pack not formally accepted** as production UI. 003 must not treat architecture HTML as signed-off product chrome.
 2. **Demo incomplete** vs six tracks. Do not invent screens to fill focused templates.
-3. **Giant feature.** Reviewers should use `plan-sequence.html` + task critical path, not assume one sprint.
+3. **Giant feature.** Reviewers should use `product-book/plan-sequence.html` + task critical path, not assume one sprint.
 4. **Postgres optional.** Compose file exists; 003 does not require Docker to Accept if SQLite sim + tests pass.
 5. **F4 trials/coupons** has no dedicated catalog API. Do not invent; stay on `billing` / `plans` if needed or leave template-only.
 6. **`notification_deliveries` vs ledger.** Plan: journal only; timeline remains source of truth.

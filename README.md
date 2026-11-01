@@ -17,7 +17,7 @@ This file is the single product map for humans and for any LLM (Cursor or Claude
 | You are a… | Read |
 |---|---|
 | **Anyone / LLM** | This disclaimer, [§1](#1-quick-start), [§2](#2-logical-design) |
-| **Product manager** | §2, [§10](#10-spec-kit--role-workflow), `specs/006-internal-v2/spec.md`, [density-map.html](density-map.html) |
+| **Product manager** | §2, [§10](#10-spec-kit--role-workflow), `specs/006-internal-v2/spec.md`, [product-book/density-map.html](product-book/density-map.html) |
 | **Architect** | [§3](#3-architecture), [§5](#5-domain-model), [§8](#8-auth), [§9](#9-ports-whatsapp-quotas) |
 | **Builder** | Do not implement until spec status is Specified and you are asked. Then §3–§7. |
 | **Tester** | [§10](#10-spec-kit--role-workflow), [§12](#12-feature-backlog) feature→test index |
@@ -46,23 +46,23 @@ pip install -r requirements.txt
 python -m uvicorn app.main:app --reload --port 8000
 ```
 
-Default API `DATABASE_URL` matches Compose. Copy [.env.example](.env.example) if you need a file. Seeded workspaces: `exam-prep`, `language-1on1`, `music` (catalog pack: [seed-map.html](seed-map.html)). Wipe and reload: `cd backend; python -m app.seed_cli --reset`. Auth stub: [backend/README.md](backend/README.md).
+Default API `DATABASE_URL` matches Compose. Copy [.env.example](.env.example) if you need a file. Seeded workspaces: `exam-prep`, `language-1on1`, `music` (catalog pack: [product-book/seed-map.html](product-book/seed-map.html)). Wipe and reload: `cd backend; python -m app.seed_cli --reset`. Auth stub: [backend/README.md](backend/README.md).
 
 **Product maps (static HTML, no API required)** — open in a browser:
 
 | Open | What it is |
 |---|---|
-| [product-viewer.html](product-viewer.html) | **Product book (hub)** — key components + task tiles (T0.1…). Not the app. [plan-viewer.html](plan-viewer.html) redirects here. |
-| [work-log.html](work-log.html) | Chronological status. Links back to the hub. |
-| [plan-functional.html](plan-functional.html) | Functional map: seven jobs, roles, 47 screens, templates, journeys |
-| [plan-technical.html](plan-technical.html) | Technical map: layers, entities, 84 APIs, ports, modules, protected tests |
-| [plan-sequence.html](plan-sequence.html) | End-to-end build order: functional + technical paired by phase |
-| [density-map.html](density-map.html) | **005 density board** — iSeek gap, backend workflow, T7.1–T7.12. Open in a browser. |
-| [tutor-platform-architecture.html](tutor-platform-architecture.html) | System map: entry → six tracks → layers → 50 screens → follow the call |
-| [tutor-platform-demo.html](tutor-platform-demo.html) | UI gold (50 screens, six templates). **Incomplete** — focused tracks omit some spine screens |
-| [tutor-platform-role-student.html](tutor-platform-role-student.html) | Generated child: student lane only |
-| [tutor-platform-explorer.html](tutor-platform-explorer.html) | Module toggles and build sequence |
-| [tutor-loop-ui-kit.html](tutor-loop-ui-kit.html) | Exam-prep *template* visuals — not a Biology app |
+| [product-book/product-viewer.html](product-book/product-viewer.html) | **Product book (hub)** — key components + task tiles (T0.1…). Not the app. [product-book/plan-viewer.html](product-book/plan-viewer.html) redirects here. |
+| [product-book/work-log.html](product-book/work-log.html) | Chronological status. Links back to the hub. |
+| [product-book/plan-functional.html](product-book/plan-functional.html) | Functional map: seven jobs, roles, 47 screens, templates, journeys |
+| [product-book/plan-technical.html](product-book/plan-technical.html) | Technical map: layers, entities, 84 APIs, ports, modules, protected tests |
+| [product-book/plan-sequence.html](product-book/plan-sequence.html) | End-to-end build order: functional + technical paired by phase |
+| [product-book/density-map.html](product-book/density-map.html) | **005 density board** — iSeek gap, backend workflow, T7.1–T7.12. Open in a browser. |
+| [product-book/tutor-platform-architecture.html](product-book/tutor-platform-architecture.html) | System map: entry → six tracks → layers → 50 screens → follow the call |
+| [product-book/tutor-platform-demo.html](product-book/tutor-platform-demo.html) | UI gold (50 screens, six templates). **Incomplete** — focused tracks omit some spine screens |
+| [product-book/tutor-platform-role-student.html](product-book/tutor-platform-role-student.html) | Generated child: student lane only |
+| [product-book/tutor-platform-explorer.html](product-book/tutor-platform-explorer.html) | Module toggles and build sequence |
+| [product-book/tutor-loop-ui-kit.html](product-book/tutor-loop-ui-kit.html) | Exam-prep *template* visuals — not a Biology app |
 
 ```bash
 python scripts/build_catalog.py
@@ -89,7 +89,7 @@ The **timeline** is the ledger. WhatsApp / email / push deliver events; they do 
 
 Layered monolith + ports only at vendor edges. Frontend never holds business rules. Routers never call Google or disk. Services never know HTTP.
 
-Walk it: [tutor-platform-architecture.html](tutor-platform-architecture.html).
+Walk it: [product-book/tutor-platform-architecture.html](product-book/tutor-platform-architecture.html).
 
 ```
 Entry (role + workspace)
@@ -101,7 +101,7 @@ Entry (role + workspace)
   → PostgreSQL (workspace_id on every business table)
 ```
 
-UI: Next.js 15 (one route per catalog screen id) in `frontend/`. API: FastAPI `/api/v1` against local Postgres. Demo HTML is still UI gold; screens are `shell` until `wired`. Status: `empty` → `shell` → `wired`. The screen set is closed (49 ids after 007); a new id needs a spec that adds it to demo `S` + rebuilds the catalog.
+UI: Next.js 15 (one route per catalog screen id) in `frontend/`. API: FastAPI `/api/v1` against local Postgres. Demo HTML is still UI gold. Catalog `status` is `wired` on all 50 screens — each route renders a wired screen. Vocabulary: `empty` → `shell` → `wired`. The screen set is closed (50 ids, including `profile`); a new id needs a spec that adds it to demo `S` + rebuilds the catalog.
 
 ---
 
@@ -121,7 +121,7 @@ UI: Next.js 15 (one route per catalog screen id) in `frontend/`. API: FastAPI `/
 
 Spine: `workspaces`, `users`, `identities`, `sessions_auth`, `staff_memberships`, `students`, `parent_links`, `cohorts`, `enrollments`, `scheduled_sessions` (status `scheduled` \| `completed` \| `cancelled`; `student_id` set for 1-on-1), `staff_availability` (per-staff weekly windows + date exceptions), `attendance`, `session_records`, `transcript_events` (empty until STT), `timeline_events`, `feature_flags`, `audit_log`, **`taxonomies` / `topics`**, `usage_meters`, `quota_policies`, plus 003 workspace-scoped tables: `questions`, `attempts`, `doubts`, `messages`, `invoices`, `notification_prefs`, `notification_deliveries`, `content_items`, `assignments`, `submissions`, `practice_sets`, `tests`, `announcements`, `plans`, `payouts`, `automation_rules`, `backlog_items`.
 
-Never `biology_chapters` or exam-board tables. Content hangs off `topic_id`.
+Never `biology_chapters` or exam-board tables. Content hangs off `topic_id`. Workspace topic names are `GET /api/v1/topics`.
 
 Always-on (cannot flag off): A1, A2, A3, G1, G2, D4, F2. Caps throttle **usage**, not existence.
 
@@ -131,7 +131,7 @@ Catalog: [catalog/entities.json](catalog/entities.json), [catalog/modules.json](
 
 ## 6. Screen map
 
-50 ids locked to `tutor-platform-demo.html` `S`, including catalog id `profile`. Source: [catalog/screens.json](catalog/screens.json). Each catalog row also carries Owner / Who / Why / How / When from demo `WHY`. The architecture HTML (`tutor-platform-architecture.html`) loads [catalog/embed.js](catalog/embed.js) — after demo edits run `python scripts/build_catalog.py` then `python scripts/build_role_html.py`. Architecture Start lists the six demo tracks from that catalog. Role HTML files are generated from the demo; they are not a second product. Parent hub is `parent-home` (activity, marksheet, results, receipts, teacher chat). `staff-login` is on 1-on-1, K-12, Skills, Music, Everything; Exam-prep omits it.
+50 ids locked to `product-book/tutor-platform-demo.html` `S`, including catalog id `profile`. Source: [catalog/screens.json](catalog/screens.json). Each catalog row also carries Owner / Who / Why / How / When from demo `WHY`. The architecture HTML (`product-book/tutor-platform-architecture.html`) loads [catalog/embed.js](catalog/embed.js) — after demo edits run `python scripts/build_catalog.py` then `python scripts/build_role_html.py`. Architecture Start lists the six demo tracks from that catalog. Role HTML files are generated from the demo; they are not a second product. Parent hub is `parent-home` (activity, marksheet, results, receipts, teacher chat). `staff-login` is on 1-on-1, K-12, Skills, Music, Everything; Exam-prep omits it.
 
 - **A Identity (10):** `router`, `student-login`, `staff-login`, `wsetup`, `branding`, `roster`, `cohort-builder`, `parent-link`, `parent-home`, `profile`
 - **B Teaching (13):** `schedule`, `session-pre`, `sessions`, `availability`, `join`, `live-teacher`, `live-student`, `session-video`, `record`, `library`, `lesson`, `assign-issue`, `assign-grade`
@@ -204,7 +204,7 @@ Last Accepted feature dir: [specs/006-internal-v2/](specs/006-internal-v2/). Cat
 - Docker Compose Postgres **is** the local backend (optional if you only run pytest). Live OTP / Meet / Razorpay / WhatsApp / Meta / AI vendors are **not** connected (mock ports).
 - Do not invent screen ids. Exam-prep faculty is not forced through `staff-login`.
 - Demo **incomplete** vs all six tracks: some spine screens still sit only on Everything. `staff-login` is on 1-on-1, K-12, Skills, Music, and Everything; Exam-prep omits it on purpose (faculty starts at cohort/schedule). Fill remaining gaps later — **same ids**, no new screens.
-- **005 dashboard density (Accepted):** named next session, due practice, attendance bars, chase list, scorecard, receipts, content kind/progress on the same 47 ids. Aggregates in `backend/app/services/progress.py`. Action board: [density-map.html](density-map.html). Spec: [specs/005-dashboard-density/](specs/005-dashboard-density/).
+- **005 dashboard density (Accepted):** named next session, due practice, attendance bars, chase list, scorecard, receipts, content kind/progress on the same 47 ids. Aggregates in `backend/app/services/progress.py`. Action board: [product-book/density-map.html](product-book/density-map.html). Spec: [specs/005-dashboard-density/](specs/005-dashboard-density/).
 - **006 internal v2 (Accepted):** remaining blueprint depth that does not call a vendor (permissions, waitlists, in-app live chat, rubrics, practice depth, SLA, auto-invoice). Ports stay mock. Spec: [specs/006-internal-v2/](specs/006-internal-v2/).
 - **Earlier local-complete pass (on `feat/local-complete`):** Apple-like interface on the existing screens. Shared class whiteboard, cohort chat, in-app notices for class started and class cancelled. Billing trail with placeholder tiers, hourly review, receipts, refunds, and payouts from completed sessions. Ports stay mock. That pass reported pytest 63 passed and a 49-screen catalog. It is a separate event from Spec Kit 009 and 010 below.
 - **007 sessions & timetable (In Progress):** session state is time-driven (`Upcoming` → `Auto completed`, or `Staff completed` once a record is filed) with owner free to re-time in any state; cancelled sessions stay on the calendar; 1-on-1 sessions book against a roster student; `staff_availability` holds per-staff weekly windows + date exceptions and feeds the schedule overlay and booking checks. Adds screen ids `sessions`, `availability`. Spec: [specs/007-sessions-timetable/](specs/007-sessions-timetable/).

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
@@ -49,6 +50,30 @@ def put_branding(ws: Workspace, **fields) -> dict:
             data[key] = value
     ws.branding = data
     return data
+
+
+_SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+
+
+def normalize_slug(raw: str) -> str:
+    slug = (raw or "").strip().lower()
+    if not slug or len(slug) > 80 or _SLUG_RE.fullmatch(slug) is None:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "Use letters, numbers, and hyphens for the workspace address.",
+        )
+    return slug
+
+
+def assert_slug_available(db: Session, slug: str, except_id: str | None = None) -> None:
+    query = db.query(Workspace).filter(Workspace.slug == slug)
+    if except_id:
+        query = query.filter(Workspace.id != except_id)
+    if query.first():
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "That workspace address is already in use.",
+        )
 
 
 def auth_methods(ws: Workspace | None) -> list[str]:

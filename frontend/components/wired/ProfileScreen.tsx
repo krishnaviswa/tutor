@@ -21,7 +21,7 @@ const IMAGE_TYPES = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp
 
 type Step = { challenge_id: string; email_challenge_id?: string | null; faculty_admin?: boolean };
 
-const BOARD_OPTIONS = ["CBSE", "ICSE", "IB", "IGCSE", "State Board"] as const;
+const BOARD_OPTIONS = ["School", "College", "Independent study", "Workplace training"] as const;
 
 const GRADE_OPTIONS = [
   "Grade 8",
@@ -34,21 +34,21 @@ const GRADE_OPTIONS = [
 ] as const;
 
 const SUBJECT_PRESETS = [
-  "Physics",
-  "Chemistry",
-  "Mathematics",
-  "Biology",
-  "English",
-  "Computer Science",
+  "Language",
+  "Numeracy",
+  "Performance",
+  "Making",
+  "Movement",
+  "General studies",
 ] as const;
 
 const EXPERTISE_PRESETS = [
-  "JEE Advanced",
-  "NEET UG",
-  "Board Exams",
-  "Olympiad",
-  "Foundation",
-  "Concept Remediation",
+  "One-to-one",
+  "Small group",
+  "Concept teaching",
+  "Guided practice",
+  "Revision",
+  "Mentoring",
 ] as const;
 
 const empty: Profile = {

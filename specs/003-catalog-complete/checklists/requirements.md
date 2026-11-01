@@ -5,7 +5,7 @@ Unchecked items **block** `/speckit.implement`. Architect may attest design item
 ## Blocks implement
 
 - [x] Human walked `specs/003-catalog-complete/spec.md` (stories + ACs) and this plan
-- [x] Human reviewed `plan-viewer.html` (and satellites) — functional, technical, sequenced E2E
+- [x] Human reviewed `product-book/plan-viewer.html` (and satellites) — functional, technical, sequenced E2E
 - [x] Human OK in chat before `/speckit.implement`
 - [x] 002 pytest remains required as a phase gate (isolation, record→timeline, quotas, parent, live_calls == 0)
 - [x] Mock ports only — no live Meta / Google / Razorpay in CI

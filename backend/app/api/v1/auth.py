@@ -1,13 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.api.v1.deps import current_principal
+from app.api.v1.deps import current_principal, effective_workspace_modules
 from app.config import get_settings
 from app.db import get_db
 from app.models.tables import Identity, OtpChallenge, User, Workspace
 from app.ports.mocks import MockPorts
 from app.services.auth import (
+    SESSION_COOKIE,
     Principal,
     identity_user,
     issue_session,
@@ -19,6 +20,22 @@ from app.services.internal_v2 import auth_methods, staff_allowed_modules
 from app.api.v1.deps import ports_dep
 
 router = APIRouter()
+_COOKIE_MAX_AGE = 14 * 24 * 60 * 60
+
+
+def _attach_session(response: Response, request: Request, token: str) -> None:
+    """Browser sessions ask for the httpOnly cookie. API tests keep the JSON token."""
+    if request.headers.get("x-tutoros-cookie") != "1":
+        return
+    response.set_cookie(
+        SESSION_COOKIE,
+        token,
+        max_age=_COOKIE_MAX_AGE,
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        path="/",
+    )
 
 
 class OtpStartIn(BaseModel):
@@ -61,7 +78,7 @@ def otp_start(
 
 
 @router.post("/auth/otp/verify")
-def otp_verify(body: OtpVerifyIn, db: Session = Depends(get_db)):
+def otp_verify(body: OtpVerifyIn, request: Request, response: Response, db: Session = Depends(get_db)):
     settings = get_settings()
     if body.code != settings.otp_code:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "bad otp")
@@ -73,11 +90,12 @@ def otp_verify(body: OtpVerifyIn, db: Session = Depends(get_db)):
     user = identity_user(db, "phone", body.phone)
     role = membership_role(db, user.id, body.workspace_id, body.role)
     token = issue_session(db, user, body.workspace_id, role)
+    _attach_session(response, request, token)
     return {"token": token, "role": role, "workspace_id": body.workspace_id}
 
 
 @router.post("/auth/password")
-def password_login(body: PasswordIn, db: Session = Depends(get_db)):
+def password_login(body: PasswordIn, request: Request, response: Response, db: Session = Depends(get_db)):
     ident = (
         db.query(Identity)
         .filter(
@@ -92,12 +110,15 @@ def password_login(body: PasswordIn, db: Session = Depends(get_db)):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "unknown username or password")
     role = role_in_workspace(db, user.id, body.workspace_id)
     token = issue_session(db, user, body.workspace_id, role)
+    _attach_session(response, request, token)
     return {"token": token, "role": role, "workspace_id": body.workspace_id}
 
 
 @router.post("/auth/magic-link")
 def magic_link(
     body: MagicIn,
+    request: Request,
+    response: Response,
     db: Session = Depends(get_db),
     ports: MockPorts = Depends(ports_dep),
 ):
@@ -105,7 +126,14 @@ def magic_link(
     role = membership_role(db, user.id, body.workspace_id, body.role)
     token = issue_session(db, user, body.workspace_id, role)
     ports.send_email(body.email, "Sign in", "mock magic link")
+    _attach_session(response, request, token)
     return {"token": token, "role": role, "workspace_id": body.workspace_id, "mock": True}
+
+
+@router.post("/auth/logout")
+def logout(response: Response):
+    response.delete_cookie(SESSION_COOKIE, path="/", httponly=True, samesite="lax")
+    return {"ok": True}
 
 
 @router.get("/auth/me")
@@ -118,5 +146,6 @@ def me(principal: Principal = Depends(current_principal), db: Session = Depends(
         "display_name": principal.display_name,
         "auth_methods": auth_methods(ws),
         "permissions": staff_allowed_modules(db, principal),
+        "workspace_modules": sorted(effective_workspace_modules(db, principal.workspace_id)),
         "workspace": {"id": ws.id, "slug": ws.slug, "kind": ws.kind} if ws else None,
     }

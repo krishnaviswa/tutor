@@ -13,7 +13,7 @@ DONE = [
     "T5.1", "T5.2", "T5.3",
     "T6.1", "T6.2", "T6.3",
 ]
-path = ROOT / "product-viewer.html"
+path = ROOT / "product-book/product-viewer.html"
 text = path.read_text(encoding="utf-8")
 for tid in DONE:
     text, n = re.subn(

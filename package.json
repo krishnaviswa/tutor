@@ -1,0 +1,11 @@
+{
+  "name": "tutoros",
+  "private": true,
+  "description": "Repo scripts. Product app deps stay in frontend/. Playwright lives in e2e/.",
+  "scripts": {
+    "e2e": "npm --prefix e2e test",
+    "e2e:smoke": "npm --prefix e2e run test:smoke",
+    "e2e:flows": "npm --prefix e2e run test:flows",
+    "e2e:report": "npm --prefix e2e run report"
+  }
+}

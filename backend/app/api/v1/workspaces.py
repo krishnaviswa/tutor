@@ -6,9 +6,16 @@ from app.api.v1.deps import current_principal, require_roles
 from app.db import get_db
 from app.models.tables import FeatureFlag, Workspace
 from app.services.auth import Principal
-from app.services.internal_v2 import auth_methods, branding_of, put_branding
+from app.services.internal_v2 import (
+    assert_slug_available,
+    auth_methods,
+    branding_of,
+    normalize_slug,
+    put_branding,
+)
 from app.services.quota import ALWAYS_ON
 from app.services.seed import SLICE_MODULES
+from app.services.templates import TEMPLATES, apply_workspace_template
 
 router = APIRouter()
 
@@ -21,6 +28,8 @@ class WorkspaceIn(BaseModel):
 
 class WorkspacePatch(BaseModel):
     name: str | None = None
+    slug: str | None = None
+    kind: str | None = None
     student_whatsapp: int | None = None
     auth_methods: list[str] | None = None
     availability: list[dict] | None = None
@@ -33,6 +42,7 @@ class BrandingIn(BaseModel):
     logo: str | None = None
     accent: str | None = None
     tagline: str | None = None
+    name: str | None = None
 
 
 
@@ -60,12 +70,18 @@ def create_workspace(
     db: Session = Depends(get_db),
     principal: Principal = Depends(require_roles("owner")),
 ):
-    if db.query(Workspace).filter(Workspace.slug == body.slug).first():
-        raise HTTPException(status.HTTP_409_CONFLICT, "slug taken")
-    ws = Workspace(slug=body.slug, name=body.name, kind=body.kind)
+    slug = normalize_slug(body.slug)
+    assert_slug_available(db, slug)
+    name = body.name.strip()
+    if not name:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Enter a workspace name.")
+    ws = Workspace(slug=slug, name=name, kind=body.kind)
     db.add(ws)
     db.flush()
-    db.add(FeatureFlag(workspace_id=ws.id, modules=list(SLICE_MODULES)))
+    if body.kind in TEMPLATES:
+        apply_workspace_template(db, ws, body.kind)
+    else:
+        db.add(FeatureFlag(workspace_id=ws.id, modules=list(SLICE_MODULES)))
     from app.services.billing import ensure_subscription
 
     ensure_subscription(db, ws.id)
@@ -90,7 +106,14 @@ def patch_current(
     if not ws:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "workspace")
     if body.name is not None:
-        ws.name = body.name
+        cleaned = body.name.strip()
+        if not cleaned:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "Enter a workspace name.")
+        ws.name = cleaned
+    if body.slug is not None:
+        slug = normalize_slug(body.slug)
+        assert_slug_available(db, slug, ws.id)
+        ws.slug = slug
     if body.student_whatsapp is not None:
         ws.student_whatsapp = 1 if body.student_whatsapp else 0
     put_branding(
@@ -101,12 +124,15 @@ def patch_current(
         preview_modules=body.preview_modules,
         coupons=body.coupons,
     )
-    flags = db.query(FeatureFlag).filter(FeatureFlag.workspace_id == ws.id).first()
-    if flags:
-        modules = set(flags.modules)
-        for m in ALWAYS_ON:
-            modules.add(m)
-        flags.modules = list(modules)
+    if body.kind is not None:
+        apply_workspace_template(db, ws, body.kind)
+    else:
+        flags = db.query(FeatureFlag).filter(FeatureFlag.workspace_id == ws.id).first()
+        if flags:
+            modules = set(flags.modules or [])
+            for m in ALWAYS_ON:
+                modules.add(m)
+            flags.modules = list(modules)
     return _out(ws)
 
 
@@ -119,8 +145,14 @@ def patch_branding(
     ws = db.get(Workspace, principal.workspace_id)
     if not ws:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "workspace")
-    branding = dict(ws.branding or {})
     data = body.model_dump(exclude_none=True)
+    name = data.pop("name", None)
+    if name is not None:
+        cleaned = name.strip()
+        if not cleaned:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "Enter a workspace name.")
+        ws.name = cleaned
+    branding = dict(ws.branding or {})
     branding.update(data)
     ws.branding = branding
     db.flush()

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { getToken } from "@/lib/session";
 import { catalogRoute } from "@/lib/screens";
 
 type Me = { role?: string; workspace?: { kind?: string; slug?: string } };
@@ -13,15 +12,13 @@ export function RouterScreen() {
   const [wsName, setWsName] = useState("TutorOS");
 
   useEffect(() => {
-    if (!getToken()) return;
     api("/api/v1/auth/me")
       .then((row) => {
         const me = row as Me;
         if (me.workspace?.kind) setKind(me.workspace.kind);
         if (me.workspace?.slug) setWsName(me.workspace.slug);
+        return api("/api/v1/workspaces/current");
       })
-      .catch(() => undefined);
-    api("/api/v1/workspaces/current")
       .then((w) => {
         const row = w as { name?: string; kind?: string };
         if (row.name) setWsName(row.name);

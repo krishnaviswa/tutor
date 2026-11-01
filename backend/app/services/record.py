@@ -88,7 +88,7 @@ def patch_record(
             marked[st.id] = raw
         sync_attendance_marks(db, session, marked, actor_role=actor_role, waive=waive)
     else:
-        student_ids = class_roster_ids(session)
+        student_ids = class_roster_ids(session, db)
     events = []
     body = f"Session recorded: {session.title}"
     for sid in student_ids:

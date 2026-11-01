@@ -74,7 +74,7 @@ Attendance remains platform join/enter. Seed may create **historical** attendanc
 7. Historical attendance rows for last week (not today’s live session).
 8. Owner revenue: invoices on exam-prep sufficient for scorecard rupees.
 
-Wipe: `python -m app.seed_cli --reset`. Document on [seed-map.html](../../seed-map.html).
+Wipe: `python -m app.seed_cli --reset`. Document on [product-book/seed-map.html](../../product-book/seed-map.html).
 
 ## RBAC
 

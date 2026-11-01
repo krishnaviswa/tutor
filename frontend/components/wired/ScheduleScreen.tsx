@@ -29,18 +29,21 @@ const CLASS_LOCK = "Only the assigned teacher or the owner can change this class
 
 function explainSessionError(err: unknown): string {
   const raw = (err instanceof Error ? err.message : String(err)).replace(/\s+/g, " ").trim();
+  let detail = "";
   const start = raw.indexOf("{");
   if (start >= 0) {
     try {
       const body = JSON.parse(raw.slice(start)) as { detail?: unknown };
-      if (typeof body.detail === "string" && body.detail.trim()) return body.detail.trim();
+      if (typeof body.detail === "string") detail = body.detail.trim();
     } catch {
       /* use the sentence below */
     }
   }
-  if (raw.includes("403") || raw.includes(CLASS_LOCK)) return CLASS_LOCK;
-  if (raw.startsWith("409") || raw.includes("teacher conflict")) return "That slot conflicts with another class.";
-  if (raw.includes("outside availability")) return "That time is outside the teacher's availability.";
+  const hay = `${raw} ${detail}`;
+  if (hay.includes("403") || hay.includes(CLASS_LOCK)) return CLASS_LOCK;
+  if (raw.startsWith("409") || hay.includes("teacher conflict")) return "That slot conflicts with another class.";
+  if (hay.includes("outside availability")) return "That time is outside the teacher's availability.";
+  if (detail) return detail;
   const plain = raw.replace(/^\d{3}\s+/, "").trim();
   return plain && !plain.startsWith("{") && !plain.startsWith("[") ? plain : "Could not save that class.";
 }

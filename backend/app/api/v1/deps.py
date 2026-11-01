@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models.tables import FeatureFlag, User, Workspace
-from app.services.auth import Principal, decode_jwt
+from app.services.auth import SESSION_COOKIE, Principal, decode_jwt
 from app.services.internal_v2 import branding_of, staff_allowed_modules
 from app.services.quota import ALWAYS_ON
 
@@ -56,9 +56,14 @@ def current_principal(
     db: Session = Depends(get_db),
     authorization: Annotated[str | None, Header()] = None,
 ) -> Principal:
-    if not authorization or not authorization.lower().startswith("bearer "):
+    token = ""
+    if authorization and authorization.lower().startswith("bearer "):
+        token = authorization.split(" ", 1)[1].strip()
+    if not token:
+        token = request.cookies.get(SESSION_COOKIE) or ""
+    if not token:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "sign in")
-    payload = decode_jwt(authorization.split(" ", 1)[1].strip())
+    payload = decode_jwt(token)
     user = db.get(User, payload["sub"])
     if not user:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "unknown user")
@@ -73,13 +78,18 @@ def current_principal(
     return principal
 
 
-def _g1(db: Session, path: str, principal: Principal) -> None:
-    flags = db.query(FeatureFlag).filter(FeatureFlag.workspace_id == principal.workspace_id).first()
+def effective_workspace_modules(db: Session, workspace_id: str) -> set[str]:
+    flags = db.query(FeatureFlag).filter(FeatureFlag.workspace_id == workspace_id).first()
     modules = set(flags.modules) if flags else set(ALWAYS_ON)
-    ws = db.get(Workspace, principal.workspace_id)
+    ws = db.get(Workspace, workspace_id)
     brand = branding_of(ws)
     if brand.get("preview_mode"):
         modules |= set(brand.get("preview_modules") or [])
+    return modules
+
+
+def _g1(db: Session, path: str, principal: Principal) -> None:
+    modules = effective_workspace_modules(db, principal.workspace_id)
     for prefix, mod in MODULE_FOR_PATH_PREFIX:
         if path.startswith(prefix) and mod not in modules:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "module off")
@@ -89,7 +99,8 @@ def _g1(db: Session, path: str, principal: Principal) -> None:
     for prefix, mod in MODULE_FOR_PATH_PREFIX:
         if path.startswith(prefix) and mod not in extra:
             # Owner console stays role-gated 403 (002), not a G1 hide.
-            if mod == "F2":
+            # Notices follow the workspace flag. They are not a per-person teaching toggle.
+            if mod in ("F2", "D5"):
                 continue
             raise HTTPException(status.HTTP_404_NOT_FOUND, "module off")
 

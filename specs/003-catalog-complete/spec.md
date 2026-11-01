@@ -10,7 +10,7 @@
 
 001 mapped TutorOS as a clickable architecture pack (closed 47 screens, layers, ports). 002 made the **spine feel live**: durable tenant-scoped rows, three seeded workspaces, auth stub, roster/cohort, one teaching write (`record`) → `timeline_events`, parent hub reads, quota meters. Demo HTML stayed UI gold. Next.js was not built. Fifty-one catalog APIs remain `planned`. Seventeen entities remain `later`. All 47 screens remain `empty`.
 
-Humans asked for the **remaining catalog-complete product as one Spec Kit feature** — one spec, one plan, one task list, then an **interactive HTML implementation guide** (master `plan-viewer.html` plus satellite pages), then implement only after they approve that guide. The HTML is the README-equivalent for chief architects and leads: functional jobs, technical stack, and the end-to-end implementation sequence. That is larger than a normal Spec Kit slice and larger than 002’s closed vertical. This spec still does **not** invent screens, subjects, or vendors. It specifies wiring **existing** catalog ids: remaining APIs, remaining entities, and a Next.js app with one route per existing screen.
+Humans asked for the **remaining catalog-complete product as one Spec Kit feature** — one spec, one plan, one task list, then an **interactive HTML implementation guide** (master `product-book/plan-viewer.html` plus satellite pages), then implement only after they approve that guide. The HTML is the README-equivalent for chief architects and leads: functional jobs, technical stack, and the end-to-end implementation sequence. That is larger than a normal Spec Kit slice and larger than 002’s closed vertical. This spec still does **not** invent screens, subjects, or vendors. It specifies wiring **existing** catalog ids: remaining APIs, remaining entities, and a Next.js app with one route per existing screen.
 
 001 is not rewritten and is not implemented. 002 is not rewritten: its tests, mock ports, and spine behaviour are **protected**. The first work in this feature is to prove 002 still holds (Tester + converge + Accept), then extend.
 
@@ -43,7 +43,7 @@ Humans asked for the **remaining catalog-complete product as one Spec Kit featur
 2. **Given** two workspaces A and B, **when** a signed-in person acts in A, **then** they cannot read or mutate 003 business rows that belong to B (every new business table is workspace-scoped).
 3. **Given** this feature, **when** anyone lists screens, routes, or demo keys, **then** only ids already in `catalog/screens.json` appear — no 48th screen.
 4. **Given** vendor edges, **when** the app runs locally or in CI, **then** ports are mock by default; no live Meta, Google, or Razorpay calls. Failed channel send does not roll back `timeline_events`.
-5. **Given** `tutor-platform-demo.html`, **when** a Next.js screen is built, **then** the demo remains UI gold until that screen is `wired`; catalog/architecture follow the demo; incomplete demo tracks are not filled by inventing ids. Exam-prep omits mandatory `staff-login`; faculty teaching starts at `cohort-builder` / `schedule`.
+5. **Given** `product-book/tutor-platform-demo.html`, **when** a Next.js screen is built, **then** the demo remains UI gold until that screen is `wired`; catalog/architecture follow the demo; incomplete demo tracks are not filled by inventing ids. Exam-prep omits mandatory `staff-login`; faculty teaching starts at `cohort-builder` / `schedule`.
 6. **Given** 001-platform-architecture, **when** 003 is specified or implemented, **then** 001 artifacts are not rewritten as a new architecture pack and `/speckit.implement` is not run on 001.
 7. **Given** 002-sim-spine, **when** 003 starts, **then** Tester + converge + PM Accept for 002 happen without expanding 002’s slice; 002 routers stay; no `/sim/login` or other invented paths.
 8. **Given** the seventeen catalog entities still marked `later`, **when** 003 data work completes, **then** each exists as a workspace-scoped table (or equivalent spine row) and catalog `tier` is updated on Accept — no syllabus, exam-board, or Biology tables.
@@ -53,11 +53,11 @@ Humans asked for the **remaining catalog-complete product as one Spec Kit featur
 12. **Given** parent hub, **when** practice, invoices, messages, and prefs tables exist, **then** `parent-home` children show that child’s rows in workspace A only — not another family, not workspace B.
 13. **Given** `join` / live screens, **when** a student enters a session, **then** attendance is recorded by the platform join/record path, not by trusting the video URL.
 14. **Given** STT, **when** `session-video` or `record` is opened, **then** the transcript panel stays empty; no fake captions.
-15. **Given** Spec Kit, **when** someone runs `/speckit.implement` for 003, **then** it is refused until this spec is Specified, Architect artifacts exist, tasks exist, **`plan-viewer.html` exists**, and a human has OK’d that HTML in chat.
+15. **Given** Spec Kit, **when** someone runs `/speckit.implement` for 003, **then** it is refused until this spec is Specified, Architect artifacts exist, tasks exist, **`product-book/plan-viewer.html` exists**, and a human has OK’d that HTML in chat.
 16. **Given** Accept, **when** screens, APIs, tables, or ports changed, **then** the same change updates README, catalog, and architecture HTML (regenerated from demo where required).
 17. **Given** optional local Postgres, **when** `DATABASE_URL` points at Compose Postgres, **then** the same models run; unit tests may stay on in-memory SQLite. Engine choice is not a product SKU.
 18. **Given** Biology / NEET / NCERT files under `docs/examples/`, **when** 003 ships, **then** they remain example-only; seeds stay job arrangements (exam-prep, language 1-on-1, music), not a Biology product.
-19. **Given** the HTML implementation guide (`plan-viewer.html` and satellites), **when** a lead reviews before implement, **then** they can navigate functional jobs, technical contracts, and sequenced E2E steps covering all 47 screens, catalog APIs, and entities — documentation only, not the running app.
+19. **Given** the HTML implementation guide (`product-book/plan-viewer.html` and satellites), **when** a lead reviews before implement, **then** they can navigate functional jobs, technical contracts, and sequenced E2E steps covering all 47 screens, catalog APIs, and entities — documentation only, not the running app.
 
 ## Out of scope
 
@@ -76,7 +76,7 @@ Humans asked for the **remaining catalog-complete product as one Spec Kit featur
 ## Clarify (closed)
 
 - **One giant feature by human request.** Remaining catalog (entities + APIs + Next.js for 47 existing ids) is Specified here. Internal phase gates still apply: a failing 002 test stops the next phase.
-- **HTML plan gate.** After tasks, the first deliverable is an interactive HTML suite: master `plan-viewer.html` plus satellites for functional map, technical map, and sequenced E2E steps. Implement is blocked until a human approves that guide in chat. It is documentation, not the app.
+- **HTML plan gate.** After tasks, the first deliverable is an interactive HTML suite: master `product-book/plan-viewer.html` plus satellites for functional map, technical map, and sequenced E2E steps. Implement is blocked until a human approves that guide in chat. It is documentation, not the app.
 - **001 vs 002 vs 003.** 001 = architecture pack (Specified, no implement). 002 = spine sim (protected; Tester + Accept first). 003 = remaining catalog-complete product.
 - **Demo stays gold.** Wire existing ids. Incomplete focused tracks are allowed; do not invent screens to fill them.
 - **Mock default.** Simulate vendors; do not call them. Timeline is the ledger.
@@ -89,7 +89,7 @@ Humans asked for the **remaining catalog-complete product as one Spec Kit featur
 - [x] Clarify closed (folded into this spec)
 - [x] Architect: `plan.md` + checklist + analyze
 - [x] Tasks (`tasks.md`)
-- [x] `plan-viewer.html` master + satellite HTML (functional, technical, sequence)
+- [x] `product-book/plan-viewer.html` master + satellite HTML (functional, technical, sequence)
 - [x] Human OK on the HTML guide (blocks `/speckit.implement`)
 - [x] `/speckit.implement` (Builder; after HTML OK)
 - [x] Tester + PM Accept (`specs/003-catalog-complete/test-report.md`; 20 pytest passed; shell/sim)

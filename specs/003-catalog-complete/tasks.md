@@ -2,7 +2,7 @@
 
 Builder implemented on `cursor/003-catalog-complete` after human OK. **Tester + PM Accept closed** (`test-report.md`, Ship, shell/sim). Screens remain `shell`. Do not invent ids. Do not expand 002.
 
-Builder implements **only after** human OK on `plan-viewer.html`. Branch `cursor/003-catalog-complete`, never `main`.
+Builder implements **only after** human OK on `product-book/plan-viewer.html`. Branch `cursor/003-catalog-complete`, never `main`.
 
 Phase gate: if 002 pytest fails, **stop** and report before the next phase.
 
@@ -528,7 +528,7 @@ Phase gate: if 002 pytest fails, **stop** and report before the next phase.
 - **Depends:** T5.1
 - **Critical path:** no
 - **AC:** 16
-- **Files:** `tutor-platform-architecture.html` (via embed), `tutor-platform-role-*.html`
+- **Files:** `product-book/tutor-platform-architecture.html` (via embed), `product-book/tutor-platform-role-*.html`
 - **Commands:** `python scripts/build_role_html.py`
 - **Risks:** Do not hand-edit generated role HTML.
 

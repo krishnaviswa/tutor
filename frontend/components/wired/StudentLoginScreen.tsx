@@ -5,8 +5,8 @@ import { useEffect, useRef, useState, type ClipboardEvent, type FormEvent, type 
 import { api } from "@/lib/api";
 import { DEMO_PERSONAS, MOCK_TENANT_LIST, MOCK_TENANTS, OTP_CODE, type DemoPersonaRole } from "@/lib/mocks";
 import { catalogRoute } from "@/lib/screens";
-import { getToken, setToken } from "@/lib/session";
-import { Err } from "./bits";
+import { setToken } from "@/lib/session";
+import { Err, signInError } from "./bits";
 
 const exam = MOCK_TENANTS["exam-prep"];
 
@@ -24,7 +24,6 @@ export function StudentLoginScreen() {
   const boxes = useRef<Array<HTMLInputElement | null>>([]);
 
   useEffect(() => {
-    if (!getToken()) return;
     api("/api/v1/auth/me")
       .then((me) => {
         if ((me as { role?: string }).role === "student") router.replace(catalogRoute("student-dash"));
@@ -138,7 +137,7 @@ export function StudentLoginScreen() {
       setToken(ver.token);
       router.replace(destinationForRole(selectedRole));
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(signInError(err));
     } finally {
       setBusy(false);
     }
