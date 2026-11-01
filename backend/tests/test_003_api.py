@@ -1,15 +1,40 @@
 from app.db import session_factory
-from app.models.tables import Attendance, Submission
+from app.models.tables import Attendance, FeatureFlag, Submission
+from app.services.quota import ALWAYS_ON
 from app.services.seed import WS_EXAM, WS_LANG
+from app.services.templates import modules_for_template
 from tests.helpers import auth, login
+
+
+def _modules(ws_id: str) -> set[str]:
+    db = session_factory()()
+    try:
+        row = db.query(FeatureFlag).filter(FeatureFlag.workspace_id == ws_id).one()
+        return set(row.modules or [])
+    finally:
+        db.close()
 
 
 def test_branding_and_whatsapp_pause(client):
     owner = login(client, "+9101o", WS_EXAM, "owner")
     h = auth(owner)
-    branded = client.patch("/api/v1/workspaces/current/branding", headers=h, json={"accent": "#2E7D4F"})
-    assert branded.status_code == 200
-    assert branded.json()["branding"]["accent"] == "#2E7D4F"
+    branded = client.patch(
+        "/api/v1/workspaces/current/branding",
+        headers=h,
+        json={"name": "Chindu Science Academy", "tagline": "On the record", "accent": "#2E7D4F", "logo": "C"},
+    )
+    assert branded.status_code == 200, branded.text
+    body = branded.json()
+    assert body["name"] == "Chindu Science Academy"
+    assert body["branding"]["tagline"] == "On the record"
+    assert body["branding"]["accent"] == "#2E7D4F"
+    assert body["branding"]["logo"] == "C"
+    assert "name" not in body["branding"]
+    again = client.get("/api/v1/workspaces/current", headers=h)
+    assert again.status_code == 200
+    assert again.json()["name"] == "Chindu Science Academy"
+    blank = client.patch("/api/v1/workspaces/current/branding", headers=h, json={"name": "   "})
+    assert blank.status_code == 400
     paused = client.post("/api/v1/billing/whatsapp-pause", headers=h, json={"paused": True})
     assert paused.status_code == 200
     assert paused.json()["whatsapp_paused"] is True
@@ -155,6 +180,76 @@ def test_assignment_grade_and_mock_checkout(client):
     assert pay.json()["mock"]["provider"] == "mock"
 
 
+def test_workspace_patch_persists_kind_and_slug(client):
+    owner = login(client, "+9101o", WS_EXAM, "owner")
+    h = auth(owner)
+    patched = client.patch(
+        "/api/v1/workspaces/current",
+        headers=h,
+        json={"name": "North Studio", "slug": "north-studio", "kind": "music"},
+    )
+    assert patched.status_code == 200, patched.text
+    body = patched.json()
+    assert body["name"] == "North Studio"
+    assert body["slug"] == "north-studio"
+    assert body["kind"] == "music"
+    again = client.get("/api/v1/workspaces/current", headers=h)
+    assert again.status_code == 200
+    assert again.json()["name"] == "North Studio"
+    assert again.json()["slug"] == "north-studio"
+    assert again.json()["kind"] == "music"
+    music = set(modules_for_template("music"))
+    exam = set(modules_for_template("exam-prep"))
+    assert music != exam
+    assert set(ALWAYS_ON) <= music
+    assert _modules(WS_EXAM) == music
+    renamed = client.patch("/api/v1/workspaces/current", headers=h, json={"name": "North Studio West"})
+    assert renamed.status_code == 200, renamed.text
+    assert renamed.json()["kind"] == "music"
+    assert _modules(WS_EXAM) == music
+    conflict = client.patch("/api/v1/workspaces/current", headers=h, json={"slug": "language-1on1"})
+    assert conflict.status_code == 409
+    assert conflict.json()["detail"] == "That workspace address is already in use."
+    blank = client.patch("/api/v1/workspaces/current", headers=h, json={"name": "   "})
+    assert blank.status_code == 400
+    assert blank.json()["detail"] == "Enter a workspace name."
+    bad_slug = client.patch("/api/v1/workspaces/current", headers=h, json={"slug": "North Studio"})
+    assert bad_slug.status_code == 400
+    kept = client.get("/api/v1/workspaces/current", headers=h).json()
+    assert kept["name"] == "North Studio West"
+    assert kept["slug"] == "north-studio"
+    assert kept["kind"] == "music"
+
+
+def test_template_apply_returns_distinct_module_sets(client):
+    owner = login(client, "+9101o", WS_EXAM, "owner")
+    h = auth(owner)
+    exam = client.post("/api/v1/workspaces/current/template", headers=h, json={"kind": "exam-prep"})
+    one = client.post("/api/v1/workspaces/current/template", headers=h, json={"kind": "one-on-one"})
+    assert exam.status_code == 200, exam.text
+    assert one.status_code == 200, one.text
+    exam_modules = set(exam.json()["modules"])
+    one_modules = set(one.json()["modules"])
+    assert exam_modules != one_modules
+    always = set(exam.json()["always_on"])
+    assert always == set(ALWAYS_ON)
+    assert always <= exam_modules
+    assert always <= one_modules
+    assert "A1" in exam_modules
+    assert "F2" in always
+    assert "C1" in exam_modules and "C1" not in one_modules
+    assert "F1" in one_modules and "F1" not in exam_modules
+    current = client.get("/api/v1/workspaces/current", headers=h)
+    assert current.json()["kind"] == "one-on-one"
+    everything = client.post("/api/v1/workspaces/current/template", headers=h, json={"kind": "everything"})
+    assert everything.status_code == 200, everything.text
+    everything_modules = set(everything.json()["modules"])
+    assert "C6" in everything_modules
+    assert "C6" not in exam_modules
+    assert always <= everything_modules
+    assert client.get("/api/v1/workspaces/current", headers=h).json()["kind"] == "everything"
+
+
 def test_templates_keep_always_on_and_integrations_mock(client):
     owner = login(client, "+9101o", WS_EXAM, "owner")
     h = auth(owner)
@@ -162,6 +257,9 @@ def test_templates_keep_always_on_and_integrations_mock(client):
     assert applied.status_code == 200
     assert "A1" in applied.json()["modules"]
     assert "F2" in applied.json()["always_on"]
+    # Exam-prep leaves integrations off. The full gallery includes them, so the mock port can connect.
+    opened = client.post("/api/v1/workspaces/current/template", headers=h, json={"kind": "everything"})
+    assert opened.status_code == 200, opened.text
     connected = client.post("/api/v1/integrations/calendar_video/connect", headers=h)
     assert connected.status_code == 200
     assert connected.json()["provider"] == "mock"

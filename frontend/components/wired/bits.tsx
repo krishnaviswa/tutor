@@ -29,6 +29,21 @@ export function Err({ message }: { message?: string | null }) {
   );
 }
 
+/** FastAPI errors arrive as `400 {"detail":"..."}`. Show the sentence. */
+export function apiDetail(err: unknown): string {
+  const raw = err instanceof Error ? err.message : String(err);
+  const jsonStart = raw.indexOf("{");
+  if (jsonStart >= 0) {
+    try {
+      const body = JSON.parse(raw.slice(jsonStart)) as { detail?: unknown };
+      if (typeof body.detail === "string" && body.detail.trim()) return body.detail;
+    } catch {
+      /* keep the raw message */
+    }
+  }
+  return raw;
+}
+
 export function Empty({ children }: { children: ReactNode }) {
   return (
     <div className="state state--empty" role="status">

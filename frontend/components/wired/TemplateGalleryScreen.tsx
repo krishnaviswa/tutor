@@ -1,60 +1,80 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
 import { catalogRoute } from "@/lib/screens";
+import { templateName } from "@/lib/template-kinds";
 import { Err } from "./bits";
-
-type Tpl = { id: string; modules: string[] };
+import { useTemplateSetup } from "./useTemplateSetup";
 
 export function TemplateGalleryScreen() {
-  const [rows, setRows] = useState<Tpl[]>([]);
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState("");
-
-  useEffect(() => {
-    api("/api/v1/templates")
-      .then((data) => setRows(data as Tpl[]))
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
-  }, []);
-
-  async function apply(kind: string) {
-    setBusy(kind);
-    setError("");
-    try {
-      await api("/api/v1/workspaces/current/template", {
-        method: "POST",
-        body: JSON.stringify({ kind }),
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setBusy("");
-    }
-  }
+  const setup = useTemplateSetup();
+  const selectedName = templateName(setup.sel);
 
   return (
     <>
       <h2>Template gallery</h2>
-      <span className="k">Each = a toggle-set + starter taxonomy</span>
-      <Err message={error} />
+      <span className="k">Each one is a starting set of tools. Applying it replaces which tools are on.</span>
+      <Err message={setup.error} />
+      {setup.kindLoaded ? (
+        <p style={{ margin: "12px 0" }}>
+          {setup.currentKind ? (
+            <>
+              On now: <strong>{templateName(setup.currentKind)}</strong>
+            </>
+          ) : (
+            "No setup is on yet."
+          )}
+        </p>
+      ) : (
+        <p className="muted" style={{ margin: "12px 0" }}>
+          Loading the current setup…
+        </p>
+      )}
+      {setup.applied ? (
+        <p className="muted" role="status">
+          {templateName(setup.applied)} is on. Next, set the name and colours learners see.
+        </p>
+      ) : null}
+      {!setup.templatesLoaded ? <p className="muted">Loading setups…</p> : null}
       <div className="grid g2">
-        {rows.map((t) => (
-          <div key={t.id} className="card">
-            <div className="sb">
-              <h3 style={{ margin: 0 }}>{t.id}</h3>
-              <span className="pill">{t.modules.length} modules</span>
-            </div>
-            <button className="hot hot--btn ghost" type="button" disabled={busy === t.id} onClick={() => void apply(t.id)}>
-              Apply
+        {setup.cards.map((card) => {
+          const selected = setup.sel === card.id;
+          return (
+            <button
+              key={card.id}
+              type="button"
+              aria-pressed={selected}
+              className={selected ? "card card--wash" : "card"}
+              style={{ textAlign: "left", border: selected ? "1.5px solid var(--tint)" : undefined }}
+              onClick={() => setup.choose(card.id)}
+            >
+              <div className="sb">
+                <h3 style={{ margin: 0 }}>{card.name}</h3>
+                <span className="pill">{card.modules.length} tools</span>
+              </div>
+              {card.blurb ? (
+                <p className="muted" style={{ margin: "6px 0" }}>
+                  {card.blurb}
+                </p>
+              ) : null}
+              {setup.currentKind === card.id ? <span className="pill is-good">On now</span> : null}
             </button>
-          </div>
-        ))}
+          );
+        })}
       </div>
-      <Link href={catalogRoute("branding")} className="hot hot--btn" style={{ marginTop: 8 }}>
-        Branding
-      </Link>
+      <div className="row" style={{ marginTop: 12 }}>
+        <button
+          className={setup.applied ? "btn btn--sm" : "hot hot--btn"}
+          type="button"
+          disabled={setup.busy || !setup.sel || !setup.kindLoaded || !setup.templatesLoaded}
+          onClick={() => void setup.apply()}
+        >
+          {setup.busy ? "Applying…" : `Apply ${selectedName}`}
+        </button>
+        <Link href={catalogRoute("branding")} className={setup.applied ? "hot hot--btn" : "btn btn--sm"}>
+          {setup.applied ? "Continue to branding" : "Branding"}
+        </Link>
+      </div>
     </>
   );
 }

@@ -72,7 +72,7 @@ class Workspace(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     slug: Mapped[str] = mapped_column(String(80), unique=True)
     name: Mapped[str] = mapped_column(String(200))
-    kind: Mapped[str] = mapped_column(String(40))  # exam-prep | one-on-one | music
+    kind: Mapped[str] = mapped_column(String(40))  # exam-prep | one-on-one | k-12 | skills | music | everything
     student_whatsapp: Mapped[int] = mapped_column(Integer, default=0)
     whatsapp_paused: Mapped[int] = mapped_column(Integer, default=0)
     branding: Mapped[dict] = mapped_column(JSON, default=dict)

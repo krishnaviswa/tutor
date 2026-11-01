@@ -12,7 +12,6 @@ from app.models.tables import (
     AuditLog,
     AutomationRule,
     BacklogItem,
-    FeatureFlag,
     Invoice,
     NotificationPref,
     Plan,
@@ -27,7 +26,7 @@ from app.services.internal_v2 import auto_invoice, fee_visible_for, meta_of, run
 from app.services.progress import invoice_out, report_slice, student_dashboard, teacher_dashboard
 from app.services.quota import ALWAYS_ON
 from app.services.scope import linked_student_ids, student_for_principal
-from app.services.templates import TEMPLATES, modules_for_template
+from app.services.templates import TEMPLATES, apply_workspace_template, modules_for_template
 
 router = APIRouter()
 
@@ -468,19 +467,12 @@ def apply_template(
     db: Session = Depends(get_db),
     principal: Principal = Depends(require_roles("owner")),
 ):
-    if body.kind not in TEMPLATES:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "template")
-    flags = db.query(FeatureFlag).filter(FeatureFlag.workspace_id == principal.workspace_id).first()
-    modules = modules_for_template(body.kind)
-    if flags:
-        flags.modules = modules
-    else:
-        db.add(FeatureFlag(workspace_id=principal.workspace_id, modules=modules))
     ws = db.get(Workspace, principal.workspace_id)
-    if ws:
-        ws.kind = body.kind if body.kind != "everything" else ws.kind
+    if not ws:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "workspace")
+    modules = apply_workspace_template(db, ws, body.kind)
     db.flush()
-    return {"kind": body.kind, "modules": modules, "always_on": list(ALWAYS_ON)}
+    return {"kind": ws.kind, "modules": modules, "always_on": list(ALWAYS_ON)}
 
 
 @router.get("/automation-rules")

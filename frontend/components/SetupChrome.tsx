@@ -21,6 +21,9 @@ export function SetupChrome({
       <header className="suphead">
         <div className="wm">
           TutorOS <i>setup</i>
+          <Link href={catalogRoute("owner")} className="hot--link">
+            Owner console
+          </Link>
         </div>
         <nav className="steps" aria-label="Setup steps">
           {STEPS.map((s, i) => {
