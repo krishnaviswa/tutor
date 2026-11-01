@@ -72,10 +72,10 @@ Human OK to implement is this chat (single OK). Status stays Draft until Archite
 10. **Given** landings after identity, **when** OTP/link succeeds, **then** student → `student-dash`; exam-prep faculty → `schedule` or `teacher-dash`; parent → `parent-home`.
 11. **Given** `join` / live / `session-video`, **when** a student enters, **then** attendance is the platform enter/record path; transcript stays empty (no fake STT). Video URLs stay mock.
 12. **Given** a teaching or practice write that should notify, **when** it succeeds, **then** `timeline_events` is the ledger first; WhatsApp/email/push stay mock channels for teacher, parent, admin; student WhatsApp stays owner-gated default off.
-13. **Given** demo HTML, **when** a screen is `wired`, **then** the Next.js UI follows `tutor-platform-demo.html` for that id; catalog APIs only from `catalog/apis.json` / that screen’s `apis` list. No invented paths. A minimal API fix is allowed only if the screen cannot function, and it is Tester-gated.
+13. **Given** demo HTML, **when** a screen is `wired`, **then** the Next.js UI follows `product-book/tutor-platform-demo.html` for that id; catalog APIs only from `catalog/apis.json` / that screen’s `apis` list. No invented paths. A minimal API fix is allowed only if the screen cannot function, and it is Tester-gated.
 14. **Given** already-wired `schedule`, `session-pre`, `record`, `roster`, **when** 004 proceeds, **then** those components are not rewritten; chrome/gate may be extended (faculty Content nav) but not replaced.
 15. **Given** Biology / NEET / NCERT under `docs/examples/`, **when** 004 ships, **then** they remain example-only; seeds stay job arrangements (exam-prep, language 1-on-1, music).
-16. **Given** Accept, **when** screens become `wired`, **then** the same change updates `catalog/screens.json`, `README.md`, `product-viewer.html`, and `work-log.html`.
+16. **Given** Accept, **when** screens become `wired`, **then** the same change updates `catalog/screens.json`, `README.md`, `product-book/product-viewer.html`, and `product-book/work-log.html`.
 
 ## Out of scope
 

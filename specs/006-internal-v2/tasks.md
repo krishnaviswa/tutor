@@ -47,7 +47,7 @@
 ## T8.7 — Phase F/G ops APIs + UI + demo tracks
 
 - auto-invoice/coupon/proration; payout statements; G1 preview; automation miss → backlog; demo TEMPLATES fill (no staff-login on exam-prep).
-- Screens: `billing`, `payouts`, `owner`, `automation`. Files: `tutor-platform-demo.html`.
+- Screens: `billing`, `payouts`, `owner`, `automation`. Files: `product-book/tutor-platform-demo.html`.
 
 ## T8.8 — Wired UI pass
 

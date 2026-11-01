@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -20,11 +22,29 @@ class ImportIn(BaseModel):
     rows: list[StudentIn]
 
 
-def _out(s: Student) -> dict:
-    return {"id": s.id, "workspace_id": s.workspace_id, "user_id": s.user_id, "display_name": s.display_name}
+def _joined_at(when: datetime | None) -> str | None:
+    return when.isoformat() if when else None
 
 
-def _add_student(db: Session, workspace_id: str, body: StudentIn) -> Student:
+def _out(s: Student, joined_at: datetime | None = None) -> dict:
+    return {
+        "id": s.id,
+        "workspace_id": s.workspace_id,
+        "user_id": s.user_id,
+        "display_name": s.display_name,
+        "joined_at": _joined_at(joined_at),
+    }
+
+
+def _joined_by_user(db: Session, rows: list[Student]) -> dict[str, datetime | None]:
+    ids = [s.user_id for s in rows if s.user_id]
+    if not ids:
+        return {}
+    people = db.query(User).filter(User.id.in_(ids)).all()
+    return {person.id: person.created_at for person in people}
+
+
+def _add_student(db: Session, workspace_id: str, body: StudentIn) -> tuple[Student, datetime | None]:
     user = User(display_name=body.display_name)
     db.add(user)
     db.flush()
@@ -35,7 +55,7 @@ def _add_student(db: Session, workspace_id: str, body: StudentIn) -> Student:
         db.add(Identity(workspace_id=workspace_id, user_id=user.id, kind="phone", value=body.phone))
     if body.email:
         db.add(Identity(workspace_id=workspace_id, user_id=user.id, kind="email", value=body.email))
-    return st
+    return st, user.created_at
 
 
 @router.get("/students")
@@ -44,7 +64,8 @@ def list_students(
     principal: Principal = Depends(require_roles("owner", "teacher", "assistant")),
 ):
     rows = db.query(Student).filter(Student.workspace_id == principal.workspace_id).all()
-    return [_out(s) for s in rows]
+    joined = _joined_by_user(db, rows)
+    return [_out(s, joined.get(s.user_id)) for s in rows]
 
 
 @router.post("/students")
@@ -53,7 +74,8 @@ def create_student(
     db: Session = Depends(get_db),
     principal: Principal = Depends(require_roles("owner", "teacher", "assistant")),
 ):
-    return _out(_add_student(db, principal.workspace_id, body))
+    created, joined_at = _add_student(db, principal.workspace_id, body)
+    return _out(created, joined_at)
 
 
 @router.post("/students/import")
@@ -62,7 +84,10 @@ def import_students(
     db: Session = Depends(get_db),
     principal: Principal = Depends(require_roles("owner", "teacher", "assistant")),
 ):
-    created = [_out(_add_student(db, principal.workspace_id, row)) for row in body.rows]
+    created = []
+    for row in body.rows:
+        student, joined_at = _add_student(db, principal.workspace_id, row)
+        created.append(_out(student, joined_at))
     return {"created": created}
 
 

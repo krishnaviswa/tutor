@@ -13,6 +13,7 @@ type StudentRow = {
   user_id: string;
   display_name: string;
   phone?: string | null;
+  joined_at?: string | null;
 };
 
 type CohortRow = {
@@ -39,6 +40,18 @@ function statusTone(status: string) {
   if (status === "at risk") return "bad";
   if (status === "trial") return "warn";
   return "good";
+}
+
+function formatJoined(iso: string | null | undefined): string {
+  if (!iso) return "Not recorded";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "Not recorded";
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Kolkata",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(d);
 }
 
 function cohortNamesFor(studentId: string, cohorts: CohortRow[]) {
@@ -378,7 +391,7 @@ export function RosterScreen() {
                       "—"
                     )}
                   </td>
-                  <td className="muted">—</td>
+                  <td className="muted">{formatJoined(s.joined_at)}</td>
                   <td>
                     <span className={`pill is-${statusTone(status)}`}>{status}</span>
                   </td>

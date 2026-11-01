@@ -47,7 +47,7 @@ Library and whiteboard are two doors. Local upload on the board always works. Pl
 
 Boards (IB, ICSE, CBSE, Matric) are workspace labels, not a shipped syllabus. Constitution: subject-neutral, G3 taxonomy, no syllabus tables. ICC, IBC, and BC in the request mean ICSE, IB, and CBSE as examples of those labels.
 
-Navigation is one existing app shell. The movement map is Home, Sessions, Availability, Library, Whiteboard, People, Profile, using the screens that already exist for that person. Theme, the notification indicator, and Profile sit in that bar for every signed-in role. There is no second navigation system. A role is not given a new door to a screen they cannot use. The only proposed catalog addition is the id `profile`. It cannot be built until `catalog/screens.json` and `tutor-platform-demo.html` both gain that id. This pass does not add it.
+Navigation is one existing app shell. The movement map is Home, Sessions, Availability, Library, Whiteboard, People, Profile, using the screens that already exist for that person. Theme, the notification indicator, and Profile sit in that bar for every signed-in role. There is no second navigation system. A role is not given a new door to a screen they cannot use. The only proposed catalog addition is the id `profile`. It cannot be built until `catalog/screens.json` and `product-book/tutor-platform-demo.html` both gain that id. This pass does not add it.
 
 The only permissioned undo is reversing a session handoff, and only with faculty-admin permission. There is no global undo.
 

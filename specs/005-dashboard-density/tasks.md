@@ -67,7 +67,7 @@ Phase id: `005-density`. Stop if 002 pytest goes red.
 - **Depends:** catalog seed pack on this branch
 - **Critical:** yes
 - **AC:** 9, 11
-- **Files:** `backend/app/services/seed_pack.py` (or `seed_density.py` called from it), `seed-map.html`
+- **Files:** `backend/app/services/seed_pack.py` (or `seed_density.py` called from it), `product-book/seed-map.html`
 - **Commands:** `cd backend; python -m app.seed_cli --reset`
 - **Do:** upcoming named session; due practice set; historical week attendance; one at-risk student; open + answered doubt; content `kind` + notes; one paid invoice with receipt, one pending with `due_on`.
 - **Do not:** pre-write attendance for a live class that has not been joined.
@@ -185,7 +185,7 @@ Phase id: `005-density`. Stop if 002 pytest goes red.
 - **Depends:** T7.7, T7.8, T7.9
 - **Critical:** true
 - **AC:** 13
-- **Files:** `scripts/build_catalog.py` `shows`, demo WHY, `README.md` §11–§12, `product-viewer.html`, `work-log.html`
+- **Files:** `scripts/build_catalog.py` `shows`, demo WHY, `README.md` §11–§12, `product-book/product-viewer.html`, `product-book/work-log.html`
 - **Commands:** `python scripts/build_catalog.py`
 - **Do:** `shows` text must mention named facts. Hub tiles T7.* → done.
 

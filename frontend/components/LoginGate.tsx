@@ -11,7 +11,8 @@ import {
 } from "react";
 import { api } from "@/lib/api";
 import { DEMO_PERSONAS, MOCK_TENANT_LIST, MOCK_TENANTS, OTP_CODE, type DemoPersonaRole } from "@/lib/mocks";
-import { clearToken, getToken, setToken } from "@/lib/session";
+import { clearToken, setToken } from "@/lib/session";
+import { Err, signInError } from "@/components/wired/bits";
 
 const exam = MOCK_TENANTS["exam-prep"];
 
@@ -28,8 +29,8 @@ export type LoginGateProps = {
 
 const ACCEPT: Record<DemoPersonaRole, string[]> = {
   teacher: ["teacher", "owner", "assistant"],
-  owner: ["owner", "assistant"],
-  assistant: ["assistant", "owner"],
+  owner: ["owner"],
+  assistant: ["assistant"],
   student: ["student"],
   parent: ["parent"],
 };
@@ -50,8 +51,8 @@ export function LoginGate({
   const [digits, setDigits] = useState<string[]>(() => OTP_CODE.split(""));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [username, setUsername] = useState(role === "owner" ? "vikram" : role === "assistant" ? "rohan" : role === "student" ? "aarav" : role === "parent" ? "rajesh" : "sudhakshina");
-  const [password, setPassword] = useState("TutorDemo1");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const boxes = useRef<Array<HTMLInputElement | null>>([]);
 
   const allowedRoles = accept ?? ACCEPT[role];
@@ -60,21 +61,14 @@ export function LoginGate({
   useEffect(() => {
     let cancelled = false;
     async function check() {
-      if (!getToken()) {
-        if (!cancelled) {
-          setAuthed(false);
-          setReady(true);
-        }
-        return;
-      }
       try {
         const me = (await api("/api/v1/auth/me")) as { role?: string };
         const allowed = allowedKey.split(",");
         const ok = Boolean(me.role && allowed.includes(me.role));
-        if (!ok) clearToken();
         if (!cancelled) setAuthed(ok);
       } catch {
-        clearToken();
+        // A rejected session is signed out. A role that cannot open this page keeps its session.
+        void clearToken();
         if (!cancelled) setAuthed(false);
       } finally {
         if (!cancelled) setReady(true);
@@ -181,7 +175,7 @@ export function LoginGate({
       setToken(ver.token);
       setAuthed(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(signInError(err));
     } finally {
       setBusy(false);
     }
@@ -214,7 +208,7 @@ export function LoginGate({
       setToken(ver.token);
       setAuthed(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(signInError(err));
     } finally {
       setBusy(false);
     }
@@ -231,39 +225,9 @@ export function LoginGate({
       </span>
       <h2 style={{ fontSize: "1.25rem", margin: "16px 0 6px" }}>Sign in</h2>
       <p className="muted" style={{ marginBottom: 18 }}>
-        Use your username and password. The workspace owner decides which teaching tools you see.
+        Enter the one-time code. It is sent to {masked}. The code is {OTP_CODE}.
       </p>
-      <form onSubmit={onPassword}>
-        <label className="field">
-          <span>Username</span>
-          <input className="field__in" value={username} autoComplete="username" onChange={(ev) => setUsername(ev.target.value)} />
-        </label>
-        <label className="field">
-          <span>Password</span>
-          <input className="field__in" type="password" value={password} autoComplete="current-password" onChange={(ev) => setPassword(ev.target.value)} />
-        </label>
-        <label className="field">
-          <span>Workspace</span>
-          <select className="field__in" value={isCustomWorkspace ? "__custom__" : ws} onChange={(ev) => handleWorkspaceSelect(ev.target.value)}>
-            {MOCK_TENANT_LIST.map((t) => (
-              <option key={t.key} value={t.workspaceId}>
-                {t.label}
-              </option>
-            ))}
-            <option value="__custom__">Other workspace</option>
-          </select>
-        </label>
-        <button className="btn btn--dark" type="submit" disabled={busy} style={{ width: "100%", marginTop: 8 }}>
-          {busy ? "Signing in" : "Sign in"}
-        </button>
-      </form>
-      {error ? <p className="muted" style={{ color: "var(--bad, #b42318)" }}>{error}</p> : null}
-      <details style={{ marginTop: 16 }}>
-        <summary className="muted">Local demo code</summary>
       <form onSubmit={onSubmit}>
-      <p className="muted" style={{ margin: "12px 0" }}>
-        One-time code for a local review. The code is {OTP_CODE}. Sent to {masked}.
-      </p>
       <label className="field">
         <span>Local demo account</span>
         <select
@@ -335,16 +299,38 @@ export function LoginGate({
           />
         ))}
       </div>
-      {error ? (
-        <p className="muted" style={{ color: "var(--crimson)", marginBottom: 12 }}>
-          {error}
-        </p>
-      ) : null}
       <button className="hot hot--btn" type="submit" disabled={busy}>
         {busy ? "Verifying" : "Verify & Continue"}
       </button>
-    </form>
-      </details>
+      </form>
+      <form onSubmit={onPassword} style={{ marginTop: 22 }}>
+        <p className="muted" style={{ marginBottom: 8 }}>
+          Username and password
+        </p>
+        <label className="field">
+          <span>Username</span>
+          <input className="field__in" value={username} autoComplete="username" onChange={(ev) => setUsername(ev.target.value)} />
+        </label>
+        <label className="field">
+          <span>Password</span>
+          <input className="field__in" type="password" value={password} autoComplete="current-password" onChange={(ev) => setPassword(ev.target.value)} />
+        </label>
+        <label className="field">
+          <span>Workspace</span>
+          <select className="field__in" value={isCustomWorkspace ? "__custom__" : ws} onChange={(ev) => handleWorkspaceSelect(ev.target.value)}>
+            {MOCK_TENANT_LIST.map((t) => (
+              <option key={t.key} value={t.workspaceId}>
+                {t.label}
+              </option>
+            ))}
+            <option value="__custom__">Other workspace</option>
+          </select>
+        </label>
+        <button className="btn btn--dark" type="submit" disabled={busy} style={{ width: "100%", marginTop: 8 }}>
+          {busy ? "Signing in" : "Sign in"}
+        </button>
+      </form>
+      <Err message={error} />
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
+import { noticesModuleOn } from "@/lib/notices";
 import "./comms.css";
 
 type ClassNotice = {
@@ -43,17 +44,24 @@ export function ClassNotices() {
 
   useEffect(() => {
     let alive = true;
-    Promise.all([
-      api("/api/v1/notifications/inbox"),
-      api("/api/v1/students").catch(() => []) as Promise<StudentRow[]>,
-      api("/api/v1/staff").catch(() => []) as Promise<StaffRow[]>,
-    ])
-      .then(([data, studs, staffRows]) => {
-        if (!alive) return;
+    noticesModuleOn()
+      .then((on) => {
+        if (!alive) return null;
+        if (!on) return null;
+        return Promise.all([
+          api("/api/v1/notifications/inbox"),
+          api("/api/v1/students").catch(() => []) as Promise<StudentRow[]>,
+          api("/api/v1/staff").catch(() => []) as Promise<StaffRow[]>,
+        ]);
+      })
+      .then((packed) => {
+        if (!alive || !packed) return;
+        const [data, studs, staffRows] = packed;
         setStudents(Array.isArray(studs) ? studs : []);
         setStaff(Array.isArray(staffRows) ? staffRows : []);
         if (!Array.isArray(data)) {
-          setError("Could not read class notices.");
+          setNotices([]);
+          setError("");
           return;
         }
         const seen = new Set<string>();
@@ -70,9 +78,10 @@ export function ClassNotices() {
         setNotices(newest);
         setError("");
       })
-      .catch((err) => {
+      .catch(() => {
         if (!alive) return;
-        setError(err instanceof Error ? err.message : String(err));
+        setNotices([]);
+        setError("");
       });
     return () => {
       alive = false;

@@ -6,11 +6,11 @@
 
 | You need | Read |
 |---|---|
-| **Share the product (hub)** | [product-viewer.html](product-viewer.html) — components + task tiles. Work log: [work-log.html](work-log.html) |
+| **Share the product (hub)** | [product-book/product-viewer.html](product-book/product-viewer.html) — components + task tiles. Work log: [product-book/work-log.html](product-book/work-log.html) |
 | Product + architecture | README.md |
-| System map (clickable) | tutor-platform-architecture.html |
-| UI gold (incomplete) | tutor-platform-demo.html |
-| Role children (generated) | tutor-platform-role-*.html |
+| System map (clickable) | product-book/tutor-platform-architecture.html |
+| UI gold (incomplete) | product-book/tutor-platform-demo.html |
+| Role children (generated) | product-book/tutor-platform-role-*.html |
 | Screen / API / entity contracts | catalog/*.json |
 | Governing rules | .specify/memory/constitution.md |
 | Active Spec Kit dir | path in `.specify/feature.json` — not the git branch |
@@ -39,4 +39,4 @@ Every `.cursor/rules/*.mdc` has a Claude Code mirror. Change both in the same co
 - `backend/` — FastAPI `/api/v1` against local Compose Postgres; mock ports; pytest in-memory SQLite
 - `docker-compose.yml` — local `postgres` (required for local API work until hosted)
 - `frontend/` — Next.js 15 App Router; one route per catalog screen id
-- `tutor-platform-role-*.html` — generated from demo; do not edit
+- `product-book/tutor-platform-role-*.html` — generated from demo; do not edit

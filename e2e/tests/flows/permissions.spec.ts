@@ -8,7 +8,11 @@ test.describe("@flow Permissions and session", () => {
     await page.goto(routes.owner);
     await expect(page.getByRole("heading", { name: "Faculty access" })).toHaveCount(0);
     await expect(page.getByText("Active students")).toHaveCount(0);
-    expect(await readStoredToken(page), "opening the owner console cleared the student session").toBeTruthy();
+    expect(await readStoredToken(page)).toBeNull();
+    const cookies = await page.context().cookies(env.apiBase);
+    const session = cookies.find((cookie) => cookie.name === "tutoros_token");
+    expect(session, "opening the owner console cleared the student session").toBeTruthy();
+    expect(session?.httpOnly).toBe(true);
     await page.goto(routes.studentDash);
     await expect(page.getByRole("heading", { name: /^Hi,/ })).toBeVisible();
   });

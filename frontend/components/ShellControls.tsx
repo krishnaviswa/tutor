@@ -5,6 +5,7 @@ import { Dialog } from "@/components/Dialog";
 import { MarkdownView } from "@/components/MarkdownView";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { api } from "@/lib/api";
+import { noticesModuleOn } from "@/lib/notices";
 
 type Notice = { id: string; body?: string; event_id?: string | null };
 
@@ -44,26 +45,42 @@ export function ShellControls() {
   const [termsOpen, setTermsOpen] = useState(false);
   const [rows, setRows] = useState<Notice[]>([]);
   const [count, setCount] = useState(0);
+  const [noticesOff, setNoticesOff] = useState(false);
   const closeTerms = useCallback(() => setTermsOpen(false), []);
 
   useEffect(() => {
     let stop = false;
-    async function load() {
+    let timer = 0;
+    async function load(checkModule: boolean): Promise<boolean> {
       try {
+        if (checkModule) {
+          const on = await noticesModuleOn();
+          if (stop) return false;
+          if (!on) {
+            setNoticesOff(true);
+            setCount(0);
+            setRows([]);
+            return false;
+          }
+        }
         const data = (await api("/api/v1/notifications/inbox")) as Notice[];
-        if (stop) return;
+        if (stop) return false;
         const list = uniqueNotices(Array.isArray(data) ? data : []);
         setCount(list.length);
         setRows(list);
+        return true;
       } catch {
         if (!stop) {
           setCount(0);
           setRows([]);
         }
+        return false;
       }
     }
-    void load();
-    const timer = window.setInterval(() => void load(), 15000);
+    void load(true).then((keep) => {
+      if (!keep || stop) return;
+      timer = window.setInterval(() => void load(false), 15000);
+    });
     return () => {
       stop = true;
       window.clearInterval(timer);
@@ -73,6 +90,8 @@ export function ShellControls() {
   return (
     <div className="shell-controls">
       <ThemeToggle />
+      {noticesOff ? <span className="muted">No notices.</span> : null}
+      {noticesOff ? null : (
       <span className="shell-bell">
         <button
           type="button"
@@ -94,6 +113,7 @@ export function ShellControls() {
           </div>
         ) : null}
       </span>
+      )}
       <button type="button" className="theme-btn" onClick={() => setTermsOpen(true)}>
         Terms
       </button>

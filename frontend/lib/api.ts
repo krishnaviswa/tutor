@@ -8,9 +8,10 @@ export { getToken as token, setToken, clearToken } from "./session";
 export async function api(path: string, init: RequestInit = {}) {
   const headers = new Headers(init.headers);
   headers.set("Content-Type", "application/json");
+  headers.set("X-TutorOS-Cookie", "1");
   const t = getToken();
   if (t) headers.set("Authorization", `Bearer ${t}`);
-  const res = await fetch(`${API_BASE}${path}`, { ...init, headers });
+  const res = await fetch(`${API_BASE}${path}`, { ...init, headers, credentials: "include" });
   const text = await res.text();
   let body: unknown = text;
   try {

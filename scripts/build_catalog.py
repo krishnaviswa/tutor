@@ -1,4 +1,4 @@
-"""Generate catalog JSON from tutor-platform-demo.html S{} plus planned contracts."""
+"""Generate catalog JSON from product-book/tutor-platform-demo.html S{} plus planned contracts."""
 from __future__ import annotations
 
 import json
@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEMO = ROOT / "tutor-platform-demo.html"
+DEMO = ROOT / "product-book/tutor-platform-demo.html"
 OUT = ROOT / "catalog"
 
 PHASE_BY_MOD = {
@@ -20,6 +20,17 @@ PHASE_BY_MOD = {
 }
 
 ROLE_PATH = {"student": "student", "faculty": "faculty", "admin": "admin", "parent": "parent"}
+
+
+def wiring_status(route: str) -> str:
+    """wired when the Next page renders a wired screen. shell when it is still ScreenShell."""
+    page = ROOT / "frontend" / "app" / route.strip("/") / "page.tsx"
+    if not page.is_file():
+        return "shell"
+    text = page.read_text(encoding="utf-8")
+    if "components/wired/" in text and "ScreenShell" not in text:
+        return "wired"
+    return "shell"
 
 # Planned contracts: screen id -> (apis, entities, ports, timeline events, shows)
 CONTRACTS: dict[str, dict] = {
@@ -87,8 +98,8 @@ CONTRACTS: dict[str, dict] = {
         "shows": "Guardian hub for linked children only: attendance, practice, test, fee due if this guardian can see fees, activity, marksheet, receipts, teacher chat.",
     },
     "schedule": {
-        "apis": ["GET /api/v1/sessions", "POST /api/v1/sessions", "PATCH /api/v1/sessions/{id}", "GET /api/v1/availability"],
-        "entities": ["scheduled_sessions", "cohorts", "staff_availability"],
+        "apis": ["GET /api/v1/sessions", "POST /api/v1/sessions", "PATCH /api/v1/sessions/{id}", "GET /api/v1/availability", "GET /api/v1/topics"],
+        "entities": ["scheduled_sessions", "cohorts", "staff_availability", "topics"],
         "ports": ["calendar_video", "whatsapp"],
         "timelineEvents": ["session.scheduled", "session.rescheduled", "session.cancelled"],
         "shows": "Week calendar of sessions. Conflict detection on overlap. Cancelled sessions stay struck-through. Optional overlay shades hours outside the selected staff member's availability.",
@@ -390,7 +401,7 @@ def parse_screens() -> list[dict]:
     text = DEMO.read_text(encoding="utf-8")
     block = re.search(r"var S=\{(.*?)\n\};", text, re.S)
     if not block:
-        raise SystemExit("Could not find var S={...} in tutor-platform-demo.html")
+        raise SystemExit("Could not find var S={...} in product-book/tutor-platform-demo.html")
     rows = re.findall(
         r"'([a-z0-9-]+)':\{t:'([^']+)',role:'(\w+)',frame:'(\w+)',mod:'(\w+)',dom:'(\w+)'\}",
         block.group(1),
@@ -411,7 +422,7 @@ def parse_screens() -> list[dict]:
                 "domain": dom,
                 "domainName": DOMAINS[dom],
                 "phase": PHASE_BY_MOD.get(mod, 4),
-                "status": "shell",
+                "status": wiring_status(route),
                 "demoKey": sid,
                 "figmaNodeId": None,
                 "apis": extra.get("apis", []),
@@ -445,7 +456,7 @@ def parse_screens() -> list[dict]:
 def parse_why(text: str) -> dict[str, dict]:
     block = re.search(r"var WHY=\{(.*?)\n\};", text, re.S)
     if not block:
-        raise SystemExit("Could not find var WHY={...} in tutor-platform-demo.html")
+        raise SystemExit("Could not find var WHY={...} in product-book/tutor-platform-demo.html")
     rows = re.findall(
         r"'([a-z0-9-]+)':\{own:'([^']*)',who:'([^']*)',why:'([^']*)',how:'([^']*)',when:'([^']*)'\}",
         block.group(1),
@@ -662,6 +673,42 @@ def apis(screens: list[dict]) -> list[str]:
     return [{"id": a, "status": "sim"} for a in seen]
 
 
+def publish_screen_status() -> None:
+    """Set catalog screen status from the Next route, then refresh embed.js.
+
+    Does not rebuild the rest of the catalog from the demo.
+    """
+    screens_path = OUT / "screens.json"
+    screens = json.loads(screens_path.read_text(encoding="utf-8"))
+    shells = []
+    for row in screens:
+        status = wiring_status(row["route"])
+        if status != "wired":
+            shells.append(row["id"])
+        row["status"] = status
+    screens_path.write_text(json.dumps(screens, indent=2) + "\n", encoding="utf-8")
+    embed_path = OUT / "embed.js"
+    prefix = "window.TUTOROS_CATALOG="
+    raw = embed_path.read_text(encoding="utf-8")
+    if not raw.startswith(prefix):
+        raise SystemExit("embed.js is missing window.TUTOROS_CATALOG=")
+    payload = json.loads(raw[len(prefix):].rstrip().removesuffix(";"))
+    by_id = {row["id"]: row for row in screens}
+    for row in payload.get("screens", []):
+        fresh = by_id.get(row.get("id"))
+        if fresh:
+            row["status"] = fresh["status"]
+            if row["id"] == "schedule":
+                row["apis"] = fresh["apis"]
+                row["entities"] = fresh["entities"]
+    apis = json.loads((OUT / "apis.json").read_text(encoding="utf-8"))
+    payload["apis"] = apis
+    embed_path.write_text(prefix + json.dumps(payload) + ";\n", encoding="utf-8")
+    print(f"screen status: {len(screens) - len(shells)} wired, {len(shells)} shell")
+    if shells:
+        print("still shell:", ", ".join(shells))
+
+
 def main() -> None:
     OUT.mkdir(exist_ok=True)
     screens = parse_screens()
@@ -687,7 +734,7 @@ def main() -> None:
             "entities": ents,
             "ports": prt,
             "apis": api_list,
-            "note": "Demo is UI gold and incomplete. Catalog is generated from tutor-platform-demo.html. Role HTML files are generated children.",
+            "note": "Demo is UI gold and incomplete. Catalog is generated from product-book/tutor-platform-demo.html. Role HTML files are generated children.",
         }) + ";\n",
         encoding="utf-8",
     )
@@ -695,4 +742,9 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    if "--status-only" in sys.argv:
+        publish_screen_status()
+    else:
+        main()

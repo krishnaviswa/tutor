@@ -257,7 +257,7 @@ def planning_attendance(db: Session, principal: Principal) -> list[dict]:
             .first()
         )
         marks = {a.student_id: a.status for a in att}
-        roster = class_roster_ids(sess)
+        roster = class_roster_ids(sess, db)
         out.append(
             {
                 "session_id": sess.id,

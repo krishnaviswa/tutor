@@ -2,11 +2,11 @@
 
 > **`TutorOS` is a working placeholder.** Find-and-replace it when you pick a real name.
 > This file is the written half of the pivot; the interactive half is
-> [tutor-platform-explorer.html](tutor-platform-explorer.html) — open it in a browser, tick the
+> [product-book/tutor-platform-explorer.html](product-book/tutor-platform-explorer.html) — open it in a browser, tick the
 > modules you want, and read the screens, build concepts, evolution ladders, price tier and build
 > order it produces.
 
-Companion to the single-tenant work: [tutor-loop-ui-kit.html](tutor-loop-ui-kit.html) (16 screens for
+Companion to the single-tenant work: [product-book/tutor-loop-ui-kit.html](product-book/tutor-loop-ui-kit.html) (16 screens for
 one solo NEET Biology faculty) and [tutor-operating-loop.md](tutor-operating-loop.md). Those stay as
 the **worked example**. This document generalises them into a product many tutors rent.
 
@@ -421,7 +421,7 @@ Ship a **rule library**; tenants enable what fits. Each rule names the modules i
 
 ## 6. UI screen map
 
-47 screens (locked to `tutor-platform-demo.html` `S`). Each screen lights up when any module that needs it is on. Continuity with the
+47 screens (locked to `product-book/tutor-platform-demo.html` `S`). Each screen lights up when any module that needs it is on. Continuity with the
 16-screen kit is noted.
 
 | Screen | Needed by | Kit origin |
@@ -614,7 +614,7 @@ sources, and let them keep using WhatsApp as overflow (`D5`) while the record mo
 6. **Where opinion lives.** If every tenant rebuilds the loop badly, the product's edge is gone.
    *Decide:* how strongly the "Exam-prep loop" template nudges (soft defaults vs guided setup vs
    locked-until-you-understand-it).
-7. **The single-tenant kit's fate.** Keep [tutor-loop-ui-kit.html](tutor-loop-ui-kit.html) as the
+7. **The single-tenant kit's fate.** Keep [product-book/tutor-loop-ui-kit.html](product-book/tutor-loop-ui-kit.html) as the
    reference implementation of the exam-prep template, or let it drift. *Recommendation:* keep it,
    version it alongside the template.
 
@@ -622,7 +622,7 @@ sources, and let them keep using WhatsApp as overflow (`D5`) while the record mo
 
 ## 12. Using the explorer
 
-Open [tutor-platform-explorer.html](tutor-platform-explorer.html):
+Open [product-book/tutor-platform-explorer.html](product-book/tutor-platform-explorer.html):
 
 - **Pick a template** or start from the always-on core and add modules.
 - Toggling a module **auto-selects its dependencies** and flags dependents.

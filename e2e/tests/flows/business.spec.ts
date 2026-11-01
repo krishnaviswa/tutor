@@ -24,11 +24,27 @@ test.describe("@flow Enrollment, schedule, attendance, payment, admin", () => {
     await page.getByRole("button", { name: "+ New session" }).click();
     await expect(page.getByRole("heading", { name: "New session" })).toBeVisible();
     await page.getByRole("textbox", { name: "Title", exact: true }).fill(title);
-    // Tuesday 18:30 in the seed is already taken, and the next 15 minutes still overlaps.
-    await page.getByLabel("15-min time slot (IST)").selectOption("07:15");
-    await page.getByRole("button", { name: "Create session" }).click();
+    // The shared database keeps every session this suite creates, so a fixed
+    // clock time eventually collides. Walk slots until one is free.
+    const slot = page.getByLabel("15-min time slot (IST)");
+    const values = await slot.locator("option").evaluateAll((nodes) =>
+      nodes.map((node) => (node as HTMLOptionElement).value).filter((value) => value.length > 0),
+    );
+    const start = Date.now() % values.length;
+    let placed = false;
+    for (let attempt = 0; attempt < values.length && attempt < 16; attempt += 1) {
+      await slot.selectOption(values[(start + attempt) % values.length]);
+      await page.getByRole("button", { name: "Create session" }).click();
+      const conflict = page.getByText("That slot conflicts with another class.");
+      const created = page.getByText(title);
+      await expect(conflict.or(created)).toBeVisible();
+      if (await created.isVisible()) {
+        placed = true;
+        break;
+      }
+    }
+    expect(placed).toBe(true);
     await expect(appAlerts(page)).toHaveCount(0);
-    await expect(page.getByText(title)).toBeVisible();
   });
 
   test("teacher marks attendance and saves the class record", async ({ page }) => {
@@ -43,7 +59,7 @@ test.describe("@flow Enrollment, schedule, attendance, payment, admin", () => {
     const save = page.getByRole("button", { name: "Save Class Record" });
     await expect(save).toBeEnabled();
     await save.click();
-    await expect(page.getByText(/Saved/)).toBeVisible();
+    await expect(page.getByText(/Saved · Published to \d+ student feeds/)).toBeVisible();
     await expect(appAlerts(page)).toHaveCount(0);
   });
 
@@ -56,7 +72,16 @@ test.describe("@flow Enrollment, schedule, attendance, payment, admin", () => {
     await expect(row.getByRole("cell").nth(3)).not.toHaveText("—");
   });
 
-  test("student pays the open tuition invoice", async ({ page }) => {
+  test("student pays an invoice the owner just issued", async ({ page }) => {
+    await loginViaStaffOtp(page, "owner");
+    await page.goto(routes.billing);
+    await expect(page.getByRole("heading", { name: "Billing" })).toBeVisible();
+    await page.getByLabel("Student").selectOption({ label: env.studentDisplayName });
+    await page.getByRole("button", { name: "Issue invoice" }).click();
+    await expect(page.getByText("Invoice created.")).toBeVisible();
+    await page.getByRole("button", { name: "Sign out" }).click();
+    await expect(page.getByRole("heading", { name: "Choose a door" })).toBeVisible();
+
     await loginViaStudentOtp(page, "student");
     await page.goto(routes.payments);
     await expect(page.getByRole("heading", { name: "Tuition Fees, Lesson Pack & Receipts" })).toBeVisible();

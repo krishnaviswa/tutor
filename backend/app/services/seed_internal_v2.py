@@ -95,7 +95,7 @@ def seed_internal_v2(
         .first()
     )
     if assistant:
-        put_meta(assistant, modules=["A5", "B1", "B2", "B3", "B5", "D1"])
+        put_meta(assistant, modules=["A5", "B1", "B2", "B3", "B5", "D1", "E2"])
 
     for qid, difficulty, tags in ((q1, "core", ["weak"]), (q2, "stretch", ["review"])):
         q = db.get(Question, qid)

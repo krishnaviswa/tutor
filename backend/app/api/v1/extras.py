@@ -159,7 +159,7 @@ def student_dash(
 @router.get("/teacher/dashboard")
 def teacher_dash(
     db: Session = Depends(get_db),
-    principal: Principal = Depends(require_roles("teacher")),
+    principal: Principal = Depends(require_roles("teacher", "assistant", "owner")),
 ):
     return teacher_dashboard(db, principal)
 

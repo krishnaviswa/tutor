@@ -5,8 +5,8 @@ import { useEffect, useState, type FormEvent } from "react";
 import { api } from "@/lib/api";
 import { DEMO_PERSONAS, MOCK_TENANT_LIST, MOCK_TENANTS, OTP_CODE, type DemoPersonaRole } from "@/lib/mocks";
 import { catalogRoute } from "@/lib/screens";
-import { getToken, setToken } from "@/lib/session";
-import { Err } from "./bits";
+import { setToken } from "@/lib/session";
+import { Err, signInError } from "./bits";
 
 const exam = MOCK_TENANTS["exam-prep"];
 
@@ -23,7 +23,6 @@ export function StaffLoginScreen() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!getToken()) return;
     api("/api/v1/auth/me")
       .then((me) => {
         const role = (me as { role?: string }).role;
@@ -119,7 +118,7 @@ export function StaffLoginScreen() {
       }
       router.replace(destinationForRole(staffRole));
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(signInError(err));
     } finally {
       setBusy(false);
     }

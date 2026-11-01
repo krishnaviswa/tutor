@@ -9,18 +9,20 @@ export type NavItem = {
   hint?: string;
   /** Workspace module the owner can turn off for one teacher. Absent means always shown. */
   module?: string;
+  /** Roles that may see this item. Absent means every faculty role. */
+  roles?: string[];
 };
 
 /** Exam-prep faculty: Dashboard, Schedule, Students, Practice, Doubts, Records, Content. No staff-login. */
 export const FACULTY_NAV: NavItem[] = [
-  { label: "Dashboard", destId: "teacher-dash", match: ["teacher-dash"], icon: "spark" },
+  { label: "Dashboard", destId: "teacher-dash", match: ["teacher-dash"], icon: "spark", module: "E2" },
   { label: "Schedule", destId: "schedule", match: ["schedule", "session-pre", "sessions"], icon: "cal", module: "B1" },
   { label: "Whiteboard", destId: "live-teacher", match: ["live-teacher"], icon: "board", hint: "Shared class canvas", module: "B2" },
   { label: "Availability", destId: "availability", match: ["availability"], icon: "clock", module: "B1" },
   { label: "Students", destId: "roster", match: ["roster", "cohort-builder", "mentor"], icon: "users", module: "A5" },
   { label: "Practice", destId: "qbank", match: ["qbank", "practice-build", "assign-issue", "assign-grade", "test-setup", "analysis"], icon: "doc", module: "C1" },
-  { label: "Doubts", destId: "doubt-teacher", match: ["doubt-teacher", "messages", "announce"], icon: "chat", module: "D1" },
-  { label: "Records", destId: "record", match: ["record", "session-video", "reports"], icon: "flag", module: "E2" },
+  { label: "Doubts", destId: "doubt-teacher", match: ["doubt-teacher", "messages", "announce"], icon: "chat", module: "D1", roles: ["teacher", "owner"] },
+  { label: "Records", destId: "record", match: ["record", "session-video", "reports"], icon: "flag", module: "E2", roles: ["teacher", "owner"] },
   { label: "Library", destId: "library", match: ["library"], icon: "book", module: "B5" },
   { label: "Profile", destId: "profile", match: ["profile"], icon: "users" },
 ];

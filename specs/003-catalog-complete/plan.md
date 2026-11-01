@@ -1,6 +1,6 @@
 # plan.md — 003-catalog-complete
 
-Status: **Accepted** (Architect Specified; Builder implemented; Tester Ship at shell/sim). Human OK was approval of the HTML implementation guide (`plan-viewer.html` + satellites). Screens remain `shell`.
+Status: **Accepted** (Architect Specified; Builder implemented; Tester Ship at shell/sim). Human OK was approval of the HTML implementation guide (`product-book/plan-viewer.html` + satellites). Screens remain `shell`.
 
 001-platform-architecture stays the architecture pack. 002-sim-spine stays the protected spine sim. 003 extends the catalog; it does not rewrite 001 or 002.
 
@@ -12,10 +12,10 @@ Documentation only. Not the app. Not a 48th screen.
 
 | File | Audience use |
 |---|---|
-| `plan-viewer.html` | Master hub (README equivalent): status, constitution, critical path, task plan, approval gate |
-| `plan-functional.html` | Jobs, roles, 47 screens, six templates, journeys |
-| `plan-technical.html` | Layers, entities, 84 APIs, ports, middleware, files |
-| `plan-sequence.html` | End-to-end implement steps: functional + technical paired, phase by phase |
+| `product-book/plan-viewer.html` | Master hub (README equivalent): status, constitution, critical path, task plan, approval gate |
+| `product-book/plan-functional.html` | Jobs, roles, 47 screens, six templates, journeys |
+| `product-book/plan-technical.html` | Layers, entities, 84 APIs, ports, middleware, files |
+| `product-book/plan-sequence.html` | End-to-end implement steps: functional + technical paired, phase by phase |
 
 ## Stack (003)
 
@@ -161,7 +161,7 @@ frontend/
   ...
 ```
 
-Tokens from `tutor-platform-demo.html`. Do not restyle `empty` screens against invented UI. Exam-prep template omits `staff-login` in navigation.
+Tokens from `product-book/tutor-platform-demo.html`. Do not restyle `empty` screens against invented UI. Exam-prep template omits `staff-login` in navigation.
 
 ## Tests (Builder + Tester; mock only)
 

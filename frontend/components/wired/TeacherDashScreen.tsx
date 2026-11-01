@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { ClassNotices } from "@/components/studio/ClassNotices";
 import { api } from "@/lib/api";
 import { catalogRoute } from "@/lib/screens";
-import { Av, Empty, Err, Loading } from "./bits";
+import { Av, Empty, Err, Loading, apiDetail } from "./bits";
 
 const TZ = "Asia/Kolkata";
 
@@ -45,6 +45,15 @@ function formatSessionTime(iso: string | null): string {
   }).format(d);
 }
 
+function teachingHubError(err: unknown): string {
+  const detail = apiDetail(err);
+  const lower = detail.toLowerCase();
+  if (lower.includes("module off")) return "The teaching hub is turned off for this account.";
+  if (lower.includes("forbidden")) return "You do not have access to the teaching hub.";
+  if (detail.includes("{") || /^\d{3}\b/.test(detail)) return "The teaching hub could not be loaded.";
+  return detail;
+}
+
 function Bars({ rows }: { rows: Bar[] }) {
   if (!rows.length) return <p className="muted">No sessions recorded in the past 7 days.</p>;
   return (
@@ -63,8 +72,13 @@ export function TeacherDashScreen() {
   const [data, setData] = useState<Dash | null>(null);
   const [sessions, setSessions] = useState<SessionItem[]>([]);
   const [error, setError] = useState("");
+  const [role, setRole] = useState<string | null>(null);
+  const offerStaffActions = role === "teacher" || role === "owner";
 
   useEffect(() => {
+    api("/api/v1/auth/me")
+      .then((me) => setRole((me as { role?: string }).role || ""))
+      .catch(() => setRole(""));
     Promise.all([
       api("/api/v1/teacher/dashboard") as Promise<Dash>,
       api("/api/v1/sessions").catch(() => []) as Promise<SessionItem[]>,
@@ -73,7 +87,7 @@ export function TeacherDashScreen() {
         setData(dash);
         setSessions(Array.isArray(sess) ? sess.slice(0, 4) : []);
       })
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
+      .catch((e) => setError(teachingHubError(e)));
   }, []);
 
   const chase = data?.at_risk ?? [];
@@ -98,12 +112,16 @@ export function TeacherDashScreen() {
           <Link href="/app/faculty/live-teacher" className="hot hot--btn">
             Launch Live Board
           </Link>
-          <Link href="/app/faculty/record" className="btn btn--sm">
-            Mark Attendance Roll
-          </Link>
-          <Link href="/app/faculty/doubt-teacher" className="btn btn--sm">
-            Answer Doubts {openDoubts > 0 ? `(${openDoubts})` : ""}
-          </Link>
+          {offerStaffActions ? (
+            <Link href="/app/faculty/record" className="btn btn--sm">
+              Mark Attendance Roll
+            </Link>
+          ) : null}
+          {offerStaffActions ? (
+            <Link href="/app/faculty/doubt-teacher" className="btn btn--sm">
+              Answer Doubts {openDoubts > 0 ? `(${openDoubts})` : ""}
+            </Link>
+          ) : null}
         </div>
       </div>
 
@@ -166,9 +184,11 @@ export function TeacherDashScreen() {
                       >
                         Launch Live Board
                       </Link>
-                      <Link href={`/app/faculty/record?session=${encodeURIComponent(s.id)}`} className="btn btn--sm">
-                        Mark Attendance Roll
-                      </Link>
+                      {offerStaffActions ? (
+                        <Link href={`/app/faculty/record?session=${encodeURIComponent(s.id)}`} className="btn btn--sm">
+                          Mark Attendance Roll
+                        </Link>
+                      ) : null}
                     </div>
                   </div>
                 ))
@@ -191,9 +211,11 @@ export function TeacherDashScreen() {
                     </div>
                     <div className="s">Students are waiting for a step-by-step clarification</div>
                   </div>
-                  <Link href="/app/faculty/doubt-teacher" className="btn btn--dark btn--sm">
-                    Answer Doubts
-                  </Link>
+                  {offerStaffActions ? (
+                    <Link href="/app/faculty/doubt-teacher" className="btn btn--dark btn--sm">
+                      Answer Doubts
+                    </Link>
+                  ) : null}
                 </div>
               ) : null}
 

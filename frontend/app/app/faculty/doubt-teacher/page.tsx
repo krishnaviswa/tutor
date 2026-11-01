@@ -4,7 +4,7 @@ import { DoubtTeacherScreen } from "@/components/wired/DoubtTeacherScreen";
 
 export default function Page() {
   return (
-    <LoginGate role="teacher">
+    <LoginGate role="teacher" accept={["teacher", "owner"]}>
       <AppChrome kind="faculty" screenId="doubt-teacher">
         <DoubtTeacherScreen />
       </AppChrome>

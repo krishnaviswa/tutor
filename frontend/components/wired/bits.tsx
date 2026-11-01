@@ -44,6 +44,25 @@ export function apiDetail(err: unknown): string {
   return raw;
 }
 
+/** Sign-in failures are sentences. The status code and JSON body stay off the page. */
+export function signInError(err: unknown): string {
+  const detail = apiDetail(err);
+  const lower = detail.toLowerCase();
+  if (lower.includes("bad otp")) {
+    return "That code is not valid. Check the digits and try again.";
+  }
+  if (lower.includes("unknown username or password")) {
+    return "Unknown username or password.";
+  }
+  if (lower.includes("bad challenge")) {
+    return "That code expired. Enter it again.";
+  }
+  if (/^\d{3}\b/.test(detail) || detail.includes("{")) {
+    return "Sign-in did not succeed. Check the details and try again.";
+  }
+  return detail;
+}
+
 export function Empty({ children }: { children: ReactNode }) {
   return (
     <div className="state state--empty" role="status">

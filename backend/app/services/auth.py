@@ -14,6 +14,7 @@ from app.models.tables import Identity, SessionAuth, StaffMembership, Student, U
 ROLES = ("owner", "teacher", "assistant", "student", "parent")
 STAFF = ("owner", "teacher", "assistant")
 DEMO_PASSWORD = "TutorDemo1"
+SESSION_COOKIE = "tutoros_token"
 _PASSWORD_SALT = b"tutoros-password"
 
 
@@ -24,7 +25,10 @@ def hash_password(password: str) -> str:
 def password_matches(stored: str, password: str) -> bool:
     if not stored or not password:
         return False
-    return hmac.compare_digest(stored, hash_password(password))
+    digest = hash_password(password)
+    if len(stored) != len(digest):
+        return False
+    return hmac.compare_digest(stored, digest)
 
 
 @dataclass

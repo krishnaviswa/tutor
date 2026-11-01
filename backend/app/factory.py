@@ -23,6 +23,7 @@ from app.api.v1 import (
     students,
     stubs,
     terms,
+    topics,
     workspaces,
 )
 from app.config import DATA_DIR, get_settings
@@ -30,7 +31,7 @@ from app.db import init_db, session_factory
 from app.middleware.idempotency import IdempotencyMiddleware
 from app.middleware.request_id import RequestIdMiddleware
 from app.ports.mocks import MockPorts
-from app.services.seed import seed_all
+from app.services.seed import repair_existing_seed, seed_all
 
 
 def create_app(*, seed: bool = True) -> FastAPI:
@@ -54,7 +55,8 @@ def create_app(*, seed: bool = True) -> FastAPI:
     application.add_middleware(RequestIdMiddleware)
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origin_regex=r"https?://(127\.0\.0\.1|localhost)(:\d+)?$",
+        allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
@@ -65,6 +67,7 @@ def create_app(*, seed: bool = True) -> FastAPI:
         db = session_factory()()
         try:
             seed_all(db)
+            repair_existing_seed(db)
         finally:
             db.close()
 
@@ -90,5 +93,6 @@ def create_app(*, seed: bool = True) -> FastAPI:
     application.include_router(extras.router, prefix=api)
     application.include_router(owner.router, prefix=api)
     application.include_router(terms.router, prefix=api)
+    application.include_router(topics.router, prefix=api)
     application.include_router(stubs.router, prefix=api)
     return application

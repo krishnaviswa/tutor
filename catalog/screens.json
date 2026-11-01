@@ -9,7 +9,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 0,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "router",
     "figmaNodeId": null,
     "apis": [
@@ -41,7 +41,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 0,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "student-login",
     "figmaNodeId": null,
     "apis": [
@@ -79,7 +79,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 0,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "staff-login",
     "figmaNodeId": null,
     "apis": [
@@ -118,7 +118,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 0,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "wsetup",
     "figmaNodeId": null,
     "apis": [
@@ -154,7 +154,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 0,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "branding",
     "figmaNodeId": null,
     "apis": [
@@ -188,7 +188,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 1,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "roster",
     "figmaNodeId": null,
     "apis": [
@@ -227,7 +227,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 1,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "cohort-builder",
     "figmaNodeId": null,
     "apis": [
@@ -262,7 +262,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 3,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "parent-link",
     "figmaNodeId": null,
     "apis": [
@@ -301,7 +301,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 3,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "parent-home",
     "figmaNodeId": null,
     "apis": [
@@ -334,19 +334,21 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "schedule",
     "figmaNodeId": null,
     "apis": [
       "GET /api/v1/sessions",
       "POST /api/v1/sessions",
       "PATCH /api/v1/sessions/{id}",
-      "GET /api/v1/availability"
+      "GET /api/v1/availability",
+      "GET /api/v1/topics"
     ],
     "entities": [
       "scheduled_sessions",
       "cohorts",
-      "staff_availability"
+      "staff_availability",
+      "topics"
     ],
     "ports": [
       "calendar_video",
@@ -377,7 +379,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "session-pre",
     "figmaNodeId": null,
     "apis": [
@@ -412,7 +414,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "sessions",
     "figmaNodeId": null,
     "apis": [
@@ -465,7 +467,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "availability",
     "figmaNodeId": null,
     "apis": [
@@ -499,7 +501,7 @@
     "domain": "A",
     "domainName": "Identity & access",
     "phase": 0,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "profile",
     "figmaNodeId": null,
     "apis": [
@@ -537,7 +539,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "join",
     "figmaNodeId": null,
     "apis": [
@@ -574,7 +576,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "live-teacher",
     "figmaNodeId": null,
     "apis": [
@@ -609,7 +611,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "live-student",
     "figmaNodeId": null,
     "apis": [
@@ -643,7 +645,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "session-video",
     "figmaNodeId": null,
     "apis": [
@@ -677,7 +679,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 1,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "record",
     "figmaNodeId": null,
     "apis": [
@@ -715,7 +717,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 2,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "library",
     "figmaNodeId": null,
     "apis": [
@@ -750,7 +752,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 2,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "lesson",
     "figmaNodeId": null,
     "apis": [
@@ -786,7 +788,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 2,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "assign-issue",
     "figmaNodeId": null,
     "apis": [
@@ -824,7 +826,7 @@
     "domain": "B",
     "domainName": "Teaching & sessions",
     "phase": 2,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "assign-grade",
     "figmaNodeId": null,
     "apis": [
@@ -861,7 +863,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 2,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "qbank",
     "figmaNodeId": null,
     "apis": [
@@ -896,7 +898,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 2,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "practice-build",
     "figmaNodeId": null,
     "apis": [
@@ -933,7 +935,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 2,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "practice-play",
     "figmaNodeId": null,
     "apis": [
@@ -966,7 +968,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 2,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "practice-result",
     "figmaNodeId": null,
     "apis": [
@@ -1001,7 +1003,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 3,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "test-setup",
     "figmaNodeId": null,
     "apis": [
@@ -1036,7 +1038,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 3,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "test-runner",
     "figmaNodeId": null,
     "apis": [
@@ -1071,7 +1073,7 @@
     "domain": "C",
     "domainName": "Practice & assessment",
     "phase": 2,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "analysis",
     "figmaNodeId": null,
     "apis": [
@@ -1106,7 +1108,7 @@
     "domain": "D",
     "domainName": "Record & communication",
     "phase": 3,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "doubt-student",
     "figmaNodeId": null,
     "apis": [
@@ -1144,7 +1146,7 @@
     "domain": "D",
     "domainName": "Record & communication",
     "phase": 3,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "doubt-teacher",
     "figmaNodeId": null,
     "apis": [
@@ -1180,7 +1182,7 @@
     "domain": "D",
     "domainName": "Record & communication",
     "phase": 3,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "messages",
     "figmaNodeId": null,
     "apis": [
@@ -1217,7 +1219,7 @@
     "domain": "D",
     "domainName": "Record & communication",
     "phase": 3,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "announce",
     "figmaNodeId": null,
     "apis": [
@@ -1256,7 +1258,7 @@
     "domain": "D",
     "domainName": "Record & communication",
     "phase": 0,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "timeline",
     "figmaNodeId": null,
     "apis": [
@@ -1289,7 +1291,7 @@
     "domain": "D",
     "domainName": "Record & communication",
     "phase": 1,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "notif-prefs",
     "figmaNodeId": null,
     "apis": [
@@ -1327,7 +1329,7 @@
     "domain": "E",
     "domainName": "Progress & analytics",
     "phase": 1,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "student-dash",
     "figmaNodeId": null,
     "apis": [
@@ -1361,7 +1363,7 @@
     "domain": "E",
     "domainName": "Progress & analytics",
     "phase": 2,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "teacher-dash",
     "figmaNodeId": null,
     "apis": [
@@ -1395,7 +1397,7 @@
     "domain": "E",
     "domainName": "Progress & analytics",
     "phase": 3,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "owner",
     "figmaNodeId": null,
     "apis": [
@@ -1429,7 +1431,7 @@
     "domain": "E",
     "domainName": "Progress & analytics",
     "phase": 3,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "reports",
     "figmaNodeId": null,
     "apis": [
@@ -1467,7 +1469,7 @@
     "domain": "E",
     "domainName": "Progress & analytics",
     "phase": 3,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "mentor",
     "figmaNodeId": null,
     "apis": [
@@ -1505,7 +1507,7 @@
     "domain": "F",
     "domainName": "Business & operations",
     "phase": 4,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "billing",
     "figmaNodeId": null,
     "apis": [
@@ -1542,7 +1544,7 @@
     "domain": "F",
     "domainName": "Business & operations",
     "phase": 4,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "payments",
     "figmaNodeId": null,
     "apis": [
@@ -1581,7 +1583,7 @@
     "domain": "F",
     "domainName": "Business & operations",
     "phase": 0,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "subscription",
     "figmaNodeId": null,
     "apis": [
@@ -1620,7 +1622,7 @@
     "domain": "F",
     "domainName": "Business & operations",
     "phase": 4,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "payouts",
     "figmaNodeId": null,
     "apis": [
@@ -1654,7 +1656,7 @@
     "domain": "F",
     "domainName": "Business & operations",
     "phase": 4,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "audit",
     "figmaNodeId": null,
     "apis": [
@@ -1688,7 +1690,7 @@
     "domain": "G",
     "domainName": "Configuration & templates",
     "phase": 0,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "onboard-kind",
     "figmaNodeId": null,
     "apis": [
@@ -1720,7 +1722,7 @@
     "domain": "G",
     "domainName": "Configuration & templates",
     "phase": 0,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "template-gallery",
     "figmaNodeId": null,
     "apis": [
@@ -1752,7 +1754,7 @@
     "domain": "G",
     "domainName": "Configuration & templates",
     "phase": 4,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "automation",
     "figmaNodeId": null,
     "apis": [
@@ -1784,7 +1786,7 @@
     "domain": "G",
     "domainName": "Configuration & templates",
     "phase": 4,
-    "status": "shell",
+    "status": "wired",
     "demoKey": "integrations",
     "figmaNodeId": null,
     "apis": [

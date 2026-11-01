@@ -67,14 +67,32 @@ def session_mode(s: ScheduledSession) -> str:
     return "cohort"
 
 
-def class_roster_ids(s: ScheduledSession) -> list[str]:
-    """Students the teacher put in this class. Unset or empty means nobody."""
+def _active_enrollment_ids(db: Session, s: ScheduledSession) -> list[str]:
+    found: list[str] = []
+    if not s.cohort_id:
+        return found
+    for enrollment in db.query(Enrollment).filter(
+        Enrollment.workspace_id == s.workspace_id,
+        Enrollment.cohort_id == s.cohort_id,
+    ):
+        if _enrollment_active(enrollment.status) and enrollment.student_id not in found:
+            found.append(enrollment.student_id)
+    return found
+
+
+def class_roster_ids(s: ScheduledSession, db: Session | None = None) -> list[str]:
+    """Students on this class.
+
+    A saved list, including an empty one, is the roll.
+    None is a session from before that choice: the cohort's active enrollments.
+    """
     if session_mode(s) == "1-on-1":
         return [s.student_id] if s.student_id else []
-    raw = s.class_student_ids
-    if isinstance(raw, list):
-        return [str(item) for item in raw if item]
-    return []
+    if isinstance(s.class_student_ids, list):
+        return [str(item) for item in s.class_student_ids if item]
+    if db is None:
+        return []
+    return _active_enrollment_ids(db, s)
 
 
 def session_out(db: Session, s: ScheduledSession, now: datetime | None = None) -> dict:
@@ -84,7 +102,7 @@ def session_out(db: Session, s: ScheduledSession, now: datetime | None = None) -
         "cohort_id": s.cohort_id,
         "student_id": s.student_id,
         "student_name": _student_name(db, s.workspace_id, s.student_id),
-        "student_ids": class_roster_ids(s),
+        "student_ids": class_roster_ids(s, db),
         "mode": session_mode(s),
         "teacher_user_id": s.teacher_user_id,
         "title": s.title,
@@ -153,14 +171,7 @@ def affected_students(db: Session, s: ScheduledSession) -> list[str]:
     # A saved class list, including an empty one, is the class. Older rows have no list.
     if isinstance(s.class_student_ids, list):
         return [str(item) for item in s.class_student_ids if item]
-    found: list[str] = []
-    for enrollment in db.query(Enrollment).filter(
-        Enrollment.workspace_id == s.workspace_id,
-        Enrollment.cohort_id == s.cohort_id,
-    ):
-        if _enrollment_active(enrollment.status) and enrollment.student_id not in found:
-            found.append(enrollment.student_id)
-    return found
+    return _active_enrollment_ids(db, s)
 
 
 def _clean_student_ids(student_ids: list[str]) -> list[str]:

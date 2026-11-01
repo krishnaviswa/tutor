@@ -1,6 +1,10 @@
 # Defect report — handoff
 
-Date of the run: 2026-11-01. Product code was **not** changed to hide or fix these failures. A later fix chat should implement from this file. Re-test with the Playwright suite. Do not treat a green test as done until the “What a fix should prove” line is true in the browser.
+Date of the first run: 2026-11-01. The findings below are the original evidence. They are **addressed** in the product as of the same day. Fix notes: `docs/e2e/fix-log-auth.md` (D-001–D-008, D-013, D-016, D-017) and `docs/e2e/fix-log-content.md` (D-009–D-012, D-014, D-015, D-018).
+
+Verification after those fixes: `npx playwright test` was **31 passed, 3 failed**. The three failures were the suite, not the app: 07:15 was already taken (the screen showed “That slot conflicts with another class.”), the class-record save matched two “Saved” texts, and the seed invoice was already paid. Those tests were corrected. A rerun of the three passed. Full-suite total after that correction: **34 passed**.
+
+One console note, not a failed test: saving the class record logs a React warning about two children with the same key. The save still shows “Saved · Published to N student feeds”.
 
 ## Handoff
 

@@ -43,7 +43,7 @@ from app.models.tables import (
     User,
     Workspace,
 )
-from app.services.auth import hash_password
+from app.services.auth import DEMO_PASSWORD, hash_password, password_matches
 from app.services.quota import ALWAYS_ON
 
 CATALOG_MODULES = list(ALWAYS_ON) + [
@@ -231,8 +231,8 @@ def seed_workspace_ids(
     }
     for uid, label in labels.items():
         user = _user(db, uid, label)
-        if not user.password_hash:
-            user.password_hash = hash_password("TutorDemo1")
+        if not password_matches(user.password_hash or "", DEMO_PASSWORD):
+            user.password_hash = hash_password(DEMO_PASSWORD)
     db.flush()
     for role, uid in roles_staff.items():
         db.add(StaffMembership(workspace_id=ws_id, user_id=uid, role=role))
@@ -445,6 +445,52 @@ def _pack(db: Session, row: dict, *, slug: str, name: str, phone_prefix: str, to
     )
     row.update(extra)
     return row
+
+
+_ASSISTANT_HUB_LEGACY = ["A5", "B1", "B2", "B3", "B5", "D1"]
+_ASSISTANT_HUB = ["A5", "B1", "B2", "B3", "B5", "D1", "E2"]
+
+
+def repair_existing_seed(db: Session) -> None:
+    """Fill demo sign-in on a database created before those fields existed.
+
+    seed_all returns immediately once the exam workspace is present, so a later
+    column (password hash) or identity (username) never gets written. The
+    published demo password is DEMO_PASSWORD. The assistant teaching hub is E2.
+    """
+    from app.services.internal_v2 import meta_of, put_meta
+
+    expected = hash_password(DEMO_PASSWORD)
+    tenants = (
+        ("exam-prep", WS_EXAM, PEOPLE_EXAM),
+        ("language-1on1", WS_LANG, PEOPLE_LANG),
+        ("music", WS_MUSIC, PEOPLE_MUSIC),
+    )
+    for slug, ws_id, people in tenants:
+        if db.get(Workspace, ws_id) is None:
+            continue
+        human = TENANT_HUMAN.get(slug, {})
+        for role_key, uid in people.items():
+            user = db.get(User, uid)
+            if user is None:
+                continue
+            if not password_matches(user.password_hash or "", DEMO_PASSWORD):
+                user.password_hash = expected
+            handle = human.get(f"username_{role_key}")
+            if handle:
+                _ident_once(db, ws_id, uid, "username", handle)
+        assistant = (
+            db.query(StaffMembership)
+            .filter(
+                StaffMembership.workspace_id == ws_id,
+                StaffMembership.user_id == people["assistant"],
+                StaffMembership.role == "assistant",
+            )
+            .first()
+        )
+        if assistant is not None and meta_of(assistant).get("modules") == _ASSISTANT_HUB_LEGACY:
+            put_meta(assistant, modules=list(_ASSISTANT_HUB))
+    db.commit()
 
 
 def seed_all(db: Session) -> dict:

@@ -172,6 +172,10 @@ def create_session(
         starts_at=body.starts_at,
         ends_at=body.ends_at,
     )
+    # A new cohort class starts with nobody until the teacher saves the list.
+    # Older rows leave class_student_ids unset and still use cohort enrollment.
+    if body.cohort_id:
+        s.class_student_ids = []
     db.add(s)
     db.flush()
     return _session_out(db, s)

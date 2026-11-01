@@ -149,13 +149,21 @@ function ParentLinkBody() {
   const [role, setRole] = useState<string | null>(null);
   useEffect(() => {
     api("/api/v1/auth/me")
-      .then((me) => setRole((me as { role?: string }).role || "parent"))
-      .catch(() => setRole("parent"));
+      .then((me) => setRole((me as { role?: string }).role || "signed-out"))
+      .catch(() => setRole("signed-out"));
   }, []);
   if (!role) {
     return (
       <div className="login-gate">
         <Loading>Checking your account…</Loading>
+      </div>
+    );
+  }
+  if (role === "signed-out") {
+    return (
+      <div className="login-gate">
+        <h2>Sign in</h2>
+        <p className="muted">Sign in to continue.</p>
       </div>
     );
   }

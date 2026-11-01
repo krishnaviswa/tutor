@@ -16,7 +16,7 @@ Subject-neutral remote tutoring workspace. Monorepo (`backend/` FastAPI; `fronte
 ## Source of truth
 `README.md` is the single product document. Biology / NEET / NCERT is an **example tenant**, not the domain.
 
-Share / navigate: `product-viewer.html` (hub). Arms: `tutor-platform-demo.html` (UI gold), `tutor-platform-architecture.html` (stack walk), `tutor-platform-explorer.html` (modules/pricing), `work-log.html`. Also `catalog/`, `.specify/memory/constitution.md`.
+Share / navigate: `product-book/product-viewer.html` (hub). Arms: `product-book/tutor-platform-demo.html` (UI gold), `product-book/tutor-platform-architecture.html` (stack walk), `product-book/tutor-platform-explorer.html` (modules/pricing), `product-book/work-log.html`. Also `catalog/`, `.specify/memory/constitution.md`.
 
 ## Non-negotiables
 1. Subject-neutral. Topics are G3 taxonomy. No syllabus tables.
@@ -28,7 +28,7 @@ Share / navigate: `product-viewer.html` (hub). Arms: `tutor-platform-demo.html` 
 7. Never invent a screen id. Never commit secrets.
 8. Spec-driven: no `/speckit.implement` before Specified + human OK.
 
-**Product book:** `product-viewer.html` is the hub. Demo / architecture / explorer stay in their HTML and link back. Append `work-log.html` when status or catalog changes. Do not copy those golds into the hub.
+**Product book:** `product-book/product-viewer.html` is the hub. Demo / architecture / explorer stay in their HTML and link back. Append `product-book/work-log.html` when status or catalog changes. Do not copy those golds into the hub.
 
 ## Claude Code parity
 

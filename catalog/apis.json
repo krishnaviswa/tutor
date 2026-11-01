@@ -429,5 +429,10 @@
     "id": "POST /api/v1/sessions/{id}/student-change",
     "status": "sim",
     "note": "Reschedule returns hour stays or used. Inside 24 hours the hour is used."
+  },
+  {
+    "id": "GET /api/v1/topics",
+    "status": "sim",
+    "note": "Workspace taxonomy topics for the signed-in tenant. Not a syllabus table."
   }
 ]

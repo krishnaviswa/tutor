@@ -66,25 +66,32 @@ export function AppChrome({ kind, role, active, screenId, children }: AppChromeP
   const pathname = usePathname();
   const resolvedKind: AppChromeKind = kind ?? role ?? "faculty";
   const [modules, setModules] = useState<string[] | null>(null);
+  const [who, setWho] = useState<string | null>(null);
   useEffect(() => {
     if (resolvedKind !== "faculty") return;
     let stop = false;
     api("/api/v1/auth/me")
       .then((me) => {
         if (stop) return;
-        const list = (me as { permissions?: string[] | null }).permissions;
-        setModules(Array.isArray(list) ? list : null);
+        const row = me as { permissions?: string[] | null; role?: string };
+        setModules(Array.isArray(row.permissions) ? row.permissions : null);
+        setWho(row.role ?? "");
       })
       .catch(() => {
-        if (!stop) setModules(null);
+        if (!stop) {
+          setModules(null);
+          setWho("");
+        }
       });
     return () => {
       stop = true;
     };
   }, [resolvedKind]);
-  const facultyItems = modules
-    ? FACULTY_NAV.filter((item) => !item.module || modules.includes(item.module))
-    : FACULTY_NAV;
+  const facultyItems = FACULTY_NAV.filter((item) => {
+    if (item.roles && !item.roles.includes(who ?? "")) return false;
+    if (item.module && modules && !modules.includes(item.module)) return false;
+    return true;
+  });
   const items = resolvedKind === "admin" ? ADMIN_NAV : facultyItems;
   const currentId = screenId ?? screenIdFromPath(pathname);
   const homeId = resolvedKind === "admin" ? "owner" : "teacher-dash";
@@ -127,8 +134,9 @@ export function AppChrome({ kind, role, active, screenId, children }: AppChromeP
             type="button"
             className="theme-btn signout"
             onClick={() => {
-              clearToken();
-              window.location.assign(catalogRoute("router"));
+              void clearToken().then(() => {
+                window.location.assign(catalogRoute("router"));
+              });
             }}
           >
             <SignOutIcon />

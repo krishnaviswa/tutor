@@ -35,11 +35,6 @@ export function MessagesScreen() {
   const [cohortId, setCohortId] = useState("");
   const logRef = useRef<HTMLDivElement>(null);
 
-  const samples: Thread[] = [
-    { id: "ex-1", last_body: "Could we revisit the last example before Thursday?", student_id: "Example · after class" },
-    { id: "ex-2", last_body: "I sent the notes from today’s session.", student_id: "Example · class notes" },
-  ];
-
   async function load(): Promise<Thread[]> {
     try {
       const data = await api("/api/v1/threads");
@@ -135,9 +130,9 @@ export function MessagesScreen() {
     }
   }
 
-  const shown = threads.length ? threads : samples;
-  const active = sel && (sel.id === "new" || threads.some((thread) => thread.id === sel.id)) ? sel : shown[0];
-  const example = active ? active.id !== "new" && !threads.some((thread) => thread.id === active.id) : false;
+  const shown = threads;
+  const active =
+    sel && (sel.id === "new" || threads.some((thread) => thread.id === sel.id)) ? sel : shown[0] ?? null;
   const transcript =
     active?.messages && active.messages.length
       ? active.messages
@@ -157,6 +152,7 @@ export function MessagesScreen() {
       {!ready ? <Loading>Loading messages…</Loading> : null}
       <div className="chat">
         <div className="chat__list" aria-label="Threads">
+          {ready && shown.length === 0 ? <p className="muted">No messages yet.</p> : null}
           {shown.map((t) => (
             <button
               key={t.id}
@@ -171,11 +167,7 @@ export function MessagesScreen() {
         </div>
         <section className="chat__thread" aria-label="Conversation">
           <div className="chat__log" ref={logRef}>
-            {example ? (
-              <p className="muted" style={{ margin: "0 0 8px" }}>
-                Example thread, so the inbox isn’t an empty page. A message you send is saved.
-              </p>
-            ) : null}
+            {ready && !active ? <p className="muted">No conversations yet.</p> : null}
             {transcript.length ? (
               transcript.map((line) => (
                 <div className="bubble" key={line.id}>

@@ -66,7 +66,7 @@ Depends on T9.1–T9.5.
 
 Depends on T9.2, T9.4, T9.5.
 
-- **Files:** `scripts/build_catalog.py` contract `shows` text for the existing ids only, then `python scripts/build_catalog.py`. Demo `R` for `live-teacher`, `live-student`, `availability` if gold would otherwise lie. Do not copy demo HTML into `product-viewer.html`.
+- **Files:** `scripts/build_catalog.py` contract `shows` text for the existing ids only, then `python scripts/build_catalog.py`. Demo `R` for `live-teacher`, `live-student`, `availability` if gold would otherwise lie. Do not copy demo HTML into `product-book/product-viewer.html`.
 - **Do:** Screen count stays 49.
 - **AC:** 22.
 

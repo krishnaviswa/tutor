@@ -35,5 +35,5 @@ Unchecked items block `/speckit.implement`. This pass is planning only.
 ## Catalog
 
 - [x] Planned screen set is the existing 49
-- [x] Work log has one entry per epic (see work-log.html)
+- [x] Work log has one entry per epic (see product-book/work-log.html)
 - [x] Product book tile is Specified, not built

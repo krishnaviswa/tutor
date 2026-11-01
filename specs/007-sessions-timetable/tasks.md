@@ -19,7 +19,7 @@ Status: **Testing** (implemented; 52 pytest + tsc + build green). Ladder: Draft 
 - [x] Register router in `factory.py`; add prefixes to `deps.py`.
 
 ## T7.4 — Catalog + demo
-- [x] `tutor-platform-demo.html`: `S`, `WHY`, `R['sessions']`, `R['availability']`, `t1`/`t2` steps,
+- [x] `product-book/tutor-platform-demo.html`: `S`, `WHY`, `R['sessions']`, `R['availability']`, `t1`/`t2` steps,
   `R['schedule']` cancelled + availability styling.
 - [x] `CONTRACTS` rows in `build_catalog.py`; `schedule` contract updated.
 - [x] Run `build_catalog.py` + `build_role_html.py`. Catalog = 49.
@@ -36,5 +36,5 @@ Status: **Testing** (implemented; 52 pytest + tsc + build green). Ladder: Draft 
 
 ## T7.7 — Tests + docs
 - [x] `backend/tests/test_007_sessions_timetable.py` (AC 1–14).
-- [x] `README.md` §5–§7, architecture HTML, `product-viewer.html`, `work-log.html`.
+- [x] `README.md` §5–§7, architecture HTML, `product-book/product-viewer.html`, `product-book/work-log.html`.
 - [x] `specs/007-sessions-timetable/test-report.md`.

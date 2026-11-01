@@ -20,10 +20,10 @@ export function RoleChrome({ screenId, children }: RoleChromeProps) {
     let cancelled = false;
     api("/api/v1/auth/me")
       .then((me) => {
-        if (!cancelled) setRole((me as { role?: string }).role ?? "student");
+        if (!cancelled) setRole((me as { role?: string }).role || "signed-out");
       })
       .catch(() => {
-        if (!cancelled) setRole("student");
+        if (!cancelled) setRole("signed-out");
       });
     return () => {
       cancelled = true;
@@ -34,6 +34,14 @@ export function RoleChrome({ screenId, children }: RoleChromeProps) {
     return (
       <div className="login-gate">
         <Loading>Checking your account…</Loading>
+      </div>
+    );
+  }
+  if (role === "signed-out") {
+    return (
+      <div className="login-gate">
+        <h2>Sign in</h2>
+        <p className="muted">Sign in to continue.</p>
       </div>
     );
   }
