@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import hmac
 from dataclasses import dataclass
 
 import jwt
@@ -11,6 +13,18 @@ from app.models.tables import Identity, SessionAuth, StaffMembership, Student, U
 
 ROLES = ("owner", "teacher", "assistant", "student", "parent")
 STAFF = ("owner", "teacher", "assistant")
+DEMO_PASSWORD = "TutorDemo1"
+_PASSWORD_SALT = b"tutoros-password"
+
+
+def hash_password(password: str) -> str:
+    return hashlib.pbkdf2_hmac("sha256", password.encode(), _PASSWORD_SALT, 120_000).hex()
+
+
+def password_matches(stored: str, password: str) -> bool:
+    if not stored or not password:
+        return False
+    return hmac.compare_digest(stored, hash_password(password))
 
 
 @dataclass
@@ -75,6 +89,31 @@ def membership_role(db: Session, user_id: str, workspace_id: str, requested: str
     if not mem:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "no membership")
     return mem.role
+
+
+def role_in_workspace(db: Session, user_id: str, workspace_id: str) -> str:
+    mem = (
+        db.query(StaffMembership)
+        .filter(StaffMembership.user_id == user_id, StaffMembership.workspace_id == workspace_id)
+        .first()
+    )
+    if mem:
+        return mem.role
+    if db.query(Student).filter(Student.user_id == user_id, Student.workspace_id == workspace_id).first():
+        return "student"
+    from app.models.tables import ParentLink
+
+    if (
+        db.query(ParentLink)
+        .filter(
+            ParentLink.parent_user_id == user_id,
+            ParentLink.workspace_id == workspace_id,
+            ParentLink.accepted_at.isnot(None),
+        )
+        .first()
+    ):
+        return "parent"
+    raise HTTPException(status.HTTP_403_FORBIDDEN, "no membership")
 
 
 def identity_user(db: Session, kind: str, value: str) -> User:

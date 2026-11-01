@@ -61,6 +61,74 @@ function errorDetail(err: unknown): string {
   return raw;
 }
 
+const FACULTY_FEATURES = [
+  ["B1", "Schedule"],
+  ["B2", "Whiteboard"],
+  ["B5", "Library"],
+  ["C1", "Practice"],
+  ["D1", "Doubts"],
+  ["E2", "Records"],
+  ["A5", "Students"],
+] as const;
+
+function FacultyAccess() {
+  const [rows, setRows] = useState<{ user_id: string; name: string; modules: string[] }[]>([]);
+  const [note, setNote] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    api("/api/v1/owner/faculty-access")
+      .then((body) => {
+        const teachers = (body as { teachers?: { user_id: string; name: string; modules: string[] }[] }).teachers || [];
+        setRows(teachers);
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : String(err)));
+  }, []);
+
+  async function toggle(userId: string, moduleId: string, on: boolean) {
+    const current = rows.find((row) => row.user_id === userId);
+    if (!current) return;
+    const modules = on ? [...current.modules, moduleId] : current.modules.filter((id) => id !== moduleId);
+    setError("");
+    try {
+      const saved = (await api(`/api/v1/owner/faculty-access/${encodeURIComponent(userId)}`, {
+        method: "PUT",
+        body: JSON.stringify({ modules }),
+      })) as { modules: string[] };
+      setRows((list) => list.map((row) => (row.user_id === userId ? { ...row, modules: saved.modules } : row)));
+      setNote("Saved. That teacher sees the change on their next page.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }
+
+  return (
+    <div className="card" style={{ marginBottom: 16 }}>
+      <h3>Faculty access</h3>
+      <p className="muted">You decide which tools each teacher gets. A teacher still only changes their own classes.</p>
+      <Err message={error} />
+      {note ? <p className="muted">{note}</p> : null}
+      {rows.map((teacher) => (
+        <div key={teacher.user_id} className="list__i">
+          <strong>{teacher.name}</strong>
+          <div className="row" style={{ gap: 8, flexWrap: "wrap", marginTop: 8 }}>
+            {FACULTY_FEATURES.map(([id, label]) => (
+              <label key={id} className="muted" style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <input
+                  type="checkbox"
+                  checked={teacher.modules.includes(id)}
+                  onChange={(ev) => void toggle(teacher.user_id, id, ev.target.checked)}
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function OwnerScreen() {
   const [data, setData] = useState<Console | null>(null);
   const [workspace, setWorkspace] = useState<WorkspaceCurrent | null>(null);
@@ -142,6 +210,7 @@ export function OwnerScreen() {
 
       {!data && !error ? <Loading>Loading the scorecard…</Loading> : null}
       <Err message={error} />
+      <FacultyAccess />
 
       {data ? (
         <>

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { api } from "@/lib/api";
 import { NavIcon } from "@/components/NavIcon";
 import { BrandLockup } from "@/components/SignedInMark";
 import { SectionTabs } from "@/components/SectionTabs";
@@ -64,7 +65,27 @@ function navItemActive(it: NavItem, activeLabel?: string, currentId?: string, pa
 export function AppChrome({ kind, role, active, screenId, children }: AppChromeProps) {
   const pathname = usePathname();
   const resolvedKind: AppChromeKind = kind ?? role ?? "faculty";
-  const items = resolvedKind === "admin" ? ADMIN_NAV : FACULTY_NAV;
+  const [modules, setModules] = useState<string[] | null>(null);
+  useEffect(() => {
+    if (resolvedKind !== "faculty") return;
+    let stop = false;
+    api("/api/v1/auth/me")
+      .then((me) => {
+        if (stop) return;
+        const list = (me as { permissions?: string[] | null }).permissions;
+        setModules(Array.isArray(list) ? list : null);
+      })
+      .catch(() => {
+        if (!stop) setModules(null);
+      });
+    return () => {
+      stop = true;
+    };
+  }, [resolvedKind]);
+  const facultyItems = modules
+    ? FACULTY_NAV.filter((item) => !item.module || modules.includes(item.module))
+    : FACULTY_NAV;
+  const items = resolvedKind === "admin" ? ADMIN_NAV : facultyItems;
   const currentId = screenId ?? screenIdFromPath(pathname);
   const homeId = resolvedKind === "admin" ? "owner" : "teacher-dash";
   const breadcrumb = resolveBreadcrumb(items, currentId);

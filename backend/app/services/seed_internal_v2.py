@@ -96,6 +96,17 @@ def seed_internal_v2(
     )
     if assistant:
         put_meta(assistant, modules=["A5", "B1", "B2", "B3", "B5", "D1"])
+    teacher = (
+        db.query(StaffMembership)
+        .filter(
+            StaffMembership.workspace_id == ws_id,
+            StaffMembership.user_id == people["teacher"],
+            StaffMembership.role == "teacher",
+        )
+        .first()
+    )
+    if teacher and not (teacher.meta or {}).get("modules"):
+        put_meta(teacher, modules=["A5", "B1", "B2", "B5", "C1", "D1", "E2"])
 
     for qid, difficulty, tags in ((q1, "core", ["weak"]), (q2, "stretch", ["review"])):
         q = db.get(Question, qid)

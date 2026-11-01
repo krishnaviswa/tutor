@@ -50,6 +50,8 @@ export function LoginGate({
   const [digits, setDigits] = useState<string[]>(() => OTP_CODE.split(""));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [username, setUsername] = useState(role === "owner" ? "vikram" : role === "assistant" ? "rohan" : role === "student" ? "aarav" : role === "parent" ? "rajesh" : "meera");
+  const [password, setPassword] = useState("TutorDemo1");
   const boxes = useRef<Array<HTMLInputElement | null>>([]);
 
   const allowedRoles = accept ?? ACCEPT[role];
@@ -163,6 +165,28 @@ export function LoginGate({
     boxes.current[Math.min(text.length, 5)]?.focus();
   }
 
+  async function onPassword(e: FormEvent) {
+    e.preventDefault();
+    setError("");
+    setBusy(true);
+    try {
+      const ver = (await api("/api/v1/auth/password", {
+        method: "POST",
+        body: JSON.stringify({ username: username.trim(), password, workspace_id: ws }),
+      })) as { token: string; role?: string };
+      if (ver.role && !allowedRoles.includes(ver.role)) {
+        setError("That account is a different role. Open the matching sign-in.");
+        return;
+      }
+      setToken(ver.token);
+      setAuthed(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
@@ -201,26 +225,54 @@ export function LoginGate({
     : phoneValue;
 
   return (
-    <form className="login-gate tint-sky" onSubmit={onSubmit}>
+    <div className="login-gate tint-sky">
       <span className="av av--lg" style={{ background: "var(--accent)", borderRadius: 12 }}>
         T
       </span>
-      <h2 style={{ fontSize: "1.25rem", margin: "16px 0 6px" }}>Enter the 6-digit code</h2>
+      <h2 style={{ fontSize: "1.25rem", margin: "16px 0 6px" }}>Sign in</h2>
       <p className="muted" style={{ marginBottom: 18 }}>
-        Sent to {masked}. Mock code {OTP_CODE}. Pick a demo persona below for 1-click sign-in.
+        Use your username and password. The workspace owner decides which teaching tools you see.
+      </p>
+      <form onSubmit={onPassword}>
+        <label className="field">
+          <span>Username</span>
+          <input className="field__in" value={username} autoComplete="username" onChange={(ev) => setUsername(ev.target.value)} />
+        </label>
+        <label className="field">
+          <span>Password</span>
+          <input className="field__in" type="password" value={password} autoComplete="current-password" onChange={(ev) => setPassword(ev.target.value)} />
+        </label>
+        <label className="field">
+          <span>Workspace</span>
+          <select className="field__in" value={isCustomWorkspace ? "__custom__" : ws} onChange={(ev) => handleWorkspaceSelect(ev.target.value)}>
+            {MOCK_TENANT_LIST.map((t) => (
+              <option key={t.key} value={t.workspaceId}>
+                {t.label}
+              </option>
+            ))}
+            <option value="__custom__">Other workspace</option>
+          </select>
+        </label>
+        <button className="btn btn--dark" type="submit" disabled={busy} style={{ width: "100%", marginTop: 8 }}>
+          {busy ? "Signing in" : "Sign in"}
+        </button>
+      </form>
+      {error ? <p className="muted" style={{ color: "var(--bad, #b42318)" }}>{error}</p> : null}
+      <details style={{ marginTop: 16 }}>
+        <summary className="muted">Local demo code</summary>
+      <form onSubmit={onSubmit}>
+      <p className="muted" style={{ margin: "12px 0" }}>
+        One-time code for a local review. The code is {OTP_CODE}. Sent to {masked}.
       </p>
       <label className="field">
-        <span>Demo Persona Quick-Select</span>
+        <span>Local demo account</span>
         <select
           className="field__in"
           value={activePersona?.id ?? "__custom__"}
           onChange={(ev) => handlePersonaSelect(ev.target.value)}
         >
           {DEMO_PERSONAS.map((p) => {
-            const tenantPhone = (activeTenant ?? exam).phones[p.phoneKey];
-            const text = p.id === "assistant"
-              ? `${p.roleTitle} — ${p.name} (${tenantPhone})`
-              : `${p.roleTitle} — ${p.name} (${tenantPhone})`;
+            const text = `${p.roleTitle} — ${p.name}`;
             return (
               <option key={p.id} value={p.id}>
                 {text}
@@ -291,12 +343,8 @@ export function LoginGate({
       <button className="hot hot--btn" type="submit" disabled={busy}>
         {busy ? "Verifying" : "Verify & Continue"}
       </button>
-      <div className="card card--wash" style={{ marginTop: 22 }}>
-        <div className="k" style={{ marginBottom: 4 }}>One identity</div>
-        <p className="muted">
-          Sessions, practice, doubts and records thread to this number. The JWT stays in this browser.
-        </p>
-      </div>
     </form>
+      </details>
+    </div>
   );
 }

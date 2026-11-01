@@ -99,7 +99,7 @@ const COLORS = [
   { name: "gray", hex: "#8e8e93" },
 ] as const;
 
-const PPTX_SENTENCE = "PowerPoint cannot be opened for markup here — upload a PDF or an image.";
+type SlidePage = { number: number; texts: string[]; images: { mime: string; data_base64: string }[] };
 const CLASS_LOCK = "Only the assigned teacher or the owner can change this class.";
 
 const emptyDoc = (): BoardDoc => ({ strokes: [], texts: [], placements: [], erases: [] });
@@ -382,6 +382,8 @@ export function SessionBoard({
   const [laser, setLaser] = useState<{ x: number; y: number } | null>(null);
   const [cropDrag, setCropDrag] = useState<Crop | null>(null);
   const [canUndoCrop, setCanUndoCrop] = useState(false);
+  const [slides, setSlides] = useState<SlidePage[]>([]);
+  const [slideAt, setSlideAt] = useState(0);
   const docRef = useRef(doc);
   const toolRef = useRef(tool);
   const colorRef = useRef(color);
@@ -415,7 +417,7 @@ export function SessionBoard({
     material?.body?.trim() || material?.notes?.length || opened?.body?.trim() || opened?.text?.trim() || opened?.notes?.length,
   );
   const docKind: DocKind = classified === "empty" && hasWriting ? "text" : classified;
-  const showInk = mode === "blank" || (docKind !== "pptx" && docKind !== "office");
+  const showInk = mode === "blank" || docKind === "image" || docKind === "pdf" || docKind === "text" || (docKind === "pptx" && slides.length > 0);
   const prose = [
     opened?.text || "",
     opened?.body || material?.body || "",
@@ -424,6 +426,27 @@ export function SessionBoard({
     .map((part) => part.trim())
     .filter(Boolean)
     .join("\n\n");
+
+  useEffect(() => {
+    if (docKind !== "pptx" || !contentKey) {
+      setSlides([]);
+      return;
+    }
+    let cancel = false;
+    api(`/api/v1/content/${encodeURIComponent(contentKey)}/slides`)
+      .then((data) => {
+        if (cancel) return;
+        const pages = (data as { slides?: SlidePage[] }).slides || [];
+        setSlides(pages);
+        setSlideAt(0);
+      })
+      .catch(() => {
+        if (!cancel) setSlides([]);
+      });
+    return () => {
+      cancel = true;
+    };
+  }, [docKind, contentKey]);
 
   useEffect(() => {
     if (!library) return;
@@ -879,7 +902,7 @@ export function SessionBoard({
           a.title.localeCompare(b.title),
         );
       });
-      setNote(ext === "ppt" || ext === "pptx" ? PPTX_SENTENCE : "That file is the page.");
+      setNote(ext === "ppt" || ext === "pptx" ? "Opening the slides." : "That file is the page.");
     } catch (err) {
       setNote(err instanceof Error ? err.message : String(err));
     } finally {
@@ -1082,15 +1105,49 @@ export function SessionBoard({
             </article>
           ) : null}
           {mode === "material" && docKind === "pptx" ? (
-            <div className="doc-stage__notice">
-              <h3>{filename || "PowerPoint"}</h3>
-              <p>{PPTX_SENTENCE}</p>
-              {opened?.url ? (
-                <a className="btn btn--sm" href={opened.url} download={filename || "slides.pptx"}>
-                  Download
-                </a>
-              ) : null}
-            </div>
+            <article className="doc-stage__notes">
+              <div className="sb" style={{ marginBottom: 12 }}>
+                <h3 style={{ margin: 0 }}>{filename || "PowerPoint"}</h3>
+                {slides.length > 1 ? (
+                  <div className="row" style={{ gap: 8 }}>
+                    <button type="button" className="btn btn--sm" disabled={slideAt === 0} onClick={() => setSlideAt((n) => Math.max(0, n - 1))}>
+                      Previous slide
+                    </button>
+                    <span className="muted">
+                      {slideAt + 1} / {slides.length}
+                    </span>
+                    <button
+                      type="button"
+                      className="btn btn--sm"
+                      disabled={slideAt >= slides.length - 1}
+                      onClick={() => setSlideAt((n) => Math.min(slides.length - 1, n + 1))}
+                    >
+                      Next slide
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+              {slides[slideAt] ? (
+                <>
+                  {(slides[slideAt].images || []).map((image, index) => (
+                    <img
+                      key={`${image.mime}-${index}`}
+                      className="doc-stage__img"
+                      alt=""
+                      src={`data:${image.mime};base64,${image.data_base64}`}
+                    />
+                  ))}
+                  {(slides[slideAt].texts || []).map((line) => (
+                    <p key={line}>{line}</p>
+                  ))}
+                  {!slides[slideAt].texts?.length && !slides[slideAt].images?.length ? (
+                    <p className="muted">This slide has no text or picture to show.</p>
+                  ) : null}
+                </>
+              ) : (
+                <p className="muted">Opening the slides.</p>
+              )}
+            </article>
           ) : null}
           {mode === "material" && docKind === "office" ? (
             <div className="doc-stage__notice">

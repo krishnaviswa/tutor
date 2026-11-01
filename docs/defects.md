@@ -2,7 +2,7 @@ This file is a defect log, not a spec and not a screen list.
 
 ## 2026-11-01 — Sign-in still uses a demo persona list
 
-Status: Open. The temporary demo is accepted until a later UI pass.
+Status: Primary door is username and password (2026-11-01). The persona list remains under Local demo code and is not the sign-in. Phone numbers stay off that list.
 
 The sign-in dropdown shows phone numbers (`+9101t`, `+9101o`, `+9101a`, `+9101s`, `+9101p`). A person should not see those codes.
 

@@ -4,10 +4,11 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.deps import require_roles
 from app.db import get_db
-from app.models.tables import QuotaPolicy, UsageMeter, Workspace
+from app.models.tables import QuotaPolicy, StaffMembership, UsageMeter, User, Workspace
 from app.services import billing
 from app.services.auth import Principal
 from app.services import quota as quota_svc
+from app.services.internal_v2 import MODULE_LABELS, TEACHING_MODULES, meta_of, set_staff_modules
 from app.services.progress import owner_console as owner_density_console
 
 router = APIRouter()
@@ -26,6 +27,51 @@ class PauseIn(BaseModel):
 class TierIn(BaseModel):
     tier: str
 
+
+class ModulesIn(BaseModel):
+    modules: list[str]
+
+
+
+@router.get("/owner/faculty-access")
+def faculty_access(
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner")),
+):
+    rows = (
+        db.query(StaffMembership)
+        .filter(
+            StaffMembership.workspace_id == principal.workspace_id,
+            StaffMembership.role == "teacher",
+        )
+        .all()
+    )
+    people = []
+    for row in rows:
+        user = db.get(User, row.user_id)
+        chosen = meta_of(row).get("modules")
+        people.append(
+            {
+                "user_id": row.user_id,
+                "name": user.display_name if user else row.user_id,
+                "modules": list(chosen) if chosen else list(TEACHING_MODULES),
+            }
+        )
+    return {
+        "features": [{"id": key, "label": MODULE_LABELS[key]} for key in TEACHING_MODULES],
+        "teachers": people,
+    }
+
+
+@router.put("/owner/faculty-access/{user_id}")
+def put_faculty_access(
+    user_id: str,
+    body: ModulesIn,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner")),
+):
+    modules = set_staff_modules(db, principal.workspace_id, user_id, body.modules)
+    return {"user_id": user_id, "modules": modules}
 
 
 @router.get("/owner/console")

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models.tables import (
@@ -53,6 +54,37 @@ def put_branding(ws: Workspace, **fields) -> dict:
 def auth_methods(ws: Workspace | None) -> list[str]:
     methods = branding_of(ws).get("auth_methods") or ["otp", "magic"]
     return [m for m in methods if m in ("otp", "magic")]
+
+
+TEACHING_MODULES = ("A5", "B1", "B2", "B5", "C1", "D1", "E2")
+MODULE_LABELS = {
+    "A5": "Students",
+    "B1": "Schedule",
+    "B2": "Whiteboard",
+    "B5": "Library",
+    "C1": "Practice",
+    "D1": "Doubts",
+    "E2": "Records",
+}
+
+
+def set_staff_modules(db: Session, workspace_id: str, user_id: str, modules: list[str]) -> list[str]:
+    allowed = [m for m in modules if m in TEACHING_MODULES]
+    row = (
+        db.query(StaffMembership)
+        .filter(
+            StaffMembership.workspace_id == workspace_id,
+            StaffMembership.user_id == user_id,
+            StaffMembership.role == "teacher",
+        )
+        .first()
+    )
+    if not row:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "teacher")
+    data = meta_of(row)
+    data["modules"] = allowed
+    row.meta = data
+    return allowed
 
 
 def staff_allowed_modules(db: Session, principal: Principal) -> list[str] | None:

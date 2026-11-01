@@ -1,3 +1,5 @@
+import base64
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -10,6 +12,7 @@ from app.services.auth import Principal
 from app.services.internal_v2 import meta_of, put_meta
 from app.services import library as library_svc
 from app.services.progress import content_out
+from app.services.slides import slides_from_pptx
 
 router = APIRouter()
 
@@ -114,3 +117,26 @@ def get_content(
     if not row:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "content")
     return _out(row, db, lesson=True)
+
+
+@router.get("/content/{content_id}/slides")
+def content_slides(
+    content_id: str,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner", "teacher", "assistant", "student")),
+):
+    row = (
+        db.query(ContentItem)
+        .filter(ContentItem.id == content_id, ContentItem.workspace_id == principal.workspace_id)
+        .first()
+    )
+    if not row:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "content")
+    raw = str(meta_of(row).get("data_base64") or "")
+    if not raw:
+        return {"slides": []}
+    try:
+        blob = base64.b64decode(raw)
+    except Exception:
+        return {"slides": []}
+    return {"slides": slides_from_pptx(blob)}

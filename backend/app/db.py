@@ -93,6 +93,7 @@ _ADDED_COLUMNS: dict[str, list[tuple[str, str, str]]] = {
     ],
     "payouts": [("teacher_user_id", "id", "")],
     "person_profiles": [("photo", "text", "DEFAULT ''")],
+    "users": [("password_hash", "text", "DEFAULT ''")],
 }
 
 

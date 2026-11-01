@@ -43,6 +43,7 @@ from app.models.tables import (
     User,
     Workspace,
 )
+from app.services.auth import hash_password
 from app.services.quota import ALWAYS_ON
 
 CATALOG_MODULES = list(ALWAYS_ON) + [
@@ -229,7 +230,9 @@ def seed_workspace_ids(
         people["parent"]: human.get("parent", f"{slug} parent"),
     }
     for uid, label in labels.items():
-        _user(db, uid, label)
+        user = _user(db, uid, label)
+        if not user.password_hash:
+            user.password_hash = hash_password("TutorDemo1")
     db.flush()
     for role, uid in roles_staff.items():
         db.add(StaffMembership(workspace_id=ws_id, user_id=uid, role=role))
@@ -239,6 +242,15 @@ def seed_workspace_ids(
     _ident_once(db, ws_id, people["student"], "email", f"student@{slug}.sim")
     _ident_once(db, ws_id, people["parent"], "phone", f"{phone_prefix}p")
     _ident_once(db, ws_id, people["parent"], "email", f"parent@{slug}.sim")
+    for role_key, uid in (
+        ("owner", people["owner"]),
+        ("teacher", people["teacher"]),
+        ("assistant", people["assistant"]),
+        ("student", people["student"]),
+        ("parent", people["parent"]),
+    ):
+        handle = human.get(f"username_{role_key}") or f"{slug}-{role_key}"
+        _ident_once(db, ws_id, uid, "username", handle)
 
     tag = ws_id.split("-")[1]
     student_id = f"cccccccc-{tag}-4000-8000-000000000020"
@@ -366,6 +378,11 @@ PEOPLE_MUSIC = {
 TENANT_HUMAN: dict[str, dict[str, str]] = {
     "exam-prep": {
         "owner": "Vikram Nair",
+        "username_owner": "vikram",
+        "username_teacher": "meera",
+        "username_assistant": "rohan",
+        "username_student": "aarav",
+        "username_parent": "rajesh",
         "teacher": "Dr. Meera Krishnan",
         "assistant": "Rohan Deshmukh",
         "student": "Aarav Sharma",
@@ -378,6 +395,11 @@ TENANT_HUMAN: dict[str, dict[str, str]] = {
     },
     "language-1on1": {
         "owner": "Elena Rostova",
+        "username_owner": "elena",
+        "username_teacher": "claire",
+        "username_assistant": "liam",
+        "username_student": "maya",
+        "username_parent": "david",
         "teacher": "Claire Dubois",
         "assistant": "Liam O'Connor",
         "student": "Maya Lin",
@@ -390,6 +412,11 @@ TENANT_HUMAN: dict[str, dict[str, str]] = {
     },
     "music": {
         "owner": "Pandit Ravi Kulkarni",
+        "username_owner": "ravi",
+        "username_teacher": "ananya",
+        "username_assistant": "karthik",
+        "username_student": "zoya",
+        "username_parent": "farhan",
         "teacher": "Ananya Sen",
         "assistant": "Karthik Iyer",
         "student": "Zoya Khan",
