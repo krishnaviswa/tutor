@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workspace admin — TutorOS</title>
+<style>
+:root { color-scheme: light; }
+body { font: 17px/1.55 Georgia, "Iowan Old Style", Palatino, serif; max-width: 40rem; margin: 2.5rem auto; padding: 0 1.25rem 4rem; color: #1c1917; background: #faf7f2; }
+h1 { font-size: 1.85rem; line-height: 1.2; margin: 0 0 0.4rem; }
+h2 { font-size: 1.25rem; margin: 2rem 0 0.6rem; }
+h3 { font-size: 1.05rem; margin: 1.4rem 0 0.4rem; }
+a { color: #1d4e89; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 0.88em; }
+pre { background: #fff; border: 1px solid #e7e5e4; border-radius: 8px; padding: 0.8rem 1rem; overflow: auto; }
+pre code { font-size: 0.82rem; }
+.crumbs { font-size: 0.92rem; margin-bottom: 1.4rem; }
+.soon { background: #fff7ed; border-left: 4px solid #c2410c; padding: 0.2rem 0 0.2rem 1rem; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.95rem; }
+th, td { border: 1px solid #e7e5e4; padding: 0.35rem 0.5rem; text-align: left; vertical-align: top; }
+th { background: #fff; }
+ul, ol { padding-left: 1.25rem; }
+li { margin: 0.35rem 0; }
+</style>
+</head>
+<body>
+<p class="crumbs"><a href="index.html">All runbooks</a> · <a href="admin.md">Markdown</a></p>
+<h1>Workspace admin</h1>
+<p>This guide is for the workspace owner (<code>Vikram Nair</code>, Owner <code>+9101o</code>). That login is the role <code>owner</code>. Faculty admin is a grant a teacher (<code>Sudhakshina</code>, <code>+9101t</code>) can hold. It does not replace the owner, and handing the grant to someone else leaves you as owner.</p>
+<p>The steps use the exam-prep demo (<strong>Apex Science Academy</strong>). The one-time code is <code>000000</code>. There is no username and password.</p>
+<h2>Demo Personas (Exam-Prep Workspace)</h2>
+<ul>
+<li><strong>Owner / Admin:</strong> <code>Vikram Nair</code> (<code>+9101o</code>)</li>
+<li><strong>Senior Faculty / Faculty Admin:</strong> <code>Sudhakshina</code> (<code>+9101t</code>)</li>
+<li><strong>Teaching Assistant:</strong> <code>Rohan Deshmukh</code> (<code>+9101a</code>)</li>
+<li><strong>Student:</strong> <code>Aarav Sharma</code> (<code>+9101s</code>, enrolled in <code>Grade 11 Evening Batch (Mon–Fri)</code>)</li>
+<li><strong>Parent:</strong> <code>Rajesh Sharma</code> (<code>+9101p</code>)</li>
+</ul>
+<h2>Sign in</h2>
+<ol>
+<li>Open <a href="http://127.0.0.1:3000">http://127.0.0.1:3000</a>. You arrive at the role doors (<code>/app/student/router</code>).</li>
+<li>Choose the direct <strong>Workspace Owner / Admin</strong> door (<code>/app/admin</code>), or click <strong>other staff sign-in</strong> (<code>/app/faculty/staff-login</code>).</li>
+<li>In the 1-click <strong>Workspace &amp; Demo Persona Picker</strong>, <strong>Owner / Admin — Vikram Nair (<code>+9101o</code>)</strong> and the <code>Coaching exam-prep</code> workspace are selected (or select them from the <code>&lt;select&gt;</code> dropdowns), with code <code>000000</code>.</li>
+<li>Click <strong>Verify &amp; Continue</strong> to land on the owner console at <code>/app/admin</code>.</li>
+</ol>
+<h2>Where you land &amp; Section Sub-Tabs</h2>
+<p>The owner rail is: Owner console, Billing, Reports, Cohorts, Schedule, Records, Integrations, Profile.</p>
+<p>The header has Back on a nested screen, the place name, a sun or moon theme icon, a bell icon, <strong>Terms</strong>, and Sign out. Below the header, multi-screen admin and teaching workflows display horizontal <strong>Section Sub-Tabs</strong>:</p>
+<ul>
+<li><strong>Owner Console Sub-Tabs:</strong> <code>Scorecard &amp; Enquiries</code> (<code>/app/admin</code>) · <code>Teacher Payouts</code> (<code>/app/admin/payouts</code>) · <code>Subscription &amp; Quotas</code> (<code>/app/admin/subscription</code>) · <code>Automations</code> (<code>/app/admin/automation</code>) · <code>Templates</code> (<code>/app/admin/template-gallery</code>) · <code>Branding</code> (<code>/app/admin/branding</code>) · <code>Workspace Setup</code> (<code>/app/admin/wsetup</code>)</li>
+<li><strong>Schedule Sub-Tabs:</strong> <code>Week Calendar</code> (<code>/app/faculty/schedule</code>) · <code>Sessions &amp; Supervision</code> (<code>/app/faculty/sessions</code>) · <code>Pre-Class Prep</code> (<code>/app/faculty/session-pre</code>) · <code>My Availability</code> (<code>/app/faculty/availability</code>)</li>
+<li><strong>Students / Cohorts Sub-Tabs:</strong> <code>Student Roster</code> (<code>/app/admin/roster</code>) · <code>Cohorts &amp; Batches</code> (<code>/app/faculty/cohort-builder</code>) · <code>Mentor Backlog</code> (<code>/app/faculty/mentor</code>)</li>
+<li><strong>Records &amp; Reports Sub-Tabs:</strong> <code>Class Record &amp; Roll</code> (<code>/app/faculty/record</code>) · <code>Session Recordings</code> (<code>/app/faculty/session-video</code>) · <code>Progress Reports</code> (<code>/app/faculty/reports</code>)</li>
+</ul>
+<p>The bell is the in-app notice list. <strong>Terms</strong> shows <code>docs/legal/terms-and-conditions.md</code>. A tech admin changes that file.</p>
+<p>Availability is an Outlook-style week (click, drag, resize, 15-minute snap, every week or one date). It does not connect to an Outlook mailbox. Schedule is the class week.</p>
+<h2>What each nav item does</h2>
+<p><strong>Owner console</strong> (<code>/app/admin</code>). The operating scorecard: sessions delivered against the plan, active students, practice completion, doubt SLA, revenue in Rupees (<code>₹</code>) and collected percent, teachers, and cohort margin. The same page loads usage meters. The <strong>Enquiry</strong> form on this page takes name, phone, and pack hours (via structured <code>&lt;select&gt;</code> presets such as 8 hours). <strong>Save enquiry</strong> posts <code>{name, phone, hours}</code> to <code>POST /api/v1/owner/enquiries</code>. That call is owner only. It creates a student and a lesson pack. The exam-prep child (<code>Aarav Sharma</code>) already has an 8-hour pack; parents (<code>Rajesh Sharma</code>) read that balance on Home and on Fees. The horizontal <strong>Owner Console</strong> section sub-tabs give 1-click access to <strong>Teacher Payouts</strong> (<code>/app/admin/payouts</code>), <strong>Subscription &amp; Quotas</strong> (<code>/app/admin/subscription</code>), <strong>Automations</strong> (<code>/app/admin/automation</code>), <strong>Templates</strong> (<code>/app/admin/template-gallery</code>), <strong>Branding</strong> (<code>/app/admin/branding</code>), and <strong>Workspace Setup</strong> (<code>/app/admin/wsetup</code>).</p>
+<p>On <strong>Subscription &amp; Quotas</strong> (<code>/app/admin/subscription</code>) you read the meters, change a cap, and pause WhatsApp for 24 hours. Caps throttle paid sends. The teaching record still writes. Student WhatsApp stays off unless you enable that channel.</p>
+<p>On <strong>Teacher Payouts</strong> (<code>/app/admin/payouts</code>), <code>GET /api/v1/payouts</code> adds <code>delivered</code> and <code>hours</code>: classes the student attended with the teacher present (<code>Sudhakshina</code>), and the hours on the statement the teacher checks, formatted in Rupees (<code>₹</code>). You can move a row from pending to approved to paid.</p>
+<p><strong>Templates</strong> (<code>/app/admin/template-gallery</code>) and <strong>Automations</strong> (<code>/app/admin/automation</code>) sit directly in the <strong>Owner Console</strong> section sub-tabs. The gallery applies a template (a set of module toggles and a starter topic list). Automation turns a rule on or off, such as the seeded “Post-class summary notification” timeline write, or adds a new rule via the collapsible <strong>+ New Rule</strong> form with structured trigger and action <code>&lt;select&gt;</code> dropdowns.</p>
+<p>Also in the <strong>Owner Console</strong> sub-tabs: <strong>Workspace Setup</strong> (<code>/app/admin/wsetup</code>), <strong>Branding</strong> (<code>/app/admin/branding</code>), and the onboarding kind selector (<code>/app/admin/onboard-kind</code>).</p>
+<p><strong>Billing</strong> (<code>/app/admin/billing</code>). Issue an invoice for a student (<code>Aarav Sharma</code>, <code>Diya Patel</code>, <code>Kabir Verma</code>) using <code>&lt;select&gt;</code> dropdowns for Student, Plan (<code>Monthly Tuition Plan</code>), Rupee (<code>₹</code>) fee presets (<code>₹2,500</code>, <code>₹4,500</code>, <code>₹9,000</code>, <code>₹18,000</code>, or custom <code>₹</code> amount—automatically converted to cents under the hood), and Coupon (<code>SAVE10</code>, <code>EARLYBIRD</code>). Run renewals, and open the invoice trail (pay, receipt, refund on the mock payments port). The prepaid pack is the enquiry on the owner console, not a second form on this screen. Attended and no-show use the session length, which is 60 minutes when the session has no end. A student cancel or a move inside 24 hours uses that length. At or outside 24 hours it stays. A teacher cancel does not use it. You can waive a forfeit: on Schedule, before Save time, your line is <strong>Hour stays because the owner can waive it.</strong> The save response is <code>hour</code> of <code>stays</code> or <code>used</code>.</p>
+<p><strong>Reports</strong> (<code>/app/faculty/reports</code>). The owner is allowed in, and the shell follows the owner, so you keep the owner rail. You see each student’s attempts, attendance, practice, latest test, and teacher note, plus platform subscription revenue and student fees collected in Rupees (<code>₹</code>). Export writes a report file from that slice. A parent who opens this route sees only the linked child, as a marksheet, without the export button.</p>
+<p><strong>Cohorts</strong> (<code>/app/admin/roster</code>). The student list (<code>Aarav Sharma</code>, <code>Diya Patel</code>, <code>Kabir Verma</code>) and cohorts (<code>Grade 11 Evening Batch (Mon–Fri)</code>, <code>Weekend Fast-Track Batch</code>): open the collapsible <strong>+ Add student</strong> form, import CSV, paste a WhatsApp list, pick a student in the <code>&lt;select&gt;</code> dropdown to mint a parent invite, and open cohorts. New cohort is <code>/app/faculty/cohort-builder</code> in the <strong>Students</strong> sub-tabs.</p>
+<p><strong>Schedule</strong> (<code>/app/faculty/schedule</code>). This item opens the faculty week calendar with the <strong>Schedule</strong> section sub-tabs (<code>Week Calendar</code>, <code>Sessions &amp; Supervision</code>, <code>Pre-Class Prep</code>, <code>My Availability</code>). The owner is allowed to use it. You can create a session via the collapsible <strong>+ New Session</strong> form, change its time, or cancel it. Cancel notifies parents and admin. A teacher cancel keeps the hour. A 1-on-1 picks a roster student. Before <strong>Save time</strong> the page says <strong>Hour stays</strong> or <strong>Hour is used</strong>, and for you <strong>Hour stays because the owner can waive it.</strong> On <strong>My Availability</strong> (<code>/app/faculty/availability</code>) you can select any staff member (<code>Sudhakshina</code>, <code>Rohan Deshmukh</code>) from the <code>&lt;select&gt;</code> dropdown and edit their Outlook-style week. That week does not sync Outlook.</p>
+<p><strong>Records</strong> (<code>/app/admin/audit</code>). The workspace journal (with action filter chips). Export posts a data export. This is the audit log. The class note a teacher files is on the 3-step faculty Records screen (<code>/app/faculty/record</code>), not here.</p>
+<p><strong>Integrations</strong> (<code>/app/admin/integrations</code>). Mock connect for each named integration. The page says mock OAuth. Live Google, Meta, Outlook, Razorpay, and WhatsApp are not connected.</p>
+<p><strong>Profile</strong> (<code>/app/faculty/profile</code>). Phone, address, expertise, and subjects. Saving confirms with the one-time code. If you also hold the faculty-admin grant, the save asks for an email code as well. That email step does not create a new login.</p>
+<h2>Jobs you can do today</h2>
+<ol>
+<li>Sign in via the direct <strong>Workspace Owner / Admin</strong> door as <code>Vikram Nair</code> (<code>+9101o</code>) and read the scorecard and meters before you change a cap.</li>
+<li>Save an enquiry with name, phone, and pack hours when a new student needs a pack. Parents then see the hours left on Home.</li>
+<li>Issue or renew a fee in Rupees (<code>₹</code>) on Billing, then leave pay and receipts on the mock port. Parents see the open amount and the latest paid receipt on their home screen when the parent link allows fees.</li>
+<li>Mint a parent invite from Cohorts, or from <code>/app/parent/parent-link</code> while signed in as owner. The parent accepts the token.</li>
+<li>Put a class on the week, or cancel one. Before Save time, read Hour stays or Hour is used. The cancelled row stays on the calendar. A teacher cancel keeps the hour.</li>
+<li>Pause WhatsApp, or leave student WhatsApp off.</li>
+<li>Open <strong>Teacher Payouts</strong> from the <strong>Owner Console</strong> sub-tabs and read the delivered sessions, then move a row when you are ready to mark it approved or paid.</li>
+<li>Read the audit journal if you need to see what changed.</li>
+<li>Apply a template from the <strong>Templates</strong> sub-tab only when you mean to change the module set for this workspace.</li>
+</ol>
+<p>The exam-prep seed gives the faculty-admin grant to Senior Faculty <code>Sudhakshina</code> (<code>+9101t</code>), not to you. You (<code>Vikram Nair</code>, <code>+9101o</code>) remain the owner. The teacher uses the Faculty admin card on Sessions. You can still sign in as owner and use the owner rail. A tech admin checks the grant with <code>GET /api/v1/faculty-admin/me</code> or the <code>faculty_admin_grants</code> table.</p>
+<p>Student attendance on the 3-step session record (<code>/app/faculty/record</code>) is Attended, No-show, Student cancel, or Teacher cancel, with live lesson-pack consequence previews before saving. Unmarked stays unmarked. A stored present still reads as Attended, and absent as No-show. The faculty-admin card is on Sessions for the teacher <code>+9101t</code>. It is not a separate login. Sign-in phones stay owner <code>+9101o</code> (<code>Vikram Nair</code>), teacher <code>+9101t</code> (<code>Sudhakshina</code>), assistant <code>+9101a</code> (<code>Rohan Deshmukh</code>), student <code>+9101s</code> (<code>Aarav Sharma</code>), parent <code>+9101p</code> (<code>Rajesh Sharma</code>), code <code>000000</code>.</p>
+<h2>Not shipped</h2>
+<div class="soon">
+<ul><li>More than one branch.</li><li>A quality spot-check of a recording.</li></ul>
+</div>
+</body>
+</html>

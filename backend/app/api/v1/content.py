@@ -1,3 +1,5 @@
+import base64
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -10,6 +12,7 @@ from app.services.auth import Principal
 from app.services.internal_v2 import meta_of, put_meta
 from app.services import library as library_svc
 from app.services.progress import content_out
+from app.services.slides import slides_from_pptx
 
 router = APIRouter()
 
@@ -30,6 +33,9 @@ class ContentIn(BaseModel):
     subject_topic_id: str | None = None
     unit_topic_id: str | None = None
     session_id: str | None = None
+    filename: str | None = None
+    mime: str | None = None
+    data_base64: str | None = None
 
 
 def _out(row: ContentItem, db: Session | None = None, *, lesson: bool = False) -> dict:
@@ -52,14 +58,14 @@ def create_content(
     ports: MockPorts = Depends(ports_dep),
     principal: Principal = Depends(require_roles("owner", "teacher")),
 ):
-    if body.file_kind:
+    if body.file_kind or body.data_base64 or body.filename:
         row = library_svc.file_material(
             db,
             ports,
             principal,
             title=body.title,
             body=body.body,
-            file_kind=body.file_kind,
+            file_kind=body.file_kind or "",
             storage_name=body.storage_path,
             board=body.board,
             subject=body.subject,
@@ -68,6 +74,9 @@ def create_content(
             subject_topic_id=body.subject_topic_id,
             unit_topic_id=body.unit_topic_id,
             session_id=body.session_id,
+            filename=body.filename,
+            mime=body.mime,
+            data_base64=body.data_base64,
         )
         return _out(row, db)
     if body.topic_id:
@@ -108,3 +117,26 @@ def get_content(
     if not row:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "content")
     return _out(row, db, lesson=True)
+
+
+@router.get("/content/{content_id}/slides")
+def content_slides(
+    content_id: str,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("owner", "teacher", "assistant", "student")),
+):
+    row = (
+        db.query(ContentItem)
+        .filter(ContentItem.id == content_id, ContentItem.workspace_id == principal.workspace_id)
+        .first()
+    )
+    if not row:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "content")
+    raw = str(meta_of(row).get("data_base64") or "")
+    if not raw:
+        return {"slides": []}
+    try:
+        blob = base64.b64decode(raw)
+    except Exception:
+        return {"slides": []}
+    return {"slides": slides_from_pptx(blob)}

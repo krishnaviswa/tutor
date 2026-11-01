@@ -86,7 +86,7 @@ def test_scope_and_filter_params(client):
 
 def test_one_on_one_booking_and_guards(client):
     h = auth(login(client, "+9101t", WS_EXAM, "teacher"))
-    when = _iso(datetime(2026, 10, 6, 8, 30, tzinfo=timezone.utc))  # Tue 14:00 IST, inside window
+    when = _iso(datetime(2026, 10, 6, 16, 15, tzinfo=timezone.utc))  # Tue 16:15, inside 16:00–17:30
     ok = client.post(
         "/api/v1/sessions",
         headers=h,
@@ -104,6 +104,20 @@ def test_one_on_one_booking_and_guards(client):
     assert both.status_code == 400
     neither = client.post("/api/v1/sessions", headers=h, json={"title": "x", "starts_at": when})
     assert neither.status_code == 400
+
+
+def test_seeded_week_and_afternoon_off(client):
+    teacher = auth(login(client, "+9101t", WS_EXAM, "teacher"))
+    got = client.get(f"/api/v1/availability?teacher_id={TEACHER_UID}", headers=teacher).json()
+    windows = {(w["weekday"], w["start"], w["end"]) for w in got["windows"]}
+    for day in ("Mon", "Tue", "Wed", "Thu", "Fri"):
+        assert (day, "16:00", "17:30") in windows
+        assert (day, "18:00", "20:00") in windows
+    assert ("Sat", "10:00", "11:30") in windows
+    assert not any(w["weekday"] == "Sun" for w in got["windows"])
+    off = next(b for b in got["blocks"] if b["date"] == "2026-11-04")
+    assert (off["start"], off["end"], off["available"], off["note"]) == ("16:00", "17:30", False, "Afternoon off")
+    assert all(b["date"] != "2026-12-25" for b in got["blocks"])
 
 
 def test_availability_put_get_and_403(client):

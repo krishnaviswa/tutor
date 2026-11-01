@@ -672,6 +672,9 @@ def link_enrollment_plan(
 def sync_payouts(db: Session, workspace_id: str) -> list[Payout]:
     """Amounts come from staff-completed and auto-completed sessions, not seeded rows."""
     sessions = db.query(ScheduledSession).filter(ScheduledSession.workspace_id == workspace_id).all()
+    from app.services.lesson_packs import delivered_by_teacher
+
+    delivered_map = delivered_by_teacher(db, workspace_id, sessions)
     cohorts = {c.id: c for c in db.query(Cohort).filter(Cohort.workspace_id == workspace_id).all()}
     grouped: dict[str, list[ScheduledSession]] = {}
     for s in sessions:
@@ -691,6 +694,8 @@ def sync_payouts(db: Session, workspace_id: str) -> list[Payout]:
                 hourly_n += 1
             else:
                 flat_n += 1
+        delivered = delivered_map.get(teacher_id, [])
+        hours = round(sum(item["hours"] for item in delivered), 2)
         explanation = (
             f"{len(rows)} taught sessions; {hourly_n} hourly billed {amount} cents; "
             f"{flat_n} flat-plan sessions contribute 0"
@@ -715,6 +720,8 @@ def sync_payouts(db: Session, workspace_id: str) -> list[Payout]:
                 "explanation": explanation,
                 "hourly_sessions": hourly_n,
                 "flat_sessions": flat_n,
+                "delivered": delivered,
+                "hours": hours,
             }
         )
         row.meta = meta
@@ -735,6 +742,8 @@ def payout_out(row: Payout) -> dict:
         "period": meta.get("period"),
         "sessions": meta.get("sessions"),
         "explanation": meta.get("explanation") or "",
+        "delivered": meta.get("delivered") or [],
+        "hours": meta.get("hours") or 0,
     }
 
 

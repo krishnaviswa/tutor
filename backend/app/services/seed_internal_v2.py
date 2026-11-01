@@ -9,7 +9,10 @@ from sqlalchemy.orm import Session
 from app.models.tables import (
     Assignment,
     Attempt,
+    LessonPack,
+    LessonPackLedger,
     AutomationRule,
+    FacultyAdminGrant,
     ParentLink,
     Payout,
     PracticeSet,
@@ -20,7 +23,7 @@ from app.models.tables import (
     Workspace,
 )
 from app.services.internal_v2 import put_branding, put_meta
-from app.services.seed import _ident_once, _put, _user, cid
+from app.services.seed import TENANT_HUMAN, _ident_once, _put, _user, cid
 
 
 def seed_internal_v2(
@@ -65,8 +68,9 @@ def seed_internal_v2(
     if link:
         put_meta(link, fee_visible=True)
 
+    human = TENANT_HUMAN.get(slug, {})
     parent2_id = cid(tag, 70)
-    _user(db, parent2_id, f"{slug} parent 2")
+    _user(db, parent2_id, human.get("parent2", f"{slug} parent 2"))
     db.flush()
     _ident_once(db, ws_id, parent2_id, "phone", f"{phone_prefix}g")
     _ident_once(db, ws_id, parent2_id, "email", f"parent2@{slug}.sim")
@@ -125,7 +129,7 @@ def seed_internal_v2(
         AutomationRule,
         cid(tag, 73),
         workspace_id=ws_id,
-        name="Missed two practices",
+        name="Flag remediation after two missed practice sets",
         trigger="miss_2_practices",
         action="backlog",
         enabled=1,
@@ -133,9 +137,9 @@ def seed_internal_v2(
 
     payout = db.get(Payout, cid(tag, 38))
     if payout:
-        put_meta(payout, teacher_name=f"{slug} teacher", period="Sep", sessions=4)
+        put_meta(payout, teacher_name=human.get("teacher", f"{slug} teacher"), period="Oct 2026", sessions=4)
 
-    # 007: per-staff availability for the teacher (weekly windows + one time-off block).
+    # Decided teaching week plus one named afternoon off. Faculty-admin grant is not a login role.
     teacher_id = people["teacher"]
     has_avail = (
         db.query(StaffAvailability)
@@ -146,28 +150,56 @@ def seed_internal_v2(
         .first()
     )
     if not has_avail:
-        for wd in ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat"):
-            db.add(
-                StaffAvailability(
-                    workspace_id=ws_id,
-                    user_id=teacher_id,
-                    kind="window",
-                    weekday=wd,
-                    start_time="06:00",
-                    end_time="21:00",
-                    available=1,
+        for wd in ("Mon", "Tue", "Wed", "Thu", "Fri"):
+            for start_time, end_time in (("16:00", "17:30"), ("18:00", "20:00")):
+                db.add(
+                    StaffAvailability(
+                        workspace_id=ws_id,
+                        user_id=teacher_id,
+                        kind="window",
+                        weekday=wd,
+                        start_time=start_time,
+                        end_time=end_time,
+                        available=1,
+                    )
                 )
+        db.add(
+            StaffAvailability(
+                workspace_id=ws_id,
+                user_id=teacher_id,
+                kind="window",
+                weekday="Sat",
+                start_time="10:00",
+                end_time="11:30",
+                available=1,
             )
+        )
         db.add(
             StaffAvailability(
                 workspace_id=ws_id,
                 user_id=teacher_id,
                 kind="block",
-                on_date="2026-12-25",
-                start_time="00:00",
-                end_time="23:59",
+                on_date="2026-11-04",
+                start_time="16:00",
+                end_time="17:30",
                 available=0,
-                note="Holiday",
+                note="Afternoon off",
+            )
+        )
+    has_grant = (
+        db.query(FacultyAdminGrant)
+        .filter(
+            FacultyAdminGrant.workspace_id == ws_id,
+            FacultyAdminGrant.user_id == teacher_id,
+        )
+        .first()
+    )
+    if not has_grant:
+        db.add(
+            FacultyAdminGrant(
+                workspace_id=ws_id,
+                user_id=teacher_id,
+                granted_by=people["owner"],
             )
         )
 
@@ -179,7 +211,7 @@ def seed_internal_v2(
         workspace_id=ws_id,
         cohort_id=cohort_id,
         teacher_user_id=teacher_id,
-        title="Last week recap",
+        title="Last Week Recap: Equations of Motion",
         starts_at=now - timedelta(days=3),
         status="scheduled",
     )
@@ -190,7 +222,7 @@ def seed_internal_v2(
         workspace_id=ws_id,
         cohort_id=cohort_id,
         teacher_user_id=teacher_id,
-        title="Cancelled — teacher unwell",
+        title="Cancelled — Faculty Unwell",
         starts_at=now + timedelta(days=2),
         status="cancelled",
         cancelled_at=now,
@@ -203,7 +235,26 @@ def seed_internal_v2(
         workspace_id=ws_id,
         student_id=student_id,
         teacher_user_id=teacher_id,
-        title="1-on-1 catch-up",
+        title="1-on-1 Concept Clinic: Free-Body Diagrams",
         starts_at=now + timedelta(days=1, hours=2),
         status="scheduled",
+    )
+    # 8-hour pack for the demo student in each tenant this seed already visits.
+    _put(
+        db,
+        LessonPack,
+        cid(tag, 91),
+        workspace_id=ws_id,
+        student_id=student_id,
+        purchased_minutes=8 * 60,
+    )
+    _put(
+        db,
+        LessonPackLedger,
+        cid(tag, 92),
+        workspace_id=ws_id,
+        student_id=student_id,
+        kind="purchase",
+        reason="purchase",
+        minutes=8 * 60,
     )

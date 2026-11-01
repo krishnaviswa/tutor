@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { NavIcon } from "@/components/NavIcon";
+import { BrandLockup } from "@/components/SignedInMark";
+import { SectionTabs } from "@/components/SectionTabs";
 import { ShellBack, ShellStage } from "@/components/ShellBack";
 import { ShellControls } from "@/components/ShellControls";
 import { SignOutButton } from "@/components/SignOutButton";
@@ -31,9 +33,7 @@ export function ParentChrome({ screenId, active, children }: ParentChromeProps) 
       <div className="phonewrap">
         <header className="crumbstrip">
           <ShellBack items={PARENT_NAV} currentId={currentId} />
-          <Link href={catalogRoute("parent-home")} className="wm wm--sm">
-            TutorOS
-          </Link>
+          <BrandLockup href={catalogRoute("parent-home")} />
           <span className="place" style={{ margin: 0 }}>
             <strong>{currentTitle || "Home"}</strong>
           </span>
@@ -47,6 +47,7 @@ export function ParentChrome({ screenId, active, children }: ParentChromeProps) 
           <ShellControls />
           <SignOutButton className="signout signout--sm" />
         </header>
+        <SectionTabs screenId={currentId} role="parent" />
         <div className="phonewrap__body">
           <ShellStage>{children}</ShellStage>
         </div>

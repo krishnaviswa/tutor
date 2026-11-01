@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import base64
+import binascii
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -19,8 +22,12 @@ from app.ports.mocks import MockPorts
 from app.services import quota as quota_svc
 from app.services.auth import Principal
 from app.services.grants import holds_faculty_admin, is_owner
+from app.services.library import MAX_FILE_BYTES
 
 _PRIVATE = ("phone", "address")
+# Content files may use the library cap (50 MB). A profile photo is a small data URL on this row.
+AVATAR_MAX_BYTES = min(2 * 1024 * 1024, MAX_FILE_BYTES)
+_PHOTO_MIMES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 
 
 def _identity(db: Session, workspace_id: str, user_id: str, kind: str) -> str:
@@ -54,9 +61,43 @@ def _ensure(db: Session, workspace_id: str, user_id: str) -> PersonProfile:
     return row
 
 
-def profile_out(row: PersonProfile, *, organization_email: str = "") -> dict:
+def _clean_photo(value: str) -> str:
+    raw = value.strip()
+    if not raw:
+        return ""
+    if len(raw) > ((AVATAR_MAX_BYTES + 2) // 3) * 4 + 64:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "photo is too large")
+    if not raw.lower().startswith("data:image/"):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "photo must be an image")
+    header, sep, payload = raw.partition(",")
+    if not sep or ";base64" not in header.lower():
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "photo must be an image")
+    mime = header[5:].split(";", 1)[0].strip().lower()
+    if mime == "image/jpg":
+        mime = "image/jpeg"
+    if mime not in _PHOTO_MIMES:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "photo must be an image")
+    compact = "".join(payload.split())
+    if not compact:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "photo must be an image")
+    pad = (-len(compact)) % 4
+    try:
+        blob = base64.b64decode(compact + ("=" * pad), validate=True)
+    except (binascii.Error, ValueError):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "photo must be an image") from None
+    if not blob or len(blob) > AVATAR_MAX_BYTES:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "photo is too large" if blob else "photo must be an image",
+        )
+    encoded = base64.b64encode(blob).decode("ascii")
+    return f"data:{mime};base64,{encoded}"
+
+
+def profile_out(row: PersonProfile, *, organization_email: str = "", display_name: str = "") -> dict:
     return {
         "user_id": row.user_id,
+        "display_name": display_name,
         "phone": row.phone or "",
         "address": row.address or "",
         "expertise": row.expertise or "",
@@ -64,15 +105,24 @@ def profile_out(row: PersonProfile, *, organization_email: str = "") -> dict:
         "board_label": row.board_label or "",
         "grade_label": row.grade_label or "",
         "study_info": row.study_info or "",
+        "photo": row.photo or "",
         "organization_email": organization_email,
         "active": bool(row.active),
     }
 
 
+def _named(db: Session, row: PersonProfile) -> dict:
+    user = db.get(User, row.user_id)
+    return profile_out(
+        row,
+        organization_email=_identity(db, row.workspace_id, row.user_id, "email"),
+        display_name=user.display_name if user else "",
+    )
+
+
 def read_own(db: Session, principal: Principal) -> dict:
     row = _ensure(db, principal.workspace_id, principal.user_id)
-    email = _identity(db, principal.workspace_id, principal.user_id, "email")
-    return profile_out(row, organization_email=email)
+    return _named(db, row)
 
 
 def _otp_row(db: Session, challenge_id: str | None, code: str | None, phone: str) -> OtpChallenge:
@@ -143,6 +193,8 @@ def save_own(
     email_challenge_id: str | None,
     email_code: str | None,
 ) -> dict:
+    if fields.get("photo") is not None:
+        fields = {**fields, "photo": _clean_photo(str(fields["photo"]))}
     phone = _identity(db, principal.workspace_id, principal.user_id, "phone")
     otp = _otp_row(db, challenge_id, code, phone)
     email_row = None
@@ -152,7 +204,7 @@ def save_own(
     if email_row is not None:
         email_row.consumed = 1
     row = _ensure(db, principal.workspace_id, principal.user_id)
-    for key in ("phone", "address", "expertise", "subjects", "board_label", "grade_label", "study_info"):
+    for key in ("phone", "address", "expertise", "subjects", "board_label", "grade_label", "study_info", "photo"):
         if key in fields and fields[key] is not None:
             setattr(row, key, fields[key])
     if principal.role != "student":
@@ -160,8 +212,7 @@ def save_own(
         pass
     db.flush()
     users_before = db.query(User).count()
-    email = _identity(db, principal.workspace_id, principal.user_id, "email")
-    out = profile_out(row, organization_email=email)
+    out = _named(db, row)
     out["accounts"] = users_before
     return out
 
@@ -243,7 +294,7 @@ def admin_update_teacher(db: Session, principal: Principal, user_id: str, fields
         if fields.get(key) is not None:
             setattr(row, key, fields[key])
     db.flush()
-    return profile_out(row, organization_email=_identity(db, principal.workspace_id, user_id, "email"))
+    return _named(db, row)
 
 
 def admin_remove_teacher(db: Session, principal: Principal, user_id: str) -> dict:

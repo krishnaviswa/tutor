@@ -3,9 +3,11 @@ from __future__ import annotations
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.models.tables import Attendance, AutomationRule, BacklogItem, Enrollment, ScheduledSession, SessionRecord, Student, utcnow
+from app.models.tables import Attendance, AutomationRule, BacklogItem, ScheduledSession, SessionRecord, Student, utcnow
 from app.ports.mocks import MockPorts
 from app.services import notify, timeline
+from app.services.lesson_packs import canonical_attendance, sync_attendance_marks
+from app.services.sessions import class_roster_ids
 
 
 def get_or_create_record(db: Session, workspace_id: str, session_id: str) -> SessionRecord:
@@ -32,12 +34,19 @@ def patch_record(
     attendance: list[dict] | None,
     student_whatsapp_on: bool,
     teacher_status: str | None = None,
+    actor_role: str = "teacher",
+    waive: bool = False,
 ) -> dict:
+    if waive and actor_role != "owner":
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "forbidden")
     rec = get_or_create_record(db, workspace_id, session.id)
     if teacher_status is not None:
-        if teacher_status not in ("present", "absent"):
+        if teacher_status == "":
+            rec.teacher_status = None
+        elif teacher_status not in ("present", "absent"):
             raise HTTPException(status.HTTP_400_BAD_REQUEST, "teacher_status")
-        rec.teacher_status = teacher_status
+        else:
+            rec.teacher_status = teacher_status
     if notes is not None:
         rec.notes = notes
         rec.recorded_at = utcnow()
@@ -50,8 +59,16 @@ def patch_record(
             Attendance.workspace_id == workspace_id,
             Attendance.session_id == session.id,
         ).delete()
+        marked: dict[str, str] = {}
         for row in attendance:
-            sid = row["student_id"]
+            sid = row.get("student_id")
+            if not sid:
+                continue
+            raw = row.get("status")
+            if raw in (None, "", "unmarked"):
+                continue
+            if canonical_attendance(raw) is None:
+                raise HTTPException(status.HTTP_400_BAD_REQUEST, "attendance status")
             st = (
                 db.query(Student)
                 .filter(Student.id == sid, Student.workspace_id == workspace_id)
@@ -64,20 +81,14 @@ def patch_record(
                     workspace_id=workspace_id,
                     session_id=session.id,
                     student_id=st.id,
-                    status=row.get("status", "present"),
+                    status=raw,
                 )
             )
             student_ids.append(st.id)
-    elif session.student_id:
-        student_ids = [session.student_id]
-    elif session.cohort_id:
-        student_ids = [
-            e.student_id
-            for e in db.query(Enrollment).filter(
-                Enrollment.workspace_id == workspace_id,
-                Enrollment.cohort_id == session.cohort_id,
-            )
-        ]
+            marked[st.id] = raw
+        sync_attendance_marks(db, session, marked, actor_role=actor_role, waive=waive)
+    else:
+        student_ids = class_roster_ids(session)
     events = []
     body = f"Session recorded: {session.title}"
     for sid in student_ids:

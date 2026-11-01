@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { formatWhen, maskIds } from "@/lib/format";
 import { Empty, Err } from "./bits";
 
 type Row = { id: string; action: string; payload?: unknown; created_at?: string | null };
@@ -21,7 +22,7 @@ export function AuditScreen() {
     setError("");
     try {
       const row = await api("/api/v1/data-export", { method: "POST" });
-      setNote(JSON.stringify(row));
+      setNote(maskIds(typeof row === "string" ? row : JSON.stringify(row)));
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
@@ -43,7 +44,7 @@ export function AuditScreen() {
           <div key={r.id} className="list__i">
             <div className="gr">
               <div className="t">{r.action}</div>
-              <div className="s">{r.created_at}</div>
+              <div className="s">{formatWhen(r.created_at)}</div>
             </div>
           </div>
         ))

@@ -122,3 +122,82 @@ export const ALL_OTP_ROLES: { apiRole: string; phone: keyof MockTenant["phones"]
   { apiRole: "student", phone: "student", label: "student" },
   { apiRole: "parent", phone: "parent", label: "parent" },
 ];
+
+export type DemoPersonaRole = "teacher" | "owner" | "assistant" | "student" | "parent";
+
+export type DemoPersona = {
+  id: DemoPersonaRole;
+  role: DemoPersonaRole;
+  phoneKey: keyof MockTenant["phones"];
+  name: string;
+  roleTitle: string;
+  label: string;
+  phone: string;
+  email: string;
+  workspaceId: string;
+};
+
+export const DEMO_PERSONAS: DemoPersona[] = [
+  {
+    id: "teacher",
+    role: "teacher",
+    phoneKey: "teacher",
+    name: "Sudhakshina",
+    roleTitle: "Teacher",
+    label: "Teacher — Sudhakshina (+9101t)",
+    phone: MOCK_TENANTS["exam-prep"].phones.teacher,
+    email: MOCK_TENANTS["exam-prep"].emails.teacher,
+    workspaceId: MOCK_TENANTS["exam-prep"].workspaceId,
+  },
+  {
+    id: "owner",
+    role: "owner",
+    phoneKey: "owner",
+    name: "Vikram Nair",
+    roleTitle: "Owner / Admin",
+    label: "Owner / Admin — Vikram Nair (+9101o)",
+    phone: MOCK_TENANTS["exam-prep"].phones.owner,
+    email: MOCK_TENANTS["exam-prep"].emails.owner,
+    workspaceId: MOCK_TENANTS["exam-prep"].workspaceId,
+  },
+  {
+    id: "assistant",
+    role: "assistant",
+    phoneKey: "assistant",
+    name: "Rohan Deshmukh",
+    roleTitle: "Teaching Assistant",
+    label: "Teaching Assistant — Rohan Deshmukh (+9101a)",
+    phone: MOCK_TENANTS["exam-prep"].phones.assistant,
+    email: MOCK_TENANTS["exam-prep"].emails.assistant,
+    workspaceId: MOCK_TENANTS["exam-prep"].workspaceId,
+  },
+  {
+    id: "student",
+    role: "student",
+    phoneKey: "student",
+    name: "Aarav Sharma",
+    roleTitle: "Student",
+    label: "Student — Aarav Sharma (+9101s)",
+    phone: MOCK_TENANTS["exam-prep"].phones.student,
+    email: MOCK_TENANTS["exam-prep"].emails.student,
+    workspaceId: MOCK_TENANTS["exam-prep"].workspaceId,
+  },
+  {
+    id: "parent",
+    role: "parent",
+    phoneKey: "parent",
+    name: "Rajesh Sharma",
+    roleTitle: "Parent",
+    label: "Parent — Rajesh Sharma (+9101p)",
+    phone: MOCK_TENANTS["exam-prep"].phones.parent,
+    email: MOCK_TENANTS["exam-prep"].emails.parent,
+    workspaceId: MOCK_TENANTS["exam-prep"].workspaceId,
+  },
+];
+
+export const MOCK_TENANT_LIST: MockTenant[] = [
+  MOCK_TENANTS["exam-prep"],
+  MOCK_TENANTS["language-1on1"],
+  MOCK_TENANTS.music,
+];
+

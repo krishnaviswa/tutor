@@ -26,6 +26,7 @@ class User(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     display_name: Mapped[str] = mapped_column(String(200))
+    password_hash: Mapped[str] = mapped_column(String(128), default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     identities: Mapped[list[Identity]] = relationship(back_populates="user")
@@ -158,6 +159,8 @@ class ScheduledSession(Base):
     subject_label: Mapped[str] = mapped_column(String(200), default="")
     library_item_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     prior_teacher_user_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    # Students the teacher put in this class. None is a session from before that choice.
+    class_student_ids: Mapped[list | None] = mapped_column(JSON, nullable=True)
 
 
 class StaffAvailability(Base):
@@ -187,7 +190,7 @@ class Attendance(Base):
     workspace_id: Mapped[str] = mapped_column(String(36), index=True)
     session_id: Mapped[str] = mapped_column(ForeignKey("scheduled_sessions.id"))
     student_id: Mapped[str] = mapped_column(ForeignKey("students.id"))
-    status: Mapped[str] = mapped_column(String(20))  # present | absent
+    status: Mapped[str] = mapped_column(String(20))  # attended | no_show | student_cancel | teacher_cancel; present reads as attended, absent as no_show
 
 
 class SessionRecord(Base):
@@ -437,6 +440,7 @@ class NotificationDelivery(Base):
     student_id: Mapped[str | None] = mapped_column(ForeignKey("students.id"), nullable=True)
     body: Mapped[str] = mapped_column(Text, default="")
     status: Mapped[str] = mapped_column(String(20), default="sent")
+    event_id: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
@@ -572,6 +576,7 @@ class PersonProfile(Base):
     board_label: Mapped[str] = mapped_column(String(80), default="")
     grade_label: Mapped[str] = mapped_column(String(80), default="")
     study_info: Mapped[str] = mapped_column(Text, default="")
+    photo: Mapped[str] = mapped_column(Text, default="")
     active: Mapped[int] = mapped_column(Integer, default=1)
 
 
@@ -638,3 +643,30 @@ class EmailChallenge(Base):
     email: Mapped[str] = mapped_column(String(320))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     consumed: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class LessonPack(Base):
+    """Prepaid minutes for one student. Balance is the ledger sum, not a second attendance store."""
+
+    __tablename__ = "lesson_packs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    student_id: Mapped[str] = mapped_column(ForeignKey("students.id"))
+    purchased_minutes: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class LessonPackLedger(Base):
+    """Signed minutes. kind is purchase, attendance, or move. reason says why the line exists."""
+
+    __tablename__ = "lesson_pack_ledger"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    workspace_id: Mapped[str] = mapped_column(String(36), index=True)
+    student_id: Mapped[str] = mapped_column(ForeignKey("students.id"))
+    session_id: Mapped[str | None] = mapped_column(ForeignKey("scheduled_sessions.id"), nullable=True)
+    kind: Mapped[str] = mapped_column(String(20))  # purchase | attendance | move
+    reason: Mapped[str] = mapped_column(String(40))
+    minutes: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

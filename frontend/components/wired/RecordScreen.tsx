@@ -8,12 +8,66 @@ import { Err } from "./bits";
 
 const TZ = "Asia/Kolkata";
 
+const STUDENT_ROLL = [
+  { value: "attended", label: "Attended" },
+  { value: "no_show", label: "No-show" },
+  { value: "student_cancel", label: "Student cancel" },
+  { value: "teacher_cancel", label: "Teacher cancel" },
+] as const;
+
+const NOTE_TEMPLATES = [
+  "Covered core concepts and worked examples. Assigned practice set for next session.",
+  "Completed numerical problem-solving drill. Students should revise formula derivations.",
+  "Reviewed previous test doubts and strengthened weak topic fundamentals.",
+];
+
+type StudentRoll = (typeof STUDENT_ROLL)[number]["value"];
+
+function normalizeStudent(status: string | null | undefined): StudentRoll | "" {
+  if (status === "present" || status === "attended") return "attended";
+  if (status === "absent" || status === "no_show") return "no_show";
+  if (status === "student_cancel" || status === "teacher_cancel") return status;
+  return "";
+}
+
+function studentLabel(status: string): string {
+  return STUDENT_ROLL.find((item) => item.value === status)?.label ?? "Not marked";
+}
+
+function statusPillTone(status: string): string {
+  if (status === "attended") return "is-good";
+  if (status === "no_show") return "is-bad";
+  if (status === "teacher_cancel" || status === "student_cancel") return "is-warn";
+  return "";
+}
+
 type SessionRow = {
   id: string;
   title: string;
   starts_at: string | null;
-  cohort_id: string;
+  cohort_id?: string | null;
+  student_id?: string | null;
+  student_ids?: string[];
+  mode?: string;
+  teacher_user_id?: string | null;
 };
+
+const CLASS_LOCK = "Only the assigned teacher or the owner can change this class.";
+
+function plainDetail(err: unknown): string {
+  const raw = (err instanceof Error ? err.message : String(err)).replace(/\s+/g, " ").trim();
+  const start = raw.indexOf("{");
+  if (start >= 0) {
+    try {
+      const body = JSON.parse(raw.slice(start)) as { detail?: unknown };
+      if (typeof body.detail === "string" && body.detail.trim()) return body.detail.trim();
+    } catch {
+      /* use the sentence below */
+    }
+  }
+  if (raw.includes("403") || raw.includes(CLASS_LOCK)) return CLASS_LOCK;
+  return raw.replace(/^\d{3}\s+/, "") || "Could not save that class.";
+}
 
 type StudentRow = {
   id: string;
@@ -29,6 +83,7 @@ type RecordPayload = {
   session: SessionRow;
   notes: string;
   attendance: AttendanceIn[];
+  teacher_status?: string | null;
   capture?: { kind: string }[];
 };
 
@@ -50,10 +105,6 @@ function avColor(name: string) {
   let h = 0;
   for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
   return AV_PALETTE[h % AV_PALETTE.length];
-}
-
-function firstName(name: string) {
-  return name.trim().split(/\s+/)[0] || name;
 }
 
 function formatWhen(iso: string | null) {
@@ -99,12 +150,22 @@ function RecordScreenInner() {
   const [notes, setNotes] = useState("");
   const [loadedNotes, setLoadedNotes] = useState("");
   const [attendance, setAttendance] = useState<Record<string, string>>({});
-  const [teacherStatus, setTeacherStatus] = useState("present");
+  const [teacherStatus, setTeacherStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<PatchResult | null>(null);
   const [capture, setCapture] = useState<{ kind: string }[]>([]);
+  const [me, setMe] = useState<{ id: string; role: string } | null>(null);
+
+  useEffect(() => {
+    api("/api/v1/auth/me")
+      .then((row) => {
+        const person = row as { id?: string; role?: string };
+        setMe({ id: person.id || "", role: person.role || "" });
+      })
+      .catch(() => undefined);
+  }, []);
 
   const loadLists = useCallback(async () => {
     const [sess, studs] = await Promise.all([
@@ -161,9 +222,11 @@ function RecordScreenInner() {
         setLoadedNotes(nextNotes);
         const next: Record<string, string> = {};
         for (const a of rec.attendance ?? []) {
-          next[a.student_id] = a.status || "present";
+          const status = normalizeStudent(a.status);
+          if (status) next[a.student_id] = status;
         }
         setAttendance(next);
+        setTeacherStatus(rec.teacher_status === "present" || rec.teacher_status === "absent" ? rec.teacher_status : "");
         setCapture(rec.capture ?? []);
         setSaved(null);
         setError(null);
@@ -186,161 +249,322 @@ function RecordScreenInner() {
 
   const rows = useMemo(() => {
     const byId = new Map(students.map((s) => [s.id, s]));
-    const ids = new Set<string>([...students.map((s) => s.id), ...Object.keys(attendance)]);
-    return [...ids].map((id) => ({
+    const chosen = session?.student_ids ?? (session?.student_id ? [session.student_id] : []);
+    return chosen.map((id, idx) => ({
       id,
-      display_name: byId.get(id)?.display_name ?? id.slice(0, 8),
-      status: attendance[id] ?? "present",
+      display_name: byId.get(id)?.display_name ?? `Student ${idx + 1}`,
+      status: normalizeStudent(attendance[id]),
     }));
-  }, [students, attendance]);
+  }, [students, attendance, session]);
 
-  const present = rows.filter((r) => r.status === "present").length;
-  const absent = rows.filter((r) => r.status === "absent").length;
+  const attended = rows.filter((r) => r.status === "attended").length;
+  const noShow = rows.filter((r) => r.status === "no_show").length;
+  const studentCancel = rows.filter((r) => r.status === "student_cancel").length;
+  const teacherCancel = rows.filter((r) => r.status === "teacher_cancel").length;
+  const unmarked = rows.length - attended - noShow - studentCancel - teacherCancel;
+  const hoursUsedCount = attended + noShow;
+  const hoursPreservedCount = teacherCancel;
+  const rollSummary = `${attended} Attended · ${noShow} No-show · ${studentCancel} Student cancel · ${teacherCancel} Teacher cancel · ${unmarked} Unmarked`;
 
   const events = useMemo(() => {
     const items: { t: string; b: string }[] = [];
     if (session?.starts_at) {
-      items.push({ t: formatTime(session.starts_at), b: "Session scheduled" });
+      items.push({ t: formatTime(session.starts_at), b: "Class session scheduled" });
     }
-    if (loadedNotes.trim()) {
-      items.push({ t: "Notes", b: "Teacher note on file" });
+    if (capture.length > 0) {
+      items.push({ t: "Live Class", b: `${capture.length} interactive whiteboard / poll activity captured` });
     }
     if (rows.length) {
-      items.push({ t: "Attendance", b: `${present} present · ${absent} absent` });
+      items.push({ t: "Attendance Roll", b: rollSummary });
+    }
+    if (loadedNotes.trim()) {
+      items.push({ t: "Class Summary", b: loadedNotes.trim() });
     }
     if (saved) {
       const n = saved.timeline_event_ids?.length ?? 0;
       items.push({
         t: "Saved",
-        b: `Record generated · ${n} timeline write${n === 1 ? "" : "s"}`,
+        b: `Class record saved and published to ${n} student progress ${n === 1 ? "log" : "logs"}`,
       });
     }
     if (!items.length) {
-      items.push({ t: "Event log", b: "No events yet — save the record after class." });
+      items.push({ t: "Pending", b: "Complete the 3 steps on this screen to record the class." });
     }
     return items;
-  }, [session, loadedNotes, rows.length, present, absent, saved]);
+  }, [session, capture.length, loadedNotes, rows.length, rollSummary, saved]);
 
-  function toggleStatus(id: string) {
+  function setStatus(id: string, status: StudentRoll) {
     setAttendance((prev) => ({
       ...prev,
-      [id]: prev[id] === "absent" ? "present" : "absent",
+      [id]: prev[id] === status ? "" : status,
     }));
     setSaved(null);
   }
 
+  function markAllAttended() {
+    setTeacherStatus("present");
+    const next: Record<string, string> = {};
+    for (const r of rows) {
+      next[r.id] = "attended";
+    }
+    setAttendance(next);
+    setSaved(null);
+  }
+
+  function setTeacher(status: "present" | "absent") {
+    setTeacherStatus((prev) => (prev === status ? "" : status));
+    setSaved(null);
+  }
+
+  const readOnly = Boolean(
+    me &&
+      (me.role === "teacher" || me.role === "assistant") &&
+      session?.teacher_user_id &&
+      session.teacher_user_id !== me.id,
+  );
+
   async function saveRecord() {
-    if (!sessionId || saving) return;
+    if (!sessionId || saving || readOnly) return;
     setSaving(true);
     setError(null);
     try {
+      const marked = rows
+        .filter((r) => normalizeStudent(r.status))
+        .map((r) => ({ student_id: r.id, status: normalizeStudent(r.status) }));
       const result = (await api(`/api/v1/sessions/${sessionId}/record`, {
         method: "PATCH",
         body: JSON.stringify({
           notes,
-          attendance: rows.map((r) => ({ student_id: r.id, status: r.status })),
+          ...(rows.length > 0 ? { attendance: marked } : {}),
           teacher_status: teacherStatus,
         }),
       })) as PatchResult;
       setSaved(result);
       setLoadedNotes(result.notes ?? notes);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(plainDetail(err));
     } finally {
       setSaving(false);
     }
   }
 
-  const title = session?.title || sessions.find((s) => s.id === sessionId)?.title || "Session record";
+  const title = session?.title || sessions.find((s) => s.id === sessionId)?.title || "Class Record";
   const kicker = loading
-    ? "Loading record…"
-    : `${formatWhen(session?.starts_at ?? null)}`;
+    ? "Loading class record…"
+    : `${formatWhen(session?.starts_at ?? null)} IST · Complete the 3-step post-class workflow below`;
 
   return (
     <>
-      <h2>Session record — {title}</h2>
-      <span className="k">
-        {kicker}
-        {" · "}
-        <span className="pill is-info">event log — not a transcription</span>
-        {capture.length ? ` · Captured: ${capture.length} live events` : ""}
-      </span>
-      <label className="field">
-        <span>Session</span>
-        <select
-          className="field__in"
-          value={sessionId}
-          onChange={(e) => pickSession(e.target.value)}
-          disabled={loading || sessions.length === 0}
-        >
-          {sessions.length === 0 ? <option value="">No sessions</option> : null}
-          {sessions.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.title}
-            </option>
-          ))}
-        </select>
-      </label>
-      <Err message={error} />
-      <div className="grid g2" style={{ alignItems: "start" }}>
-        <div className="card">
-          <h3>Event transcript</h3>
-          <div className="tl" style={{ marginTop: 6 }}>
-            {events.map((e) => (
-              <div className="tl__i" key={`${e.t}-${e.b}`}>
-                <div className="tl__t">{e.t}</div>
-                <div className="tl__b">{e.b}</div>
-              </div>
-            ))}
-          </div>
+      <div className="page-toolbar">
+        <div className="page-toolbar__title">
+          <h2>Attendance &amp; Class Record — {title}</h2>
+          <span className="k">{kicker}</span>
         </div>
+        <div className="page-toolbar__actions">
+          <Link href="/app/faculty/teacher-dash" className="btn btn--sm" style={btnStyle({ textDecoration: "none" })}>
+            Teaching Hub
+          </Link>
+          <Link href="/app/faculty/assign-issue" className="btn btn--sm" style={btnStyle({ textDecoration: "none" })}>
+            Issue Assignment
+          </Link>
+        </div>
+      </div>
+
+      {/* 3-Step Visual Workflow Banner */}
+      <div className="card" style={{ padding: "14px 18px" }}>
+        <div className="steps" style={{ justifyContent: "space-between" }}>
+          <span className={sessionId ? "on" : ""}>
+            1. Pick Session {sessionId ? "✓" : ""}
+          </span>
+          <span>→</span>
+          <span className={rows.length - unmarked > 0 || teacherStatus ? "on" : ""}>
+            2. Mark Attendance Roll (Teacher &amp; Students) ({rows.length - unmarked}/{rows.length} marked)
+          </span>
+          <span>→</span>
+          <span className={notes.trim() || saved ? "on" : ""}>
+            3. Save Class Summary Note {saved ? "✓" : ""}
+          </span>
+        </div>
+      </div>
+
+      <Err message={error} />
+
+      <div className="grid g2" style={{ alignItems: "start" }}>
         <div>
+          {/* Step 1: Pick Session */}
           <div className="card">
-            <div className="sb">
-              <h3 style={{ margin: 0 }}>Attendance</h3>
+            <div className="sb" style={{ marginBottom: 10 }}>
+              <h3 style={{ margin: 0 }}>Step 1 · Pick Session</h3>
+              <span className="pill is-info">{formatWhen(session?.starts_at ?? null)}</span>
             </div>
-            <label className="field">
-              <span>Teacher</span>
-              <select className="field__in" value={teacherStatus} onChange={(e) => setTeacherStatus(e.target.value)}>
-                <option value="present">Teacher present</option>
-                <option value="absent">Teacher absent</option>
+            <label className="field" style={{ marginBottom: 0 }}>
+              <span>Scheduled Class Session</span>
+              <select
+                className="field__in"
+                value={sessionId}
+                onChange={(e) => pickSession(e.target.value)}
+                disabled={loading || sessions.length === 0}
+              >
+                {sessions.length === 0 ? <option value="">No sessions scheduled</option> : null}
+                {sessions.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.title} ({formatWhen(s.starts_at)})
+                  </option>
+                ))}
               </select>
             </label>
-            <div className="sb">
-              <span className="muted">
-                {present} present · {absent} absent
-              </span>
-            </div>
-            <div className="row" style={{ marginTop: 8, gap: 6 }}>
-              {rows.map((r) => (
-                <button
-                  key={r.id}
-                  type="button"
-                  className={`pill ${r.status === "absent" ? "is-bad" : "is-good"}`}
-                  style={btnStyle()}
-                  onClick={() => toggleStatus(r.id)}
-                  title={r.status === "absent" ? "Mark present" : "Mark absent"}
-                >
-                  <span className="av av--sm" style={{ background: avColor(r.display_name) }}>
-                    {initials(r.display_name)}
-                  </span>
-                  {firstName(r.display_name)}
+          </div>
+
+          {/* Step 2: Mark Attendance Roll */}
+          <div className="card">
+            <div className="sb" style={{ marginBottom: 8 }}>
+              <h3 style={{ margin: 0 }}>Step 2 · Mark Attendance Roll (Teacher &amp; Students)</h3>
+              {rows.length > 0 ? (
+                <button type="button" className="btn btn--sm" style={btnStyle()} onClick={markAllAttended} disabled={readOnly}>
+                  Mark All Attended
                 </button>
-              ))}
+              ) : null}
             </div>
+
+            {/* Live Consequence Badge */}
+            <div className="card card--wash" style={{ padding: "12px 14px", marginBottom: 12 }}>
+              <div className="row" style={{ gap: 6, marginBottom: 6 }}>
+                <span className="pill is-good">{attended} Attended</span>
+                <span className="pill is-bad">{noShow} No-show</span>
+                <span className="pill is-warn">{teacherCancel} Teacher cancel</span>
+                <span className="pill">{studentCancel} Student cancel</span>
+                {unmarked > 0 ? <span className="pill">{unmarked} Unmarked</span> : null}
+              </div>
+              <div className="s" style={{ color: "var(--ink)" }}>
+                <b>Lesson-Pack Hour Impact:</b> <b>Attended</b> and <b>No-show</b> use <b>1 lesson-pack hour</b> ({hoursUsedCount} student pack
+                {hoursUsedCount === 1 ? "" : "s"} deducted), while <b>Teacher cancel</b> preserves the hour ({hoursPreservedCount} preserved).
+              </div>
+            </div>
+
+            <div
+              className="list__i"
+              style={{
+                padding: "12px 0",
+                flexDirection: "column",
+                alignItems: "stretch",
+                gap: 8,
+              }}
+            >
+              <div className="sb" style={{ gap: 8 }}>
+                <div className="t">Lead Teacher</div>
+                <span
+                  className={`pill ${
+                    teacherStatus === "present"
+                      ? "is-good"
+                      : teacherStatus === "absent"
+                        ? "is-bad"
+                        : ""
+                  }`}
+                >
+                  {teacherStatus === "present"
+                    ? "Present · Verified for teacher payout"
+                    : teacherStatus === "absent"
+                      ? "Absent"
+                      : "Not marked yet"}
+                </span>
+              </div>
+              <div className="roll-grid--2">
+                <button
+                  type="button"
+                  className={teacherStatus === "present" ? "btn btn--dark btn--sm" : "btn btn--sm"}
+                  style={btnStyle({ width: "100%", justifyContent: "center" })}
+                  onClick={() => setTeacher("present")}
+                  disabled={readOnly}
+                >
+                  Present
+                </button>
+                <button
+                  type="button"
+                  className={teacherStatus === "absent" ? "btn btn--dark btn--sm" : "btn btn--sm"}
+                  style={btnStyle({ width: "100%", justifyContent: "center" })}
+                  onClick={() => setTeacher("absent")}
+                  disabled={readOnly}
+                >
+                  Absent
+                </button>
+              </div>
+            </div>
+
+            {rows.map((r) => (
+              <div
+                key={r.id}
+                className="list__i"
+                style={{
+                  padding: "12px 0",
+                  flexDirection: "column",
+                  alignItems: "stretch",
+                  gap: 8,
+                }}
+              >
+                <div className="sb" style={{ gap: 10 }}>
+                  <div className="row" style={{ gap: 10, flexWrap: "nowrap", minWidth: 0 }}>
+                    <span className="av av--sm" style={{ background: avColor(r.display_name) }}>
+                      {initials(r.display_name)}
+                    </span>
+                    <div className="t" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {r.display_name}
+                    </div>
+                  </div>
+                  <span className={`pill ${statusPillTone(r.status)}`} style={{ padding: "2px 8px" }}>
+                    {studentLabel(r.status)}
+                  </span>
+                </div>
+                <div className="roll-grid">
+                  {STUDENT_ROLL.map((choice) => (
+                    <button
+                      key={choice.value}
+                      type="button"
+                      className={r.status === choice.value ? "btn btn--dark btn--sm" : "btn btn--sm"}
+                      style={btnStyle({ width: "100%", justifyContent: "center", padding: "7px 8px", whiteSpace: "nowrap" })}
+                      onClick={() => setStatus(r.id, choice.value)}
+                      disabled={readOnly}
+                    >
+                      {choice.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+
             {rows.length === 0 && !loading ? (
               <p className="muted" style={{ marginTop: 8 }}>
-                No students in this workspace yet.
+                No students are selected for this class yet.
               </p>
             ) : null}
-            <p className="muted" style={{ marginTop: 10 }}>
-              Tap a name to toggle present / absent. Saving writes the ledger — it does not send WhatsApp.
-            </p>
           </div>
+        </div>
+
+        <div>
+          {/* Step 3: Save Class Summary Note */}
           <div className="card">
-            <h3>Teacher note</h3>
+            <h3>Step 3 · Save Class Summary Note</h3>
+            <div className="field">
+              <span>Quick Summary Templates (1-Click Insert)</span>
+              <div className="chips">
+                {NOTE_TEMPLATES.map((tpl) => (
+                  <button
+                    key={tpl}
+                    type="button"
+                    className={`chip${notes === tpl ? " on" : ""}`}
+                    onClick={() => {
+                      setNotes(tpl);
+                      setSaved(null);
+                    }}
+                    disabled={readOnly}
+                  >
+                    {tpl.slice(0, 42)}…
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <label className="field">
-              <span>Notes</span>
+              <span>Class Summary &amp; Next-Class Follow-Up</span>
               <textarea
                 className="field__in"
                 rows={4}
@@ -349,38 +573,56 @@ function RecordScreenInner() {
                   setNotes(e.target.value);
                   setSaved(null);
                 }}
-                placeholder="What to open with next class, who to follow up…"
+                placeholder="Key topics covered today, homework assigned, and students to follow up with next class…"
+                readOnly={readOnly}
               />
             </label>
-            <div className="row" style={{ marginTop: 8 }}>
+
+            <div className="card card--wash" style={{ padding: "12px 14px", marginBottom: 12 }}>
+              <div className="k" style={{ marginBottom: 4 }}>Consequence Preview Before Saving</div>
+              <p className="muted" style={{ margin: 0 }}>
+                Saving records <b>{attended} Attended</b> and <b>{noShow} No-show</b> (deducting 1 lesson-pack hour each), preserves hours for{" "}
+                <b>{teacherCancel} Teacher cancel</b>, and publishes your class summary to{" "}
+                <b>{rows.length} student &amp; parent progress feed{rows.length === 1 ? "" : "s"}</b>.
+              </p>
+            </div>
+
+            {readOnly ? (
+              <p role="status" style={{ marginBottom: 10 }}>
+                {CLASS_LOCK}
+              </p>
+            ) : null}
+            <div className="row" style={{ gap: 10 }}>
               <button
                 type="button"
-                className="btn btn--sm"
+                className="hot hot--btn"
                 style={btnStyle()}
                 onClick={saveRecord}
-                disabled={saving || !sessionId}
+                disabled={saving || !sessionId || readOnly}
               >
-                {saving ? "Saving…" : "+ Add note"}
+                {saving ? "Saving Class Record…" : "Save Class Record"}
               </button>
               {saved ? (
                 <span className="pill is-good">
-                  {saved.timeline_event_ids?.length ?? 0} timeline writes
+                  Saved · Published to {saved.timeline_event_ids?.length ?? 0} student feed
+                  {(saved.timeline_event_ids?.length ?? 0) === 1 ? "" : "s"}
                 </span>
               ) : null}
             </div>
           </div>
-          <div className="card card--wash">
-            <p className="muted">
-              This record fans out to <b>{rows.length} student timeline{rows.length === 1 ? "" : "s"}</b> when
-              you save. Timeline is the ledger; channels follow that write.
-            </p>
+
+          <div className="card">
+            <h3>Session Activity Summary</h3>
+            <div className="tl" style={{ marginTop: 6 }}>
+              {events.map((e) => (
+                <div className="tl__i" key={`${e.t}-${e.b}`}>
+                  <div className="tl__t">{e.t}</div>
+                  <div className="tl__b">{e.b}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-      <div style={{ marginTop: 6 }}>
-        <Link className="hot hot--btn" href="/app/faculty/teacher-dash" style={btnStyle({ textDecoration: "none" })}>
-          Open cohort dashboard
-        </Link>
       </div>
     </>
   );

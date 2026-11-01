@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import "./comms.css";
 
@@ -11,6 +11,11 @@ type CohortMessage = {
   created_at: string;
   meta?: Record<string, unknown>;
 };
+
+type StudentRow = { id: string; user_id?: string; display_name: string };
+type StaffRow = { id: string; user_id?: string; display_name?: string; name?: string; role?: string };
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function timeMs(value: string) {
   const parsed = Date.parse(value);
@@ -30,12 +35,60 @@ function formatWhen(value: string) {
 
 export function CohortChat({ cohortId, title }: { cohortId: string; title?: string }) {
   const [messages, setMessages] = useState<CohortMessage[]>([]);
+  const [students, setStudents] = useState<StudentRow[]>([]);
+  const [staff, setStaff] = useState<StaffRow[]>([]);
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [sendError, setSendError] = useState("");
   const [delivery, setDelivery] = useState("");
   const listRef = useRef<HTMLUListElement>(null);
+
+  useEffect(() => {
+    let alive = true;
+    Promise.all([
+      api("/api/v1/students").catch(() => []) as Promise<StudentRow[]>,
+      api("/api/v1/staff").catch(() => []) as Promise<StaffRow[]>,
+    ]).then(([studs, staffRows]) => {
+      if (!alive) return;
+      setStudents(Array.isArray(studs) ? studs : []);
+      setStaff(Array.isArray(staffRows) ? staffRows : []);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const nameByUserId = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const st of students) {
+      if (st.id && st.display_name) map[st.id] = st.display_name;
+      if (st.user_id && st.display_name) map[st.user_id] = st.display_name;
+    }
+    for (const member of staff) {
+      const label = member.display_name || member.name;
+      if (!label || UUID_RE.test(label)) continue;
+      if (member.id) map[member.id] = label;
+      if (member.user_id) map[member.user_id] = label;
+    }
+    return map;
+  }, [students, staff]);
+
+  function resolveSenderName(message: CohortMessage): string {
+    const metaName =
+      typeof message.meta?.sender_name === "string"
+        ? message.meta.sender_name
+        : typeof message.meta?.display_name === "string"
+          ? message.meta.display_name
+          : "";
+    if (metaName && !UUID_RE.test(metaName)) return metaName;
+    const mapped = nameByUserId[message.sender_user_id];
+    if (mapped && !UUID_RE.test(mapped)) return mapped;
+    const roleHint = typeof message.meta?.role === "string" ? message.meta.role : "";
+    if (roleHint === "student") return "Student";
+    if (!message.sender_user_id || UUID_RE.test(message.sender_user_id)) return "Faculty";
+    return message.sender_user_id;
+  }
 
   const load = useCallback(async () => {
     try {
@@ -112,7 +165,7 @@ export function CohortChat({ cohortId, title }: { cohortId: string; title?: stri
         {messages.map((message) => (
           <li key={message.id} className="studio-msg">
             <div className="studio-msg__meta">
-              <span>{message.sender_user_id}</span>
+              <span>{resolveSenderName(message)}</span>
               <time dateTime={message.created_at}>{formatWhen(message.created_at)}</time>
             </div>
             <p className="studio-msg__body">{message.body}</p>

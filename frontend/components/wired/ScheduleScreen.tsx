@@ -8,6 +8,43 @@ import { Err, Loading } from "./bits";
 const TZ = "Asia/Kolkata";
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 
+const SESSION_TITLE_PRESETS = [
+  "Concept Lecture & Problem Solving",
+  "Doubt Clearing & Revision",
+  "1-on-1 Mentorship & Backlog",
+  "Mock Test Review & Analysis",
+  "Weekly Practice Drill",
+  "Past Paper Walkthrough",
+] as const;
+
+const TIME_SLOTS_15M = Array.from({ length: (22 - 7) * 4 }, (_, idx) => {
+  const totalMinutes = 7 * 60 + idx * 15;
+  const hh = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+  const mm = String(totalMinutes % 60).padStart(2, "0");
+  return `${hh}:${mm}`;
+});
+
+const QUICK_SLOTS = ["09:00", "11:00", "16:00", "17:30", "18:30", "19:30", "20:30"] as const;
+const CLASS_LOCK = "Only the assigned teacher or the owner can change this class.";
+
+function explainSessionError(err: unknown): string {
+  const raw = (err instanceof Error ? err.message : String(err)).replace(/\s+/g, " ").trim();
+  const start = raw.indexOf("{");
+  if (start >= 0) {
+    try {
+      const body = JSON.parse(raw.slice(start)) as { detail?: unknown };
+      if (typeof body.detail === "string" && body.detail.trim()) return body.detail.trim();
+    } catch {
+      /* use the sentence below */
+    }
+  }
+  if (raw.includes("403") || raw.includes(CLASS_LOCK)) return CLASS_LOCK;
+  if (raw.startsWith("409") || raw.includes("teacher conflict")) return "That slot conflicts with another class.";
+  if (raw.includes("outside availability")) return "That time is outside the teacher's availability.";
+  const plain = raw.replace(/^\d{3}\s+/, "").trim();
+  return plain && !plain.startsWith("{") && !plain.startsWith("[") ? plain : "Could not save that class.";
+}
+
 export type SessionRow = {
   id: string;
   workspace_id: string;
@@ -24,6 +61,7 @@ export type SessionRow = {
 
 type CohortRow = { id: string; name: string };
 type StudentRow = { id: string; display_name: string };
+type TopicRow = { id: string; name?: string; title?: string };
 type Availability = {
   windows: { weekday: string; start: string; end: string }[];
   blocks: { date: string; start: string; end: string; available: boolean }[];
@@ -76,15 +114,38 @@ function btnStyle(extra?: CSSProperties): CSSProperties {
   return { width: "auto", margin: 0, cursor: "pointer", ...extra };
 }
 
+function hourConsequence(originalIso: string, owner: boolean, apiHour?: string): string {
+  if (owner) return "Hour stays because the owner can waive it.";
+  if (apiHour === "stays") return "Hour stays";
+  if (apiHour === "used") return "Hour is used";
+  const start = new Date(originalIso).getTime();
+  if (Number.isNaN(start)) return "Hour stays";
+  const boundary = start - 24 * 60 * 60 * 1000;
+  return Date.now() <= boundary ? "Hour stays" : "Hour is used";
+}
+
+function stepMinutes(localIso: string, deltaMinutes: number): string {
+  const [datePart, timePart] = (localIso || "").split("T");
+  if (!datePart || !timePart) return localIso;
+  const [hh, mm] = timePart.slice(0, 5).split(":").map(Number);
+  if (Number.isNaN(hh) || Number.isNaN(mm)) return localIso;
+  const total = Math.max(0, Math.min(23 * 60 + 45, hh * 60 + mm + deltaMinutes));
+  const nextH = String(Math.floor(total / 60)).padStart(2, "0");
+  const nextM = String(total % 60).padStart(2, "0");
+  return `${datePart}T${nextH}:${nextM}`;
+}
+
 export function ScheduleScreen() {
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [cohorts, setCohorts] = useState<CohortRow[]>([]);
   const [students, setStudents] = useState<StudentRow[]>([]);
+  const [topics, setTopics] = useState<TopicRow[]>([]);
   const [weekOffset, setWeekOffset] = useState(0);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [composing, setComposing] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [titlePreset, setTitlePreset] = useState<string>("__custom__");
   const [title, setTitle] = useState("New session");
   const [startsLocal, setStartsLocal] = useState("");
   const [cohortId, setCohortId] = useState("");
@@ -93,6 +154,13 @@ export function ScheduleScreen() {
   const [showAvail, setShowAvail] = useState(false);
   const [avail, setAvail] = useState<Availability | null>(null);
   const [ready, setReady] = useState(false);
+  const [isOwner, setIsOwner] = useState<boolean | null>(null);
+  const [role, setRole] = useState<string | null>(null);
+  const [meId, setMeId] = useState("");
+  const [teachers, setTeachers] = useState<{ id: string; display_name: string }[]>([]);
+  const [assignTeacherId, setAssignTeacherId] = useState("");
+  const [originalStart, setOriginalStart] = useState<string | null>(null);
+  const [hourNote, setHourNote] = useState("");
 
   const monday = useMemo(() => addDays(mondayOf(istYmd(new Date())), weekOffset * 7), [weekOffset]);
   const weekDays = useMemo(
@@ -103,14 +171,16 @@ export function ScheduleScreen() {
   const load = useCallback(async () => {
     setError("");
     try {
-      const [sess, coh, studs] = await Promise.all([
+      const [sess, coh, studs, topicRows] = await Promise.all([
         api("/api/v1/sessions") as Promise<SessionRow[]>,
         api("/api/v1/cohorts") as Promise<CohortRow[]>,
         api("/api/v1/students").catch(() => []) as Promise<StudentRow[]>,
+        api("/api/v1/topics").catch(() => []) as Promise<TopicRow[]>,
       ]);
       setSessions(Array.isArray(sess) ? sess : []);
       setCohorts(Array.isArray(coh) ? coh : []);
       setStudents(Array.isArray(studs) ? studs : []);
+      setTopics(Array.isArray(topicRows) ? topicRows : []);
       setCohortId((current) => current || (Array.isArray(coh) && coh[0] ? coh[0].id : ""));
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -124,6 +194,37 @@ export function ScheduleScreen() {
   }, [load]);
 
   useEffect(() => {
+    let cancelled = false;
+    api("/api/v1/auth/me")
+      .then((me) => {
+        if (cancelled) return;
+        const row = me as { role?: string; id?: string };
+        const nextRole = row.role || "";
+        setRole(nextRole);
+        setMeId(row.id || "");
+        setIsOwner(nextRole === "owner");
+        if (nextRole !== "owner") return;
+        return api("/api/v1/staff").then((people) => {
+          if (cancelled || !Array.isArray(people)) return;
+          const list = (people as { id: string; display_name: string; role: string }[])
+            .filter((person) => person.role === "teacher" || person.role === "assistant")
+            .map((person) => ({ id: person.id, display_name: person.display_name }));
+          setTeachers(list);
+          setAssignTeacherId((current) => current || list[0]?.id || "");
+        });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setIsOwner(false);
+          setRole("");
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     if (!showAvail || avail) return;
     (async () => {
       try {
@@ -133,6 +234,11 @@ export function ScheduleScreen() {
       }
     })();
   }, [showAvail, avail]);
+
+  const titlePresets = useMemo(() => {
+    const topicNames = topics.map((t) => (t.title || t.name || "").trim()).filter(Boolean);
+    return Array.from(new Set([...topicNames, ...SESSION_TITLE_PRESETS]));
+  }, [topics]);
 
   const byDay = useMemo(() => {
     const buckets: SessionRow[][] = WEEKDAYS.map(() => []);
@@ -170,8 +276,21 @@ export function ScheduleScreen() {
     return weekRows.find((s) => s.starts_at && new Date(s.starts_at).getTime() >= now) || weekRows[0] || null;
   }, [byDay]);
 
+  const defaultWhen = `${addDays(monday, 1)}T18:30`;
+  const effectiveStartsLocal = startsLocal || defaultWhen;
+  const currentDatePart = effectiveStartsLocal.split("T")[0] || addDays(monday, 1);
+  const currentTimePart = (effectiveStartsLocal.split("T")[1] || "18:30").slice(0, 5);
+
+  function setDatePart(ymd: string) {
+    setStartsLocal(`${ymd}T${currentTimePart}`);
+  }
+
+  function setTimePart(hm: string) {
+    setStartsLocal(`${currentDatePart}T${hm}`);
+  }
+
   async function createSession() {
-    const when = startsLocal || `${addDays(monday, 1)}T18:30`;
+    const when = startsLocal || defaultWhen;
     const payload: Record<string, unknown> = {
       title: title.trim() || "New session",
       starts_at: `${when}:00+05:30`,
@@ -196,21 +315,24 @@ export function ScheduleScreen() {
     setError("");
     try {
       if (editingId) {
-        await api(`/api/v1/sessions/${editingId}`, {
+        const result = (await api(`/api/v1/sessions/${editingId}`, {
           method: "PATCH",
           body: JSON.stringify({ title: payload.title, starts_at: payload.starts_at }),
-        });
+        })) as { hour?: string };
+        if (originalStart) {
+          setHourNote(hourConsequence(originalStart, isOwner === true, result?.hour));
+        }
       } else {
+        if (role === "owner" && assignTeacherId) payload.teacher_user_id = assignTeacherId;
         await api("/api/v1/sessions", { method: "POST", body: JSON.stringify(payload) });
+        setHourNote("");
       }
       setComposing(false);
       setEditingId(null);
+      setOriginalStart(null);
       await load();
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (msg.startsWith("409")) setError("That slot conflicts with another class.");
-      else if (msg.includes("outside availability")) setError("That time is outside the teacher's availability.");
-      else setError(msg);
+      setError(explainSessionError(err));
     } finally {
       setBusy(false);
     }
@@ -227,7 +349,7 @@ export function ScheduleScreen() {
       });
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(explainSessionError(err));
     } finally {
       setBusy(false);
     }
@@ -235,7 +357,10 @@ export function ScheduleScreen() {
 
   function openReschedule(row: SessionRow) {
     setEditingId(row.id);
+    setOriginalStart(row.starts_at);
+    setHourNote("");
     setTitle(row.title);
+    setTitlePreset(titlePresets.includes(row.title) ? row.title : "__custom__");
     if (row.starts_at) {
       const d = new Date(row.starts_at);
       const pad = (n: number) => String(n).padStart(2, "0");
@@ -261,6 +386,7 @@ export function ScheduleScreen() {
             setComposing((open) => {
               if (!open) {
                 setEditingId(null);
+                setOriginalStart(null);
                 setStartsLocal(`${addDays(monday, 1)}T18:30`);
               }
               return !open;
@@ -293,19 +419,124 @@ export function ScheduleScreen() {
       {composing ? (
         <div className="card" style={{ marginBottom: 14 }}>
           <h3>{editingId ? "Reschedule" : "New session"}</h3>
-          <label className="field">
-            <span>Title</span>
-            <input className="field__in" value={title} onChange={(e) => setTitle(e.target.value)} />
-          </label>
-          <label className="field">
-            <span>Starts (IST)</span>
-            <input
-              className="field__in"
-              type="datetime-local"
-              value={startsLocal}
-              onChange={(e) => setStartsLocal(e.target.value)}
-            />
-          </label>
+
+          <div className="grid g2" style={{ gap: 10 }}>
+            <label className="field">
+              <span>Topic / Session preset</span>
+              <select
+                className="field__in"
+                value={titlePreset}
+                onChange={(e) => {
+                  const chosen = e.target.value;
+                  setTitlePreset(chosen);
+                  if (chosen !== "__custom__") {
+                    setTitle(chosen);
+                  }
+                }}
+              >
+                <option value="__custom__">Custom title…</option>
+                {titlePresets.map((preset) => (
+                  <option key={preset} value={preset}>
+                    {preset}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="field">
+              <span>Title</span>
+              <input
+                className="field__in"
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  setTitlePreset("__custom__");
+                }}
+              />
+            </label>
+          </div>
+
+          <div className="grid g3" style={{ gap: 10, alignItems: "end" }}>
+            <label className="field">
+              <span>Starts (IST)</span>
+              <input
+                className="field__in"
+                type="datetime-local"
+                step={900}
+                value={startsLocal}
+                onChange={(e) => setStartsLocal(e.target.value)}
+              />
+            </label>
+
+            <label className="field">
+              <span>Day of week</span>
+              <select
+                className="field__in"
+                value={currentDatePart}
+                onChange={(e) => setDatePart(e.target.value)}
+              >
+                {!weekDays.some((d) => d.ymd === currentDatePart) ? (
+                  <option value={currentDatePart}>{currentDatePart}</option>
+                ) : null}
+                {weekDays.map((d) => (
+                  <option key={d.ymd} value={d.ymd}>
+                    {d.label} ({d.ymd})
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="field">
+              <span>15-min time slot (IST)</span>
+              <select
+                className="field__in"
+                value={currentTimePart}
+                onChange={(e) => setTimePart(e.target.value)}
+              >
+                {!TIME_SLOTS_15M.includes(currentTimePart) ? (
+                  <option value={currentTimePart}>{currentTimePart}</option>
+                ) : null}
+                {TIME_SLOTS_15M.map((slot) => (
+                  <option key={slot} value={slot}>
+                    {slot} IST
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="row" style={{ gap: 6, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
+            <span className="muted" style={{ fontSize: ".8rem" }}>
+              Quick 15m slots:
+            </span>
+            {QUICK_SLOTS.map((slot) => (
+              <button
+                key={slot}
+                type="button"
+                className={`chip${currentTimePart === slot ? " on" : ""}`}
+                onClick={() => setTimePart(slot)}
+              >
+                {slot}
+              </button>
+            ))}
+            <button
+              type="button"
+              className="btn btn--sm"
+              style={btnStyle()}
+              onClick={() => setStartsLocal(stepMinutes(effectiveStartsLocal, -15))}
+            >
+              −15m
+            </button>
+            <button
+              type="button"
+              className="btn btn--sm"
+              style={btnStyle()}
+              onClick={() => setStartsLocal(stepMinutes(effectiveStartsLocal, 15))}
+            >
+              +15m
+            </button>
+          </div>
+
           {!editingId && (
             <>
               <div className="row" style={{ gap: 8, marginBottom: 8 }}>
@@ -352,15 +583,57 @@ export function ScheduleScreen() {
               )}
             </>
           )}
+          {role === "owner" && !editingId ? (
+            <label className="field">
+              <span>Teacher</span>
+              <select
+                className="field__in"
+                value={assignTeacherId}
+                onChange={(e) => setAssignTeacherId(e.target.value)}
+              >
+                {teachers.map((person) => (
+                  <option key={person.id} value={person.id}>
+                    {person.display_name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          {editingId && originalStart && isOwner !== null ? (
+            <p className="muted" role="status">
+              {hourConsequence(originalStart, isOwner)}
+            </p>
+          ) : null}
           <div className="row">
-            <button type="button" className="hot hot--btn" style={btnStyle()} disabled={busy} aria-busy={busy} onClick={() => void createSession()}>
+            <button
+              type="button"
+              className="hot hot--btn"
+              style={btnStyle()}
+              disabled={busy}
+              aria-busy={busy}
+              onClick={() => void createSession()}
+            >
               {busy ? "Saving…" : editingId ? "Save time" : "Create session"}
             </button>
-            <button type="button" className="btn btn--sm" style={btnStyle()} onClick={() => { setComposing(false); setEditingId(null); }}>
+            <button
+              type="button"
+              className="btn btn--sm"
+              style={btnStyle()}
+              onClick={() => {
+                setComposing(false);
+                setEditingId(null);
+                setOriginalStart(null);
+              }}
+            >
               Cancel
             </button>
           </div>
         </div>
+      ) : null}
+      {hourNote ? (
+        <p className="muted" role="status">
+          {hourNote}
+        </p>
       ) : null}
       {!ready ? <Loading>Loading this week…</Loading> : null}
       <Err message={error} />
@@ -391,6 +664,7 @@ export function ScheduleScreen() {
                 {byDay[i].length ? (
                   byDay[i].map((s) => {
                     const cancelled = s.status === "cancelled";
+                    const mine = role === "owner" || (!!meId && s.teacher_user_id === meId);
                     return (
                       <div key={s.id} style={{ marginBottom: 6 }}>
                         <Link
@@ -402,9 +676,7 @@ export function ScheduleScreen() {
                             marginBottom: 0,
                           }}
                         >
-                          <div className="k">
-                            {s.starts_at ? formatTime(s.starts_at) : "—"}
-                          </div>
+                          <div className="k">{s.starts_at ? formatTime(s.starts_at) : "—"}</div>
                           <div
                             className="t"
                             style={{
@@ -416,16 +688,32 @@ export function ScheduleScreen() {
                             {s.student_name ? ` · ${s.student_name}` : ""}
                           </div>
                         </Link>
-                        {!cancelled && (
+                        {!cancelled && mine ? (
                           <div className="row" style={{ gap: 4, marginTop: 4 }}>
-                            <button type="button" className="btn btn--sm" style={btnStyle()} onClick={() => openReschedule(s)}>
+                            <button
+                              type="button"
+                              className="btn btn--sm"
+                              style={btnStyle()}
+                              onClick={() => openReschedule(s)}
+                            >
                               Reschedule
                             </button>
-                            <button type="button" className="btn btn--sm" style={btnStyle()} disabled={busy} onClick={() => void cancelSession(s)}>
+                            <button
+                              type="button"
+                              className="btn btn--sm"
+                              style={btnStyle()}
+                              disabled={busy}
+                              onClick={() => void cancelSession(s)}
+                            >
                               Cancel
                             </button>
                           </div>
-                        )}
+                        ) : null}
+                        {!cancelled && role && role !== "owner" && !mine ? (
+                          <p className="muted" style={{ margin: "4px 0 0" }}>
+                            {CLASS_LOCK}
+                          </p>
+                        ) : null}
                       </div>
                     );
                   })
@@ -440,8 +728,8 @@ export function ScheduleScreen() {
       {upcoming ? (
         <>
           <p className="muted" style={{ marginTop: 12 }}>
-            Next block is <b>{upcoming.title}</b> — open it. Cancelled sessions stay struck-through;
-            upcoming / completed / cancelled lists are on <Link href="/app/faculty/sessions">Sessions</Link>.
+            Next block is <b>{upcoming.title}</b> — open it. Cancelled sessions stay struck-through; upcoming /
+            completed / cancelled lists are on <Link href="/app/faculty/sessions">Sessions</Link>.
           </p>
           <div style={{ marginTop: 8 }}>
             <Link

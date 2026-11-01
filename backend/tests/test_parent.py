@@ -40,5 +40,26 @@ def test_parent_hub_reads_linked_child_rows(client):
     assert {i["id"] for i in invoices}.isdisjoint(other_inv)
 
 
+def test_parent_home_shows_class_note_and_fee_facts(client):
+    parent = login(client, "+9101p", WS_EXAM, "parent")
+    child = client.get("/api/v1/parent/home", headers=auth(parent)).json()["children"][0]
+    note = child["latest_class_note"]
+    assert note["text"]
+    assert any(w in note["text"].lower() for w in ("relative velocity", "homework"))
+    assert note["session_title"]
+    assert child["attendance"]["total"] >= 1
+    assert child["attendance"]["present"] >= 1
+    fees = child["fees"]
+    assert fees["visible"] is True
+    assert fees["due"]["amount_cents"] == child["fee_due"]["amount_cents"]
+    assert fees["due"]["due_on"]
+    receipt = fees["latest_receipt"]
+    assert receipt["status"] == "paid"
+    assert receipt["amount_cents"]
+    assert receipt["receipt_id"]
+    assert "hour_pack" not in child
+    assert "hours_left" not in fees
+
+
 def test_catalog_paths_only_no_sim_login(client):
     assert client.post("/api/v1/sim/login", json={}).status_code == 404

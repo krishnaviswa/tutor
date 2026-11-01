@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 
 from app.models.tables import (
+    Assignment,
     Attempt,
     Attendance,
     Cohort,
@@ -31,6 +32,7 @@ from app.models.tables import (
 )
 from app.services.auth import Principal
 from app.services.internal_v2 import fee_visible_for
+from app.services.lesson_packs import canonical_attendance, pack_summary
 from app.services.scope import linked_student_ids, student_for_principal
 
 PARENT_HUB = [
@@ -115,11 +117,16 @@ def content_out(row: ContentItem, db: Session | None = None, *, lesson: bool = F
         "subject_label": meta.get("subject_label") or "",
         "unit_label": meta.get("unit_label") or "",
         "session_id": meta.get("session_id"),
+        "filename": str(meta.get("filename") or ""),
+        "mime": str(meta.get("mime") or ""),
+        "size_bytes": int(meta.get("size_bytes") or 0),
+        "has_file": bool(meta.get("data_base64")),
     }
     if lesson:
         notes = meta.get("notes") or []
         out["notes"] = [str(n) for n in notes] if isinstance(notes, list) else []
         out["next_practice"] = _first_practice(db, row.workspace_id) if db is not None else None
+        out["data_base64"] = str(meta.get("data_base64") or "")
     return out
 
 
@@ -598,13 +605,100 @@ def _fee_due(invoices: list[Invoice]) -> dict | None:
     return {"amount_cents": out["amount_cents"], "due_on": out["due_on"], "status": out["state"]}
 
 
+def _session_ids_for_student(db: Session, workspace_id: str, student_id: str) -> set[str]:
+    """Sessions this student was marked on, or booked as the 1-on-1 student."""
+    ids = {
+        row.session_id
+        for row in db.query(Attendance)
+        .filter(Attendance.workspace_id == workspace_id, Attendance.student_id == student_id)
+        .all()
+    }
+    direct = (
+        db.query(ScheduledSession.id)
+        .filter(
+            ScheduledSession.workspace_id == workspace_id,
+            ScheduledSession.student_id == student_id,
+        )
+        .all()
+    )
+    ids.update(row[0] for row in direct)
+    return ids
+
+
+def _latest_class_note(db: Session, workspace_id: str, student_id: str) -> dict | None:
+    session_ids = _session_ids_for_student(db, workspace_id, student_id)
+    if not session_ids:
+        return None
+    recs = (
+        db.query(SessionRecord)
+        .filter(SessionRecord.workspace_id == workspace_id, SessionRecord.session_id.in_(session_ids))
+        .all()
+    )
+    recs = [r for r in recs if (r.notes or "").strip()]
+    if not recs:
+        return None
+    recs.sort(key=lambda r: _aware(r.recorded_at) or _now())
+    rec = recs[-1]
+    sess = db.get(ScheduledSession, rec.session_id)
+    return {
+        "text": rec.notes,
+        "session_id": rec.session_id,
+        "session_title": sess.title if sess else "",
+        "recorded_at": _iso(rec.recorded_at),
+    }
+
+
+def _latest_assignment(db: Session, workspace_id: str, student_id: str) -> dict | None:
+    cohort_ids = {
+        row.cohort_id
+        for row in db.query(Enrollment)
+        .filter(Enrollment.workspace_id == workspace_id, Enrollment.student_id == student_id)
+        .all()
+    }
+    rows = db.query(Assignment).filter(Assignment.workspace_id == workspace_id).all()
+    visible = [row for row in rows if not row.cohort_id or row.cohort_id in cohort_ids]
+    if not visible:
+        return None
+    visible.sort(key=lambda row: (_aware(row.created_at) or _now(), row.id))
+    latest = visible[-1]
+    submitted = (
+        db.query(Submission)
+        .filter(
+            Submission.workspace_id == workspace_id,
+            Submission.assignment_id == latest.id,
+            Submission.student_id == student_id,
+        )
+        .first()
+        is not None
+    )
+    return {"id": latest.id, "title": latest.title, "submitted": submitted}
+
+
+def _fee_facts(db: Session, invoices: list[Invoice], *, fee_visible: bool) -> dict:
+    """Open amount due and the latest paid receipt. The hour balance is lesson_pack, not this block."""
+    if not fee_visible:
+        return {"visible": False, "due": None, "latest_receipt": None}
+    paid = [i for i in invoices if i.status == "paid"]
+    paid.sort(key=lambda i: _aware(i.created_at) or _now())
+    latest = None
+    if paid:
+        out = invoice_out(paid[-1], db)
+        latest = {
+            "amount_cents": out["amount_cents"],
+            "receipt_id": out["receipt_id"],
+            "status": "paid",
+            "label": out["label"],
+        }
+    return {"visible": True, "due": _fee_due(invoices), "latest_receipt": latest}
+
+
 def child_slice(db: Session, workspace_id: str, st: Student, *, fee_visible: bool = True) -> dict:
     att_rows = (
         db.query(Attendance)
         .filter(Attendance.workspace_id == workspace_id, Attendance.student_id == st.id)
         .all()
     )
-    present = sum(1 for a in att_rows if a.status == "present")
+    present = sum(1 for a in att_rows if canonical_attendance(a.status) == "attended")
     attempts = db.query(Attempt).filter(Attempt.workspace_id == workspace_id, Attempt.student_id == st.id).all()
     practice = None
     test = None
@@ -628,6 +722,10 @@ def child_slice(db: Session, workspace_id: str, st: Student, *, fee_visible: boo
         "latest_test": test,
         "fee_due": _fee_due(invoices) if fee_visible else None,
         "fee_visible": fee_visible,
+        "fees": _fee_facts(db, invoices, fee_visible=fee_visible),
+        "latest_class_note": _latest_class_note(db, workspace_id, st.id),
+        "lesson_pack": pack_summary(db, workspace_id, st.id),
+        "latest_assignment": _latest_assignment(db, workspace_id, st.id),
         "activity_summary": (event.body if event else "No activity yet.")[:120],
     }
 

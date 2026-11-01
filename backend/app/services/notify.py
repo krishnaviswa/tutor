@@ -110,25 +110,70 @@ def dispatch_after_timeline(
     return {"sent": sent, "skipped": skipped}
 
 
-IN_APP_ROLES = ("teacher", "parent", "admin", "student")
+def _in_app_exists(
+    db: Session,
+    workspace_id: str,
+    role: str,
+    student_id: str | None,
+    event_id: str | None,
+) -> bool:
+    if not event_id:
+        return False
+    q = db.query(NotificationDelivery).filter(
+        NotificationDelivery.workspace_id == workspace_id,
+        NotificationDelivery.channel == "in_app",
+        NotificationDelivery.to_role == role,
+        NotificationDelivery.event_id == event_id,
+    )
+    if student_id is None:
+        q = q.filter(NotificationDelivery.student_id.is_(None))
+    else:
+        q = q.filter(NotificationDelivery.student_id == student_id)
+    return q.first() is not None
 
 
-def deliver_in_app(db: Session, workspace_id: str, body: str, student_ids: list[str]) -> None:
-    """In-app copies. Independent of the mock WhatsApp provider."""
-    targets = student_ids or [None]
-    for sid in targets:
-        roles = IN_APP_ROLES if sid else ("teacher", "admin")
-        for role in roles:
-            db.add(
-                NotificationDelivery(
-                    workspace_id=workspace_id,
-                    channel="in_app",
-                    to_role=role,
-                    student_id=sid,
-                    body=body,
-                    status="sent",
-                )
-            )
+def _add_in_app(
+    db: Session,
+    workspace_id: str,
+    body: str,
+    role: str,
+    student_id: str | None,
+    event_id: str | None,
+) -> None:
+    if _in_app_exists(db, workspace_id, role, student_id, event_id):
+        return
+    db.add(
+        NotificationDelivery(
+            workspace_id=workspace_id,
+            channel="in_app",
+            to_role=role,
+            student_id=student_id,
+            body=body,
+            status="sent",
+            event_id=event_id,
+        )
+    )
+
+
+def deliver_in_app(
+    db: Session,
+    workspace_id: str,
+    body: str,
+    student_ids: list[str],
+    event_id: str | None = None,
+) -> None:
+    """One staff line per event, plus a student and parent copy for each person in the class."""
+    students: list[str] = []
+    seen: set[str] = set()
+    for sid in student_ids or []:
+        if sid and sid not in seen:
+            seen.add(sid)
+            students.append(sid)
+    _add_in_app(db, workspace_id, body, "teacher", None, event_id)
+    _add_in_app(db, workspace_id, body, "admin", None, event_id)
+    for sid in students:
+        _add_in_app(db, workspace_id, body, "student", sid, event_id)
+        _add_in_app(db, workspace_id, body, "parent", sid, event_id)
 
 
 def inbox_for(db: Session, principal) -> list[dict]:
@@ -153,9 +198,18 @@ def inbox_for(db: Session, principal) -> list[dict]:
         q = q.filter(NotificationDelivery.to_role == principal.role)
     rows = q.all()
     rows.sort(key=lambda r: r.created_at or r.id, reverse=True)
+    seen: set[str] = set()
+    unique = []
+    for row in rows:
+        key = row.event_id or row.id
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(row)
     return [
         {
             "id": r.id,
+            "event_id": r.event_id,
             "channel": r.channel,
             "to_role": r.to_role,
             "student_id": r.student_id,
@@ -163,5 +217,5 @@ def inbox_for(db: Session, principal) -> list[dict]:
             "status": r.status,
             "created_at": r.created_at.isoformat() if r.created_at else None,
         }
-        for r in rows
+        for r in unique
     ]

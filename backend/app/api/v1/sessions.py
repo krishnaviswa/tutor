@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
@@ -25,6 +26,7 @@ class SessionIn(BaseModel):
     student_id: str | None = None
     ends_at: datetime | None = None
     book: bool = False
+    teacher_user_id: str | None = None
 
 
 class SessionPatch(BaseModel):
@@ -33,12 +35,18 @@ class SessionPatch(BaseModel):
     ends_at: datetime | None = None
     status: str | None = None
     cancel_reason: str | None = None
+    subject_label: str | None = None
+    library_item_id: str | None = None
+    student_ids: list[str] | None = None
+    teacher_user_id: str | None = None
+    waive: bool = False
 
 
 class RecordPatch(BaseModel):
     notes: str | None = None
     attendance: list[dict] | None = None
     teacher_status: str | None = None
+    waive: bool = False
 
 
 class EngagementIn(BaseModel):
@@ -59,6 +67,7 @@ class StudentChangeIn(BaseModel):
     action: str
     reason: str = ""
     starts_at: datetime | None = None
+    waive: bool = False
 
 
 class PlaceLibraryIn(BaseModel):
@@ -114,7 +123,7 @@ def list_sessions(
 def create_session(
     body: SessionIn,
     db: Session = Depends(get_db),
-    principal: Principal = Depends(require_roles("owner", "teacher", "student")),
+    principal: Principal = Depends(require_roles("owner", "teacher", "assistant", "student")),
 ):
     if bool(body.cohort_id) == bool(body.student_id):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "exactly one of cohort_id or student_id")
@@ -134,7 +143,6 @@ def create_session(
         )
         if not st:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, "student")
-    teacher_id = principal.user_id
     ws = db.get(Workspace, principal.workspace_id)
     if principal.role == "student":
         if not body.book:
@@ -145,6 +153,8 @@ def create_session(
             .first()
         )
         teacher_id = first.teacher_user_id if first else principal.user_id
+    else:
+        teacher_id = sessions_svc.assign_teacher(db, principal, body.teacher_user_id)
     # Availability gates bookings made against a person: student self-booking, or a 1-on-1.
     # A teacher scheduling their own cohort class is the authority and is not gated.
     if (principal.role == "student" or body.student_id) and not staff_available(
@@ -185,16 +195,33 @@ def patch_session(
     body: SessionPatch,
     db: Session = Depends(get_db),
     ports: MockPorts = Depends(ports_dep),
-    principal: Principal = Depends(require_roles("owner", "teacher")),
+    principal: Principal = Depends(require_roles("owner", "teacher", "assistant")),
 ):
     s = _get(db, principal.workspace_id, session_id)
+    sessions_svc.assert_can_change_session(db, principal, s)
+    hour = None
+    if body.teacher_user_id is not None:
+        s.teacher_user_id = sessions_svc.assign_teacher(db, principal, body.teacher_user_id)
     if body.title is not None:
         s.title = body.title
+    if body.subject_label is not None:
+        label = body.subject_label.strip()
+        if len(label) > 200:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "topic is too long")
+        s.subject_label = label
+    if "library_item_id" in body.model_fields_set:
+        sessions_svc.set_library_choice(db, s, body.library_item_id)
+    if body.student_ids is not None:
+        sessions_svc.set_class_students(db, principal, s, body.student_ids)
     # Time edits are allowed in any state (glitch fix). Moving to the future re-reads as "Upcoming".
     if body.starts_at is not None:
-        if teacher_conflict(db, principal.workspace_id, s.teacher_user_id, body.starts_at, skip_id=s.id):
-            raise HTTPException(status.HTTP_409_CONFLICT, "teacher conflict")
-        s.starts_at = body.starts_at
+        hour = sessions_svc.move_start(
+            db,
+            s,
+            body.starts_at,
+            actor_role=principal.role,
+            waive=body.waive,
+        )
     if body.ends_at is not None:
         s.ends_at = body.ends_at
     if body.status is not None:
@@ -210,7 +237,10 @@ def patch_session(
             body.cancel_reason or "",
             bool(ws.student_whatsapp) if ws else False,
         )
-    return _session_out(db, s)
+    out = _session_out(db, s)
+    if hour is not None:
+        out["hour"] = hour
+    return out
 
 
 @router.get("/sessions/{session_id}/board")
@@ -258,7 +288,7 @@ def student_change(
 ):
     s = _get(db, principal.workspace_id, session_id)
     ws = db.get(Workspace, principal.workspace_id)
-    sessions_svc.student_change(
+    s, hour = sessions_svc.student_change(
         db,
         ports,
         principal,
@@ -267,8 +297,12 @@ def student_change(
         reason=body.reason,
         starts_at=body.starts_at,
         student_whatsapp_on=bool(ws.student_whatsapp) if ws else False,
+        waive=body.waive,
     )
-    return _session_out(db, s)
+    out = _session_out(db, s)
+    if hour is not None:
+        out["hour"] = hour
+    return out
 
 
 @router.post("/sessions/{session_id}/board/library")
@@ -287,9 +321,10 @@ def place_library(
 def start_session(
     session_id: str,
     db: Session = Depends(get_db),
-    principal: Principal = Depends(require_roles("owner", "teacher")),
+    principal: Principal = Depends(require_roles("owner", "teacher", "assistant")),
 ):
     s = _get(db, principal.workspace_id, session_id)
+    sessions_svc.assert_can_change_session(db, principal, s)
     return sessions_svc.start_session(db, principal.workspace_id, s, principal.user_id)
 
 
@@ -329,6 +364,7 @@ def patch_record(
     principal: Principal = Depends(require_roles("owner", "teacher")),
 ):
     s = _get(db, principal.workspace_id, session_id)
+    sessions_svc.assert_can_change_session(db, principal, s)
     ws = db.get(Workspace, principal.workspace_id)
     return record_svc.patch_record(
         db,
@@ -340,18 +376,47 @@ def patch_record(
         body.attendance,
         bool(ws.student_whatsapp) if ws else False,
         body.teacher_status,
+        principal.role,
+        body.waive,
     )
 
 
+def _chosen_video_url(raw: bytes) -> str:
+    """Empty body keeps the mock classroom link. A preset URL is stored as given."""
+    text = raw.decode("utf-8", errors="replace").strip()
+    if not text:
+        return ""
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "video url") from exc
+    if not isinstance(payload, dict):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "video url")
+    value = payload.get("video_url")
+    if value is None or value == "":
+        return ""
+    if not isinstance(value, str):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "video url")
+    chosen = value.strip()
+    if not chosen:
+        return ""
+    if len(chosen) > 500 or not chosen.startswith(("https://", "http://", "mock://")):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "video url")
+    return chosen
+
+
 @router.post("/sessions/{session_id}/video-link")
-def video_link(
+async def video_link(
     session_id: str,
+    request: Request,
     db: Session = Depends(get_db),
     ports: MockPorts = Depends(ports_dep),
     principal: Principal = Depends(require_roles("owner", "teacher")),
 ):
     s = _get(db, principal.workspace_id, session_id)
-    s.video_url = ports.create_video_link(s.id)
+    sessions_svc.assert_can_change_session(db, principal, s)
+    chosen = _chosen_video_url(await request.body())
+    s.video_url = chosen or ports.create_video_link(s.id)
     if not s.join_token:
         s.join_token = new_id()
     if not s.recording_url:

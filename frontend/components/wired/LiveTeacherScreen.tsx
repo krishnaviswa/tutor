@@ -16,89 +16,23 @@ type Live = {
   engagement: { kind: string; payload?: Record<string, unknown> }[];
 };
 
-type SessionRow = { id: string; title: string };
+type SessionRow = { id: string; title: string; teacher_user_id?: string | null };
 
-function SessionMoves({ sessionId }: { sessionId: string }) {
-  const [items, setItems] = useState<{ id: string; title: string }[]>([]);
-  const [staff, setStaff] = useState<{ id: string; display_name: string; role: string }[]>([]);
-  const [contentId, setContentId] = useState("");
-  const [teacherId, setTeacherId] = useState("");
-  const [msg, setMsg] = useState("");
+const CLASS_LOCK = "Only the assigned teacher or the owner can change this class.";
 
-  useEffect(() => {
-    api("/api/v1/content")
-      .then((rows) => setItems(rows as { id: string; title: string }[]))
-      .catch(() => setItems([]));
-    api("/api/v1/staff")
-      .then((rows) => setStaff((rows as { id: string; display_name: string; role: string }[]).filter((r) => r.role === "teacher")))
-      .catch(() => setStaff([]));
-  }, [sessionId]);
-
-  return (
-    <div className="card" style={{ marginBottom: 12 }}>
-      <div className="k">This session</div>
-      <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: "wrap" }}>
-        <select value={contentId} onChange={(e) => setContentId(e.target.value)}>
-          <option value="">Library file</option>
-          {items.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.title}
-            </option>
-          ))}
-        </select>
-        <button
-          type="button"
-          className="btn btn--sm"
-          disabled={!contentId}
-          onClick={() =>
-            void api(`/api/v1/sessions/${sessionId}/board/library`, {
-              method: "POST",
-              body: JSON.stringify({ content_id: contentId }),
-            })
-              .then(() => setMsg("Library file is on the board. Save still accepts a file from this computer."))
-              .catch((err) => setMsg(err instanceof Error ? err.message : String(err)))
-          }
-        >
-          Place on board
-        </button>
-        <select value={teacherId} onChange={(e) => setTeacherId(e.target.value)}>
-          <option value="">Colleague</option>
-          {staff.map((person) => (
-            <option key={person.id} value={person.id}>
-              {person.display_name}
-            </option>
-          ))}
-        </select>
-        <button
-          type="button"
-          className="btn btn--sm"
-          disabled={!teacherId}
-          onClick={() =>
-            void api(`/api/v1/sessions/${sessionId}/handoff`, {
-              method: "POST",
-              body: JSON.stringify({ teacher_user_id: teacherId }),
-            })
-              .then(() => setMsg("Handed to that teacher, with the subject and library file."))
-              .catch((err) => setMsg(err instanceof Error ? err.message : String(err)))
-          }
-        >
-          Hand off
-        </button>
-        <button
-          type="button"
-          className="btn btn--sm"
-          onClick={() =>
-            void api(`/api/v1/sessions/${sessionId}/handoff/revert`, { method: "POST" })
-              .then(() => setMsg("Handoff reversed. Other edits stayed."))
-              .catch((err) => setMsg(err instanceof Error ? err.message : String(err)))
-          }
-        >
-          Revert handoff
-        </button>
-      </div>
-      {msg ? <p className="muted">{msg}</p> : null}
-    </div>
-  );
+function explainLiveError(err: unknown): string {
+  const raw = (err instanceof Error ? err.message : String(err)).replace(/\s+/g, " ").trim();
+  const start = raw.indexOf("{");
+  if (start >= 0) {
+    try {
+      const body = JSON.parse(raw.slice(start)) as { detail?: unknown };
+      if (typeof body.detail === "string" && body.detail.trim()) return body.detail.trim();
+    } catch {
+      /* use the sentence below */
+    }
+  }
+  if (raw.includes("403") || raw.includes(CLASS_LOCK)) return CLASS_LOCK;
+  return raw.replace(/^\d{3}\s+/, "") || "Could not update this class.";
 }
 
 export function LiveTeacherScreen() {
@@ -109,6 +43,16 @@ export function LiveTeacherScreen() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [started, setStarted] = useState("");
+  const [me, setMe] = useState<{ id: string; role: string } | null>(null);
+
+  useEffect(() => {
+    api("/api/v1/auth/me")
+      .then((row) => {
+        const person = row as { id?: string; role?: string };
+        setMe({ id: person.id || "", role: person.role || "" });
+      })
+      .catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     api("/api/v1/sessions")
@@ -117,14 +61,14 @@ export function LiveTeacherScreen() {
         setSessions(list);
         if (!sessionId && list[0]) setSessionId(list[0].id);
       })
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
+      .catch((e) => setError(explainLiveError(e)));
   }, [sessionId]);
 
   function loadLive(id: string) {
     if (!id) return;
     api(`/api/v1/sessions/${id}/live`)
       .then((row) => setLive(row as Live))
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
+      .catch((e) => setError(explainLiveError(e)));
   }
 
   useEffect(() => {
@@ -142,52 +86,60 @@ export function LiveTeacherScreen() {
       });
       loadLive(sessionId);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(explainLiveError(err));
     } finally {
       setBusy(false);
     }
   }
 
+  const selected = sessions.find((row) => row.id === sessionId);
+  const readOnly = Boolean(
+    me &&
+      (me.role === "teacher" || me.role === "assistant") &&
+      selected?.teacher_user_id &&
+      selected.teacher_user_id !== me.id,
+  );
+
   return (
     <div className="board-room">
       <header className="board-room__bar">
-        <div>
-          <h2>Whiteboard</h2>
-          <p className="muted">{live?.session.title || "Shared class canvas"}</p>
+        <h2 className="board-room__title">{live?.session.title || "Class whiteboard"}</h2>
+        <div className="board-room__actions">
+          <label className="field board-room__pick">
+            <span>Session</span>
+            <select className="field__in" value={sessionId} onChange={(e) => setSessionId(e.target.value)}>
+              {sessions.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.title}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            className="btn btn--sm"
+            type="button"
+            disabled={busy || !sessionId || readOnly}
+            onClick={() => {
+              if (readOnly) {
+                setError(CLASS_LOCK);
+                return;
+              }
+              setBusy(true);
+              setError("");
+              api(`/api/v1/sessions/${sessionId}/start`, { method: "POST" })
+                .then(() => setStarted("Class started. People in this class can see the notice."))
+                .catch((err) => setError(explainLiveError(err)))
+                .finally(() => setBusy(false));
+            }}
+          >
+            {busy ? "Starting" : "Start class"}
+          </button>
         </div>
-        <label className="field board-room__pick">
-          <span>Session</span>
-          <select className="field__in" value={sessionId} onChange={(e) => setSessionId(e.target.value)}>
-            {sessions.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.title}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button
-          className="btn btn--sm"
-          type="button"
-          disabled={busy || !sessionId}
-          onClick={() => {
-            setBusy(true);
-            setError("");
-            api(`/api/v1/sessions/${sessionId}/start`, { method: "POST" })
-              .then(() => setStarted("Class started. People in this class can see the notice."))
-              .catch((err) => setError(err instanceof Error ? err.message : String(err)))
-              .finally(() => setBusy(false));
-          }}
-        >
-          {busy ? "Starting" : "Start class"}
-        </button>
       </header>
       {started ? <p className="muted">{started}</p> : null}
       <Err message={error} />
       {sessionId ? (
-        <>
-          <SessionMoves sessionId={sessionId} />
-          <SessionBoard sessionId={sessionId} />
-        </>
+        <SessionBoard sessionId={sessionId} library={!readOnly} readOnly={readOnly} />
       ) : (
         <p className="muted">No session on the calendar yet. Add one from Schedule, then the canvas opens here.</p>
       )}

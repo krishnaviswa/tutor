@@ -5,9 +5,16 @@ from sqlalchemy.orm import Session
 from app.api.v1.deps import current_principal
 from app.config import get_settings
 from app.db import get_db
-from app.models.tables import OtpChallenge, Workspace
+from app.models.tables import Identity, OtpChallenge, User, Workspace
 from app.ports.mocks import MockPorts
-from app.services.auth import Principal, identity_user, issue_session, membership_role
+from app.services.auth import (
+    Principal,
+    identity_user,
+    issue_session,
+    membership_role,
+    password_matches,
+    role_in_workspace,
+)
 from app.services.internal_v2 import auth_methods, staff_allowed_modules
 from app.api.v1.deps import ports_dep
 
@@ -25,6 +32,12 @@ class OtpVerifyIn(BaseModel):
     workspace_id: str
     role: str
     challenge_id: str | None = None
+
+
+class PasswordIn(BaseModel):
+    username: str
+    password: str
+    workspace_id: str
 
 
 class MagicIn(BaseModel):
@@ -59,6 +72,25 @@ def otp_verify(body: OtpVerifyIn, db: Session = Depends(get_db)):
         ch.consumed = 1
     user = identity_user(db, "phone", body.phone)
     role = membership_role(db, user.id, body.workspace_id, body.role)
+    token = issue_session(db, user, body.workspace_id, role)
+    return {"token": token, "role": role, "workspace_id": body.workspace_id}
+
+
+@router.post("/auth/password")
+def password_login(body: PasswordIn, db: Session = Depends(get_db)):
+    ident = (
+        db.query(Identity)
+        .filter(
+            Identity.kind == "username",
+            Identity.value == body.username.strip(),
+            Identity.workspace_id == body.workspace_id,
+        )
+        .first()
+    )
+    user = db.get(User, ident.user_id) if ident else None
+    if not user or not password_matches(user.password_hash or "", body.password):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "unknown username or password")
+    role = role_in_workspace(db, user.id, body.workspace_id)
     token = issue_session(db, user, body.workspace_id, role)
     return {"token": token, "role": role, "workspace_id": body.workspace_id}
 

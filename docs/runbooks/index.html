@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TutorOS runbooks</title>
+<style>
+
+:root { color-scheme: light; }
+body { font: 17px/1.55 Georgia, "Iowan Old Style", Palatino, serif; max-width: 40rem; margin: 2.5rem auto; padding: 0 1.25rem 4rem; color: #1c1917; background: #faf7f2; }
+h1 { font-size: 1.85rem; line-height: 1.2; margin: 0 0 0.4rem; }
+h2 { font-size: 1.25rem; margin: 2rem 0 0.6rem; }
+h3 { font-size: 1.05rem; margin: 1.4rem 0 0.4rem; }
+a { color: #1d4e89; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 0.88em; }
+pre { background: #fff; border: 1px solid #e7e5e4; border-radius: 8px; padding: 0.8rem 1rem; overflow: auto; }
+pre code { font-size: 0.82rem; }
+.crumbs { font-size: 0.92rem; margin-bottom: 1.4rem; }
+.soon { background: #fff7ed; border-left: 4px solid #c2410c; padding: 0.2rem 0 0.2rem 1rem; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.95rem; }
+th, td { border: 1px solid #e7e5e4; padding: 0.35rem 0.5rem; text-align: left; vertical-align: top; }
+th { background: #fff; }
+ul, ol { padding-left: 1.25rem; }
+li { margin: 0.35rem 0; }
+
+</style>
+</head>
+<body>
+<h1>TutorOS runbooks</h1>
+<p>Usage guides for the product as it runs on this machine. The humanized exam-prep demo personas (<strong>Apex Science Academy</strong>) and the one-time code <code>000000</code> are in each guide. These pages stand on their own. They are not the product book.</p>
+<ul>
+<li><a href="faculty.html">Faculty</a> — teachers (<code>Sudhakshina</code>, Senior Faculty / Faculty Admin <code>+9101t</code>) and assistants (<code>Rohan Deshmukh</code>, <code>+9101a</code>), and the faculty-admin grant when that person holds it.</li>
+<li><a href="admin.html">Workspace admin</a> — the owner of the workspace (<code>Vikram Nair</code>, <code>+9101o</code>).</li>
+<li><a href="student.html">Student</a> — the learner (<code>Aarav Sharma</code>, <code>+9101s</code>).</li>
+<li><a href="parent.html">Parent</a> — a guardian (<code>Rajesh Sharma</code>, <code>+9101p</code>) linked to their child (<code>Aarav Sharma</code>).</li>
+<li><a href="tech-admin.html">Tech admin</a> — the person who runs Postgres, the API, and the site.</li>
+</ul>
+<p>Each guide has the same steps in Markdown: <a href="faculty.md">faculty.md</a>, <a href="admin.md">admin.md</a>, <a href="student.md">student.md</a>, <a href="parent.md">parent.md</a>, <a href="tech-admin.md">tech-admin.md</a>.</p>
+<h2>Highlights in this release</h2>
+<ul>
+<li><strong>1-Click Workspace &amp; Demo Persona Picker:</strong> Every sign-in gate includes <code>Demo Persona Quick-Select</code> and <code>Workspace</code> dropdowns, and the router screen (<code>/app/student/router</code>) includes a direct <strong>Workspace Owner / Admin</strong> door alongside Student, Teacher, and Parent.</li>
+<li><strong>Horizontal Section Sub-Tabs:</strong> Multi-screen workflows display horizontal section sub-tabs across <code>Schedule</code>, <code>Students</code>, <code>Practice &amp; Assessments</code> (steps 1–6), <code>Doubts &amp; Comms</code>, <code>Records &amp; Reports</code>, <code>Owner Console</code>, <code>Student Classes/Practice/You</code>, and <code>Parent Home/Reports</code>.</li>
+<li><strong>Guided Forms &amp; Consequence Previews:</strong> Structured <code>&lt;select&gt;</code> dropdowns, collapsible <code>+ New</code> / <code>+ Add</code> creation forms, Rupee (<code>₹</code>) billing presets and inputs, and the <strong>3-step Attendance &amp; Class Summary flow</strong> (<code>/app/faculty/record</code>) with live lesson-pack consequence previews before saving.</li>
+</ul>
+<p>What this pass shipped, and what it left out, is in <a href="build-plan.md">build-plan.md</a>. The guides cover the 8-hour demo pack (480 minutes on <code>balance_minutes</code> and <code>purchased_minutes</code>, only after a seed that includes <code>seed_internal_v2</code>; balance on parent home and on payments), the 24-hour burn rule (60 minutes when a session has no end), Schedule saying Hour stays or Hour is used before save, four-way student attendance (a stored present still reads as Attended, and absent as No-show), payouts of delivered sessions (<code>delivered</code> and <code>hours</code>), the owner enquiry (name, phone, hours), and a parent booking an open hour. Sign-in phones stay owner <code>+9101o</code> (<code>Vikram Nair</code>), teacher <code>+9101t</code> (<code>Sudhakshina</code>), assistant <code>+9101a</code> (<code>Rohan Deshmukh</code>), student <code>+9101s</code> (<code>Aarav Sharma</code>), parent <code>+9101p</code> (<code>Rajesh Sharma</code>), code <code>000000</code>. Faculty admin is the card on Sessions, not a separate login. Multi-branch and a recording spot-check are not shipped.</p>
+</body>
+</html>

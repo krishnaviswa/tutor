@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ClipboardEvent, type FormEvent, type KeyboardEvent } from "react";
 import { api } from "@/lib/api";
-import { MOCK_TENANTS, OTP_CODE } from "@/lib/mocks";
+import { DEMO_PERSONAS, MOCK_TENANT_LIST, MOCK_TENANTS, OTP_CODE, type DemoPersonaRole } from "@/lib/mocks";
 import { catalogRoute } from "@/lib/screens";
 import { getToken, setToken } from "@/lib/session";
 import { Err } from "./bits";
@@ -15,6 +15,8 @@ export function StudentLoginScreen() {
   const [phone, setPhone] = useState(exam.phones.student);
   const [email, setEmail] = useState(exam.emails.student);
   const [ws, setWs] = useState(exam.workspaceId);
+  const [selectedRole, setSelectedRole] = useState<DemoPersonaRole>("student");
+  const [customWs, setCustomWs] = useState(false);
   const [digits, setDigits] = useState<string[]>(() => OTP_CODE.split(""));
   const [mode, setMode] = useState<"otp" | "magic">("otp");
   const [busy, setBusy] = useState(false);
@@ -29,6 +31,52 @@ export function StudentLoginScreen() {
       })
       .catch(() => undefined);
   }, [router]);
+
+  const activeTenant = MOCK_TENANT_LIST.find((t) => t.workspaceId === ws);
+  const isCustomWorkspace = customWs || !activeTenant;
+  const activePersona = DEMO_PERSONAS.find((p) => {
+    const tenantForMatch = activeTenant ?? exam;
+    return tenantForMatch.phones[p.phoneKey] === phone && p.role === selectedRole;
+  });
+
+  function handlePersonaSelect(personaId: string) {
+    if (personaId === "__custom__") return;
+    const persona = DEMO_PERSONAS.find((p) => p.id === personaId);
+    if (!persona) return;
+    const targetTenant = activeTenant ?? exam;
+    setSelectedRole(persona.role);
+    setPhone(targetTenant.phones[persona.phoneKey]);
+    setEmail(targetTenant.emails[persona.phoneKey]);
+    if (!activeTenant) {
+      setCustomWs(false);
+      setWs(exam.workspaceId);
+    }
+    setDigits(OTP_CODE.split(""));
+  }
+
+  function handleWorkspaceSelect(value: string) {
+    if (value === "__custom__") {
+      setCustomWs(true);
+      return;
+    }
+    setCustomWs(false);
+    setWs(value);
+    const nextTenant = MOCK_TENANT_LIST.find((t) => t.workspaceId === value);
+    if (nextTenant) {
+      const matchedPersona = DEMO_PERSONAS.find((p) => p.role === selectedRole);
+      if (matchedPersona) {
+        setPhone(nextTenant.phones[matchedPersona.phoneKey]);
+        setEmail(nextTenant.emails[matchedPersona.phoneKey]);
+      }
+    }
+  }
+
+  function destinationForRole(role: DemoPersonaRole): string {
+    if (role === "owner") return catalogRoute("owner");
+    if (role === "teacher" || role === "assistant") return catalogRoute("teacher-dash");
+    if (role === "parent") return catalogRoute("parent-home");
+    return catalogRoute("student-dash");
+  }
 
   function setDigitAt(index: number, raw: string) {
     const ch = raw.replace(/\D/g, "").slice(-1);
@@ -61,10 +109,10 @@ export function StudentLoginScreen() {
       if (mode === "magic") {
         const ver = (await api("/api/v1/auth/magic-link", {
           method: "POST",
-          body: JSON.stringify({ email, workspace_id: ws, role: "student" }),
+          body: JSON.stringify({ email, workspace_id: ws, role: selectedRole }),
         })) as { token: string };
         setToken(ver.token);
-        router.replace(catalogRoute("student-dash"));
+        router.replace(destinationForRole(selectedRole));
         return;
       }
       const code = digits.join("");
@@ -83,12 +131,12 @@ export function StudentLoginScreen() {
           phone,
           code,
           workspace_id: ws,
-          role: "student",
+          role: selectedRole,
           challenge_id: start.challenge_id,
         }),
       })) as { token: string };
       setToken(ver.token);
-      router.replace(catalogRoute("student-dash"));
+      router.replace(destinationForRole(selectedRole));
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -119,47 +167,80 @@ export function StudentLoginScreen() {
           Magic link
         </button>
       </div>
-      {mode === "otp" ? (
-        <div className="row" style={{ gap: 8, flexWrap: "nowrap", marginBottom: 14 }}>
-          {digits.map((d, i) => (
-            <input
-              key={i}
-              ref={(el) => {
-                boxes.current[i] = el;
-              }}
-              className={`otp-d${d ? " is-filled" : ""}`}
-              inputMode="numeric"
-              autoComplete={i === 0 ? "one-time-code" : "off"}
-              maxLength={1}
-              aria-label={`Digit ${i + 1}`}
-              value={d}
-              onChange={(ev) => setDigitAt(i, ev.target.value)}
-              onKeyDown={(ev) => onKeyDown(i, ev)}
-              onPaste={i === 0 ? onPaste : undefined}
-            />
+      <label className="field">
+        <span>Demo Persona Quick-Select</span>
+        <select
+          className="field__in"
+          value={activePersona?.id ?? "__custom__"}
+          onChange={(ev) => handlePersonaSelect(ev.target.value)}
+        >
+          {DEMO_PERSONAS.map((p) => {
+            const tenantPhone = (activeTenant ?? exam).phones[p.phoneKey];
+            return (
+              <option key={p.id} value={p.id}>
+                {`${p.roleTitle} — ${p.name} (${tenantPhone})`}
+              </option>
+            );
+          })}
+          <option value="__custom__">Custom phone / email...</option>
+        </select>
+      </label>
+      <label className="field">
+        <span>Workspace</span>
+        <select
+          className="field__in"
+          value={isCustomWorkspace ? "__custom__" : ws}
+          onChange={(ev) => handleWorkspaceSelect(ev.target.value)}
+        >
+          {MOCK_TENANT_LIST.map((t) => (
+            <option key={t.key} value={t.workspaceId}>
+              {t.label}
+            </option>
           ))}
-        </div>
+          <option value="__custom__">Other workspace ID...</option>
+        </select>
+        {isCustomWorkspace ? (
+          <input
+            className="field__in"
+            value={ws}
+            placeholder="Workspace UUID"
+            onChange={(ev) => setWs(ev.target.value)}
+            style={{ fontFamily: "var(--mono)", fontSize: ".78rem", marginTop: 8 }}
+          />
+        ) : null}
+      </label>
+      {mode === "otp" ? (
+        <>
+          <label className="field">
+            <span>Phone</span>
+            <input className="field__in" value={phone} autoComplete="tel" onChange={(ev) => setPhone(ev.target.value)} />
+          </label>
+          <div className="row" style={{ gap: 8, flexWrap: "nowrap", marginBottom: 14 }}>
+            {digits.map((d, i) => (
+              <input
+                key={i}
+                ref={(el) => {
+                  boxes.current[i] = el;
+                }}
+                className={`otp-d${d ? " is-filled" : ""}`}
+                inputMode="numeric"
+                autoComplete={i === 0 ? "one-time-code" : "off"}
+                maxLength={1}
+                aria-label={`Digit ${i + 1}`}
+                value={d}
+                onChange={(ev) => setDigitAt(i, ev.target.value)}
+                onKeyDown={(ev) => onKeyDown(i, ev)}
+                onPaste={i === 0 ? onPaste : undefined}
+              />
+            ))}
+          </div>
+        </>
       ) : (
         <label className="field">
           <span>Email</span>
           <input className="field__in" value={email} autoComplete="email" onChange={(ev) => setEmail(ev.target.value)} />
         </label>
       )}
-      {mode === "otp" ? (
-      <label className="field">
-        <span>Phone</span>
-        <input className="field__in" value={phone} autoComplete="tel" onChange={(ev) => setPhone(ev.target.value)} />
-      </label>
-      ) : null}
-      <label className="field">
-        <span>Workspace</span>
-        <input
-          className="field__in"
-          value={ws}
-          onChange={(ev) => setWs(ev.target.value)}
-          style={{ fontFamily: "var(--mono)", fontSize: ".78rem" }}
-        />
-      </label>
       <Err message={error} />
       <button className="hot hot--btn" type="submit" disabled={busy} aria-busy={busy}>
         {busy ? "Verifying" : mode === "magic" ? "Send magic link" : "Verify"}

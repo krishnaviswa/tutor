@@ -4,14 +4,14 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.deps import current_principal, ports_dep, require_roles
 from app.db import get_db
-from app.models.tables import Announcement, Cohort, Doubt, Message, Student, Workspace, new_id
+from app.models.tables import Announcement, Cohort, Doubt, Student, Workspace
 from app.ports.mocks import MockPorts
 from app.services.auth import Principal
 from app.services import doubts as doubts_svc
+from app.services import messages as messages_svc
 from app.services import notify, timeline
-from app.services.grants import holds_contact, holds_faculty_admin, is_owner
 from app.services.internal_v2 import meta_of, put_meta, sla_hours
-from app.services.scope import can_read_student, linked_student_ids, student_for_principal
+from app.services.scope import student_for_principal
 
 router = APIRouter()
 
@@ -160,28 +160,7 @@ def doubt_notice(
 
 @router.get("/threads")
 def list_threads(db: Session = Depends(get_db), principal: Principal = Depends(current_principal)):
-    q = db.query(Message).filter(
-        Message.workspace_id == principal.workspace_id,
-        Message.cohort_id.is_(None),
-    )
-    if principal.role == "parent":
-        allowed = linked_student_ids(db, principal)
-        q = q.filter(Message.student_id.in_(allowed or [""]))
-    elif principal.role == "student":
-        st = student_for_principal(db, principal)
-        q = q.filter(Message.student_id == st.id)
-    rows = q.order_by(Message.created_at.desc()).all()
-    threads: dict[str, dict] = {}
-    for m in rows:
-        if m.thread_id not in threads:
-            threads[m.thread_id] = {
-                "id": m.thread_id,
-                "student_id": m.student_id,
-                "last_body": m.body,
-                "unread": not bool(meta_of(m).get("read")),
-                "attachments": [meta_of(m).get("attachment")] if meta_of(m).get("attachment") else [],
-            }
-    return list(threads.values())
+    return messages_svc.list_threads(db, principal)
 
 
 @router.post("/threads/{thread_id}/messages")
@@ -191,29 +170,15 @@ def post_message(
     db: Session = Depends(get_db),
     principal: Principal = Depends(current_principal),
 ):
-    student_id = body.student_id
-    if principal.role == "student":
-        student_id = student_for_principal(db, principal).id
-    if principal.role == "teacher" and student_id:
-        if not holds_contact(db, principal.workspace_id, principal.user_id) and not holds_faculty_admin(
-            db, principal.workspace_id, principal.user_id
-        ):
-            raise HTTPException(status.HTTP_403_FORBIDDEN, "contact not granted")
-    if principal.role == "owner" or is_owner(db, principal.workspace_id, principal.user_id):
-        pass
-    if student_id and not can_read_student(db, principal, student_id):
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "not a participant")
-    row = Message(
-        workspace_id=principal.workspace_id,
-        thread_id=thread_id or new_id(),
-        student_id=student_id,
-        sender_user_id=principal.user_id,
-        body=body.body,
+    return messages_svc.post_message(
+        db,
+        principal,
+        thread_id,
+        body.body,
+        body.student_id,
+        body.attachment,
+        body.template_id,
     )
-    db.add(row)
-    db.flush()
-    put_meta(row, attachment=body.attachment, template_id=body.template_id, read=False)
-    return {"id": row.id, "thread_id": row.thread_id, "body": row.body, "attachment": body.attachment}
 
 
 @router.get("/announcements")

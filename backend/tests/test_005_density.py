@@ -34,7 +34,7 @@ def test_teacher_dashboard_chase_and_bars_isolated(client):
     assert body["practice_by_set"]
     assert body["doubt_backlog"] >= 1
     names = {r["display_name"] for r in body["at_risk"]}
-    assert any("student 2" in n for n in names)
+    assert any("Diya Patel" in n or "student 2" in n for n in names)
 
     lang = login(client, "+9102t", WS_LANG, "teacher")
     other = client.get("/api/v1/teacher/dashboard", headers=auth(lang)).json()

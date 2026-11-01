@@ -123,6 +123,12 @@ def test_start_and_cancel_in_app_even_when_whatsapp_fails(client):
     )
     assert created.status_code == 200, created.text
     sid = created.json()["id"]
+    picked = client.patch(
+        f"/api/v1/sessions/{sid}",
+        headers=teacher,
+        json={"student_ids": [STUDENT]},
+    )
+    assert picked.status_code == 200, picked.text
 
     def boom(*_a, **_k):
         raise RuntimeError("whatsapp down")
@@ -437,6 +443,20 @@ def test_hourly_invoice_reviews_and_freezes(client):
         headers=teacher,
         json={"title": "Later", "cohort_id": cohort["id"], "starts_at": _iso(later)},
     ).json()["id"]
+
+    # Demo teacher +9101t also holds the faculty-admin grant. That grant is not a billing role.
+    assert client.get("/api/v1/faculty-admin/me", headers=teacher).json()["faculty_admin"] is True
+    period = {
+        "cohort_id": cohort["id"],
+        "period_start": "2020-01-01T00:00:00+00:00",
+        "period_end": _iso(later + timedelta(days=1)),
+    }
+    teacher_try = client.post("/api/v1/invoices/hourly", headers=teacher, json=period)
+    assert teacher_try.status_code == 403
+    assert teacher_try.json()["detail"] == "forbidden"
+    student_try = client.post("/api/v1/invoices/hourly", headers=student, json=period)
+    assert student_try.status_code == 403
+    assert student_try.json()["detail"] == "forbidden"
 
     made = client.post(
         "/api/v1/invoices/hourly",

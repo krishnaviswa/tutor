@@ -19,6 +19,7 @@ class ProfileIn(BaseModel):
     board_label: str | None = None
     grade_label: str | None = None
     study_info: str | None = None
+    photo: str | None = None
     challenge_id: str | None = None
     code: str | None = None
     email_challenge_id: str | None = None
@@ -35,7 +36,7 @@ class TeacherProfileIn(BaseModel):
 @router.get("/profile")
 def get_profile(
     db: Session = Depends(get_db),
-    principal: Principal = Depends(require_roles("owner", "teacher", "assistant", "student")),
+    principal: Principal = Depends(require_roles("owner", "teacher", "assistant", "student", "parent")),
 ):
     return profiles_svc.read_own(db, principal)
 

@@ -58,6 +58,8 @@ def _column_type(dialect: str, logical: str) -> str:
         return "INTEGER"
     if logical == "label":
         return "VARCHAR(200)"
+    if logical == "text":
+        return "TEXT"
     return "VARCHAR(36)" if logical == "id" else "VARCHAR(32)"
 
 
@@ -70,12 +72,13 @@ _ADDED_COLUMNS: dict[str, list[tuple[str, str, str]]] = {
         ("subject_label", "label", "DEFAULT ''"),
         ("library_item_id", "id", ""),
         ("prior_teacher_user_id", "id", ""),
+        ("class_student_ids", "json", ""),
     ],
     "session_records": [
         ("teacher_status", "str", ""),
     ],
     "messages": [("cohort_id", "id", "")],
-    "notification_deliveries": [("student_id", "id", "")],
+    "notification_deliveries": [("student_id", "id", ""), ("event_id", "label", "")],
     "cohorts": [
         ("billing_mode", "str", "DEFAULT 'static'"),
         ("hourly_rate_cents", "int", "DEFAULT 0"),
@@ -89,6 +92,8 @@ _ADDED_COLUMNS: dict[str, list[tuple[str, str, str]]] = {
         ("kind", "str", "DEFAULT 'static'"),
     ],
     "payouts": [("teacher_user_id", "id", "")],
+    "person_profiles": [("photo", "text", "DEFAULT ''")],
+    "users": [("password_hash", "text", "DEFAULT ''")],
 }
 
 

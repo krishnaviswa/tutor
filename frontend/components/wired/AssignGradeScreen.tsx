@@ -1,11 +1,12 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import { Empty, Err } from "./bits";
 
 type Asg = { id: string; title: string };
+type Student = { id: string; user_id?: string; display_name: string };
 type Sub = {
   id: string;
   student_id: string;
@@ -15,22 +16,38 @@ type Sub = {
   resubmit_count?: number;
 };
 
+const GRADE_OPTIONS = [
+  "A+ (95–100%)",
+  "A (85–94%)",
+  "B+ (75–84%)",
+  "B (65–74%)",
+  "C (50–64%)",
+  "Needs Revision",
+] as const;
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export function AssignGradeScreen() {
   const params = useSearchParams();
   const [assignments, setAssignments] = useState<Asg[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
   const [asgId, setAsgId] = useState(params.get("id") || "");
   const [subs, setSubs] = useState<Sub[]>([]);
   const [sel, setSel] = useState<Sub | null>(null);
-  const [grade, setGrade] = useState("");
+  const [grade, setGrade] = useState<string>(GRADE_OPTIONS[0]);
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    api("/api/v1/assignments")
-      .then((rows) => {
-        const list = rows as Asg[];
+    Promise.all([
+      api("/api/v1/assignments") as Promise<Asg[]>,
+      api("/api/v1/students").catch(() => []) as Promise<Student[]>,
+    ])
+      .then(([rows, studs]) => {
+        const list = Array.isArray(rows) ? rows : [];
         setAssignments(list);
+        setStudents(Array.isArray(studs) ? studs : []);
         if (!asgId && list[0]) setAsgId(list[0].id);
       })
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
@@ -39,9 +56,24 @@ export function AssignGradeScreen() {
   useEffect(() => {
     if (!asgId) return;
     api(`/api/v1/assignments/${asgId}/submissions`)
-      .then((rows) => setSubs(rows as Sub[]))
+      .then((rows) => setSubs(Array.isArray(rows) ? (rows as Sub[]) : []))
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }, [asgId]);
+
+  const studentNameMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const s of students) {
+      if (s.id) map[s.id] = s.display_name;
+      if (s.user_id) map[s.user_id] = s.display_name;
+    }
+    return map;
+  }, [students]);
+
+  function resolveStudentName(studentId: string): string {
+    if (studentNameMap[studentId]) return studentNameMap[studentId];
+    if (UUID_RE.test(studentId)) return "Student";
+    return studentId || "Student";
+  }
 
   async function save() {
     if (!sel || !asgId) return;
@@ -53,7 +85,7 @@ export function AssignGradeScreen() {
         body: JSON.stringify({ submission_id: sel.id, grade, feedback }),
       });
       const rows = (await api(`/api/v1/assignments/${asgId}/submissions`)) as Sub[];
-      setSubs(rows);
+      setSubs(Array.isArray(rows) ? rows : []);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -89,15 +121,15 @@ export function AssignGradeScreen() {
                 style={{ width: "100%", textAlign: "left" }}
                 onClick={() => {
                   setSel(s);
-                  setGrade(s.grade || "");
+                  setGrade(s.grade || GRADE_OPTIONS[0]);
                   setFeedback(s.feedback || "");
                 }}
               >
-                <div className="t">{s.student_id}</div>
+                <div className="t">{resolveStudentName(s.student_id)}</div>
                 <div className="s muted">
-                  {s.grade || "ungraded"}
-                  {s.late ? " · late" : ""}
-                  {s.resubmit_count != null ? ` · resubmit ${s.resubmit_count}` : ""}
+                  {s.grade || "Ungraded"}
+                  {s.late ? " · Late" : ""}
+                  {s.resubmit_count != null ? ` · Resubmission #${s.resubmit_count}` : ""}
                 </div>
               </button>
             ))
@@ -106,20 +138,38 @@ export function AssignGradeScreen() {
         <div className="card">
           {sel ? (
             <>
+              <div className="k" style={{ marginBottom: 8 }}>
+                Grading {resolveStudentName(sel.student_id)}
+              </div>
               <label className="field">
                 <span>Grade</span>
-                <input className="field__in" value={grade} onChange={(e) => setGrade(e.target.value)} />
+                <select className="field__in" value={grade} onChange={(e) => setGrade(e.target.value)}>
+                  {grade && !GRADE_OPTIONS.includes(grade as (typeof GRADE_OPTIONS)[number]) ? (
+                    <option value={grade}>{grade}</option>
+                  ) : null}
+                  {GRADE_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label className="field">
                 <span>Feedback</span>
-                <textarea className="field__in" value={feedback} onChange={(e) => setFeedback(e.target.value)} rows={3} />
+                <textarea
+                  className="field__in"
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  rows={3}
+                  placeholder="Constructive notes for the student's timeline…"
+                />
               </label>
               <button className="hot hot--btn" type="button" disabled={busy} onClick={() => void save()}>
-                Return to student
+                {busy ? "Saving…" : "Return to student"}
               </button>
             </>
           ) : (
-            <p className="muted">Pick a submission.</p>
+            <p className="muted">Pick a student submission on the left to grade.</p>
           )}
         </div>
       </div>

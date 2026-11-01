@@ -174,5 +174,13 @@
   {
     "id": "backlog_items",
     "tier": "spine"
+  },
+  {
+    "id": "lesson_packs",
+    "tier": "spine"
+  },
+  {
+    "id": "lesson_pack_ledger",
+    "tier": "spine"
   }
 ]
