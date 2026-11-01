@@ -109,9 +109,9 @@ input[type=search]{flex:1;min-width:160px;border:1px solid var(--line);border-ra
 <div class="eyebrow">Center of the snowflake</div>
 <h1>Product book</h1>
 <p class="lede">This page names the pieces and sends you there. Demo, architecture, and explorer stay in their own HTML. Click a task tile for files, tests, and log. 004 is <strong>Accepted</strong> (47 screens <span class="mono">wired</span>). 005 and 006 are <strong>Accepted</strong>. 007 sessions &amp; timetable is <strong>In Progress</strong> — session states, 1-on-1 booking, per-staff availability; see <a href="specs/007-sessions-timetable/spec.md">007 spec</a>. 009 paint board, intra-hour availability, and doubt notice is <strong>In Progress</strong> (implemented, not Accepted) — <a href="specs/009-board-availability-notice/spec.md">009 spec</a>. 010 faculty admin and library is <strong>In Progress</strong> (human OK 2026-10-31, not Accepted) — <a href="specs/010-faculty-admin-library/spec.md">010 spec</a>. Catalog is 50 ids, including <span class="mono">profile</span>. Product home is Next.js <span class="mono">/</span> → <span class="mono">/app/student/router</span>. 003 APIs remain. 002 remains protected.</p>
-<p class="lede">In the app now, still <strong>In Progress</strong> (not Accepted), on the existing screens. Availability is an Outlook-style week: drag, resize, and a 15-minute snap. An exception is one date on that calendar. The student attendance roll is Attended, No-show, Student cancel, or Teacher cancel. Unmarked stays unmarked. The faculty-admin card is on Sessions for a teacher who holds the grant. The owner console is a separate sign-in. Terms reads <span class="mono">docs/legal/terms-and-conditions.md</span> on each open. Parent home shows attendance, the last class note, fees, and the lesson-pack balance when the API sends it. Each seeded tenant’s demo student starts with 8 hours. Library upload accepts a real file up to 50 MB. Pre-class setup has Save pre-class setup. Billing changes are owner-only. A teacher does not see the raw 403. Sign-in still has the demo persona dropdown. That is an open defect in <a href="docs/defects.md">docs/defects.md</a>, not a finished door. Section tabs are on the faculty, owner, student, and parent hubs.</p>
+<p class="lede">In the app now, still <strong>In Progress</strong> (not Accepted), on the existing screens. Sign-in leads with a username and password. Exam-prep: <span class="mono">vikram</span> owner, <span class="mono">sudhakshina</span> teacher, <span class="mono">rohan</span> assistant, <span class="mono">aarav</span> student, <span class="mono">rajesh</span> parent. Password <span class="mono">TutorDemo1</span> after a seed that includes those usernames. The one-time code stays under Local demo code. The signed-in name sits at the top left, with a photo or initials. A teacher changes only their own classes. The owner can change any class and, on the owner console, turns Schedule, Whiteboard, Library, Practice, Doubts, Records, and Students on or off for each teacher. Faculty admin is a grant, not a second login, and does not edit someone else’s class. Pre-class starts empty: choose a topic, a handout, and who is in the class, then Save. A 1-on-1 says 1-on-1 and shows one student. Availability is an Outlook-style week. Attendance is Attended, No-show, Student cancel, or Teacher cancel. Messages append. Each notice shows once. A PDF or image opens on its own stage. A PowerPoint opens as slides (text and pictures), not a pixel copy of the deck. Library upload is a real file up to 50 MB. Terms reads <span class="mono">docs/legal/terms-and-conditions.md</span> each open. Parent home shows attendance, the last note, fees, and the hour balance. Billing writes are owner-only. Role guides: <a href="docs/runbooks/index.html">docs/runbooks</a>. Open sign-in notes: <a href="docs/defects.md">docs/defects.md</a>.</p>
 <div class="eyebrow" id="try">Try the live app</div>
-<p class="lede">Needs Next on <span class="mono">:3000</span> and FastAPI on <span class="mono">:8000</span> (<span class="mono">start-local.bat</span>). Same mock OTP for every role. LoginGate already fills phone + workspace; you only type the code if a box is empty. JWT is created after verify — there is no seed JWT.</p>
+<p class="lede">Needs Next on <span class="mono">:3000</span> and FastAPI on <span class="mono">:8000</span> (<span class="mono">start-local.bat</span>). Sign in with a username and password <span class="mono">TutorDemo1</span>. A database seeded before that username exists still accepts the one-time code <span class="mono">000000</span> under Local demo code. Wipe and reload with <span class="mono">python -m app.seed_cli --reset</span> so the usernames and the name Sudhakshina are in Postgres.</p>
 <div class="try">
 <a class="arm" href="http://localhost:3000/">
   <div class="eyebrow">whole app</div>
@@ -124,9 +124,10 @@ input[type=search]{flex:1;min-width:160px;border:1px solid var(--line);border-ra
   <h3>Owner console</h3>
   <dl>
     <dt>Open</dt><dd>/app/admin</dd>
-    <dt>Phone</dt><dd>+9101o</dd>
-    <dt>Email</dt><dd>owner@exam-prep.sim</dd>
-    <dt>OTP</dt><dd>000000</dd>
+    <dt>Who</dt><dd>Vikram Nair</dd>
+    <dt>Username</dt><dd>vikram</dd>
+    <dt>Password</dt><dd>TutorDemo1</dd>
+    <dt>OTP</dt><dd>000000 · phone +9101o</dd>
     <dt>Role</dt><dd>owner</dd>
   </dl>
   <span class="go">Sign in as owner</span>
@@ -136,9 +137,10 @@ input[type=search]{flex:1;min-width:160px;border:1px solid var(--line);border-ra
   <h3>Teacher dashboard</h3>
   <dl>
     <dt>Open</dt><dd>/app/faculty/teacher-dash</dd>
-    <dt>Phone</dt><dd>+9101t</dd>
-    <dt>Email</dt><dd>teacher@exam-prep.sim</dd>
-    <dt>OTP</dt><dd>000000</dd>
+    <dt>Who</dt><dd>Sudhakshina</dd>
+    <dt>Username</dt><dd>sudhakshina</dd>
+    <dt>Password</dt><dd>TutorDemo1</dd>
+    <dt>OTP</dt><dd>000000 · phone +9101t</dd>
     <dt>Role</dt><dd>teacher</dd>
   </dl>
   <span class="go">Sign in as teacher</span>
@@ -149,9 +151,10 @@ input[type=search]{flex:1;min-width:160px;border:1px solid var(--line);border-ra
   <dl>
     <dt>Open</dt><dd>/app/student/student-login</dd>
     <dt>Lands</dt><dd>/app/student</dd>
-    <dt>Phone</dt><dd>+9101s</dd>
-    <dt>Email</dt><dd>student@exam-prep.sim</dd>
-    <dt>OTP</dt><dd>000000</dd>
+    <dt>Who</dt><dd>Aarav Sharma</dd>
+    <dt>Username</dt><dd>aarav</dd>
+    <dt>Password</dt><dd>TutorDemo1</dd>
+    <dt>OTP</dt><dd>000000 · phone +9101s</dd>
     <dt>Role</dt><dd>student</dd>
   </dl>
   <span class="go">Sign in as student</span>
@@ -162,9 +165,10 @@ input[type=search]{flex:1;min-width:160px;border:1px solid var(--line);border-ra
   <dl>
     <dt>Open</dt><dd>/app/parent/parent-link</dd>
     <dt>Lands</dt><dd>/app/parent</dd>
-    <dt>Phone</dt><dd>+9101p</dd>
-    <dt>Email</dt><dd>parent@exam-prep.sim</dd>
-    <dt>OTP</dt><dd>000000</dd>
+    <dt>Who</dt><dd>Rajesh Sharma</dd>
+    <dt>Username</dt><dd>rajesh</dd>
+    <dt>Password</dt><dd>TutorDemo1</dd>
+    <dt>OTP</dt><dd>000000 · phone +9101p</dd>
     <dt>Invite</dt><dd>link-exam-prep</dd>
     <dt>Role</dt><dd>parent</dd>
   </dl>
@@ -176,9 +180,10 @@ input[type=search]{flex:1;min-width:160px;border:1px solid var(--line);border-ra
   <p>Fifth catalog role. On exam-prep the teacher door does not use this screen.</p>
   <dl>
     <dt>Open</dt><dd>/app/faculty/staff-login</dd>
-    <dt>Phone</dt><dd>+9101a</dd>
-    <dt>Email</dt><dd>assistant@exam-prep.sim</dd>
-    <dt>OTP</dt><dd>000000</dd>
+    <dt>Who</dt><dd>Rohan Deshmukh</dd>
+    <dt>Username</dt><dd>rohan</dd>
+    <dt>Password</dt><dd>TutorDemo1</dd>
+    <dt>OTP</dt><dd>000000 · phone +9101a</dd>
     <dt>Role</dt><dd>assistant</dd>
   </dl>
   <span class="go">Sign in as assistant</span>
@@ -199,12 +204,12 @@ input[type=search]{flex:1;min-width:160px;border:1px solid var(--line);border-ra
     <dt>Practice set id</dt><dd>cccccccc-0001-4000-8000-000000000026</dd>
     <dt>Parent invite</dt><dd>link-exam-prep (accepted) · link-exam-prep-pending</dd>
     <dt>Join token</dt><dd>join-exam-prep (recorded) · join-exam-prep-next (upcoming)</dd>
-    <dt>JWT</dt><dd>none until OTP verify; then browser localStorage</dd>
+    <dt>JWT</dt><dd>none until username or OTP sign-in; then browser localStorage</dd>
     <dt>Operator list</dt><dd><a href="http://localhost:3000/operator">/operator</a> — not a catalog screen</dd>
   </dl>
 </div>
 <div class="eyebrow">Key components</div>
-<div class="snow"><a class="arm" href="#try"><div class="eyebrow">local</div><h3>Try the app</h3><p>Owner, teacher, student, parent — URLs, phones, OTP, tokens.</p></a><a class="arm" href="seed-map.html"><div class="eyebrow">open</div><h3>Seed map</h3><p>Which Postgres rows power each catalog workflow.</p></a><a class="arm" href="density-map.html"><div class="eyebrow">005</div><h3>Density board</h3><p>iSeek gap, backend workflow, T7.1–T7.12. Open in the browser.</p></a><a class="arm" href="tutor-platform-demo.html"><div class="eyebrow">open</div><h3>Screens</h3><p>Demo UI gold — 49 ids. Incomplete tracks stay incomplete.</p></a><a class="arm" href="tutor-platform-architecture.html"><div class="eyebrow">open</div><h3>Stack walk</h3><p>Architecture map. Follow the call. Catalog-driven.</p></a><a class="arm" href="tutor-platform-explorer.html"><div class="eyebrow">open</div><h3>Modules & pricing</h3><p>Explorer — toggles, tiers, build sequence.</p></a><a class="arm" href="work-log.html"><div class="eyebrow">open</div><h3>Work log</h3><p>Status history. Filter by task. Always returns here.</p></a><a class="arm" href="plan-functional.html"><div class="eyebrow">open</div><h3>Functional map</h3><p>Jobs, roles, journeys, every screen.</p></a><a class="arm" href="plan-technical.html"><div class="eyebrow">open</div><h3>Technical map</h3><p>Layers, APIs, entities, ports, tests.</p></a><a class="arm" href="plan-sequence.html"><div class="eyebrow">open</div><h3>E2E sequence</h3><p>Functional + technical paired by phase.</p></a><a class="arm" href="README.md"><div class="eyebrow">open</div><h3>README</h3><p>Text product map. Accepted deltas land here.</p></a><a class="arm" href="catalog/screens.json"><div class="eyebrow">open</div><h3>Catalog</h3><p>Screen / API / entity contracts.</p></a><a class="arm" href="specs/005-dashboard-density/spec.md"><div class="eyebrow">open</div><h3>005 spec</h3><p>Specified. Lift demo named facts onto wired dashboards. Same 47 ids.</p></a><a class="arm" href="specs/004-wire-demo-ui/spec.md"><div class="eyebrow">open</div><h3>004 spec</h3><p>Accepted. Demo UI wired onto /api/v1.</p></a><a class="arm" href="backend/README.md"><div class="eyebrow">open</div><h3>Backend</h3><p>002 FastAPI sim. Protected tests.</p></a><a class="arm" href="AGENTS.md"><div class="eyebrow">open</div><h3>Agent guide</h3><p>Where Cursor and Claude Code start.</p></a></div>
+<div class="snow"><a class="arm" href="#try"><div class="eyebrow">local</div><h3>Try the app</h3><p>Owner, teacher, student, parent — usernames, password, OTP.</p></a><a class="arm" href="seed-map.html"><div class="eyebrow">open</div><h3>Seed map</h3><p>Which Postgres rows power each catalog workflow.</p></a><a class="arm" href="density-map.html"><div class="eyebrow">005</div><h3>Density board</h3><p>iSeek gap, backend workflow, T7.1–T7.12. Open in the browser.</p></a><a class="arm" href="tutor-platform-demo.html"><div class="eyebrow">open</div><h3>Screens</h3><p>Demo UI gold — 49 ids. Incomplete tracks stay incomplete.</p></a><a class="arm" href="tutor-platform-architecture.html"><div class="eyebrow">open</div><h3>Stack walk</h3><p>Architecture map. Follow the call. Catalog-driven.</p></a><a class="arm" href="tutor-platform-explorer.html"><div class="eyebrow">open</div><h3>Modules & pricing</h3><p>Explorer — toggles, tiers, build sequence.</p></a><a class="arm" href="work-log.html"><div class="eyebrow">open</div><h3>Work log</h3><p>Status history. Filter by task. Always returns here.</p></a><a class="arm" href="plan-functional.html"><div class="eyebrow">open</div><h3>Functional map</h3><p>Jobs, roles, journeys, every screen.</p></a><a class="arm" href="plan-technical.html"><div class="eyebrow">open</div><h3>Technical map</h3><p>Layers, APIs, entities, ports, tests.</p></a><a class="arm" href="plan-sequence.html"><div class="eyebrow">open</div><h3>E2E sequence</h3><p>Functional + technical paired by phase.</p></a><a class="arm" href="README.md"><div class="eyebrow">open</div><h3>README</h3><p>Text product map. Accepted deltas land here.</p></a><a class="arm" href="catalog/screens.json"><div class="eyebrow">open</div><h3>Catalog</h3><p>Screen / API / entity contracts.</p></a><a class="arm" href="specs/005-dashboard-density/spec.md"><div class="eyebrow">open</div><h3>005 spec</h3><p>Specified. Lift demo named facts onto wired dashboards. Same 47 ids.</p></a><a class="arm" href="specs/004-wire-demo-ui/spec.md"><div class="eyebrow">open</div><h3>004 spec</h3><p>Accepted. Demo UI wired onto /api/v1.</p></a><a class="arm" href="backend/README.md"><div class="eyebrow">open</div><h3>Backend</h3><p>002 FastAPI sim. Protected tests.</p></a><a class="arm" href="AGENTS.md"><div class="eyebrow">open</div><h3>Agent guide</h3><p>Where Cursor and Claude Code start.</p></a></div>
 <div class="eyebrow" id="path">Critical path</div>
 <div class="path" id="cpath"></div>
 <div class="eyebrow" id="tasks">Task plan</div>

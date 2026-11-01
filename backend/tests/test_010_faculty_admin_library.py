@@ -84,13 +84,13 @@ def test_profile_photo_and_display_name(client):
     student = auth(login(client, "+9101s", WS_EXAM, "student"))
     parent = auth(login(client, "+9101p", WS_EXAM, "parent"))
 
-    assert client.get("/api/v1/auth/me", headers=teacher).json()["display_name"] == "Dr. Meera Krishnan"
+    assert client.get("/api/v1/auth/me", headers=teacher).json()["display_name"] == "Sudhakshina"
     assert client.get("/api/v1/auth/me", headers=owner).json()["display_name"] == "Vikram Nair"
     assert client.get("/api/v1/auth/me", headers=student).json()["display_name"] == "Aarav Sharma"
     assert client.get("/api/v1/auth/me", headers=parent).json()["display_name"] == "Rajesh Sharma"
 
     teacher_profile = client.get("/api/v1/profile", headers=teacher).json()
-    assert teacher_profile["display_name"] == "Dr. Meera Krishnan"
+    assert teacher_profile["display_name"] == "Sudhakshina"
     assert teacher_profile["photo"] == ""
     assert client.get("/api/v1/profile", headers=owner).json()["display_name"] == "Vikram Nair"
     assert client.get("/api/v1/profile", headers=student).json()["display_name"] == "Aarav Sharma"

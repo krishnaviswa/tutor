@@ -50,7 +50,7 @@ export function LoginGate({
   const [digits, setDigits] = useState<string[]>(() => OTP_CODE.split(""));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [username, setUsername] = useState(role === "owner" ? "vikram" : role === "assistant" ? "rohan" : role === "student" ? "aarav" : role === "parent" ? "rajesh" : "meera");
+  const [username, setUsername] = useState(role === "owner" ? "vikram" : role === "assistant" ? "rohan" : role === "student" ? "aarav" : role === "parent" ? "rajesh" : "sudhakshina");
   const [password, setPassword] = useState("TutorDemo1");
   const boxes = useRef<Array<HTMLInputElement | null>>([]);
 

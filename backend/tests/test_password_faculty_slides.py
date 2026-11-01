@@ -12,12 +12,12 @@ from tests.helpers import auth, login
 def test_password_signs_in_meera(client):
     bad = client.post(
         "/api/v1/auth/password",
-        json={"username": "meera", "password": "nope", "workspace_id": WS_EXAM},
+        json={"username": "sudhakshina", "password": "nope", "workspace_id": WS_EXAM},
     )
     assert bad.status_code == 401
     ok = client.post(
         "/api/v1/auth/password",
-        json={"username": "meera", "password": "TutorDemo1", "workspace_id": WS_EXAM},
+        json={"username": "sudhakshina", "password": "TutorDemo1", "workspace_id": WS_EXAM},
     )
     assert ok.status_code == 200, ok.text
     assert ok.json()["role"] == "teacher"
@@ -28,10 +28,10 @@ def test_owner_can_turn_off_a_teacher_library(client):
     teacher = login(client, "+9101t", WS_EXAM, "teacher")
     listing = client.get("/api/v1/owner/faculty-access", headers=auth(owner))
     assert listing.status_code == 200
-    meera = next(row for row in listing.json()["teachers"] if "Meera" in row["name"])
-    assert "B5" in meera["modules"]
+    row = next(person for person in listing.json()["teachers"] if person["name"] == "Sudhakshina")
+    assert "B5" in row["modules"]
     saved = client.put(
-        f"/api/v1/owner/faculty-access/{meera['user_id']}",
+        f"/api/v1/owner/faculty-access/{row['user_id']}",
         headers=auth(owner),
         json={"modules": ["B1", "A5"]},
     )

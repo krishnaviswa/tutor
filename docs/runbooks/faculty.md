@@ -1,13 +1,13 @@
 # Faculty
 
-This guide is for a teacher (`Dr. Meera Krishnan`, Senior Faculty / Faculty Admin `+9101t`) and for an assistant (`Rohan Deshmukh`, Assistant `+9101a`). Faculty admin is a grant on that same teaching login. It is not a separate account.
+This guide is for a teacher (`Sudhakshina`, Senior Faculty / Faculty Admin `+9101t`) and for an assistant (`Rohan Deshmukh`, Assistant `+9101a`). Faculty admin is a grant on that same teaching login. It is not a separate account.
 
 The steps use the exam-prep demo workspace (**Apex Science Academy**). The one-time code is always `000000`. There is no username and password.
 
 ## Demo Personas (Exam-Prep Workspace)
 
 - **Owner / Admin:** `Vikram Nair` (`+9101o`)
-- **Senior Faculty / Faculty Admin:** `Dr. Meera Krishnan` (`+9101t`)
+- **Senior Faculty / Faculty Admin:** `Sudhakshina` (`+9101t`)
 - **Teaching Assistant:** `Rohan Deshmukh` (`+9101a`)
 - **Student:** `Aarav Sharma` (`+9101s`, enrolled in `Grade 11 Evening Batch (Mon–Fri)`)
 - **Parent:** `Rajesh Sharma` (`+9101p`)
@@ -15,7 +15,7 @@ The steps use the exam-prep demo workspace (**Apex Science Academy**). The one-t
 ## Sign in
 
 1. Open [http://127.0.0.1:3000](http://127.0.0.1:3000). The site sends you to the role doors at `/app/student/router` (**I’m here to learn**, **I’m a teacher**, **I’m a parent**, and the direct **Workspace Owner / Admin** door).
-2. Teacher: choose **I’m a teacher**. On exam-prep that door opens the dashboard sign-in and skips staff sign-in. Use the 1-click **Workspace & Demo Persona Picker** (`Demo Persona Quick-Select` and `Workspace` dropdowns) to pick **Teacher — Dr. Meera Krishnan (`+9101t`)** or keep the prefilled `+9101t` and `000000` code. Click **Verify & Continue** to land on **Dashboard** at `/app/faculty/teacher-dash`.
+2. Teacher: choose **I’m a teacher**. On exam-prep that door opens the dashboard sign-in and skips staff sign-in. Use the 1-click **Workspace & Demo Persona Picker** (`Demo Persona Quick-Select` and `Workspace` dropdowns) to pick **Teacher — Sudhakshina (`+9101t`)** or keep the prefilled `+9101t` and `000000` code. Click **Verify & Continue** to land on **Dashboard** at `/app/faculty/teacher-dash`.
 3. Assistant: on the role doors, use **other staff sign-in** (`/app/faculty/staff-login`) or select **Teaching Assistant — Rohan Deshmukh (`+9101a`)** in the **Demo Persona Quick-Select** dropdown, code `000000`. You land on the same dashboard.
 4. The workspace dropdown defaults to the exam-prep seed (`Coaching exam-prep`). You can switch to `Language 1-on-1`, `Music studio`, or a custom workspace ID from the dropdown.
 
@@ -45,7 +45,7 @@ Availability is an Outlook-style week: click an empty quarter, drag a block, and
 
 **Whiteboard** (`/app/faculty/live-teacher`). The shared class canvas for the session, plus cohort chat when the session belongs to a cohort. The assigned teacher can hand the session, its subject, and a library item to a colleague in the same organization using structured `<select>` pickers. From the board you can open the session record.
 
-**Availability** (`/app/faculty/availability`). The Outlook-style week above. Save availability. You see your own row (`Dr. Meera Krishnan`). The owner (`Vikram Nair`) can pick another staff member from the `<select>` dropdown and edit theirs. Parents (`Rajesh Sharma`) book an open hour only inside the week you publish, and only in the next 7 days.
+**Availability** (`/app/faculty/availability`). The Outlook-style week above. Save availability. You see your own row (`Sudhakshina`). The owner (`Vikram Nair`) can pick another staff member from the `<select>` dropdown and edit theirs. Parents (`Rajesh Sharma`) book an open hour only inside the week you publish, and only in the next 7 days.
 
 **Students** (`/app/admin/roster`). The roster. The rail stays the faculty rail when a teacher opens it from Students, and the **Students** section sub-tabs link `Student Roster`, `Cohorts & Batches`, and `Mentor Backlog`. Click the collapsible **+ Add student** button, import a CSV, paste a WhatsApp list (one `name,phone` per line), or pick a student from the `<select>` dropdown to mint a parent invite token. Cohorts are on the same page, and **Cohorts & Batches** is `/app/faculty/cohort-builder` (class chat included). Open a student (`Aarav Sharma`) to see the card a teacher is allowed to see: grade, board, and study info. Phone and home address stay on that person’s own profile.
 
@@ -74,7 +74,7 @@ Availability is an Outlook-style week: click an empty quarter, drag a block, and
 
 Sessions (`/app/faculty/sessions`) includes a **Faculty admin** card. The card is drawn only when `GET /api/v1/faculty-admin/me` says this person holds the grant. If the grant is missing, the card is not shown.
 
-The exam-prep seed writes that grant for Senior Faculty `Dr. Meera Krishnan` (`+9101t`), granted by owner `Vikram Nair` (`+9101o`). Assistant `Rohan Deshmukh` (`+9101a`) does not get a grant row. After a normal seed, `Dr. Meera Krishnan` sees the card on Sessions and `Rohan Deshmukh` does not.
+The exam-prep seed writes that grant for Senior Faculty `Sudhakshina` (`+9101t`), granted by owner `Vikram Nair` (`+9101o`). Assistant `Rohan Deshmukh` (`+9101a`) does not get a grant row. After a normal seed, `Sudhakshina` sees the card on Sessions and `Rohan Deshmukh` does not.
 
 A tech admin confirms it by signing in as that person and calling `GET /api/v1/faculty-admin/me`, or by looking for a row in `faculty_admin_grants` for that user and workspace.
 
@@ -90,7 +90,7 @@ A faculty-admin save on Profile also asks for an email code. That email step is 
 
 ## A teaching day
 
-1. Sign in via the **Workspace & Demo Persona Picker** (`Dr. Meera Krishnan`, `+9101t`) and read the chase list on the dashboard.
+1. Sign in via the **Workspace & Demo Persona Picker** (`Sudhakshina`, `+9101t`) and read the chase list on the dashboard.
 2. Check the week under **Schedule** (using the `Week Calendar`, `Sessions & Supervision`, `Pre-Class Prep`, and `My Availability` sub-tabs). Create or move a session, or cancel it if the class will not run.
 3. Publish the hours you can teach on Availability.
 4. Open the whiteboard when the class starts. Hand it off only if a colleague should take that session.
@@ -100,7 +100,7 @@ A faculty-admin save on Profile also asks for an email code. That email step is 
 
 Announcements live at `/app/faculty/announce`. The mentor backlog is linked from the dashboard and the **Students** sub-tabs at `/app/faculty/mentor`: book a backlog item onto a session.
 
-The exam-prep child (`Aarav Sharma`) starts with an 8-hour pack. Parents see the hours left on Home and on Fees. Booking an open hour does not use one. The owner (`Vikram Nair`) creates a student and a pack from the owner console (name, phone, hours). Payouts lists delivered sessions. Faculty admin stays the card on Sessions. It is not a separate login. Sign-in phones stay owner `+9101o` (`Vikram Nair`), teacher `+9101t` (`Dr. Meera Krishnan`), assistant `+9101a` (`Rohan Deshmukh`), student `+9101s` (`Aarav Sharma`), parent `+9101p` (`Rajesh Sharma`), code `000000`.
+The exam-prep child (`Aarav Sharma`) starts with an 8-hour pack. Parents see the hours left on Home and on Fees. Booking an open hour does not use one. The owner (`Vikram Nair`) creates a student and a pack from the owner console (name, phone, hours). Payouts lists delivered sessions. Faculty admin stays the card on Sessions. It is not a separate login. Sign-in phones stay owner `+9101o` (`Vikram Nair`), teacher `+9101t` (`Sudhakshina`), assistant `+9101a` (`Rohan Deshmukh`), student `+9101s` (`Aarav Sharma`), parent `+9101p` (`Rajesh Sharma`), code `000000`.
 
 ## Not shipped
 

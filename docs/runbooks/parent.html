@@ -30,7 +30,7 @@ li { margin: 0.35rem 0; }
 <h2>Demo Personas (Exam-Prep Workspace)</h2>
 <ul>
 <li><strong>Owner / Admin:</strong> <code>Vikram Nair</code> (<code>+9101o</code>)</li>
-<li><strong>Senior Faculty / Faculty Admin:</strong> <code>Dr. Meera Krishnan</code> (<code>+9101t</code>)</li>
+<li><strong>Senior Faculty / Faculty Admin:</strong> <code>Sudhakshina</code> (<code>+9101t</code>)</li>
 <li><strong>Teaching Assistant:</strong> <code>Rohan Deshmukh</code> (<code>+9101a</code>)</li>
 <li><strong>Student:</strong> <code>Aarav Sharma</code> (<code>+9101s</code>, enrolled in <code>Grade 11 Evening Batch (Mon–Fri)</code>)</li>
 <li><strong>Parent:</strong> <code>Rajesh Sharma</code> (<code>+9101p</code>)</li>
@@ -43,7 +43,7 @@ li { margin: 0.35rem 0; }
 <li>Confirm the invite token from the <code>&lt;select&gt;</code> dropdown (<code>link-exam-prep — Aarav Sharma (Accepted)</code>). The exam-prep seed token is <code>link-exam-prep</code>, and that link is already accepted for <code>Aarav Sharma</code>. Submit it. You land on Family at <code>/app/parent</code>.</li>
 </ol>
 <p>If you open <code>/app/parent</code> directly after the code, and the link is already accepted, you are on the home screen without another invite. A second child (<code>Diya Patel</code>, parent <code>Sunita Patel</code>) stays hidden until a teacher or the owner mints a link and you accept it.</p>
-<p>The owner (<code>Vikram Nair</code>) or a teacher (<code>Dr. Meera Krishnan</code>) creates an invite from the roster, or from the same parent-link page while they are signed in. They pick the student from the <code>&lt;select&gt;</code> dropdown and get a token. You select or paste that token and choose <strong>Link my account</strong>.</p>
+<p>The owner (<code>Vikram Nair</code>) or a teacher (<code>Sudhakshina</code>) creates an invite from the roster, or from the same parent-link page while they are signed in. They pick the student from the <code>&lt;select&gt;</code> dropdown and get a token. You select or paste that token and choose <strong>Link my account</strong>.</p>
 <h2>Where you land &amp; Section Sub-Tabs</h2>
 <p>The bottom nav is: Home, Activity, Reports, Fees, Chat.</p>
 <p>The header has Back on a nested screen, a sun or moon theme icon, a bell icon, <strong>Terms</strong>, and Sign out. Below the header, multi-screen parent workflows display horizontal <strong>Section Sub-Tabs</strong>:</p>
@@ -57,18 +57,18 @@ li { margin: 0.35rem 0; }
 <p><strong>Home</strong> (<code>/app/parent</code>). Your linked child (<code>Aarav Sharma</code>), in this workspace only, paired with the <strong>Parent Home</strong> section sub-tabs (<code>Family Overview</code>, <code>Alert Preferences</code>).</p>
 <p>On the page, without opening Chat:</p>
 <ul>
-<li><strong>Attendance</strong> is the count on file (<code>present / total</code>). The teacher (<code>Dr. Meera Krishnan</code>) marks each student Attended, No-show, Student cancel, or Teacher cancel on the 3-step session record. A student left unmarked stays unmarked.</li>
+<li><strong>Attendance</strong> is the count on file (<code>present / total</code>). The teacher (<code>Sudhakshina</code>) marks each student Attended, No-show, Student cancel, or Teacher cancel on the 3-step session record. A student left unmarked stays unmarked.</li>
 <li><strong>Lesson pack</strong> is the hours left when home includes <code>lesson_pack.balance_minutes</code>. If that field is missing, the page asks <code>GET /api/v1/students/{id}/lesson-pack</code>. The number is hours, for example 8 hours, or 7 hours 30 minutes. The exam-prep child (<code>Aarav Sharma</code>) starts with an 8-hour pack. If the API sends no balance, this card is absent.</li>
 <li><strong>Latest assignment</strong> appears only when home includes <code>latest_assignment.submitted</code>. The line is Turned in or Not turned in. If that flag is absent, Home does not show a done mark.</li>
 <li><strong>Last class note</strong> is the newest teacher note on a session this child attended, or a 1-on-1 booked for this child, published from Step 3 of the teacher’s Attendance &amp; Class Summary flow. If the teacher has not saved a note, the card says so.</li>
 <li><strong>Fees</strong> shows the open amount in Rupees (<code>₹</code>) and the date it is due, and the latest paid receipt (amount in <code>₹</code> and receipt id). If the guardian link hides fees, this block is hidden.</li>
-<li><strong>Open hours</strong> lists 60-minute starts from <code>GET /api/v1/parent/open-hours</code>, in the next 7 days, inside <code>Dr. Meera Krishnan</code>’s published week. You pick one. That posts <code>{start}</code> to <code>/api/v1/parent/bookings</code>. Booking does not use the hour. If the balance is under 60 minutes, the post returns 400 and the page shows that detail (<code>balance under 60 minutes</code>). If the open-hours route is not there, the card is absent. After a restart on the current API, the card shows.</li>
+<li><strong>Open hours</strong> lists 60-minute starts from <code>GET /api/v1/parent/open-hours</code>, in the next 7 days, inside <code>Sudhakshina</code>’s published week. You pick one. That posts <code>{start}</code> to <code>/api/v1/parent/bookings</code>. Booking does not use the hour. If the balance is under 60 minutes, the post returns 400 and the page shows that detail (<code>balance under 60 minutes</code>). If the open-hours route is not there, the card is absent. After a restart on the current API, the card shows.</li>
 </ul>
 <p>You also see the latest practice score, the latest test score, and class notices. Links from Home open Activity, the marksheet, the practice result, Fees, and Chat when you want the longer page.</p>
 <p><strong>Activity</strong> (<code>/app/student/timeline</code>). <code>Aarav Sharma</code>’s timeline, the same ledger the teacher writes. The shell stays the parent shell. You do not see another family’s child.</p>
 <p><strong>Reports</strong> (<code>/app/faculty/reports</code>). A marksheet for your child (<code>Aarav Sharma</code>), paired with the <strong>Parent Reports</strong> section sub-tabs (<code>Progress Report</code> at <code>/app/faculty/reports</code> and <code>Test Results</code> at <code>/app/student/practice-result</code>): attendance, practice, latest test, and the teacher note. You do not get the owner export or the other students.</p>
 <p><strong>Fees</strong> (<code>/app/student/payments</code>). The same lesson-pack balance, when the API returns it, plus open invoices and paid receipts formatted in Rupees (<code>₹</code>). <strong>Pay (mock)</strong> checks out through the mock payments port. Nothing is charged on a live Razorpay account. If your link has fees hidden, Home already says fees are hidden and this list is not the place to discover another child’s bill. The pack balance is not a second child’s bill.</p>
-<p><strong>Chat</strong> (<code>/app/faculty/messages</code>). A thread with the teacher (<code>Dr. Meera Krishnan</code>), on the record. Use it when you need to write to them. Attendance, the class note, the pack balance, and the fee summary do not depend on this thread.</p>
+<p><strong>Chat</strong> (<code>/app/faculty/messages</code>). A thread with the teacher (<code>Sudhakshina</code>), on the record. Use it when you need to write to them. Attendance, the class note, the pack balance, and the fee summary do not depend on this thread.</p>
 <p>Notification choices are <code>/app/student/notif-prefs</code> (also reachable from the <code>Alert Preferences</code> sub-tab on Home). Your own channels can be set there. The student’s WhatsApp stays off unless the owner enables it.</p>
 <h2>Jobs you can do today</h2>
 <ol>
@@ -78,7 +78,7 @@ li { margin: 0.35rem 0; }
 <li>Open Activity when you want every timeline line, not only the latest class note.</li>
 <li>Open Reports (and switch between <code>Progress Report</code> and <code>Test Results</code> sub-tabs) for the marksheet.</li>
 <li>Pay an open invoice in Rupees (<code>₹</code>) on Fees and keep the receipt. Home then shows that receipt as the latest paid one. Fees shows the same pack balance when the API returns it.</li>
-<li>Message <code>Dr. Meera Krishnan</code> on Chat when the note is not enough.</li>
+<li>Message <code>Sudhakshina</code> on Chat when the note is not enough.</li>
 </ol>
 <p>If Home says there is no linked child, the invite was not accepted for this login. Go back to parent-link and submit the token the academy gave you.</p>
 <p>Attended and no-show use the session length, which is 60 minutes when the session has no end. A student cancel or a move inside 24 hours uses that length. At or outside 24 hours the length stays. A teacher cancel does not. The owner (<code>Vikram Nair</code>) can waive a forfeit. Booking the open hour does not itself use the hour.</p>

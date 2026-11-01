@@ -34,7 +34,7 @@ export function CohortBuilderScreen() {
 
   const [subjectTrack, setSubjectTrack] = useState<string>(SUBJECT_TRACKS[0]);
   const [cadence, setCadence] = useState<string>(SCHEDULE_CADENCES[0]);
-  const [teacherName, setTeacherName] = useState<string>("Dr. Meera Krishnan");
+  const [teacherName, setTeacherName] = useState<string>("Sudhakshina");
   const [name, setName] = useState<string>(`${SUBJECT_TRACKS[0]} · ${SCHEDULE_CADENCES[0]}`);
   const [picked, setPicked] = useState<string[]>([]);
   const [showCreate, setShowCreate] = useState<boolean>(false);
@@ -104,7 +104,7 @@ export function CohortBuilderScreen() {
   const studentById = new Map(students.map((s) => [s.id, s.display_name]));
   const teacherOptions = staff.length
     ? staff.map((m) => m.display_name)
-    : ["Dr. Meera Krishnan", "Prof. Rajesh Verma", "Ananya Nair"];
+    : ["Sudhakshina", "Prof. Rajesh Verma", "Ananya Nair"];
 
   return (
     <>

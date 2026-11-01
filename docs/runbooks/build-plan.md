@@ -6,7 +6,7 @@ Decision record for the TutorComp-like pass and UX humanization pass. This is no
 
 Shipped. The role runbooks describe the product as it runs.
 
-1. Role runbooks, in HTML and Markdown, for faculty (teacher `Dr. Meera Krishnan` `+9101t`, assistant `Rohan Deshmukh` `+9101a`, and the faculty-admin grant), workspace admin (owner `Vikram Nair` `+9101o`), student (`Aarav Sharma` `+9101s`), parent (`Rajesh Sharma` `+9101p`), and tech admin.
+1. Role runbooks, in HTML and Markdown, for faculty (teacher `Sudhakshina` `+9101t`, assistant `Rohan Deshmukh` `+9101a`, and the faculty-admin grant), workspace admin (owner `Vikram Nair` `+9101o`), student (`Aarav Sharma` `+9101s`), parent (`Rajesh Sharma` `+9101p`), and tech admin.
 2. Humanized demo personas, cohorts, sessions, and practice content across all three seeded tenants (`exam-prep` Apex Science Academy, `language-1on1` Polyglot Language Studio, `music` Swar Sangam Music Academy), plus the 1-click **Workspace & Demo Persona Picker** (`Demo Persona Quick-Select` and `Workspace` dropdowns) on sign-in and the direct **Workspace Owner / Admin** door on `/app/student/router`.
 3. Horizontal **Section Sub-Tabs** (`SectionTabs.tsx`) across multi-screen workflows: `Schedule`, `Students`, `Practice & Assessments` (numbered 1–6), `Doubts & Comms`, `Records & Reports`, `Owner Console`, `Student Classes/Practice/You`, and `Parent Home/Reports`.
 4. Structured `<select>` dropdowns, collapsible `+ New` / `+ Add` creation forms (progressive disclosure), Rupee (`₹`) billing inputs and currency formatting, and the **3-step Attendance & Class Summary flow** (`/app/faculty/record`) with live lesson-pack consequence previews before saving.
@@ -17,8 +17,8 @@ Shipped. The role runbooks describe the product as it runs.
 9. On the 3-step session record (`/app/faculty/record`), each student is Attended, No-show, Student cancel, or Teacher cancel, with live lesson-pack consequence previews. Unmarked stays unmarked. A stored present still reads as Attended, and absent as No-show.
 10. `GET /api/v1/payouts` adds `delivered` and `hours`.
 11. `POST /api/v1/owner/enquiries` with `{name, phone, hours}` is owner only. It creates a student and a pack. The owner console form is that call.
-12. Sign-in phones stay owner `+9101o` (`Vikram Nair`), teacher `+9101t` (`Dr. Meera Krishnan`), assistant `+9101a` (`Rohan Deshmukh`), student `+9101s` (`Aarav Sharma`), parent `+9101p` (`Rajesh Sharma`). The one-time code is `000000`.
-13. The faculty-admin card is on Sessions for the teacher who holds the grant (`Dr. Meera Krishnan`, `+9101t`). It is not a separate login.
+12. Sign-in phones stay owner `+9101o` (`Vikram Nair`), teacher `+9101t` (`Sudhakshina`), assistant `+9101a` (`Rohan Deshmukh`), student `+9101s` (`Aarav Sharma`), parent `+9101p` (`Rajesh Sharma`). The one-time code is `000000`.
+13. The faculty-admin card is on Sessions for the teacher who holds the grant (`Sudhakshina`, `+9101t`). It is not a separate login.
 
 No new catalog screen id.
 

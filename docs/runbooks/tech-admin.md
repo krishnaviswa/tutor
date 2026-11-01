@@ -45,7 +45,7 @@ python -m app.seed_cli --reset
 Seeded workspaces are `exam-prep` (**Apex Science Academy**), `language-1on1` (**Polyglot Language Studio**), and `music` (**Swar Sangam Music Academy**). Exam-prep personas and phones are:
 
 - **Owner / Admin:** `Vikram Nair` (`+9101o`)
-- **Senior Faculty / Faculty Admin:** `Dr. Meera Krishnan` (`+9101t`)
+- **Senior Faculty / Faculty Admin:** `Sudhakshina` (`+9101t`)
 - **Teaching Assistant:** `Rohan Deshmukh` (`+9101a`)
 - **Student:** `Aarav Sharma` (`+9101s`, plus `Diya Patel` and `Kabir Verma` in `Grade 11 Evening Batch (Mon–Fri)`)
 - **Parent:** `Rajesh Sharma` (`+9101p`, plus `Sunita Patel`)
@@ -88,7 +88,7 @@ Auth is the stub: phone OTP `000000`, an optional magic link for the student or 
 Role doors on `/app/student/router`:
 
 - Student `Aarav Sharma` (`+9101s`) uses **I’m here to learn** and lands on `/app/student`.
-- Teacher `Dr. Meera Krishnan` (`+9101t`) uses **I’m a teacher** and lands on `/app/faculty/teacher-dash`. Exam-prep skips staff sign-in on that door.
+- Teacher `Sudhakshina` (`+9101t`) uses **I’m a teacher** and lands on `/app/faculty/teacher-dash`. Exam-prep skips staff sign-in on that door.
 - Owner `Vikram Nair` (`+9101o`) uses the direct **Workspace Owner / Admin** door (or **other staff sign-in**) and lands on `/app/admin`.
 - Assistant `Rohan Deshmukh` (`+9101a`) uses **other staff sign-in** (or selects the assistant persona in the picker) and lands on the faculty dashboard.
 - Parent `Rajesh Sharma` (`+9101p`) uses **I’m a parent**, accepts invite `link-exam-prep` (`Aarav Sharma`), and lands on `/app/parent`.
@@ -105,7 +105,7 @@ The terms text is the markdown file [docs/legal/terms-and-conditions.md](../lega
 
 Faculty admin is a row in `faculty_admin_grants`, not a login role. The Sessions screen draws the Faculty admin card only when `GET /api/v1/faculty-admin/me` returns `faculty_admin: true`.
 
-The seed writes that row for the exam-prep Senior Faculty (`Dr. Meera Krishnan`, `+9101t`), granted by the owner (`Vikram Nair`, `+9101o`). The assistant (`Rohan Deshmukh`, `+9101a`) does not get a row. If the card is missing, the grant row is missing. Check the table, or call `GET /api/v1/faculty-admin/me` with that person’s token. Transferring the grant does not change the workspace owner.
+The seed writes that row for the exam-prep Senior Faculty (`Sudhakshina`, `+9101t`), granted by the owner (`Vikram Nair`, `+9101o`). The assistant (`Rohan Deshmukh`, `+9101a`) does not get a row. If the card is missing, the grant row is missing. Check the table, or call `GET /api/v1/faculty-admin/me` with that person’s token. Transferring the grant does not change the workspace owner.
 
 ## What the app is doing
 
@@ -113,7 +113,7 @@ Usage guides for the four logins are next to this file: [faculty](faculty.md), [
 
 Parent home (`GET /api/v1/parent/home`) returns, for each linked child (`Aarav Sharma`), attendance, the latest class note, the open fee in Rupees (`₹`), and the latest paid receipt. It also adds `lesson_pack` and `latest_assignment.submitted`. When the payload includes `lesson_pack.balance_minutes`, Home shows that balance in hours. If home has no balance yet, the page also calls `GET /api/v1/students/{id}/lesson-pack`, which returns `balance_minutes` and `purchased_minutes`. The exam-prep pack is 8 hours (480 minutes) only after a seed that includes `seed_internal_v2`. The same balance is on `/app/student/payments` when the API returns it. An assignment line appears only when `latest_assignment.submitted` is present. If the pack, that flag, or the open-hours route is missing, Home hides that card. After a restart on the current API, those cards show. Open hours are `GET /api/v1/parent/open-hours`. A booking is `POST /api/v1/parent/bookings` with `{start}`. Booking does not use the hour. A balance under 60 minutes returns 400 with detail `balance under 60 minutes`, and the page shows that detail.
 
-Attended and no-show use the session length, which is 60 minutes when the session has no end. A student cancel or a reschedule uses that length only inside 24 hours. At or outside 24 hours it stays. A teacher cancel does not use it. The owner can waive a forfeit. A reschedule response includes `hour` of `stays` or `used`. Schedule says **Hour stays** or **Hour is used** before Save time. On the 3-step Attendance & Class Summary screen (`/app/faculty/record`), student marks are Attended, No-show, Student cancel, and Teacher cancel, with live lesson-pack consequence previews before saving. Unmarked stays unmarked. A stored present still reads as Attended, and absent as No-show. Billing (`/app/admin/billing`) accepts Rupee (`₹`) presets or custom `₹` amounts via `<select>` dropdowns and converts them to `amount_cents` for the API. `GET /api/v1/payouts` adds `delivered` and `hours`. `POST /api/v1/owner/enquiries` with `{name, phone, hours}` is owner only and creates a student and a pack. Faculty admin is the card on Sessions for `+9101t` (`Dr. Meera Krishnan`), not a separate login.
+Attended and no-show use the session length, which is 60 minutes when the session has no end. A student cancel or a reschedule uses that length only inside 24 hours. At or outside 24 hours it stays. A teacher cancel does not use it. The owner can waive a forfeit. A reschedule response includes `hour` of `stays` or `used`. Schedule says **Hour stays** or **Hour is used** before Save time. On the 3-step Attendance & Class Summary screen (`/app/faculty/record`), student marks are Attended, No-show, Student cancel, and Teacher cancel, with live lesson-pack consequence previews before saving. Unmarked stays unmarked. A stored present still reads as Attended, and absent as No-show. Billing (`/app/admin/billing`) accepts Rupee (`₹`) presets or custom `₹` amounts via `<select>` dropdowns and converts them to `amount_cents` for the API. `GET /api/v1/payouts` adds `delivered` and `hours`. `POST /api/v1/owner/enquiries` with `{name, phone, hours}` is owner only and creates a student and a pack. Faculty admin is the card on Sessions for `+9101t` (`Sudhakshina`), not a separate login.
 
 ## Not shipped
 

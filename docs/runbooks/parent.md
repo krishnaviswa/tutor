@@ -5,7 +5,7 @@ This guide is for a guardian (`Rajesh Sharma`, Parent `+9101p`) linked to a chil
 ## Demo Personas (Exam-Prep Workspace)
 
 - **Owner / Admin:** `Vikram Nair` (`+9101o`)
-- **Senior Faculty / Faculty Admin:** `Dr. Meera Krishnan` (`+9101t`)
+- **Senior Faculty / Faculty Admin:** `Sudhakshina` (`+9101t`)
 - **Teaching Assistant:** `Rohan Deshmukh` (`+9101a`)
 - **Student:** `Aarav Sharma` (`+9101s`, enrolled in `Grade 11 Evening Batch (Mon–Fri)`)
 - **Parent:** `Rajesh Sharma` (`+9101p`)
@@ -19,7 +19,7 @@ This guide is for a guardian (`Rajesh Sharma`, Parent `+9101p`) linked to a chil
 
 If you open `/app/parent` directly after the code, and the link is already accepted, you are on the home screen without another invite. A second child (`Diya Patel`, parent `Sunita Patel`) stays hidden until a teacher or the owner mints a link and you accept it.
 
-The owner (`Vikram Nair`) or a teacher (`Dr. Meera Krishnan`) creates an invite from the roster, or from the same parent-link page while they are signed in. They pick the student from the `<select>` dropdown and get a token. You select or paste that token and choose **Link my account**.
+The owner (`Vikram Nair`) or a teacher (`Sudhakshina`) creates an invite from the roster, or from the same parent-link page while they are signed in. They pick the student from the `<select>` dropdown and get a token. You select or paste that token and choose **Link my account**.
 
 ## Where you land & Section Sub-Tabs
 
@@ -40,12 +40,12 @@ You do not need Chat to see attendance, the last class note, the lesson pack, op
 
 On the page, without opening Chat:
 
-- **Attendance** is the count on file (`present / total`). The teacher (`Dr. Meera Krishnan`) marks each student Attended, No-show, Student cancel, or Teacher cancel on the 3-step session record. A student left unmarked stays unmarked.
+- **Attendance** is the count on file (`present / total`). The teacher (`Sudhakshina`) marks each student Attended, No-show, Student cancel, or Teacher cancel on the 3-step session record. A student left unmarked stays unmarked.
 - **Lesson pack** is the hours left when home includes `lesson_pack.balance_minutes`. If that field is missing, the page asks `GET /api/v1/students/{id}/lesson-pack`. The number is hours, for example 8 hours, or 7 hours 30 minutes. The exam-prep child (`Aarav Sharma`) starts with an 8-hour pack. If the API sends no balance, this card is absent.
 - **Latest assignment** appears only when home includes `latest_assignment.submitted`. The line is Turned in or Not turned in. If that flag is absent, Home does not show a done mark.
 - **Last class note** is the newest teacher note on a session this child attended, or a 1-on-1 booked for this child, published from Step 3 of the teacher’s Attendance & Class Summary flow. If the teacher has not saved a note, the card says so.
 - **Fees** shows the open amount in Rupees (`₹`) and the date it is due, and the latest paid receipt (amount in `₹` and receipt id). If the guardian link hides fees, this block is hidden.
-- **Open hours** lists 60-minute starts from `GET /api/v1/parent/open-hours`, in the next 7 days, inside `Dr. Meera Krishnan`’s published week. You pick one. That posts `{start}` to `/api/v1/parent/bookings`. Booking does not use the hour. If the balance is under 60 minutes, the post returns 400 and the page shows that detail (`balance under 60 minutes`). If the open-hours route is not there, the card is absent. After a restart on the current API, the card shows.
+- **Open hours** lists 60-minute starts from `GET /api/v1/parent/open-hours`, in the next 7 days, inside `Sudhakshina`’s published week. You pick one. That posts `{start}` to `/api/v1/parent/bookings`. Booking does not use the hour. If the balance is under 60 minutes, the post returns 400 and the page shows that detail (`balance under 60 minutes`). If the open-hours route is not there, the card is absent. After a restart on the current API, the card shows.
 
 You also see the latest practice score, the latest test score, and class notices. Links from Home open Activity, the marksheet, the practice result, Fees, and Chat when you want the longer page.
 
@@ -55,7 +55,7 @@ You also see the latest practice score, the latest test score, and class notices
 
 **Fees** (`/app/student/payments`). The same lesson-pack balance, when the API returns it, plus open invoices and paid receipts formatted in Rupees (`₹`). **Pay (mock)** checks out through the mock payments port. Nothing is charged on a live Razorpay account. If your link has fees hidden, Home already says fees are hidden and this list is not the place to discover another child’s bill. The pack balance is not a second child’s bill.
 
-**Chat** (`/app/faculty/messages`). A thread with the teacher (`Dr. Meera Krishnan`), on the record. Use it when you need to write to them. Attendance, the class note, the pack balance, and the fee summary do not depend on this thread.
+**Chat** (`/app/faculty/messages`). A thread with the teacher (`Sudhakshina`), on the record. Use it when you need to write to them. Attendance, the class note, the pack balance, and the fee summary do not depend on this thread.
 
 Notification choices are `/app/student/notif-prefs` (also reachable from the `Alert Preferences` sub-tab on Home). Your own channels can be set there. The student’s WhatsApp stays off unless the owner enables it.
 
@@ -67,7 +67,7 @@ Notification choices are `/app/student/notif-prefs` (also reachable from the `Al
 4. Open Activity when you want every timeline line, not only the latest class note.
 5. Open Reports (and switch between `Progress Report` and `Test Results` sub-tabs) for the marksheet.
 6. Pay an open invoice in Rupees (`₹`) on Fees and keep the receipt. Home then shows that receipt as the latest paid one. Fees shows the same pack balance when the API returns it.
-7. Message `Dr. Meera Krishnan` on Chat when the note is not enough.
+7. Message `Sudhakshina` on Chat when the note is not enough.
 
 If Home says there is no linked child, the invite was not accepted for this login. Go back to parent-link and submit the token the academy gave you.
 

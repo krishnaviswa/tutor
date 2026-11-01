@@ -379,11 +379,11 @@ TENANT_HUMAN: dict[str, dict[str, str]] = {
     "exam-prep": {
         "owner": "Vikram Nair",
         "username_owner": "vikram",
-        "username_teacher": "meera",
+        "username_teacher": "sudhakshina",
         "username_assistant": "rohan",
         "username_student": "aarav",
         "username_parent": "rajesh",
-        "teacher": "Dr. Meera Krishnan",
+        "teacher": "Sudhakshina",
         "assistant": "Rohan Deshmukh",
         "student": "Aarav Sharma",
         "student2": "Diya Patel",

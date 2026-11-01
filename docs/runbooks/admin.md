@@ -1,13 +1,13 @@
 # Workspace admin
 
-This guide is for the workspace owner (`Vikram Nair`, Owner `+9101o`). That login is the role `owner`. Faculty admin is a grant a teacher (`Dr. Meera Krishnan`, `+9101t`) can hold. It does not replace the owner, and handing the grant to someone else leaves you as owner.
+This guide is for the workspace owner (`Vikram Nair`, Owner `+9101o`). That login is the role `owner`. Faculty admin is a grant a teacher (`Sudhakshina`, `+9101t`) can hold. It does not replace the owner, and handing the grant to someone else leaves you as owner.
 
 The steps use the exam-prep demo (**Apex Science Academy**). The one-time code is `000000`. There is no username and password.
 
 ## Demo Personas (Exam-Prep Workspace)
 
 - **Owner / Admin:** `Vikram Nair` (`+9101o`)
-- **Senior Faculty / Faculty Admin:** `Dr. Meera Krishnan` (`+9101t`)
+- **Senior Faculty / Faculty Admin:** `Sudhakshina` (`+9101t`)
 - **Teaching Assistant:** `Rohan Deshmukh` (`+9101a`)
 - **Student:** `Aarav Sharma` (`+9101s`, enrolled in `Grade 11 Evening Batch (Mon–Fri)`)
 - **Parent:** `Rajesh Sharma` (`+9101p`)
@@ -40,7 +40,7 @@ Availability is an Outlook-style week (click, drag, resize, 15-minute snap, ever
 
 On **Subscription & Quotas** (`/app/admin/subscription`) you read the meters, change a cap, and pause WhatsApp for 24 hours. Caps throttle paid sends. The teaching record still writes. Student WhatsApp stays off unless you enable that channel.
 
-On **Teacher Payouts** (`/app/admin/payouts`), `GET /api/v1/payouts` adds `delivered` and `hours`: classes the student attended with the teacher present (`Dr. Meera Krishnan`), and the hours on the statement the teacher checks, formatted in Rupees (`₹`). You can move a row from pending to approved to paid.
+On **Teacher Payouts** (`/app/admin/payouts`), `GET /api/v1/payouts` adds `delivered` and `hours`: classes the student attended with the teacher present (`Sudhakshina`), and the hours on the statement the teacher checks, formatted in Rupees (`₹`). You can move a row from pending to approved to paid.
 
 **Templates** (`/app/admin/template-gallery`) and **Automations** (`/app/admin/automation`) sit directly in the **Owner Console** section sub-tabs. The gallery applies a template (a set of module toggles and a starter topic list). Automation turns a rule on or off, such as the seeded “Post-class summary notification” timeline write, or adds a new rule via the collapsible **+ New Rule** form with structured trigger and action `<select>` dropdowns.
 
@@ -52,7 +52,7 @@ Also in the **Owner Console** sub-tabs: **Workspace Setup** (`/app/admin/wsetup`
 
 **Cohorts** (`/app/admin/roster`). The student list (`Aarav Sharma`, `Diya Patel`, `Kabir Verma`) and cohorts (`Grade 11 Evening Batch (Mon–Fri)`, `Weekend Fast-Track Batch`): open the collapsible **+ Add student** form, import CSV, paste a WhatsApp list, pick a student in the `<select>` dropdown to mint a parent invite, and open cohorts. New cohort is `/app/faculty/cohort-builder` in the **Students** sub-tabs.
 
-**Schedule** (`/app/faculty/schedule`). This item opens the faculty week calendar with the **Schedule** section sub-tabs (`Week Calendar`, `Sessions & Supervision`, `Pre-Class Prep`, `My Availability`). The owner is allowed to use it. You can create a session via the collapsible **+ New Session** form, change its time, or cancel it. Cancel notifies parents and admin. A teacher cancel keeps the hour. A 1-on-1 picks a roster student. Before **Save time** the page says **Hour stays** or **Hour is used**, and for you **Hour stays because the owner can waive it.** On **My Availability** (`/app/faculty/availability`) you can select any staff member (`Dr. Meera Krishnan`, `Rohan Deshmukh`) from the `<select>` dropdown and edit their Outlook-style week. That week does not sync Outlook.
+**Schedule** (`/app/faculty/schedule`). This item opens the faculty week calendar with the **Schedule** section sub-tabs (`Week Calendar`, `Sessions & Supervision`, `Pre-Class Prep`, `My Availability`). The owner is allowed to use it. You can create a session via the collapsible **+ New Session** form, change its time, or cancel it. Cancel notifies parents and admin. A teacher cancel keeps the hour. A 1-on-1 picks a roster student. Before **Save time** the page says **Hour stays** or **Hour is used**, and for you **Hour stays because the owner can waive it.** On **My Availability** (`/app/faculty/availability`) you can select any staff member (`Sudhakshina`, `Rohan Deshmukh`) from the `<select>` dropdown and edit their Outlook-style week. That week does not sync Outlook.
 
 **Records** (`/app/admin/audit`). The workspace journal (with action filter chips). Export posts a data export. This is the audit log. The class note a teacher files is on the 3-step faculty Records screen (`/app/faculty/record`), not here.
 
@@ -72,9 +72,9 @@ Also in the **Owner Console** sub-tabs: **Workspace Setup** (`/app/admin/wsetup`
 8. Read the audit journal if you need to see what changed.
 9. Apply a template from the **Templates** sub-tab only when you mean to change the module set for this workspace.
 
-The exam-prep seed gives the faculty-admin grant to Senior Faculty `Dr. Meera Krishnan` (`+9101t`), not to you. You (`Vikram Nair`, `+9101o`) remain the owner. The teacher uses the Faculty admin card on Sessions. You can still sign in as owner and use the owner rail. A tech admin checks the grant with `GET /api/v1/faculty-admin/me` or the `faculty_admin_grants` table.
+The exam-prep seed gives the faculty-admin grant to Senior Faculty `Sudhakshina` (`+9101t`), not to you. You (`Vikram Nair`, `+9101o`) remain the owner. The teacher uses the Faculty admin card on Sessions. You can still sign in as owner and use the owner rail. A tech admin checks the grant with `GET /api/v1/faculty-admin/me` or the `faculty_admin_grants` table.
 
-Student attendance on the 3-step session record (`/app/faculty/record`) is Attended, No-show, Student cancel, or Teacher cancel, with live lesson-pack consequence previews before saving. Unmarked stays unmarked. A stored present still reads as Attended, and absent as No-show. The faculty-admin card is on Sessions for the teacher `+9101t`. It is not a separate login. Sign-in phones stay owner `+9101o` (`Vikram Nair`), teacher `+9101t` (`Dr. Meera Krishnan`), assistant `+9101a` (`Rohan Deshmukh`), student `+9101s` (`Aarav Sharma`), parent `+9101p` (`Rajesh Sharma`), code `000000`.
+Student attendance on the 3-step session record (`/app/faculty/record`) is Attended, No-show, Student cancel, or Teacher cancel, with live lesson-pack consequence previews before saving. Unmarked stays unmarked. A stored present still reads as Attended, and absent as No-show. The faculty-admin card is on Sessions for the teacher `+9101t`. It is not a separate login. Sign-in phones stay owner `+9101o` (`Vikram Nair`), teacher `+9101t` (`Sudhakshina`), assistant `+9101a` (`Rohan Deshmukh`), student `+9101s` (`Aarav Sharma`), parent `+9101p` (`Rajesh Sharma`), code `000000`.
 
 ## Not shipped
 
