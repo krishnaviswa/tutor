@@ -54,7 +54,10 @@ export default defineConfig({
     {
       name: "setup",
       testMatch: /[\\/]setup[\\/].*\.setup\.ts$/,
-      retries: 0,
+      // On CI a sign-in sometimes gets "bad challenge" from /auth/otp/verify straight after
+      // /auth/otp/start (seen in 2 of 3 runs). One failed sign-in would skip every chain, so
+      // retry it; the job summary labels a retried pass as "flaky", so it stays visible.
+      retries: 2,
       use: { ...devices["Desktop Chrome"] },
     },
     {

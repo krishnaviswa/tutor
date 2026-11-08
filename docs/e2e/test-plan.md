@@ -150,7 +150,7 @@ No Playwright global setup seed. The API’s existing `seed_all` is the fixture.
 
 ## Chain suite (added 2026-11-08)
 
-Workflow chains are listed in `e2e/chain-map.json`: 36 same-role (S01–S36) and 19 cross-role (X01–X19), with the files each touches and any known product gap. Built so far: **S01** (student sign-in, wrong code, reload, sign-out, re-login) and **X02** (teacher cancels a 1-on-1; student and parent see the notice in their own browsers without reloading).
+Workflow chains are listed in `e2e/chain-map.json`: 36 same-role (S01–S36) and 19 cross-role (X01–X19), with the files each touches and any known product gap. Built so far (7 of 55): **S01** (student sign-in, wrong code, reload, sign-out, re-login), **S03** (staff wrong code, a role the person does not hold, sign-in and sign-out for teacher, assistant, owner), **S26** (owner enquiry: empty, saved, reused phone refused), **X02** (teacher cancels a 1-on-1), **X03** (teacher starts a class), **X08** (teacher answers a doubt; student sees the notice and the answer), **X12** (owner enrols a student; teacher finds them on the roster). X02, X03 and X08 check the student's and parent's bells in their own browsers without a reload. **X07** (student asks a doubt; teacher is told) is built and marked as a known gap: the product writes no in-app notice for the teacher yet, so the test is expected to fail and the job summary shows "known gap".
 
 | Project | What | Notes |
 |---|---|---|
