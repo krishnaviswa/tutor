@@ -1,4 +1,6 @@
 {
-  "$comment": "Failures that existed before the chain suite. Key: full test title as Playwright prints it (or a chain id). Value: why and when it was recorded. The job summary labels these 'pre-existing' instead of 'fail'. Backend baseline 2026-11-08: pytest 117 passed, 0 failed. The existing e2e suite (project 'existing') has no recorded run on the throwaway stack yet; its first workflow run fills this file.",
-  "preExisting": {}
+  "$comment": "Failures that existed before the chain suite. Key: full test title as Playwright prints it (or a chain id). Value: why and when it was recorded. The job summary labels these 'pre-existing' instead of 'fail'. Backend baseline 2026-11-08: pytest 117 passed, 0 failed. Existing e2e suite first CI run (suite=existing, run 42473356550, 2026-11-08): 33 passed, 1 failed.",
+  "preExisting": {
+    "student pays an invoice the owner just issued": "Fails on a freshly seeded database in all 3 attempts. The seed already leaves one open invoice for the student (seed_density.py:102), so the payments screen shows two Pay buttons; after one is paid, one remains and the test expects none (business.spec.ts:94). Looks like a test that assumed one payable invoice; not yet confirmed as test-only. Recorded 2026-11-08."
+  }
 }
