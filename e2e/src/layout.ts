@@ -124,7 +124,27 @@ function auditInPage(maxPerPass: number): { findings: RawFinding[]; total: numbe
     range.selectNodeContents(node);
     for (const r of Array.from(range.getClientRects())) {
       if (r.width < 1 || r.height < 1) continue;
-      textBoxes.push({ el: owner, left: r.left, top: r.top, right: r.right, bottom: r.bottom });
+      // Only the part a reader can see counts: cut the box at every ancestor that clips
+      // (overflow hidden/clip/auto/scroll), so ellipsized text is measured as drawn.
+      let left = r.left;
+      let top = r.top;
+      let right = r.right;
+      let bottom = r.bottom;
+      for (let p: Element | null = owner; p && p !== document.documentElement; p = p.parentElement) {
+        const cs = getComputedStyle(p);
+        if (cs.overflowX === "visible" && cs.overflowY === "visible") continue;
+        const pr = p.getBoundingClientRect();
+        if (cs.overflowX !== "visible") {
+          left = Math.max(left, pr.left);
+          right = Math.min(right, pr.right);
+        }
+        if (cs.overflowY !== "visible") {
+          top = Math.max(top, pr.top);
+          bottom = Math.min(bottom, pr.bottom);
+        }
+      }
+      if (right - left < 1 || bottom - top < 1) continue;
+      textBoxes.push({ el: owner, left, top, right, bottom });
     }
     textOwners.add(owner);
   }
