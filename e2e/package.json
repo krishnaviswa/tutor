@@ -2,9 +2,12 @@
   "name": "tutoros-e2e",
   "private": true,
   "scripts": {
-    "test": "playwright test",
-    "test:smoke": "playwright test --grep @smoke",
-    "test:flows": "playwright test --grep @flow",
+    "test": "playwright test --project=chromium",
+    "test:smoke": "playwright test --project=chromium --grep @smoke",
+    "test:flows": "playwright test --project=chromium --grep @flow",
+    "test:chains": "playwright test --project=chains",
+    "test:layout": "playwright test --project=layout",
+    "impact": "node scripts/impact.mjs",
     "report": "playwright show-report playwright-report"
   },
   "devDependencies": {
