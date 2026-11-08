@@ -12,6 +12,7 @@ const CLEAN = `<!doctype html><html><head><meta name="viewport" content="width=d
   .scroll { overflow-x: auto; } .wide { width: 2000px; }
   .ell { width: 80px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
   .tabs { position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: 8px; background: #fff; }
+  .crumbrow { display: flex; gap: 0; } .ttl { width: 60px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; flex: none; }
   .tall p { margin: 0 0 24px; }
   .backdrop { position: fixed; inset: 0; z-index: -1; } .backdrop p { position: absolute; left: 20px; top: 20px; margin: 0; }
 </style></head><body>
@@ -22,6 +23,7 @@ const CLEAN = `<!doctype html><html><head><meta name="viewport" content="width=d
   <div class="row"><button>One</button><button>Two</button><a href="#x">Link</a></div>
   <div class="scroll"><div class="wide"><button>Inside a scroller</button></div></div>
   <div class="ell">A long label that is meant to end with an ellipsis</div>
+  <div class="crumbrow"><strong class="ttl">Lesson / module viewer with a long title</strong><a href="#c" style="display:inline-block;width:400px">Classes</a></div>
 </body></html>`;
 
 const BROKEN = `<!doctype html><html><head><meta name="viewport" content="width=device-width"><style>
