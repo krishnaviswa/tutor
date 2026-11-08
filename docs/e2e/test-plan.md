@@ -146,4 +146,23 @@ No Playwright global setup seed. The API’s existing `seed_all` is the fixture.
 - Faculty-access checkbox toggles (they change another user’s nav and are easy to leave half-toggled).
 - “Run renewals” and “Issue invoice” clicks (they mint shared invoices). The billing page is opened and the button is shown; issue/renew stay deferred.
 - Firefox and WebKit. Chromium only.
-- CI workflow file. Config is CI-shaped (`forbidOnly`, retries on CI, 1 worker) but no GitHub Actions yaml was added.
+- CI on push or pull request. There is a **manual** workflow only: `.github/workflows/e2e-chains.yml` (`workflow_dispatch`). See “Chain suite” below.
+
+## Chain suite (added 2026-11-08)
+
+Workflow chains are listed in `e2e/chain-map.json`: 36 same-role (S01–S36) and 19 cross-role (X01–X19), with the files each touches and any known product gap. Built so far: **S01** (student sign-in, wrong code, reload, sign-out, re-login) and **X02** (teacher cancels a 1-on-1; student and parent see the notice in their own browsers without reloading).
+
+| Project | What | Notes |
+|---|---|---|
+| `setup` | Signs each role in once through `student-login` / `staff-login` | Saves `e2e/.auth/<role>.json` (gitignored) |
+| `chains` | One test per chain id | Cross-role chains open one browser context per role. No retries. |
+| `layout` | Every page route at 375 / 768 / 1280 px | Horizontal scroll, overlapping controls or text, clipped text, controls off screen. Report-only unless `LAYOUT_STRICT=1`. `detector.spec.ts` proves the detector fails on a broken page. |
+| `chromium` | The smoke + flow suite above | Unchanged |
+
+Route guard: with `E2E_ROUTE_GUARD=1` (suite `all` or `layout-only`), every `frontend/app/**/page.tsx` route except `/operator` must be opened by some test, or the run fails.
+
+Known gaps (`knownGap` in the map) are product gaps, not test failures: the test is expected to fail and the summary says “known gap”. Failures listed in `e2e/baseline.json` are labelled “pre-existing”.
+
+Change impact: `node e2e/scripts/impact.mjs [base]` lists the chains a diff touches and prints the `--grep` to run only those.
+
+Workflow inputs: `suite` (all, same-role, cross-role, role, chain, layout-only, existing), `role`, `chain_id`, `layout_strict`, `extra_args`. The job summary has a table per chain type, layout findings, and route coverage. Artifacts: HTML report, traces, screenshots, Playwright log, API and web logs. GitHub only offers **Run workflow** once this file is on the default branch.
