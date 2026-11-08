@@ -63,6 +63,16 @@ class MagicIn(BaseModel):
     role: str
 
 
+def _commit_before_reply(db: Session) -> None:
+    """Commit now, not in get_db after the response.
+
+    FastAPI 0.118+ runs the code after `yield` once the response has gone out, so a client
+    that calls the next endpoint straight away (verify right after start, or any call with
+    the new token) can run before get_db's commit and miss the row.
+    """
+    db.commit()
+
+
 @router.post("/auth/otp/start")
 def otp_start(
     body: OtpStartIn,
@@ -73,6 +83,7 @@ def otp_start(
     ch = OtpChallenge(workspace_id=body.workspace_id, phone=body.phone)
     db.add(ch)
     db.flush()
+    _commit_before_reply(db)
     ports.send_sms(body.phone, f"OTP {settings.otp_code}")
     return {"challenge_id": ch.id, "mock": True}
 
@@ -90,6 +101,7 @@ def otp_verify(body: OtpVerifyIn, request: Request, response: Response, db: Sess
     user = identity_user(db, "phone", body.phone)
     role = membership_role(db, user.id, body.workspace_id, body.role)
     token = issue_session(db, user, body.workspace_id, role)
+    _commit_before_reply(db)
     _attach_session(response, request, token)
     return {"token": token, "role": role, "workspace_id": body.workspace_id}
 
@@ -110,6 +122,7 @@ def password_login(body: PasswordIn, request: Request, response: Response, db: S
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "unknown username or password")
     role = role_in_workspace(db, user.id, body.workspace_id)
     token = issue_session(db, user, body.workspace_id, role)
+    _commit_before_reply(db)
     _attach_session(response, request, token)
     return {"token": token, "role": role, "workspace_id": body.workspace_id}
 
@@ -125,6 +138,7 @@ def magic_link(
     user = identity_user(db, "email", body.email)
     role = membership_role(db, user.id, body.workspace_id, body.role)
     token = issue_session(db, user, body.workspace_id, role)
+    _commit_before_reply(db)
     ports.send_email(body.email, "Sign in", "mock magic link")
     _attach_session(response, request, token)
     return {"token": token, "role": role, "workspace_id": body.workspace_id, "mock": True}
