@@ -1,0 +1,187 @@
+# Manual end-to-end run of the workflow-chain suite on a throwaway stack.
+# Trigger: Actions → "E2E chains (manual)" → Run workflow → pick the branch and inputs.
+# Never runs on push or pull_request and is not a required check.
+# Stack: Postgres service container + FastAPI (uvicorn) + Next.js production build, all
+# created on the runner and destroyed with it. Every vendor port is the mock.
+name: E2E chains (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: "What to run"
+        type: choice
+        default: all
+        options:
+          - all
+          - same-role
+          - cross-role
+          - role
+          - chain
+          - layout-only
+          - existing
+      role:
+        description: "Role, when suite = role"
+        type: choice
+        default: student
+        options: [student, parent, teacher, assistant, owner]
+      chain_id:
+        description: "Chain id, when suite = chain (for example S01 or X02)"
+        type: string
+        default: ""
+      layout_strict:
+        description: "Fail a page on any layout finding (default: report only)"
+        type: boolean
+        default: false
+      extra_args:
+        description: "Extra Playwright arguments, for example --repeat-each=3"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-chains-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  e2e:
+    name: e2e (${{ inputs.suite }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: tutor
+          POSTGRES_PASSWORD: tutor
+          POSTGRES_DB: tutoros
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tutor -d tutoros"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      CI: "true"
+      # Throwaway values for a database that lives only on this runner.
+      DATABASE_URL: postgresql+psycopg://tutor:tutor@127.0.0.1:5432/tutoros
+      JWT_SECRET: ci-throwaway-runner-only
+      SMS_PROVIDER: mock
+      EMAIL_PROVIDER: mock
+      VIDEO_PROVIDER: mock
+      STORAGE_PROVIDER: local
+      PAYMENTS_STUDENT_PROVIDER: mock
+      PAYMENTS_PLATFORM_PROVIDER: mock
+      PUSH_PROVIDER: mock
+      WHATSAPP_PROVIDER: mock
+      NEXT_PUBLIC_API_BASE: http://127.0.0.1:8000
+      NEXT_TELEMETRY_DISABLED: "1"
+      LOGS: ${{ github.workspace }}/run-logs
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            e2e/package-lock.json
+
+      - name: Install API dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Build the web app
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install Playwright
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Test settings from the published demo seed
+        # e2e/.env.example holds the local demo seed (OTP stub, demo accounts). Not secrets.
+        run: cp e2e/.env.example e2e/.env
+
+      - name: Start API (seeds the fresh database on boot)
+        run: |
+          mkdir -p "$LOGS"
+          cd backend
+          nohup python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 > "$LOGS/api.log" 2>&1 &
+          for i in $(seq 1 90); do
+            if curl -fsS http://127.0.0.1:8000/openapi.json > /dev/null; then exit 0; fi
+            sleep 2
+          done
+          echo "::error::API did not start"; tail -n 80 "$LOGS/api.log"; exit 1
+
+      - name: Start web
+        run: |
+          cd frontend
+          nohup npx next start -H 127.0.0.1 -p 3000 > "$LOGS/web.log" 2>&1 &
+          for i in $(seq 1 90); do
+            if curl -fsS http://127.0.0.1:3000/ > /dev/null; then exit 0; fi
+            sleep 2
+          done
+          echo "::error::Web did not start"; tail -n 80 "$LOGS/web.log"; exit 1
+
+      - name: Run Playwright
+        working-directory: e2e
+        env:
+          SUITE: ${{ inputs.suite }}
+          ROLE: ${{ inputs.role }}
+          CHAIN_ID: ${{ inputs.chain_id }}
+          EXTRA_ARGS: ${{ inputs.extra_args }}
+          LAYOUT_STRICT: ${{ inputs.layout_strict && '1' || '0' }}
+        run: |
+          set -euo pipefail
+          set -f
+          case "$SUITE" in
+            all)         ARGS=(--project=chains --project=layout); export E2E_ROUTE_GUARD=1 ;;
+            same-role)   ARGS=(--project=chains --grep "@same-role") ;;
+            cross-role)  ARGS=(--project=chains --grep "@cross-role") ;;
+            role)        ARGS=(--project=chains --grep "@role:${ROLE}\b") ;;
+            chain)
+              if [[ ! "$CHAIN_ID" =~ ^[SX][0-9]{2}$ ]]; then
+                echo "::error::chain_id must look like S01 or X02"; exit 1
+              fi
+              ARGS=(--project=chains --grep "@${CHAIN_ID}\b") ;;
+            layout-only) ARGS=(--project=layout); export E2E_ROUTE_GUARD=1 ;;
+            existing)    ARGS=(--project=chromium) ;;
+            *)           echo "::error::unknown suite $SUITE"; exit 1 ;;
+          esac
+          read -r -a EXTRA <<< "$EXTRA_ARGS"
+          echo "npx playwright test ${ARGS[*]} ${EXTRA[*]:-}"
+          npx playwright test "${ARGS[@]}" "${EXTRA[@]}" 2>&1 | tee "$LOGS/playwright.log"
+
+      - name: Upload report, traces, and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-${{ inputs.suite }}-${{ github.run_id }}
+          path: |
+            e2e/playwright-report/
+            e2e/test-results/
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Upload test and server logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-${{ inputs.suite }}-${{ github.run_id }}
+          path: run-logs/
+          retention-days: 14
+          if-no-files-found: warn

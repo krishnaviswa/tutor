@@ -6,10 +6,19 @@ loadEnvFile();
 
 const baseURL = process.env.E2E_BASE_URL || "http://127.0.0.1:3000";
 const apiURL = process.env.E2E_API_BASE || "http://127.0.0.1:8000";
+/** Optional: run on an installed browser (for example `chrome`) when Playwright's own build is not downloaded. */
+const channel = process.env.E2E_BROWSER_CHANNEL || undefined;
 
 /**
  * One worker: every test shares the seeded Postgres database.
  * reuseExistingServer: local frontend (3000) and API (8000) are left running.
+ *
+ * Projects:
+ * - chromium: the original smoke + flow suite (tests/smoke, tests/flows). Unchanged.
+ * - setup: signs each role in once through the real sign-in screens (tests/setup).
+ * - chains: one test per workflow chain (tests/chains, ids in chain-map.json).
+ * - layout: overlap / clipping / overflow check on every page route at 375, 768, 1280.
+ * New projects never retry, so a failure is never hidden by a lucky second attempt.
  */
 export default defineConfig({
   testDir: "./tests",
@@ -24,16 +33,47 @@ export default defineConfig({
     ["list"],
     ["html", { open: "never", outputFolder: "playwright-report" }],
     ["json", { outputFile: "test-results/results.json" }],
+    ["./src/summary-reporter.ts"],
   ],
   use: {
+    ...(channel ? { channel } : {}),
     baseURL,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
-    video: "retain-on-failure",
+    // Video needs Playwright's ffmpeg, which comes with `npx playwright install`, not with an installed browser.
+    video: channel ? "off" : "retain-on-failure",
     actionTimeout: 15_000,
     navigationTimeout: 30_000,
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    {
+      name: "chromium",
+      testMatch: /[\\/](smoke|flows)[\\/].*\.spec\.ts$/,
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "setup",
+      testMatch: /[\\/]setup[\\/].*\.setup\.ts$/,
+      retries: 0,
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "chains",
+      testMatch: /[\\/]chains[\\/].*\.spec\.ts$/,
+      dependencies: ["setup"],
+      retries: 0,
+      timeout: 180_000,
+      use: { ...devices["Desktop Chrome"], timezoneId: "Asia/Kolkata" },
+    },
+    {
+      name: "layout",
+      testMatch: /[\\/]layout[\\/].*\.spec\.ts$/,
+      dependencies: ["setup"],
+      retries: 0,
+      timeout: 90_000,
+      use: { ...devices["Desktop Chrome"], timezoneId: "Asia/Kolkata" },
+    },
+  ],
   webServer: [
     {
       command: "python -m uvicorn app.main:app --port 8000",

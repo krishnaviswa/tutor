@@ -51,6 +51,29 @@ npx playwright show-report playwright-report
 
 `@smoke` is login, one journey per role, and sign-out. `@flow` is enrollment, scheduling, attendance, payment, admin enquiry, and permission checks. Workers are 1 because every test shares one seeded database.
 
+`npm test` (and the root `npm run e2e*` scripts) run only the original suite, project `chromium`. A bare `npx playwright test` now runs every project.
+
+## Chain suite
+
+Chains are user workflows, listed with ids in `chain-map.json` (S = one role, X = across roles). The map also records the files each chain touches and any known product gap.
+
+```powershell
+npm run test:chains                       # setup + every built chain
+npm run test:layout                       # setup + layout check on every page route
+npx playwright test --project=chains --grep @X02
+npx playwright test --project=chains --grep "@role:parent"
+npm run impact -- origin/main             # chains touched by a diff
+```
+
+- `tests/setup/` signs each role in once through the real sign-in screens and saves `.auth/<role>.json` (gitignored).
+- `tests/chains/` one spec per chain. Cross-role specs open a separate browser per role.
+- `tests/layout/` opens every page route at 375, 768, 1280 px and reports overlap, clipping, horizontal scroll, and off-screen controls. `LAYOUT_STRICT=1` makes findings fail.
+- `E2E_ROUTE_GUARD=1` fails the run if a page route was never opened (`/operator` is excluded).
+- `test-results/summary.md` is the per-chain summary. In GitHub Actions it is also the job summary.
+- `E2E_BROWSER_CHANNEL=chrome` runs on the installed Chrome when Playwright's own Chromium for this version is not downloaded. CI does not set it.
+
+CI: `.github/workflows/e2e-chains.yml`, manual (`workflow_dispatch`) only. It builds a throwaway Postgres + API + production web build on the runner. See `docs/e2e/test-plan.md` → “Chain suite”.
+
 ## Output
 
 HTML report: `e2e/playwright-report/`. Traces, screenshots, video: `e2e/test-results/`. Both are gitignored.
