@@ -14,6 +14,12 @@ export function escapeRe(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+/** Whether the browser holds a session cookie. Presence only, so a report never prints the token. */
+export async function hasSessionCookie(page: Page): Promise<boolean> {
+  const cookies = await page.context().cookies(env.apiBase);
+  return cookies.some((c) => c.name === "tutoros_token");
+}
+
 /** A phone number no earlier run has used. */
 export function uniquePhone(): string {
   return `+9198${String(Date.now()).slice(-8)}`;
